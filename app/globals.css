@@ -1,0 +1,26 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 15 27 45;        /* #0F1B2D */
+  --panel: 28 42 58;     /* #1C2A3A */
+  --gold: 198 167 94;    /* #C6A75E */
+  --platinum: 217 217 214; /* #D9D9D6 */
+  --sage: 79 107 99;     /* #4F6B63 */
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--platinum));
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
