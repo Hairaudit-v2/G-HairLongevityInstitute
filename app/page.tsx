@@ -341,7 +341,7 @@ export default function Page() {
             {[
               {
                 name: "Digital Diagnostic Review",
-                price: "From $199",
+                price: "From $59",
                 items: [
                   "Structured blood analysis",
                   "Risk profiling + summary",
@@ -352,7 +352,7 @@ export default function Page() {
               },
               {
                 name: "Specialist Strategy Consultation",
-                price: "From $750",
+                price: "From $199",
                 items: [
                   "Full interpretation + roadmap",
                   "45-min consult (Zoom)",
@@ -363,7 +363,7 @@ export default function Page() {
               },
               {
                 name: "Hair Longevity Membership",
-                price: "$249 / month",
+                price: "$49 / month",
                 items: [
                   "Ongoing optimisation",
                   "6-month reassessments",

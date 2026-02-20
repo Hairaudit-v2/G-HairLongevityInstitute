@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Hair Longevity Membership | Hair Longevity Institute™",
-  description: "Ongoing optimisation, 6-month reassessments, and Hair Longevity Score™ tracking. $249/month.",
+  description: "Ongoing optimisation, 6-month reassessments, and Hair Longevity Score™ tracking. $49/month.",
 };
 
 function Container({ children }: { children: React.ReactNode }) {
@@ -60,7 +60,7 @@ export default function MembershipPage() {
           </p>
 
           <div className="mt-12 rounded-3xl border border-white/10 bg-white/5 p-8 md:p-10">
-            <div className="text-2xl font-semibold text-[rgb(var(--gold))]">$249 / month</div>
+            <div className="text-2xl font-semibold text-[rgb(var(--gold))]">$49 / month</div>
             <ul className="mt-6 space-y-3 text-white/85">
               <li>• Ongoing optimisation support</li>
               <li>• 6‑month reassessments included</li>

@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: "Hair Longevity Institute™ | Biology First. Hair for Life.",
   description:
     "Advanced hormone mapping, blood analysis, and regenerative hair strategy — delivered globally through our proprietary Follicle Intelligence™ system.",
+  icons: {
+    icon: "/brand/hli-mark.png",
+    apple: "/brand/hli-mark.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

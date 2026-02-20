@@ -11,6 +11,9 @@ type IntakeSelections = {
     sex?: Sex;
     primary_concern?: PrimaryConcern;
 
+    trt?: boolean | "yes" | "no";
+    dht_management?: boolean | "yes" | "no";
+
     // Hair loss branch
     hair_loss_type?: "receding_hairline" | "crown_thinning" | "diffuse_thinning" | "sudden_shedding" | "patchy" | "unsure";
     onset?: "0_3m" | "3_12m" | "1_3y" | "3y_plus";
@@ -197,6 +200,13 @@ function buildHumanSummary(selections: any): SummaryRow[] {
 
   const meds = labelsFrom(LABELS.meds, selections.meds);
   if (meds.length) rows.push({ kind: "chips", label: "Current treatments", items: meds });
+
+  if (selections.sex === "male") {
+    const trtVal = selections.trt === true || selections.trt === "yes" ? "Yes" : selections.trt === false || selections.trt === "no" ? "No" : null;
+    const dhtVal = selections.dht_management === true || selections.dht_management === "yes" ? "Yes" : selections.dht_management === false || selections.dht_management === "no" ? "No" : null;
+    if (trtVal) rows.push({ kind: "text", label: "On TRT", value: trtVal });
+    if (dhtVal) rows.push({ kind: "text", label: "DHT management", value: dhtVal });
+  }
 
   const goals = labelsFrom(LABELS.goals, selections.goals);
   if (goals.length) rows.push({ kind: "chips", label: "Goals", items: goals });
@@ -717,6 +727,72 @@ export default function StartPage() {
                                 ]}
                                 onChange={(k) => toggleArray("meds", k)}
                             />
+
+                            {selections.sex === "male" && (
+                                <div className="mt-8 space-y-4">
+                                    <div>
+                                        <div className="text-sm font-medium text-white/85">On TRT? (yes/no)</div>
+                                        <div className="mt-2 flex gap-2">
+                                            {(["yes", "no"] as const).map((v) => {
+                                                const sel = selections.trt;
+                                                const on =
+                                                    (v === "yes" && (sel === true || sel === "yes")) ||
+                                                    (v === "no" && (sel === false || sel === "no"));
+                                                return (
+                                                    <button
+                                                        key={v}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setSelections((s) => ({
+                                                                ...s,
+                                                                trt: v === "yes" ? true : false,
+                                                            }))
+                                                        }
+                                                        className={`rounded-xl border px-4 py-2 text-sm font-medium ${
+                                                            on
+                                                                ? "border-[rgb(198,167,94)] bg-[rgba(198,167,94,0.15)] text-white"
+                                                                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                                                        }`}
+                                                    >
+                                                        {v === "yes" ? "Yes" : "No"}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium text-white/85">DHT management (finasteride/dutasteride)? (yes/no)</div>
+                                        <div className="mt-2 flex gap-2">
+                                            {(["yes", "no"] as const).map((v) => {
+                                                const sel = selections.dht_management;
+                                                const on =
+                                                    (v === "yes" && (sel === true || sel === "yes")) ||
+                                                    (v === "no" && (sel === false || sel === "no"));
+                                                return (
+                                                    <button
+                                                        key={v}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setSelections((s) => ({
+                                                                ...s,
+                                                                dht_management: v === "yes" ? true : false,
+                                                            }))
+                                                        }
+                                                        className={`rounded-xl border px-4 py-2 text-sm font-medium ${
+                                                            on
+                                                                ? "border-[rgb(198,167,94)] bg-[rgba(198,167,94,0.15)] text-white"
+                                                                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                                                        }`}
+                                                    >
+                                                        {v === "yes" ? "Yes" : "No"}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="mt-8 grid gap-3 md:grid-cols-2">
                                 <Button variant="secondary" onClick={() => setStep("branch")}>
                                     Back
@@ -946,8 +1022,14 @@ export default function StartPage() {
                             <p className="mt-3 text-white/70">
                                 Your intake has been received. We’ll review your bloods/photos and begin your diagnostic review.
                             </p>
-                            {intakeId ? (
+                            {email ? (
                                 <div className="mt-5 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-white/80">
+                                    <strong className="text-white">Report delivery:</strong> We&apos;ll send your diagnostic report to{" "}
+                                    <span className="text-[rgb(198,167,94)]">{email}</span> within 48 hours.
+                                </div>
+                            ) : null}
+                            {intakeId ? (
+                                <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-white/80">
                                     Reference ID: <span className="text-white">{intakeId}</span>
                                 </div>
                             ) : null}

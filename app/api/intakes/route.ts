@@ -186,6 +186,13 @@ export async function POST(req: Request) {
       }
     }
 
+    // Optional: auto-queue AI job (HLI_AUTO_QUEUE_AI=1)
+    if (process.env.HLI_AUTO_QUEUE_AI === "1") {
+      const base = process.env.HLI_APP_URL
+        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      fetch(`${base}/api/admin/intakes/${intakeId}/ai/run`, { method: "POST" }).catch(() => {});
+    }
+
     return NextResponse.json({
       ok: true,
       intakeId,

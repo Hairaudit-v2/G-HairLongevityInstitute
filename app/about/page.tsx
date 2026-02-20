@@ -1,7 +1,8 @@
 // app/about/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
-import FollicleSystemMap from "@/components/FollicleSystemMap";
+import AnimatedFollicleSystemMap from "@/components/AnimatedFollicleSystemMap";
+import SurgicalReadinessMatrixInteractive from "@/components/SurgicalReadinessMatrixInteractive";
 
 export const metadata: Metadata = {
   title: "About | Hair Longevity Institute™",
@@ -210,7 +211,29 @@ export default function AboutPage() {
           </p>
 
           <div className="mt-16">
-            <FollicleSystemMap />
+            <AnimatedFollicleSystemMap />
+          </div>
+        </div>
+      </section>
+
+      {/* Surgical Readiness Matrix */}
+      <section className="py-20 border-t border-white/10">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-sm tracking-widest text-[rgb(198,167,94)]">
+            SURGICAL DECISIONING
+          </div>
+
+          <h2 className="mt-3 text-3xl font-semibold text-white">
+            Surgical Readiness Matrix™
+          </h2>
+
+          <p className="mt-4 max-w-3xl text-white/70">
+            A visual framework used to determine whether surgery is appropriate now, later, or not at all —
+            based on biological stability and progression rate.
+          </p>
+
+          <div className="mt-12">
+            <SurgicalReadinessMatrixInteractive />
           </div>
         </div>
       </section>

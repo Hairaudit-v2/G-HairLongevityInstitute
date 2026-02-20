@@ -74,7 +74,7 @@ export default function BookPage() {
                 <li>• GP guidance letter (if needed)</li>
               </ul>
               <div className="mt-6 text-2xl font-semibold text-[rgb(var(--gold))]">
-                From $750
+                From $199
               </div>
             </div>
 
