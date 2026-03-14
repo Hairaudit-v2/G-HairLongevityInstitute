@@ -39,6 +39,8 @@ export default function AuditPage({ params }: { params: { intakeId: string } }) 
   const [error, setError] = useState<string | null>(null);
   const [changesNote, setChangesNote] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [referralRequesting, setReferralRequesting] = useState(false);
+  const [activeReferral, setActiveReferral] = useState<{ id: string; status: string } | null>(null);
 
   useEffect(() => {
     if (!intakeId) return;
@@ -53,6 +55,22 @@ export default function AuditPage({ params }: { params: { intakeId: string } }) 
       .catch((e) => {
         setError(e.message);
         setLoading(false);
+      });
+  }, [intakeId]);
+
+  useEffect(() => {
+    if (!intakeId) return;
+    fetch(`/api/admin/referrals?intakeId=${intakeId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.ok && d.referrals?.length > 0) {
+          const active = d.referrals.find((r: { status: string }) =>
+            ["pending", "assigned", "in_review", "needs_more_info"].includes(r.status)
+          );
+          setActiveReferral(active ? { id: active.id, status: active.status } : null);
+        } else {
+          setActiveReferral(null);
+        }
       });
   }, [intakeId]);
 
@@ -108,6 +126,31 @@ export default function AuditPage({ params }: { params: { intakeId: string } }) 
   const report = data.report;
   const canRelease = report?.status === "approved";
   const hasReport = !!report;
+  const canRequestMedicalReview = (report?.status === "approved" || report?.status === "released") && !activeReferral;
+
+  const handleRequestMedicalReview = async () => {
+    if (!intakeId || !report) return;
+    setReferralRequesting(true);
+    try {
+      const res = await fetch("/api/admin/referrals/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intakeId, reportId: report.id, reason: "Auditor requested medical review for prescribing support." }),
+      });
+      const out = await res.json();
+      if (out.ok) {
+        setActiveReferral({ id: out.referral.id, status: out.referral.status });
+      } else if (res.status === 409) {
+        setActiveReferral({ id: "existing", status: "pending" });
+      } else {
+        alert(out.error || "Failed");
+      }
+    } catch {
+      alert("Request failed");
+    } finally {
+      setReferralRequesting(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#0F1B2D] text-white">
@@ -194,8 +237,8 @@ export default function AuditPage({ params }: { params: { intakeId: string } }) 
                 {Object.entries(data.scores.domain_scores || {}).map(([k, v]) => (
                   <div key={k}>
                     <div className="text-sm text-white/80">{DOMAIN_LABELS[k] || k}: {v}/10</div>
-                    {data.scores.explainability?.[k]?.length ? (
-                      <div className="text-xs text-white/50 ml-4">Drivers: {data.scores.explainability[k].join("; ")}</div>
+                    {(data.scores?.explainability?.[k] ?? []).length ? (
+                      <div className="text-xs text-white/50 ml-4">Drivers: {(data.scores?.explainability?.[k] ?? []).join("; ")}</div>
                     ) : null}
                   </div>
                 ))}
@@ -278,6 +321,27 @@ export default function AuditPage({ params }: { params: { intakeId: string } }) 
                   >
                     {actionLoading === "release" ? "..." : "Release to patient"}
                   </button>
+                )}
+                {canRequestMedicalReview && (
+                  <button
+                    type="button"
+                    onClick={handleRequestMedicalReview}
+                    disabled={referralRequesting}
+                    className="rounded-lg border border-blue-500/50 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-200 hover:bg-blue-500/30 disabled:opacity-50"
+                  >
+                    {referralRequesting ? "..." : "Request Medical Review (AU)"}
+                  </button>
+                )}
+                {activeReferral && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-white/60">Medical referral: {activeReferral.status.replace(/_/g, " ")}</span>
+                    <Link
+                      href="/admin/referrals"
+                      className="text-sm text-[rgb(198,167,94)] hover:underline"
+                    >
+                      Manage
+                    </Link>
+                  </div>
                 )}
               </div>
             )}

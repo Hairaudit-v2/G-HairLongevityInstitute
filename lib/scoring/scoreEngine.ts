@@ -76,7 +76,7 @@ export function computeScores(params: {
       domain_scores: zeros,
       overall_score: 0,
       risk_tier: "low",
-      explainability: Object.fromEntries(DOMAINS.map((d) => [d, ["[DRY RUN]"]])),
+      explainability: Object.fromEntries(DOMAINS.map((d) => [d, ["[DRY RUN]"]])) as Record<DomainId, string[]>,
     };
   }
 

@@ -47,8 +47,10 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
         .select("id")
         .single();
       if (error) return { ok: false, error: error.message };
-      jobId = data!.id;
-      jobRow = { id: jobId, status: "queued", attempts: 0 };
+      const newId = data?.id;
+      if (!newId) return { ok: false, error: "Failed to create job" };
+      jobId = newId;
+      jobRow = { id: newId, status: "queued", attempts: 0 };
     }
 
     if (jobRow.status === "complete") {
@@ -186,10 +188,10 @@ export async function runPipeline(options: PipelineOptions): Promise<PipelineRes
       if (Array.isArray(priorMarkers) && priorMarkers.length > 0) {
         bloodMarkersForReport = priorMarkers.map((m: { name: string; value?: unknown; unit?: string; referenceRange?: string; flag?: string }) => ({
           name: m.name,
-          value: m.value ?? null,
+          value: typeof m.value === "number" || typeof m.value === "string" ? m.value : null,
           unit: m.unit,
           referenceRange: m.referenceRange,
-          flag: m.flag,
+          flag: (m.flag === "low" || m.flag === "normal" || m.flag === "high" || m.flag === "critical") ? m.flag : undefined,
         }));
       }
     }

@@ -8,7 +8,13 @@ import { runPipeline } from "@/lib/pipeline/runPipeline";
 
 export const dynamic = "force-dynamic";
 
+function isProd(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 export async function POST(req: Request) {
+  if (isProd()) return NextResponse.json({ ok: false, error: "Not found." }, { status: 404 });
+
   try {
     const url = new URL(req.url);
     const intakeId = url.searchParams.get("intakeId");

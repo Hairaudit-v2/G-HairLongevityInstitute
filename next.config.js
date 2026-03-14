@@ -4,7 +4,7 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    serverComponentsExternalPackages: ["pdf-parse", "pdf-to-img", "tesseract.js", "canvas", "pdfjs-dist", "@napi-rs/canvas", "sharp"],
+    serverComponentsExternalPackages: ["pdf-parse", "pdf-to-img", "tesseract.js", "pdfjs-dist", "@napi-rs/canvas", "sharp"],
   },
 };
 

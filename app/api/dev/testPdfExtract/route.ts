@@ -8,6 +8,10 @@ import { pdfDocumentExtractor } from "@/lib/ai/pdfExtractor";
 
 export const dynamic = "force-dynamic";
 
+function isProd(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 async function extractPdfTextViaOcr(bytes: Uint8Array): Promise<string> {
   const { pdf } = await import("pdf-to-img");
   const { createWorker } = await import("tesseract.js");
@@ -30,6 +34,8 @@ async function extractPdfTextViaOcr(bytes: Uint8Array): Promise<string> {
 }
 
 export async function POST(req: Request) {
+  if (isProd()) return NextResponse.json({ ok: false, error: "Not found." }, { status: 404 });
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;

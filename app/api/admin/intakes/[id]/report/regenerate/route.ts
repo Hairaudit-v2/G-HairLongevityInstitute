@@ -125,8 +125,9 @@ export async function POST(
       (Array.isArray(selections.meds) &&
         (selections.meds.includes("finasteride") || selections.meds.includes("dutasteride")));
 
+    type Marker = { name: string; value?: unknown; unit?: string; referenceRange?: string; flag?: string };
     const freeTMarker = bloodMarkers.find(
-      (m) =>
+      (m: Marker) =>
         m.name === "Free Testosterone" &&
         (typeof m.value === "number" || typeof m.value === "string") &&
         m.referenceRange

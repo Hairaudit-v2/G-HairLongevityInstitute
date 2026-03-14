@@ -9,7 +9,6 @@
   "dependencies": {
     "@napi-rs/canvas": "^0.1.93",
     "@supabase/supabase-js": "^2.97.0",
-    "canvas": "^3.2.1",
     "chart.js": "^4.5.1",
     "framer-motion": "^12.34.2",
     "inngest": "^3.52.2",

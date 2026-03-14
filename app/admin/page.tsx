@@ -163,9 +163,17 @@ export default function AdminPage() {
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <Link href="/" className="text-sm text-white/60 hover:text-white">
-              ← Back to site
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/" className="text-sm text-white/60 hover:text-white">
+                ← Back to site
+              </Link>
+              <Link href="/admin/doctors" className="text-sm text-white/60 hover:text-white">
+                Doctors
+              </Link>
+              <Link href="/admin/referrals" className="text-sm text-white/60 hover:text-white">
+                Referrals
+              </Link>
+            </div>
             <h1 className="mt-2 text-2xl font-semibold">Admin — Intakes</h1>
             <p className="mt-1 text-sm text-white/60">
               View and review diagnostic intake submissions.
