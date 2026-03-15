@@ -5,6 +5,17 @@ import { generateClinicalInsights } from "./clinicalInsights";
 import { getBloodRequestByIntake } from "./bloodRequests";
 import { LONGEVITY_DOC_TYPE } from "./documentTypes";
 import { REVIEW_OUTCOME } from "./reviewConstants";
+import {
+  compareTreatmentResponses,
+  buildTreatmentResponseSnapshot,
+  type TreatmentResponseComparison,
+  type TreatmentResponseSnapshot,
+} from "./treatmentResponse";
+import {
+  getScalpImageComparisonSummaryForIntake,
+  type ScalpImageComparisonSummary,
+  SCALP_IMAGE_COMPARISON_STATUS,
+} from "./scalpImageComparisons";
 import type { LongevityQuestionnaireResponses } from "./schema";
 import { computeTriage } from "./triage";
 
@@ -23,6 +34,8 @@ type CaseSnapshot = {
   flags: ReturnType<typeof computeTriage>["flags"];
   clinicalInsights: ReturnType<typeof generateClinicalInsights>;
   bloodRequestStatus: string | null;
+  treatmentResponse: TreatmentResponseSnapshot;
+  scalpPhotoCount: number;
   workflow: {
     hasBloodResultUploadDocument: boolean;
     hasStructuredMarkers: boolean;
@@ -46,6 +59,8 @@ export type CaseComparisonResult = {
   persistentDrivers: string[];
   newConcerns: string[];
   suggestedReviewFocus: string[];
+  treatmentResponse: TreatmentResponseComparison | null;
+  scalpImageComparison: ScalpImageComparisonSummary | null;
   patientSummary: PatientCaseProgressSummary;
 };
 
@@ -192,6 +207,10 @@ async function getSnapshotForIntake(
     questionnaire: responses,
     flags,
     bloodRequestStatus: bloodRequest?.status ?? null,
+    treatmentResponse: buildTreatmentResponseSnapshot(responses),
+    scalpPhotoCount: (documents ?? []).filter(
+      (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO
+    ).length,
     workflow,
     clinicalInsights: generateClinicalInsights({
       derivedFlags: flags,
@@ -217,6 +236,10 @@ function buildComparison(current: CaseSnapshot, previous: CaseSnapshot): CaseCom
   const previousDrivers = previous.clinicalInsights.activeDrivers;
   const persistentDrivers = intersection(currentDrivers, previousDrivers);
   const newDriverLabels = difference(currentDrivers, previousDrivers);
+  const treatmentResponse = compareTreatmentResponses(
+    current.treatmentResponse,
+    previous.treatmentResponse
+  );
 
   const sheddingNow = current.questionnaire.timelineTriggers?.sheddingTrend;
   const sheddingPrev = previous.questionnaire.timelineTriggers?.sheddingTrend;
@@ -246,6 +269,13 @@ function buildComparison(current: CaseSnapshot, previous: CaseSnapshot): CaseCom
     pushUnique(worsenedAreas, "Scalp irritation symptoms are more prominent than on the previous intake.");
   }
 
+  if (current.scalpPhotoCount > 0 && previous.scalpPhotoCount === 0) {
+    pushUnique(
+      suggestedReviewFocus,
+      "This intake includes scalp photos where the previous one did not; use them as a new visual baseline for follow-up."
+    );
+  }
+
   const currentStress = current.questionnaire.lifestyleTreatments?.stressScore;
   const previousStress = previous.questionnaire.lifestyleTreatments?.stressScore;
   if (typeof currentStress === "number" && typeof previousStress === "number") {
@@ -270,14 +300,43 @@ function buildComparison(current: CaseSnapshot, previous: CaseSnapshot): CaseCom
     pushUnique(worsenedAreas, "Sleep quality has worsened since the previous intake.");
   }
 
-  const treatmentHelpfulnessNow = current.questionnaire.lifestyleTreatments?.treatmentHelpfulness;
-  const treatmentHelpfulnessPrev = previous.questionnaire.lifestyleTreatments?.treatmentHelpfulness;
-  if (treatmentHelpfulnessPrev === "no" && treatmentHelpfulnessNow === "yes") {
-    pushUnique(improvedAreas, "The patient now reports current treatment as helpful.");
-    pushUnique(patientImproved, "Your current treatment plan feels more helpful than before.");
-  }
-  if (treatmentHelpfulnessPrev === "yes" && treatmentHelpfulnessNow === "no") {
-    pushUnique(worsenedAreas, "The patient no longer reports current treatment as helpful.");
+  if (treatmentResponse) {
+    for (const item of treatmentResponse.clinicianSummary) {
+      if (!improvedAreas.includes(item) && !worsenedAreas.includes(item)) {
+        if (item.toLowerCase().includes("reported improvement")) {
+          pushUnique(improvedAreas, item);
+        } else if (item.toLowerCase().includes("reported worsening")) {
+          pushUnique(worsenedAreas, item);
+        }
+      }
+    }
+    for (const item of treatmentResponse.patientImprovedSummary) {
+      pushUnique(patientImproved, item);
+    }
+    for (const item of treatmentResponse.patientFollowUpSummary) {
+      pushUnique(patientFollowUp, item);
+    }
+    if (treatmentResponse.startedTreatments.length > 0) {
+      pushUnique(
+        suggestedReviewFocus,
+        `Review response and adherence after starting: ${treatmentResponse.startedTreatments.join(", ")}.`
+      );
+    }
+    if (treatmentResponse.stoppedTreatments.length > 0) {
+      pushUnique(
+        suggestedReviewFocus,
+        `Clarify why treatment stopped: ${treatmentResponse.stoppedTreatments.join(", ")}.`
+      );
+    }
+    if (
+      treatmentResponse.currentReportedResponse === "worsened" ||
+      treatmentResponse.currentReportedResponse === "uncertain"
+    ) {
+      pushUnique(
+        suggestedReviewFocus,
+        "Review whether the current treatment plan needs adjustment based on the reported response."
+      );
+    }
   }
 
   for (const area of current.clinicalInsights.improvedAreas) {
@@ -395,6 +454,8 @@ function buildComparison(current: CaseSnapshot, previous: CaseSnapshot): CaseCom
     persistentDrivers,
     newConcerns,
     suggestedReviewFocus,
+    treatmentResponse,
+    scalpImageComparison: null,
     patientSummary: {
       whatHasImproved: patientImproved,
       stillNeedsFollowUp: patientFollowUp,
@@ -431,6 +492,64 @@ export async function getCaseComparisonForIntake(
     getSnapshotForIntake(supabase, current as ComparisonIntakeRow),
     getSnapshotForIntake(supabase, previous as ComparisonIntakeRow),
   ]);
+  const comparison = buildComparison(currentSnapshot, previousSnapshot);
+  const scalpImageComparison = await getScalpImageComparisonSummaryForIntake(
+    supabase,
+    profile_id,
+    intake_id
+  );
 
-  return buildComparison(currentSnapshot, previousSnapshot);
+  if (
+    scalpImageComparison.comparisonStatus ===
+    SCALP_IMAGE_COMPARISON_STATUS.IMPROVED
+  ) {
+    pushUnique(
+      comparison.improvedAreas,
+      "Clinician scalp photo comparison suggests visible improvement since the previous intake."
+    );
+    pushUnique(
+      comparison.patientSummary.whatHasImproved,
+      "Your clinician noted improvement when comparing your scalp photos over time."
+    );
+  }
+
+  if (
+    scalpImageComparison.comparisonStatus ===
+    SCALP_IMAGE_COMPARISON_STATUS.WORSENED
+  ) {
+    pushUnique(
+      comparison.worsenedAreas,
+      "Clinician scalp photo comparison suggests visible worsening since the previous intake."
+    );
+    pushUnique(
+      comparison.patientSummary.nextStepMayBe,
+      "Your clinician may review the changes seen in your follow-up scalp photos with you."
+    );
+  }
+
+  if (
+    scalpImageComparison.comparisonStatus ===
+      SCALP_IMAGE_COMPARISON_STATUS.PENDING_REVIEW &&
+    scalpImageComparison.canCompare
+  ) {
+    pushUnique(
+      comparison.suggestedReviewFocus,
+      "Review the current and previous scalp photo sets and record a structured visual comparison."
+    );
+  }
+
+  if (
+    scalpImageComparison.comparisonStatus ===
+      SCALP_IMAGE_COMPARISON_STATUS.UNCERTAIN ||
+    scalpImageComparison.comparisonStatus ===
+      SCALP_IMAGE_COMPARISON_STATUS.INSUFFICIENT_IMAGES
+  ) {
+    pushUnique(
+      comparison.patientSummary.stillNeedsFollowUp,
+      "Updated scalp photos may still help your clinician track visible progress over time."
+    );
+  }
+
+  comparison.scalpImageComparison = scalpImageComparison;
+  return comparison;
 }

@@ -17,6 +17,7 @@ import { getInterpretedMarkersWithIdsForIntake, getMarkersForIntake } from "@/li
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
 import { getCurrentVsPreviousForIntake } from "@/lib/longevity/bloodMarkerTrends";
 import { listPendingBloodMarkerExtractionDraftsForIntake } from "@/lib/longevity/bloodMarkerExtractionDrafts";
+import { listPendingScalpImageAnalysisDraftsForIntake } from "@/lib/longevity/scalpImageAnalysisDrafts";
 import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
@@ -89,12 +90,13 @@ export async function GET(
       documents: (documents ?? []).map((d) => ({ doc_type: d.doc_type })),
     });
 
-    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts, case_comparison, hasNewerSubmittedIntake] = await Promise.all([
+    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts, scalp_image_analysis_drafts, case_comparison, hasNewerSubmittedIntake] = await Promise.all([
       getInterpretedMarkersWithIdsForIntake(supabase, id),
       getMarkersForIntake(supabase, id),
       getBloodRequestByIntake(supabase, id),
       getCurrentVsPreviousForIntake(supabase, intake.profile_id, id),
       listPendingBloodMarkerExtractionDraftsForIntake(supabase, id),
+      listPendingScalpImageAnalysisDraftsForIntake(supabase, id),
       getCaseComparisonForIntake(supabase, intake.profile_id, id),
       supabase
         .from("hli_longevity_intakes")
@@ -132,6 +134,8 @@ export async function GET(
       ),
       hasStructuredMarkers: blood_results.length > 0,
       hasNewerSubmittedIntake: hasNewerSubmittedIntake,
+      treatmentResponseSummary: case_comparison?.treatmentResponse?.clinicianSummary ?? [],
+      scalpImageComparison: case_comparison?.scalpImageComparison?.clinicianSummary ?? [],
     });
 
     return NextResponse.json({
@@ -166,6 +170,18 @@ export async function GET(
         confidence: draft.confidence,
         source_filename: draft.source_filename,
         extracted_at: draft.extracted_at,
+      })),
+      scalp_image_analysis_drafts: scalp_image_analysis_drafts.map((draft) => ({
+        id: draft.id,
+        image_quality: draft.image_quality,
+        thinning_distribution: draft.thinning_distribution,
+        severity_estimate: draft.severity_estimate,
+        visible_findings: draft.visible_findings,
+        comparison_direction: draft.comparison_direction,
+        confidence: draft.confidence,
+        manual_review_recommended: draft.manual_review_recommended,
+        draft_summary: draft.draft_summary,
+        created_at: draft.created_at,
       })),
       blood_request: blood_request ? { id: blood_request.id, status: blood_request.status } : null,
       intake: {

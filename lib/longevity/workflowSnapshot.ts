@@ -115,6 +115,8 @@ export async function getLongevityWorkflowSnapshotForIntake(
     hasBloodResultUploadDocument,
     hasStructuredMarkers,
     hasNewerSubmittedIntake: newerSubmittedIntakes,
+    treatmentResponseSummary: caseComparison?.treatmentResponse?.clinicianSummary ?? [],
+    scalpImageComparison: caseComparison?.scalpImageComparison?.clinicianSummary ?? [],
   });
 
   return {

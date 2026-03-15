@@ -82,6 +82,8 @@ export function buildCarePlan(input: CarePlanInput): CarePlanOutput {
   const hasBloodUpload = input.hasBloodResultUploadDocument ?? false;
   const hasStructuredMarkers = input.hasStructuredMarkers ?? false;
   const hasNewerIntake = input.hasNewerSubmittedIntake ?? false;
+  const treatmentResponseSummary = input.treatmentResponseSummary ?? [];
+  const scalpImageComparison = input.scalpImageComparison ?? [];
 
   const brStatus = bloodRequest?.status ?? null;
   const letterExists = brStatus && ["letter_requested", "letter_generated", "results_uploaded"].includes(brStatus);
@@ -153,6 +155,14 @@ export function buildCarePlan(input: CarePlanInput): CarePlanOutput {
     pushUnique(nextStepRecommendations, item);
   }
 
+  for (const item of treatmentResponseSummary) {
+    pushUnique(nextStepRecommendations, item);
+  }
+
+  for (const item of scalpImageComparison) {
+    pushUnique(nextStepRecommendations, item);
+  }
+
   // --- Referral recommended ---
   if (reviewOutcome === REVIEW_OUTCOME.REFERRAL_RECOMMENDED) {
     pushUnique(nextStepRecommendations, "Referral has been recommended; ensure patient has clear next steps and GP follow-up if needed.");
@@ -165,9 +175,27 @@ export function buildCarePlan(input: CarePlanInput): CarePlanOutput {
   const hasScalpDriver = persistentDrivers.some(
     (d) => d.toLowerCase().includes("scalp") || d.toLowerCase().includes("irritation")
   );
-  if (hasScalpDriver || (insights?.activeDrivers?.length ?? 0) > 0) {
+  const needsScalpComparisonFollowUp =
+    comparison?.scalpImageComparison?.comparisonStatus === "pending_review" ||
+    comparison?.scalpImageComparison?.comparisonStatus === "uncertain" ||
+    comparison?.scalpImageComparison?.comparisonStatus === "insufficient_images";
+  if (hasScalpDriver || (insights?.activeDrivers?.length ?? 0) > 0 || needsScalpComparisonFollowUp) {
     scalpPhotoFollowUpNeeded = true;
     pushUnique(nextStepRecommendations, "Consider requesting updated scalp photos at follow-up to track any visible change.");
+  }
+
+  if (
+    comparison?.treatmentResponse?.currentReportedResponse === "worsened" ||
+    comparison?.treatmentResponse?.currentReportedResponse === "uncertain"
+  ) {
+    pushUnique(
+      nextStepRecommendations,
+      "Review whether the current treatment plan needs adjustment based on the reported treatment response."
+    );
+    pushUnique(
+      patientNextSteps,
+      "Your clinician may review whether your current treatment plan should stay the same or be adjusted."
+    );
   }
 
   // --- Default patient reassurance when nothing else ---

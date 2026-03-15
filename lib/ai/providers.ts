@@ -9,6 +9,10 @@ export interface VisionProvider {
     imageBytes: Uint8Array;
     mimeType: string;
     prompt: string;
+    jsonSchema?: {
+      name: string;
+      schema: Record<string, unknown>;
+    };
   }): Promise<{ text: string; raw?: unknown }>;
 }
 

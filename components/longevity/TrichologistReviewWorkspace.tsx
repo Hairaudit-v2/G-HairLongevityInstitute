@@ -11,6 +11,12 @@ import { getBloodMarkerOptionsByCategory } from "@/lib/longevity/bloodMarkerOpti
 import { getMarkerDefinition, getDefaultUnit } from "@/lib/longevity/bloodMarkerRegistry";
 import type { ClinicalInsights } from "@/lib/longevity/clinicalInsights";
 import type { CarePlanOutput } from "@/lib/longevity/carePlan";
+import {
+  SCALP_IMAGE_COMPARISON_STATUS,
+  type ScalpImageComparisonSummary,
+  type ScalpImageComparisonStatus,
+} from "@/lib/longevity/scalpImageComparisons";
+import type { TreatmentResponseComparison } from "@/lib/longevity/treatmentResponse";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
@@ -103,6 +109,7 @@ export type CaseDetail = {
   blood_results?: (InterpretedMarker & { id: string })[];
   blood_markers?: BloodMarkerRaw[];
   blood_marker_extraction_drafts?: BloodMarkerExtractionDraft[];
+  scalp_image_analysis_drafts?: ScalpImageAnalysisDraft[];
   case_comparison?: CaseComparisonResult | null;
   blood_request?: { id: string; status: string } | null;
   marker_trends?: MarkerTrendRow[];
@@ -137,6 +144,19 @@ export type BloodMarkerExtractionDraft = {
   extracted_at: string;
 };
 
+export type ScalpImageAnalysisDraft = {
+  id: string;
+  image_quality: string;
+  thinning_distribution: string[];
+  severity_estimate: string;
+  visible_findings: string[];
+  comparison_direction: string;
+  confidence: number | null;
+  manual_review_recommended: boolean;
+  draft_summary: string;
+  created_at: string;
+};
+
 export type CaseComparisonResult = {
   previousIntake: {
     id: string;
@@ -148,12 +168,32 @@ export type CaseComparisonResult = {
   persistentDrivers: string[];
   newConcerns: string[];
   suggestedReviewFocus: string[];
+  treatmentResponse: TreatmentResponseComparison | null;
+  scalpImageComparison: ScalpImageComparisonSummary | null;
   patientSummary: {
     whatHasImproved: string[];
     stillNeedsFollowUp: string[];
     nextStepMayBe: string[];
   };
 };
+
+const SCALP_COMPARISON_LABELS: Record<string, string> = {
+  [SCALP_IMAGE_COMPARISON_STATUS.PENDING_REVIEW]: "Pending review",
+  [SCALP_IMAGE_COMPARISON_STATUS.IMPROVED]: "Improved",
+  [SCALP_IMAGE_COMPARISON_STATUS.STABLE]: "Stable",
+  [SCALP_IMAGE_COMPARISON_STATUS.WORSENED]: "Worsened",
+  [SCALP_IMAGE_COMPARISON_STATUS.UNCERTAIN]: "Uncertain",
+  [SCALP_IMAGE_COMPARISON_STATUS.INSUFFICIENT_IMAGES]: "Insufficient images",
+};
+
+const SCALP_COMPARISON_REGIONS = [
+  { key: "frontal_hairline", label: "Frontal hairline" },
+  { key: "temples", label: "Temples" },
+  { key: "crown", label: "Crown" },
+  { key: "mid_scalp", label: "Mid scalp" },
+  { key: "part_line", label: "Part line" },
+  { key: "whole_scalp", label: "Whole scalp" },
+] as const;
 
 function FlagIcons({ flags }: { flags: ReviewQueueItem["flags"] }) {
   const items: { key: string; on: boolean; label: string }[] = [
@@ -264,6 +304,15 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   const [filterAssignedToMe, setFilterAssignedToMe] = useState(false);
   const [sortBy, setSortBy] = useState<"priority" | "complexity">("complexity");
   const [outcomeSelect, setOutcomeSelect] = useState<string>("");
+  const [scalpComparisonForm, setScalpComparisonForm] = useState<{
+    comparison_status: ScalpImageComparisonStatus;
+    compared_regions: string[];
+    clinician_summary: string;
+  }>({
+    comparison_status: SCALP_IMAGE_COMPARISON_STATUS.PENDING_REVIEW,
+    compared_regions: [],
+    clinician_summary: "",
+  });
   const [editingMarkerId, setEditingMarkerId] = useState<string | null>(null);
   const [addMarkerForm, setAddMarkerForm] = useState({
     marker_key: "",
@@ -323,6 +372,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         blood_results: data.blood_results ?? undefined,
         blood_markers: data.blood_markers ?? undefined,
         blood_marker_extraction_drafts: data.blood_marker_extraction_drafts ?? undefined,
+        scalp_image_analysis_drafts: data.scalp_image_analysis_drafts ?? undefined,
         case_comparison: data.case_comparison ?? null,
         blood_request: data.blood_request ?? null,
         marker_trends: data.marker_trends ?? undefined,
@@ -333,6 +383,15 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         setSummaryText(data.intake.patient_visible_summary);
       }
       setOutcomeSelect(data.intake.review_outcome ?? "");
+      setScalpComparisonForm({
+        comparison_status:
+          data.case_comparison?.scalpImageComparison?.comparisonStatus ??
+          SCALP_IMAGE_COMPARISON_STATUS.PENDING_REVIEW,
+        compared_regions:
+          data.case_comparison?.scalpImageComparison?.comparedRegions ?? [],
+        clinician_summary:
+          data.case_comparison?.scalpImageComparison?.clinicianNotes ?? "",
+      });
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Failed to load case");
     } finally {
@@ -444,6 +503,37 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     }
   }, [selectedId, noteText, fetchCase]);
 
+  const saveScalpComparison = useCallback(async () => {
+    if (!selectedId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/longevity/review/scalp-image-comparison", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          intake_id: selectedId,
+          comparison_status: scalpComparisonForm.comparison_status,
+          compared_regions: scalpComparisonForm.compared_regions,
+          clinician_summary: scalpComparisonForm.clinician_summary.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Failed to save scalp comparison");
+        return;
+      }
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(
+        e instanceof Error ? e.message : "Failed to save scalp comparison"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, scalpComparisonForm, fetchCase]);
+
   const markerOptionsByCategory = useMemo(() => getBloodMarkerOptionsByCategory(), []);
 
   const addBloodMarker = useCallback(async () => {
@@ -524,6 +614,32 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     }
   }, [selectedId, fetchCase]);
 
+  const runScalpImageAnalysis = useCallback(async () => {
+    if (!selectedId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/longevity/review/scalp-image-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ intake_id: selectedId }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Failed to run scalp image analysis");
+        return;
+      }
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(
+        e instanceof Error ? e.message : "Failed to run scalp image analysis"
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, fetchCase]);
+
   const reviewExtractionDraft = useCallback(async (draftId: string, action: "apply" | "dismiss") => {
     if (!selectedId) return;
     setActionLoading(true);
@@ -543,6 +659,30 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       await fetchCase(selectedId);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : `Failed to ${action} extracted draft`);
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, fetchCase]);
+
+  const reviewScalpImageAnalysisDraft = useCallback(async (draftId: string, action: "apply" | "dismiss") => {
+    if (!selectedId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/longevity/review/scalp-image-analysis/${draftId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? `Failed to ${action} scalp draft`);
+        return;
+      }
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : `Failed to ${action} scalp draft`);
     } finally {
       setActionLoading(false);
     }
@@ -853,7 +993,9 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
             <>
               {(() => {
                 const hasBloodUploadDocument = caseDetail.documents.some((doc) => doc.doc_type === "blood_test_upload");
+                const hasScalpPhotoDocument = caseDetail.documents.some((doc) => doc.doc_type === "scalp_photo");
                 const extractionDrafts = caseDetail.blood_marker_extraction_drafts ?? [];
+                const scalpImageDrafts = caseDetail.scalp_image_analysis_drafts ?? [];
                 return (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                 <div className="flex flex-wrap items-center gap-2">
@@ -1079,6 +1221,209 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                     )}
                   </div>
                 )}
+
+                {caseDetail.case_comparison?.treatmentResponse && (
+                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Treatment response summary</h3>
+                    {caseDetail.case_comparison.treatmentResponse.items.length === 0 ? (
+                      <p className="mt-2 text-sm text-white/50">No structured treatment changes captured yet.</p>
+                    ) : (
+                      <>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {caseDetail.case_comparison.treatmentResponse.items.map((item) => (
+                            <span
+                              key={`${item.key}-${item.status}`}
+                              className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white/80"
+                            >
+                              {item.label} · {item.status.replace(/_/g, " ")}
+                              {item.response ? ` · ${item.response.replace(/_/g, " ")}` : ""}
+                            </span>
+                          ))}
+                        </div>
+                        {caseDetail.case_comparison.treatmentResponse.clinicianSummary.length > 0 && (
+                          <ul className="mt-3 space-y-1 text-sm text-white/80">
+                            {caseDetail.case_comparison.treatmentResponse.clinicianSummary.map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {caseDetail.case_comparison?.scalpImageComparison && (
+                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Scalp-image comparison</h3>
+                    <p className="mt-2 text-xs text-white/60">
+                      Current photos: {caseDetail.case_comparison.scalpImageComparison.currentPhotoCount} · Previous photos: {caseDetail.case_comparison.scalpImageComparison.previousPhotoCount}
+                    </p>
+                    <p className="mt-1 text-xs text-white/50">
+                      Status: {SCALP_COMPARISON_LABELS[caseDetail.case_comparison.scalpImageComparison.comparisonStatus] ?? caseDetail.case_comparison.scalpImageComparison.comparisonStatus}
+                    </p>
+                    {caseDetail.case_comparison.scalpImageComparison.clinicianSummary.length > 0 && (
+                      <ul className="mt-3 space-y-1 text-sm text-white/80">
+                        {caseDetail.case_comparison.scalpImageComparison.clinicianSummary.map((item) => (
+                          <li key={item}>• {item}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      <div>
+                        <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                          Comparison status
+                        </label>
+                        <select
+                          value={scalpComparisonForm.comparison_status}
+                          onChange={(e) =>
+                            setScalpComparisonForm((prev) => ({
+                              ...prev,
+                              comparison_status: e.target.value as ScalpImageComparisonStatus,
+                            }))
+                          }
+                          className="mt-2 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        >
+                          {Object.entries(SCALP_COMPARISON_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                          Compared regions
+                        </label>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {SCALP_COMPARISON_REGIONS.map((region) => {
+                            const active = scalpComparisonForm.compared_regions.includes(region.key);
+                            return (
+                              <button
+                                key={region.key}
+                                type="button"
+                                onClick={() =>
+                                  setScalpComparisonForm((prev) => ({
+                                    ...prev,
+                                    compared_regions: active
+                                      ? prev.compared_regions.filter((item) => item !== region.key)
+                                      : [...prev.compared_regions, region.key],
+                                  }))
+                                }
+                                className={`rounded border px-2.5 py-1 text-xs ${
+                                  active
+                                    ? "border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 text-white"
+                                    : "border-white/20 bg-white/5 text-white/70"
+                                }`}
+                              >
+                                {region.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                        Clinician comparison note
+                      </label>
+                      <textarea
+                        value={scalpComparisonForm.clinician_summary}
+                        onChange={(e) =>
+                          setScalpComparisonForm((prev) => ({
+                            ...prev,
+                            clinician_summary: e.target.value,
+                          }))
+                        }
+                        rows={3}
+                        placeholder="Visible change, density pattern, scalp coverage, or photo limitations."
+                        className="mt-2 w-full rounded border border-white/20 bg-black/20 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={saveScalpComparison}
+                      disabled={actionLoading}
+                      className="mt-3 rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-3 py-1.5 text-sm text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+                    >
+                      Save scalp comparison
+                    </button>
+                  </div>
+                )}
+
+                <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-medium text-white/90">AI scalp-image draft analysis</h3>
+                      <p className="mt-1 text-xs text-white/60">
+                        Draft-only OpenAI-assisted image review. Internal only and never patient-visible until confirmed by a Trichologist.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={runScalpImageAnalysis}
+                      disabled={actionLoading || !hasScalpPhotoDocument}
+                      className="rounded border border-white/20 bg-white/5 px-3 py-1.5 text-sm text-white hover:bg-white/10 disabled:opacity-50"
+                    >
+                      {scalpImageDrafts.length > 0 ? "Re-run AI draft analysis" : "Run AI draft analysis"}
+                    </button>
+                  </div>
+                  {!hasScalpPhotoDocument ? (
+                    <p className="mt-3 text-sm text-white/50">Upload a `scalp_photo` document before running draft analysis.</p>
+                  ) : scalpImageDrafts.length === 0 ? (
+                    <p className="mt-3 text-sm text-white/50">No pending scalp-image drafts yet.</p>
+                  ) : (
+                    <div className="mt-3 space-y-3">
+                      {scalpImageDrafts.map((draft) => (
+                        <div key={draft.id} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+                            <span>Quality: {draft.image_quality}</span>
+                            <span>Severity: {draft.severity_estimate}</span>
+                            <span>Change: {draft.comparison_direction}</span>
+                            <span>
+                              Confidence: {draft.confidence != null ? `${Math.round(draft.confidence * 100)}%` : "—"}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-sm text-white/85">{draft.draft_summary}</p>
+                          {(draft.thinning_distribution.length > 0 || draft.visible_findings.length > 0) && (
+                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                              {draft.thinning_distribution.map((item) => (
+                                <span key={item} className="rounded-full border border-white/15 bg-white/5 px-2 py-1 text-white/75">
+                                  {item.replace(/_/g, " ")}
+                                </span>
+                              ))}
+                              {draft.visible_findings.map((item) => (
+                                <span key={item} className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-amber-100/80">
+                                  {item.replace(/_/g, " ")}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {draft.manual_review_recommended && (
+                            <p className="mt-2 text-xs text-amber-200">Manual review recommended.</p>
+                          )}
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => reviewScalpImageAnalysisDraft(draft.id, "apply")}
+                              disabled={actionLoading}
+                              className="rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-2.5 py-1 text-xs text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+                            >
+                              Apply to scalp comparison
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => reviewScalpImageAnalysisDraft(draft.id, "dismiss")}
+                              disabled={actionLoading}
+                              className="rounded border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-50"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Add blood marker</h3>
                 <div className="mt-2 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">

@@ -869,6 +869,17 @@ export function LongevityStartFlow() {
                 <SingleSelect label="Sleep quality" value={lt.sleepQuality} options={[{ key: "good", label: "Good" }, { key: "average", label: "Average" }, { key: "poor", label: "Poor" }]} onChange={(k) => setLifestyleTreatments({ sleepQuality: k })} />
                 <MultiSelect label="Current treatments or supplements" options={CURRENT_TREATMENTS} value={lt.currentTreatments ?? []} onChange={(v) => setLifestyleTreatments({ currentTreatments: v })} />
                 <SingleSelect label="Have current treatments been helpful?" value={lt.treatmentHelpfulness} options={[{ key: "yes", label: "Yes" }, { key: "no", label: "No" }, { key: "unsure", label: "Unsure" }]} onChange={(k) => setLifestyleTreatments({ treatmentHelpfulness: k })} />
+                <SingleSelect
+                  label="Overall treatment response so far"
+                  value={lt.treatmentResponse}
+                  options={[
+                    { key: "improved", label: "Improved" },
+                    { key: "no_change", label: "No clear change" },
+                    { key: "worsened", label: "Worsened" },
+                    { key: "uncertain", label: "Uncertain / too early to tell" },
+                  ]}
+                  onChange={(k) => setLifestyleTreatments({ treatmentResponse: k })}
+                />
                 <div>
                   <label className="text-sm text-white/75">Medications or supplements (free text, optional)</label>
                   <textarea className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]" rows={2} value={lt.medicationsSupplementsFreeText ?? ""} onChange={(e) => setLifestyleTreatments({ medicationsSupplementsFreeText: e.target.value })} />

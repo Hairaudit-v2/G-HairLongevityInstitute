@@ -96,6 +96,8 @@ export default async function PortalDashboardPage() {
       hasBloodResultUploadDocument,
       hasStructuredMarkers: bloodResults.length > 0,
       hasNewerSubmittedIntake: false,
+      treatmentResponseSummary: caseComparison?.treatmentResponse?.clinicianSummary ?? [],
+      scalpImageComparison: caseComparison?.scalpImageComparison?.clinicianSummary ?? [],
     });
     carePlanPatient = {
       patientNextSteps: carePlan.patientNextSteps,
@@ -218,6 +220,33 @@ export default async function PortalDashboardPage() {
                   <li key={item}>• {item}</li>
                 ))}
               </ul>
+            </div>
+          )}
+          {(caseComparison.treatmentResponse || caseComparison.scalpImageComparison) && (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {caseComparison.treatmentResponse &&
+                (caseComparison.treatmentResponse.patientImprovedSummary.length > 0 ||
+                  caseComparison.treatmentResponse.patientFollowUpSummary.length > 0) && (
+                <div>
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-white/50">Treatment progress</h3>
+                  <ul className="mt-2 space-y-2 text-sm text-white/85">
+                    {[
+                      ...caseComparison.treatmentResponse.patientImprovedSummary,
+                      ...caseComparison.treatmentResponse.patientFollowUpSummary,
+                    ].map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {caseComparison.scalpImageComparison?.comparisonStatus === "improved" && (
+                <div>
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-white/50">Photo progress</h3>
+                  <p className="mt-2 text-sm text-white/85">
+                    Your clinician has noted improvement when comparing your scalp photos over time.
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </section>

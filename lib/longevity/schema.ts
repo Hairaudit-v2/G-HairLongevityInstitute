@@ -78,6 +78,7 @@ export type LifestyleTreatments = {
   sleepQuality?: "good" | "average" | "poor";
   currentTreatments?: string[];
   treatmentHelpfulness?: "yes" | "no" | "unsure";
+  treatmentResponse?: "improved" | "no_change" | "worsened" | "uncertain";
   medicationsSupplementsFreeText?: string;
 };
 
