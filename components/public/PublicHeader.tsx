@@ -84,15 +84,20 @@ export default function PublicHeader({
                 Patient portal
               </Link>
             )}
-            {showLongevityLinks && (
-              <Link
-                href="/portal/login"
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/65 transition hover:bg-white/5 hover:text-white"
-                title="Portal sign in for patients and trichologists"
-              >
-                Patient / Trichologist login
-              </Link>
-            )}
+            <Link
+              href="/login/patient"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+              title="Patient dashboard sign in"
+            >
+              Patient Login
+            </Link>
+            <Link
+              href="/login/trichologist"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+              title="Trichologist review portal sign in"
+            >
+              Trichologist Login
+            </Link>
             <div className="ml-2">
               <PrimaryButton href={ctaHref}>{ctaLabel}</PrimaryButton>
             </div>
@@ -161,16 +166,22 @@ export default function PublicHeader({
                 Patient portal
               </Link>
             )}
-            {showLongevityLinks && (
-              <Link
-                href="/portal/login"
-                onClick={() => setMobileOpen(false)}
-                className="min-h-[48px] rounded-xl px-4 py-3 text-base font-medium text-white/85 hover:bg-white/10 hover:text-white"
-                title="Portal sign in for patients and trichologists"
-              >
-                Patient / Trichologist login
-              </Link>
-            )}
+            <Link
+              href="/login/patient"
+              onClick={() => setMobileOpen(false)}
+              className="min-h-[48px] rounded-xl px-4 py-3 text-base font-medium text-white/85 hover:bg-white/10 hover:text-white"
+              title="Patient dashboard sign in"
+            >
+              Patient Login
+            </Link>
+            <Link
+              href="/login/trichologist"
+              onClick={() => setMobileOpen(false)}
+              className="min-h-[48px] rounded-xl px-4 py-3 text-base font-medium text-white/85 hover:bg-white/10 hover:text-white"
+              title="Trichologist review portal sign in"
+            >
+              Trichologist Login
+            </Link>
           </div>
         </div>
       </div>

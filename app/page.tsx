@@ -384,6 +384,24 @@ export default function Page() {
         </Container>
       </section>
 
+      {/* Returning user entry — visible, not overpowering */}
+      {useLongevity && (
+        <section className="border-b border-white/10 bg-black/5 py-4">
+          <Container>
+            <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-sm text-white/65">
+              <span>Already have an account?</span>
+              <Link href="/login/patient" className="font-medium text-[rgb(var(--gold))] hover:underline">
+                Patient login
+              </Link>
+              <span className="text-white/30" aria-hidden>·</span>
+              <Link href="/login/trichologist" className="font-medium text-white/80 hover:underline">
+                Trichologist portal
+              </Link>
+            </p>
+          </Container>
+        </section>
+      )}
+
       {/* Trust bar */}
       <section className="border-y border-white/10 bg-black/10 py-6">
         <Container>
