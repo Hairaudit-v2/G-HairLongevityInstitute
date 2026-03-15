@@ -1,5 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { HairEcosystemNav } from "@/components/public/HairEcosystemNav";
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body style={{ margin: 0, minHeight: "100vh", background: "#0F1B2D", color: "#D9D9D6" }}>
         <HairEcosystemNav currentSite="hli" currentSiteInternalHref="/" />
         {children}
+        <Analytics />
       </body>
     </html>
   );
