@@ -159,6 +159,19 @@ export type CaseDetail = {
     patient_safe_summary: string | null;
     outcome_domains_used: string[];
   } | null;
+  /** Protocol scoring engine: internal-only clinician signal */
+  protocol_assessment?: {
+    protocol_score: number;
+    protocol_band: string;
+    response_likelihood: string;
+    coverage_domains: Record<string, string>;
+    adherence_modifier: string;
+    gaps: string[];
+    strengths: string[];
+    recommendation_signals: string[];
+    protocol_assessment_version?: string;
+    score_breakdown?: Record<string, number>;
+  } | null;
 };
 
 export type BloodMarkerRaw = {
@@ -527,6 +540,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         adherence_states: data.adherence_states ?? null,
         treatment_continuity: data.treatment_continuity ?? null,
         outcome_correlation: data.outcome_correlation ?? null,
+        protocol_assessment: data.protocol_assessment ?? null,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -1490,6 +1504,78 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                             </ul>
                           </>
                         )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {caseDetail.protocol_assessment && (
+                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Protocol assessment (internal)</h3>
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+                      <span className="text-white/60">Score</span>
+                      <span className="font-medium text-white/90">{caseDetail.protocol_assessment.protocol_score}</span>
+                      <span className="text-white/40">·</span>
+                      <span className="text-white/60">Band</span>
+                      <span className="rounded border border-white/20 bg-white/5 px-2 py-0.5 text-white/80">
+                        {caseDetail.protocol_assessment.protocol_band}
+                      </span>
+                      <span className="text-white/40">·</span>
+                      <span className="text-white/60">Response likelihood</span>
+                      <span className="text-white/80">
+                        {caseDetail.protocol_assessment.response_likelihood.replace(/_/g, " ")}
+                      </span>
+                      <span className="text-white/40">·</span>
+                      <span className="text-white/60">Adherence</span>
+                      <span className="text-white/80">{caseDetail.protocol_assessment.adherence_modifier}</span>
+                    </div>
+                    {caseDetail.protocol_assessment.coverage_domains && (
+                      <div className="mt-2">
+                        <p className="text-xs text-white/50">Domain coverage</p>
+                        <div className="mt-1 flex flex-wrap gap-1.5">
+                          {Object.entries(caseDetail.protocol_assessment.coverage_domains).map(([domain, level]) => (
+                            <span
+                              key={domain}
+                              className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-xs text-white/70"
+                            >
+                              {domain.replace(/_/g, " ")}: {level}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {(caseDetail.protocol_assessment.gaps?.length > 0 || caseDetail.protocol_assessment.strengths?.length > 0) && (
+                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                        {caseDetail.protocol_assessment.gaps?.length > 0 && (
+                          <div>
+                            <p className="text-xs text-white/50">Gaps</p>
+                            <ul className="mt-0.5 space-y-0.5 text-xs text-amber-200/90">
+                              {caseDetail.protocol_assessment.gaps.map((g, i) => (
+                                <li key={i}>• {g.replace(/_/g, " ")}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {caseDetail.protocol_assessment.strengths?.length > 0 && (
+                          <div>
+                            <p className="text-xs text-white/50">Strengths</p>
+                            <ul className="mt-0.5 space-y-0.5 text-xs text-emerald-200/90">
+                              {caseDetail.protocol_assessment.strengths.map((s, i) => (
+                                <li key={i}>• {s.replace(/_/g, " ")}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {caseDetail.protocol_assessment.score_breakdown && (
+                      <div className="mt-2 border-t border-white/10 pt-2">
+                        <p className="text-xs text-white/50">Score breakdown (internal)</p>
+                        <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-white/60">
+                          {Object.entries(caseDetail.protocol_assessment.score_breakdown).map(([k, v]) => (
+                            <span key={k}>{k.replace(/_/g, " ")}: {v}</span>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>

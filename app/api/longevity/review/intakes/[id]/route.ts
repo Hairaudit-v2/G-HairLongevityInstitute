@@ -27,6 +27,7 @@ import { getAdherenceContextForIntake } from "@/lib/longevity/adherenceContext";
 import { computeAdherenceStates } from "@/lib/longevity/adherenceStates";
 import { getTreatmentAdherenceForIntake } from "@/lib/longevity/treatmentAdherence";
 import { computeTreatmentOutcomeCorrelation } from "@/lib/longevity/treatmentOutcomeCorrelation";
+import { assessTreatmentProtocol } from "@/lib/longevity/treatmentProtocol";
 
 export const dynamic = "force-dynamic";
 
@@ -191,6 +192,26 @@ export async function GET(
       adherenceStates: adherence_states,
     });
 
+    const usedKeysForProtocol = treatment_adherence.items
+      .filter(
+        (i) =>
+          i.status === "started" ||
+          i.status === "continued" ||
+          i.status === "uncertain"
+      )
+      .map((i) => i.key);
+    // Stopped treatments are excluded from usedKeys so they do not inflate protocol score.
+    const protocol_assessment = assessTreatmentProtocol({
+      usedKeys: usedKeysForProtocol,
+      adherenceItems: treatment_adherence.items.map((i) => ({
+        key: i.key,
+        status: i.status,
+      })),
+      hasPreviousIntake: treatment_adherence.hasPreviousIntake,
+      adherenceContext: adherence_states,
+      derivedFlags: triage.flags,
+    });
+
     return NextResponse.json({
       ok: true,
       complexity,
@@ -204,6 +225,7 @@ export async function GET(
       adherence_states,
       treatment_continuity: treatment_adherence,
       outcome_correlation,
+      protocol_assessment,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,
