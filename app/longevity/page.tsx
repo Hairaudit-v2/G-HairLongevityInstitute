@@ -26,10 +26,16 @@ export default function LongevityPage() {
             Start intake
           </Link>
           <Link
+            href="/portal"
+            className="inline-flex rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 hover:bg-white/10"
+          >
+            Patient portal
+          </Link>
+          <Link
             href="/longevity/dashboard"
             className="inline-flex rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 hover:bg-white/10"
           >
-            Dashboard
+            Dashboard (session)
           </Link>
         </div>
       </div>

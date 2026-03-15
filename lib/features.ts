@@ -23,3 +23,8 @@ export function isLongevityApiEnabled(): boolean {
 export function isLongevityLettersEnabled(): boolean {
   return envFlag("HLI_ENABLE_LONGEVITY_LETTERS");
 }
+
+/** Enable longevity patient portal (login, /portal dashboard). Same as longevity; auth requires NEXT_PUBLIC_SUPABASE_ANON_KEY. */
+export function isLongevityPortalEnabled(): boolean {
+  return envFlag("HLI_ENABLE_LONGEVITY");
+}

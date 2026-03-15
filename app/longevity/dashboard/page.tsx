@@ -2,7 +2,8 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
+import { listDocumentsForProfile } from "@/lib/longevity/documents";
+import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 
 export default async function LongevityDashboardPage() {
   if (!isLongevityEnabled()) {
@@ -59,6 +60,8 @@ export default async function LongevityDashboardPage() {
   }
 
   const list = intakes ?? [];
+
+  const documents = await listDocumentsForProfile(supabase, profileId);
 
   return (
     <main className="min-h-screen bg-[rgb(var(--bg))] px-6 py-16">
@@ -140,18 +143,7 @@ export default async function LongevityDashboardPage() {
           )}
         </div>
 
-        {/* Phase 3: documents section — placeholder for uploaded documents (blood tests, scalp photos, letters). */}
-        <section className="mt-10 border-t border-white/10 pt-8" aria-labelledby="documents-heading">
-          <h2 id="documents-heading" className="text-lg font-semibold text-white">
-            Documents
-          </h2>
-          <p className="mt-1 text-sm text-white/60">
-            Uploaded documents (e.g. {LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD.replace("_", " ")}, {LONGEVITY_DOC_TYPE.SCALP_PHOTO.replace("_", " ")}, {LONGEVITY_DOC_TYPE.MEDICAL_LETTER.replace("_", " ")}) will appear here.
-          </p>
-          <div className="mt-4 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-white/50">
-            Document uploads will be available in a future update. Submitted intakes can still receive document uploads.
-          </div>
-        </section>
+        <LongevityDocumentsSection documents={documents} />
       </div>
     </main>
   );

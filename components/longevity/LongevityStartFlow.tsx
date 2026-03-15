@@ -391,6 +391,9 @@ export function LongevityStartFlow() {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [stepDocuments, setStepDocuments] = useState<Array<{ id: string; doc_type: string; filename: string | null; size_bytes: number | null; created_at: string }>>([]);
 
   const progress = useMemo(() => {
     const idx = STEP_ORDER.indexOf(step);
@@ -489,6 +492,52 @@ export function LongevityStartFlow() {
     },
     [saveProgress]
   );
+
+  const fetchStepDocuments = useCallback(async () => {
+    if (!intakeId) return;
+    try {
+      const res = await fetch(`/api/longevity/documents?intakeId=${intakeId}`);
+      const json = await res.json();
+      if (res.ok && json.ok && Array.isArray(json.documents)) {
+        setStepDocuments(json.documents);
+      }
+    } catch {
+      // ignore
+    }
+  }, [intakeId]);
+
+  const handleDocumentUpload = useCallback(
+    async (docType: string, file: File) => {
+      if (!intakeId) return;
+      setUploading(true);
+      setUploadError(null);
+      try {
+        const formData = new FormData();
+        formData.set("intakeId", intakeId);
+        formData.set("docType", docType);
+        formData.set("file", file);
+        const res = await fetch("/api/longevity/documents/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) {
+          setUploadError(json.error ?? "Upload failed.");
+          return;
+        }
+        await fetchStepDocuments();
+      } catch (e) {
+        setUploadError(e instanceof Error ? e.message : "Upload failed.");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [intakeId, fetchStepDocuments]
+  );
+
+  useEffect(() => {
+    if (step === "uploadsNextSteps" && intakeId) fetchStepDocuments();
+  }, [step, intakeId, fetchStepDocuments]);
 
   const submitIntake = useCallback(async () => {
     if (!intakeId) return;
@@ -837,9 +886,78 @@ export function LongevityStartFlow() {
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 7</div>
               <h2 className="mt-2 text-2xl font-semibold">Uploads and next steps</h2>
               <p className="mt-2 text-white/70">
-                What you have available. Upload of documents may be a possible next step in your pathway.
+                Upload blood test results, scalp photos, or medical letters. PDF or image, max 10 MB per file.
               </p>
-              <div className="mt-6 space-y-6">
+              {!intakeId ? (
+                <p className="mt-4 text-sm text-amber-200">Save your intake first to upload documents.</p>
+              ) : (
+                <>
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-white/90">Blood test results (PDF or image)</label>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="mt-2 block w-full text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleDocumentUpload("blood_test_upload", f);
+                          e.target.value = "";
+                        }}
+                        disabled={uploading}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white/90">Scalp photographs (image)</label>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp"
+                        className="mt-2 block w-full text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleDocumentUpload("scalp_photo", f);
+                          e.target.value = "";
+                        }}
+                        disabled={uploading}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white/90">Medical / specialist letters (PDF or image)</label>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="mt-2 block w-full text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleDocumentUpload("medical_letter", f);
+                          e.target.value = "";
+                        }}
+                        disabled={uploading}
+                      />
+                    </div>
+                  </div>
+                  {uploading && <p className="mt-2 text-sm text-[rgb(198,167,94)]">Uploading…</p>}
+                  {uploadError && (
+                    <div className="mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                      {uploadError}
+                    </div>
+                  )}
+                  {stepDocuments.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-white/80">Uploaded for this intake</p>
+                      <ul className="mt-2 space-y-1 text-sm text-white/60">
+                        {stepDocuments.map((d) => (
+                          <li key={d.id}>
+                            {d.filename ?? "File"} ({d.doc_type.replace(/_/g, " ")})
+                            {d.size_bytes != null && ` · ${(d.size_bytes / 1024).toFixed(1)} KB`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+              <div className="mt-6 space-y-4">
                 <MultiSelect label="What do you have available?" options={AVAILABLE_UPLOADS} value={un.availableUploads ?? []} onChange={(v) => setUploadsNextSteps({ availableUploads: v })} />
                 <SingleSelect
                   label="Current blood work status"

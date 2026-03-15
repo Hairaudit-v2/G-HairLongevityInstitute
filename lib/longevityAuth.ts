@@ -1,14 +1,16 @@
 /**
  * Longevity module session/auth helpers (isolated lane).
- * Reuses cookie/session pattern only; does not modify doctor or admin auth.
- * TODO: Replace with Supabase Auth or dedicated longevity session when wired.
+ * Portal: authenticated users use Supabase Auth; this cookie is set when they open the portal
+ * dashboard so /longevity/start and /api/longevity/* continue to work with profile_id.
+ * Anonymous: cookie-only flow (no login) still works for /longevity/start and /longevity/dashboard.
+ * Does not modify doctor or admin auth.
  */
 
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "hli_longevity_session";
 
-/** Placeholder: set longevity session (e.g. profile_id or token). Not used in Phase 1. */
+/** Set longevity session (profile_id). Used by portal dashboard so intake flows see the same profile. */
 export async function setLongevitySession(value: string): Promise<void> {
   const c = await cookies();
   c.set(COOKIE_NAME, value, {
