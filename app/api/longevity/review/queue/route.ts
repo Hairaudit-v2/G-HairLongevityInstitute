@@ -10,7 +10,9 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { computeTriage } from "@/lib/longevity/triage";
+import { computeReviewComplexity } from "@/lib/longevity/reviewComplexity";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
+import type { ReviewComplexityResult } from "@/lib/longevity/reviewComplexity";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,7 @@ export type ReviewQueueItem = {
     possibleStressTrigger: boolean;
     postpartumFlag: boolean;
   };
+  complexity: ReviewComplexityResult;
 };
 
 /**
@@ -85,6 +88,22 @@ export async function GET(req: Request) {
     const items: ReviewQueueItem[] = intakes.map((intake) => {
       const responses = latestByIntake.get(intake.id) as LongevityQuestionnaireResponses | undefined;
       const triage = responses && typeof responses === "object" ? computeTriage(responses) : null;
+      const flags = triage?.flags ?? {
+        manualReviewRecommended: false,
+        bloodsLikelyNeeded: false,
+        possibleIronRisk: false,
+        possibleThyroidRisk: false,
+        possibleHormonalPattern: false,
+        possibleInflammatoryPattern: false,
+        possibleAndrogenPattern: false,
+        possibleStressTrigger: false,
+        postpartumFlag: false,
+      };
+      const complexity = computeReviewComplexity({
+        flags,
+        review_priority: intake.review_priority ?? null,
+        questionnaireResponses: responses,
+      });
       return {
         id: intake.id,
         review_status: intake.review_status ?? "",
@@ -93,17 +112,8 @@ export async function GET(req: Request) {
         assigned_trichologist_id: intake.assigned_trichologist_id ?? null,
         triaged_at: intake.triaged_at ?? null,
         triage_version: intake.triage_version ?? null,
-        flags: triage?.flags ?? {
-          manualReviewRecommended: false,
-          bloodsLikelyNeeded: false,
-          possibleIronRisk: false,
-          possibleThyroidRisk: false,
-          possibleHormonalPattern: false,
-          possibleInflammatoryPattern: false,
-          possibleAndrogenPattern: false,
-          possibleStressTrigger: false,
-          postpartumFlag: false,
-        },
+        flags,
+        complexity,
       };
     });
 

@@ -1,5 +1,5 @@
 /**
- * POST /api/longevity/review/release — Trichologist releases patient-visible summary and marks review complete.
+ * POST /api/longevity/review/outcome — Trichologist sets or updates review_outcome and last_reviewed_at.
  * Internal, longevity-scoped. Requires Trichologist auth.
  */
 
@@ -7,15 +7,15 @@ import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
-import { REVIEW_STATUS, REVIEW_STATUS_IN_QUEUE, REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
+import { REVIEW_OUTCOME, REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { auditLongevityEvent } from "@/lib/longevity/documents";
 import { getEligibility } from "@/lib/longevity/bloodRequestEligibility";
 import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 
-const ALLOWED_OUTCOMES = Object.values(REVIEW_OUTCOME);
-
 export const dynamic = "force-dynamic";
+
+const ALLOWED_OUTCOMES = Object.values(REVIEW_OUTCOME);
 
 export async function POST(req: Request) {
   if (!isLongevityApiEnabled()) {
@@ -29,19 +29,15 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => ({}));
     const intake_id = typeof body.intake_id === "string" ? body.intake_id.trim() : null;
-    const patient_visible_summary = typeof body.patient_visible_summary === "string" ? body.patient_visible_summary.trim() : "";
-    let review_outcome: string | undefined = typeof body.review_outcome === "string" ? body.review_outcome.trim() || undefined : undefined;
-    if (review_outcome !== undefined && !(ALLOWED_OUTCOMES as readonly string[]).includes(review_outcome)) {
+    const review_outcome = typeof body.review_outcome === "string" ? body.review_outcome.trim() : null;
+    if (!intake_id) {
+      return NextResponse.json({ ok: false, error: "intake_id is required." }, { status: 400 });
+    }
+    if (!review_outcome || !ALLOWED_OUTCOMES.includes(review_outcome)) {
       return NextResponse.json(
         { ok: false, error: `review_outcome must be one of: ${ALLOWED_OUTCOMES.join(", ")}` },
         { status: 400 }
       );
-    }
-    if (!intake_id) {
-      return NextResponse.json({ ok: false, error: "intake_id is required." }, { status: 400 });
-    }
-    if (!patient_visible_summary) {
-      return NextResponse.json({ ok: false, error: "patient_visible_summary is required." }, { status: 400 });
     }
 
     const supabase = supabaseAdmin();
@@ -61,22 +57,15 @@ export async function POST(req: Request) {
     }
 
     const now = new Date().toISOString();
-    const updatePayload: Record<string, unknown> = {
-      patient_visible_summary,
-      patient_visible_released_at: now,
-      last_reviewed_at: now,
-      review_status: REVIEW_STATUS.REVIEW_COMPLETE,
-      updated_at: now,
-    };
-    if (review_outcome !== undefined) {
-      updatePayload.review_outcome = review_outcome;
-    }
-
     const { data: updated, error: updateErr } = await supabase
       .from("hli_longevity_intakes")
-      .update(updatePayload)
+      .update({
+        review_outcome,
+        last_reviewed_at: now,
+        updated_at: now,
+      })
       .eq("id", intake_id)
-      .select("id, review_status, review_outcome, patient_visible_summary, patient_visible_released_at, last_reviewed_at")
+      .select("id, review_outcome, last_reviewed_at")
       .single();
     if (updateErr) {
       return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
@@ -85,8 +74,8 @@ export async function POST(req: Request) {
     await auditLongevityEvent(supabase, {
       profile_id: intake.profile_id,
       intake_id,
-      event_type: "patient_summary_released",
-      payload: { trichologist_id: trichologist.id },
+      event_type: "review_outcome_set",
+      payload: { trichologist_id: trichologist.id, review_outcome },
       actor_type: "trichologist",
     });
 
@@ -113,7 +102,7 @@ export async function POST(req: Request) {
           }
         }
       } catch {
-        // Best-effort; do not fail release
+        // Best-effort; do not fail outcome set
       }
     }
 
@@ -121,11 +110,8 @@ export async function POST(req: Request) {
       ok: true,
       intake: {
         id: updated.id,
-        review_status: updated.review_status,
-        review_outcome: updated.review_outcome ?? null,
-        patient_visible_summary: updated.patient_visible_summary ?? null,
-        patient_visible_released_at: updated.patient_visible_released_at ?? null,
-        last_reviewed_at: updated.last_reviewed_at ?? null,
+        review_outcome: updated.review_outcome,
+        last_reviewed_at: updated.last_reviewed_at,
       },
     });
   } catch (e: unknown) {

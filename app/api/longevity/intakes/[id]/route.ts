@@ -33,7 +33,7 @@ export async function GET(
     const supabase = supabaseAdmin();
     const { data: intake, error: intakeErr } = await supabase
       .from("hli_longevity_intakes")
-      .select("id, profile_id, status, schema_version, created_at, updated_at")
+      .select("id, profile_id, status, schema_version, created_at, updated_at, patient_visible_summary, patient_visible_released_at")
       .eq("id", id)
       .single();
     if (intakeErr || !intake) {
@@ -55,6 +55,14 @@ export async function GET(
       schemaVersion: (rawResponses.schemaVersion as string) ?? questionnaire?.schema_version ?? QUESTIONNAIRE_SCHEMA_VERSION,
     };
 
+    const releasedSummary =
+      intake.patient_visible_released_at != null && intake.patient_visible_summary != null
+        ? {
+            patient_visible_summary: intake.patient_visible_summary,
+            patient_visible_released_at: intake.patient_visible_released_at,
+          }
+        : null;
+
     return NextResponse.json({
       ok: true,
       intake: {
@@ -63,6 +71,7 @@ export async function GET(
         schema_version: intake.schema_version,
         created_at: intake.created_at,
         updated_at: intake.updated_at,
+        ...(releasedSummary ? { released_summary: releasedSummary } : {}),
       },
       questionnaire: questionnaire
         ? {

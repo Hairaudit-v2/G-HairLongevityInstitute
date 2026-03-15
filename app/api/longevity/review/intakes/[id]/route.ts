@@ -11,6 +11,8 @@ import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
+import { computeTriage } from "@/lib/longevity/triage";
+import { computeReviewComplexity } from "@/lib/longevity/reviewComplexity";
 
 export const dynamic = "force-dynamic";
 
@@ -71,8 +73,17 @@ export async function GET(
       schemaVersion: (rawResponses.schemaVersion as string) ?? questionnaire?.schema_version ?? QUESTIONNAIRE_SCHEMA_VERSION,
     };
 
+    const triage = computeTriage(responses);
+    const complexity = computeReviewComplexity({
+      flags: triage.flags,
+      review_priority: intake.review_priority ?? null,
+      questionnaireResponses: responses,
+      documents: (documents ?? []).map((d) => ({ doc_type: d.doc_type })),
+    });
+
     return NextResponse.json({
       ok: true,
+      complexity,
       intake: {
         id: intake.id,
         status: intake.status,

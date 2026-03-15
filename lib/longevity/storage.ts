@@ -21,6 +21,15 @@ export function buildLongevityStoragePath(
   return `${LONGEVITY_PREFIX}/${profileId}/${intakeId}/${docType}/${timestamp}-${safe}`;
 }
 
+/** Build storage path for GP support letter: longevity/{profileId}/blood-requests/{bloodRequestId}/gp-support-letter-{timestamp}.pdf */
+export function buildLetterStoragePath(
+  profileId: string,
+  bloodRequestId: string
+): string {
+  const timestamp = Date.now();
+  return `${LONGEVITY_PREFIX}/${profileId}/blood-requests/${bloodRequestId}/gp-support-letter-${timestamp}.pdf`;
+}
+
 export async function uploadLongevityFile(
   supabase: SupabaseClient,
   path: string,

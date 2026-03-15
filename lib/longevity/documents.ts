@@ -3,7 +3,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { LongevityDocType } from "./documentTypes";
+import { LONGEVITY_DOC_TYPE, type LongevityDocType } from "./documentTypes";
 
 export type LongevityDocumentRow = {
   id: string;
@@ -109,6 +109,35 @@ export async function createDocumentRecord(
       storage_path: params.storage_path,
       filename: params.filename,
       mime_type: params.mime_type,
+      size_bytes: params.size_bytes,
+    })
+    .select("id")
+    .single();
+  if (error) return { error: error.message };
+  if (!data?.id) return { error: "Failed to create document record." };
+  return { id: data.id };
+}
+
+/** Insert blood request letter document (Phase E). Links to intake and blood_request for ownership. */
+export async function createBloodRequestLetterDocument(
+  supabase: SupabaseClient,
+  params: {
+    intake_id: string;
+    blood_request_id: string;
+    storage_path: string;
+    filename: string;
+    size_bytes: number;
+  }
+): Promise<{ id: string } | { error: string }> {
+  const { data, error } = await supabase
+    .from("hli_longevity_documents")
+    .insert({
+      intake_id: params.intake_id,
+      blood_request_id: params.blood_request_id,
+      doc_type: LONGEVITY_DOC_TYPE.BLOOD_REQUEST_LETTER,
+      storage_path: params.storage_path,
+      filename: params.filename,
+      mime_type: "application/pdf",
       size_bytes: params.size_bytes,
     })
     .select("id")

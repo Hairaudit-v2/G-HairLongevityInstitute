@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { setLongevitySession } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
+import { listBloodRequestsForProfile } from "@/lib/longevity/bloodRequests";
+import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
@@ -29,7 +31,7 @@ export default async function PortalDashboardPage() {
 
   const { data: intakes, error } = await supabase
     .from("hli_longevity_intakes")
-    .select("id, status, created_at, updated_at")
+    .select("id, status, created_at, updated_at, patient_visible_summary, patient_visible_released_at")
     .eq("profile_id", profileId)
     .order("created_at", { ascending: false });
 
@@ -47,6 +49,10 @@ export default async function PortalDashboardPage() {
 
   const list = intakes ?? [];
   const documents = await listDocumentsForProfile(supabase, profileId);
+  const bloodRequests = await listBloodRequestsForProfile(supabase, profileId);
+  const intakesWithReleasedSummary = list.filter(
+    (i) => i.patient_visible_released_at != null && (i.patient_visible_summary ?? "").trim() !== ""
+  );
 
   return (
     <>
@@ -69,6 +75,51 @@ export default async function PortalDashboardPage() {
       <div className="mt-8" aria-labelledby="next-step-heading">
         <PortalNextStep intakes={list} />
       </div>
+
+      {bloodRequests.length > 0 && (
+        <section className="mt-10" aria-labelledby="blood-requests-heading">
+          <h2 id="blood-requests-heading" className="text-lg font-semibold text-white">
+            Recommended blood tests
+          </h2>
+          <p className="mt-1 text-sm text-white/60">
+            Your clinician has recommended blood tests for your assessment. You can generate a GP support letter to take to your doctor. The letter is for your GP&apos;s information only; it is not a pathology order—your GP decides which tests to request.
+          </p>
+          <div className="mt-4 space-y-4">
+            {bloodRequests.map((br) => (
+              <BloodRequestLetterCard key={br.id} br={br} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {intakesWithReleasedSummary.length > 0 && (
+        <section className="mt-10" aria-labelledby="clinician-summary-heading">
+          <h2 id="clinician-summary-heading" className="text-lg font-semibold text-white">
+            Clinician summary
+          </h2>
+          <p className="mt-1 text-sm text-white/60">
+            Summaries released to you by your clinician. One per intake when available.
+          </p>
+          <div className="mt-4 space-y-4">
+            {intakesWithReleasedSummary.map((intake) => (
+              <div
+                key={intake.id}
+                className="rounded-2xl border border-[rgb(var(--gold))]/20 bg-[rgb(var(--gold))]/5 p-6"
+              >
+                <p className="text-xs text-white/50">
+                  Intake from {new Date(intake.created_at).toLocaleDateString()} · released{" "}
+                  {intake.patient_visible_released_at
+                    ? new Date(intake.patient_visible_released_at).toLocaleDateString()
+                    : ""}
+                </p>
+                <div className="mt-3 whitespace-pre-wrap text-sm text-white/90">
+                  {intake.patient_visible_summary ?? ""}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-10" aria-labelledby="intake-history-heading">
         <h2 id="intake-history-heading" className="text-lg font-semibold text-white">

@@ -45,5 +45,16 @@ export const REVIEW_STATUS_IN_QUEUE: ReviewStatus[] = [
   REVIEW_STATUS.AWAITING_PATIENT_DOCUMENTS,
 ];
 
+/** Allowed values for hli_longevity_intakes.review_outcome (Phase C). Conservative, clinician-friendly. */
+export const REVIEW_OUTCOME = {
+  STANDARD_PATHWAY: "standard_pathway",
+  BLOODS_RECOMMENDED: "bloods_recommended",
+  REFERRAL_RECOMMENDED: "referral_recommended",
+  FOLLOW_UP_SCHEDULED: "follow_up_scheduled",
+  OTHER: "other",
+} as const;
+
+export type ReviewOutcome = (typeof REVIEW_OUTCOME)[keyof typeof REVIEW_OUTCOME];
+
 /** Actor type for Trichologist actions in hli_longevity_audit_events. Use when logging Trichologist actions. */
 export const AUDIT_ACTOR_TRICHOLOGIST = "trichologist" as const;

@@ -3,6 +3,8 @@ import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { computeTriage } from "@/lib/longevity/triage";
+import { ruleBasedEligible, recommendedTestsFromFlags, reasonFromFlags } from "@/lib/longevity/bloodRequestEligibility";
+import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 
 export const dynamic = "force-dynamic";
@@ -84,6 +86,20 @@ export async function POST(
             updated_at: new Date().toISOString(),
           })
           .eq("id", id);
+
+        if (ruleBasedEligible(responses) && profileId) {
+          try {
+            await ensureBloodRequest(supabase, {
+              intake_id: id,
+              profile_id: profileId,
+              recommended_tests: recommendedTestsFromFlags(responses),
+              reason: reasonFromFlags(responses),
+              recommended_by: "rules",
+            });
+          } catch {
+            // Best-effort; do not fail submit
+          }
+        }
       }
     } catch {
       // Triage is additive; do not fail submit if triage fails.

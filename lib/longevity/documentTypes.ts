@@ -8,6 +8,7 @@ export const LONGEVITY_DOC_TYPE = {
   BLOOD_TEST_UPLOAD: "blood_test_upload",
   SCALP_PHOTO: "scalp_photo",
   MEDICAL_LETTER: "medical_letter",
+  BLOOD_REQUEST_LETTER: "blood_request_letter",
   OTHER: "other",
 } as const;
 
@@ -19,5 +20,6 @@ export const LONGEVITY_DOC_TYPES: LongevityDocType[] = [
   LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD,
   LONGEVITY_DOC_TYPE.SCALP_PHOTO,
   LONGEVITY_DOC_TYPE.MEDICAL_LETTER,
+  LONGEVITY_DOC_TYPE.BLOOD_REQUEST_LETTER,
   LONGEVITY_DOC_TYPE.OTHER,
 ];
