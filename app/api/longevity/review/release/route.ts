@@ -11,7 +11,12 @@ import { REVIEW_STATUS, REVIEW_STATUS_IN_QUEUE, REVIEW_OUTCOME } from "@/lib/lon
 import { auditLongevityEvent } from "@/lib/longevity/documents";
 import { getEligibility } from "@/lib/longevity/bloodRequestEligibility";
 import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
+import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationOutbox";
+import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
+import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
+import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
+import { getLongevityWorkflowSnapshotForIntake } from "@/lib/longevity/workflowSnapshot";
 
 const ALLOWED_OUTCOMES = Object.values(REVIEW_OUTCOME);
 
@@ -90,6 +95,7 @@ export async function POST(req: Request) {
       actor_type: "trichologist",
     });
 
+    let createdBloodRequest: { id: string; status: string } | null = null;
     if (review_outcome === REVIEW_OUTCOME.BLOODS_RECOMMENDED && intake.profile_id) {
       try {
         const { data: questionnaire } = await supabase
@@ -103,17 +109,164 @@ export async function POST(req: Request) {
         if (responses && typeof responses === "object") {
           const eligibility = getEligibility(responses, review_outcome);
           if (eligibility?.eligible && eligibility.recommended_by === "trichologist") {
-            await ensureBloodRequest(supabase, {
+            const bloodRequest = await ensureBloodRequest(supabase, {
               intake_id,
               profile_id: intake.profile_id,
               recommended_tests: eligibility.recommended_tests,
               reason: eligibility.reason,
               recommended_by: "trichologist",
             });
+            if (!("error" in bloodRequest) && bloodRequest.created) {
+              createdBloodRequest = {
+                id: bloodRequest.id,
+                status: bloodRequest.status,
+              };
+            }
           }
         }
       } catch {
         // Best-effort; do not fail release
+      }
+    }
+
+    if (intake.profile_id) {
+      try {
+        const snapshot = await getLongevityWorkflowSnapshotForIntake(supabase, {
+          profileId: intake.profile_id,
+          intakeId: intake_id,
+          reviewOutcome: updated.review_outcome ?? null,
+        });
+
+        if (createdBloodRequest) {
+          const bloodRequestOccurredAt = new Date().toISOString();
+          await stageLongevityIntegrationArtifacts(supabase, {
+            profile_id: intake.profile_id,
+            intake_id,
+            blood_request_id: createdBloodRequest.id,
+            event: buildLongevityEventEnvelope({
+              event_type: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+              actor_type: "trichologist",
+              occurred_at: bloodRequestOccurredAt,
+              local_entity_type: "blood_request",
+              local_entity_id: createdBloodRequest.id,
+              payload: {
+                profile_id: intake.profile_id,
+                intake_id,
+                blood_request_id: createdBloodRequest.id,
+                recommended_by: "trichologist",
+                review_outcome: updated.review_outcome ?? null,
+              },
+            }),
+            signals: buildLongevitySignals({
+              profileId: intake.profile_id,
+              intakeId: intake_id,
+              derivedFlags: snapshot.derivedFlags,
+              clinicalInsights: snapshot.clinicalInsights,
+              carePlan: snapshot.carePlan,
+              caseComparison: snapshot.caseComparison,
+              bloodRequest: snapshot.bloodRequest
+                ? {
+                    id: snapshot.bloodRequest.id,
+                    status: snapshot.bloodRequest.status,
+                    recommended_by: snapshot.bloodRequest.recommended_by,
+                  }
+                : null,
+              reviewOutcome: updated.review_outcome ?? null,
+              hasBloodResultUploadDocument: snapshot.hasBloodResultUploadDocument,
+              hasStructuredMarkers: snapshot.hasStructuredMarkers,
+              generatedAt: bloodRequestOccurredAt,
+              sourceEventType: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+            }),
+          });
+        }
+
+        const reviewOccurredAt = updated.patient_visible_released_at ?? now;
+        await stageLongevityIntegrationArtifacts(supabase, {
+          profile_id: intake.profile_id,
+          intake_id,
+          blood_request_id: snapshot.bloodRequest?.id ?? null,
+          event: buildLongevityEventEnvelope({
+            event_type: LONGEVITY_EVENT_TYPE.REVIEW_COMPLETED,
+            actor_type: "trichologist",
+            occurred_at: reviewOccurredAt,
+            local_entity_type: "intake",
+            local_entity_id: intake_id,
+            payload: {
+              profile_id: intake.profile_id,
+              intake_id,
+              review_status: updated.review_status,
+              review_outcome: updated.review_outcome ?? null,
+              patient_visible_released_at: updated.patient_visible_released_at ?? null,
+            },
+          }),
+          signals: buildLongevitySignals({
+            profileId: intake.profile_id,
+            intakeId: intake_id,
+            derivedFlags: snapshot.derivedFlags,
+            clinicalInsights: snapshot.clinicalInsights,
+            carePlan: snapshot.carePlan,
+            caseComparison: snapshot.caseComparison,
+            bloodRequest: snapshot.bloodRequest
+              ? {
+                  id: snapshot.bloodRequest.id,
+                  status: snapshot.bloodRequest.status,
+                  recommended_by: snapshot.bloodRequest.recommended_by,
+                }
+              : null,
+            reviewOutcome: updated.review_outcome ?? null,
+            hasBloodResultUploadDocument: snapshot.hasBloodResultUploadDocument,
+            hasStructuredMarkers: snapshot.hasStructuredMarkers,
+            generatedAt: reviewOccurredAt,
+            sourceEventType: LONGEVITY_EVENT_TYPE.REVIEW_COMPLETED,
+          }),
+        });
+
+        const carePlanOccurredAt = new Date().toISOString();
+        await stageLongevityIntegrationArtifacts(supabase, {
+          profile_id: intake.profile_id,
+          intake_id,
+          blood_request_id: snapshot.bloodRequest?.id ?? null,
+          event: buildLongevityEventEnvelope({
+            event_type: LONGEVITY_EVENT_TYPE.CARE_PLAN_GENERATED,
+            actor_type: "system",
+            occurred_at: carePlanOccurredAt,
+            local_entity_type: "intake",
+            local_entity_id: intake_id,
+            payload: {
+              profile_id: intake.profile_id,
+              intake_id,
+              review_outcome: updated.review_outcome ?? null,
+              next_step_count: snapshot.carePlan.nextStepRecommendations.length,
+              follow_up_timing_suggestion:
+                snapshot.carePlan.followUpTimingSuggestion,
+              gp_follow_up_suggested: snapshot.carePlan.gpFollowUpSuggested,
+              scalp_photo_follow_up_needed:
+                snapshot.carePlan.scalpPhotoFollowUpNeeded,
+            },
+          }),
+          signals: buildLongevitySignals({
+            profileId: intake.profile_id,
+            intakeId: intake_id,
+            derivedFlags: snapshot.derivedFlags,
+            clinicalInsights: snapshot.clinicalInsights,
+            carePlan: snapshot.carePlan,
+            caseComparison: snapshot.caseComparison,
+            bloodRequest: snapshot.bloodRequest
+              ? {
+                  id: snapshot.bloodRequest.id,
+                  status: snapshot.bloodRequest.status,
+                  recommended_by: snapshot.bloodRequest.recommended_by,
+                }
+              : null,
+            reviewOutcome: updated.review_outcome ?? null,
+            hasBloodResultUploadDocument: snapshot.hasBloodResultUploadDocument,
+            hasStructuredMarkers: snapshot.hasStructuredMarkers,
+            generatedAt: carePlanOccurredAt,
+            sourceEventType: LONGEVITY_EVENT_TYPE.CARE_PLAN_GENERATED,
+          }),
+        });
+      } catch {
+        // Integration staging is additive; do not fail release if it fails.
       }
     }
 

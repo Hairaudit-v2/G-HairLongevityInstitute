@@ -43,10 +43,12 @@ export async function ensureBloodRequest(
     reason: string;
     recommended_by: "rules" | "trichologist" | "system";
   }
-): Promise<{ id: string } | { error: string }> {
+) : Promise<
+  { id: string; created: boolean; status: string } | { error: string }
+> {
   const { data: existing } = await supabase
     .from("hli_longevity_blood_requests")
-    .select("id, profile_id")
+    .select("id, profile_id, status")
     .eq("intake_id", params.intake_id)
     .in("status", ["pending", "letter_requested", "letter_generated"])
     .limit(1)
@@ -66,7 +68,7 @@ export async function ensureBloodRequest(
       .update(payload)
       .eq("id", existing.id);
     if (error) return { error: error.message };
-    return { id: existing.id };
+    return { id: existing.id, created: false, status: existing.status };
   }
 
   const { data: inserted, error } = await supabase
@@ -84,7 +86,7 @@ export async function ensureBloodRequest(
     .single();
   if (error) return { error: error.message };
   if (!inserted?.id) return { error: "Failed to create blood request." };
-  return { id: inserted.id };
+  return { id: inserted.id, created: true, status: "pending" };
 }
 
 /**

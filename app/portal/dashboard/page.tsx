@@ -10,6 +10,9 @@ import { getCurrentVsPreviousForIntake, profileHasTrendData } from "@/lib/longev
 import { getInterpretedMarkersForIntake } from "@/lib/longevity/bloodResultMarkers";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
+import { generateCarePlan } from "@/lib/longevity/carePlan";
+import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
+import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
@@ -40,7 +43,7 @@ export default async function PortalDashboardPage() {
 
   const { data: intakes, error } = await supabase
     .from("hli_longevity_intakes")
-    .select("id, status, created_at, updated_at, patient_visible_summary, patient_visible_released_at")
+    .select("id, status, created_at, updated_at, patient_visible_summary, patient_visible_released_at, review_outcome")
     .eq("profile_id", profileId)
     .order("created_at", { ascending: false });
 
@@ -67,16 +70,37 @@ export default async function PortalDashboardPage() {
   const latestIntakeId = latestSubmittedIntake?.id ?? null;
   let patientSafeInsights: string[] = [];
   let caseComparison = null;
+  let carePlanPatient: { patientNextSteps: string[]; patientTimingSuggestion: string | null } | null = null;
   if (latestIntakeId) {
-    const [bloodResults, markerTrends] = await Promise.all([
+    const [bloodResults, markerTrends, bloodRequestForLatest] = await Promise.all([
       getInterpretedMarkersForIntake(supabase, latestIntakeId),
       getCurrentVsPreviousForIntake(supabase, profileId, latestIntakeId),
+      getBloodRequestByIntake(supabase, latestIntakeId),
     ]);
-    patientSafeInsights = generateClinicalInsights({
+    const clinicalInsightsForLatest = generateClinicalInsights({
       interpretedMarkers: bloodResults,
       markerTrends,
-    }).patientSafeInsights.slice(0, 3);
+    });
+    patientSafeInsights = clinicalInsightsForLatest.patientSafeInsights.slice(0, 3);
     caseComparison = await getCaseComparisonForIntake(supabase, profileId, latestIntakeId);
+    const hasBloodResultUploadDocument = documents.some(
+      (d) => d.intake_id === latestIntakeId && d.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
+    );
+    const carePlan = generateCarePlan({
+      caseComparison: caseComparison ?? null,
+      clinicalInsights: clinicalInsightsForLatest,
+      interpretedMarkers: bloodResults,
+      markerTrends,
+      bloodRequest: bloodRequestForLatest ? { status: bloodRequestForLatest.status } : null,
+      reviewOutcome: latestSubmittedIntake?.review_outcome ?? null,
+      hasBloodResultUploadDocument,
+      hasStructuredMarkers: bloodResults.length > 0,
+      hasNewerSubmittedIntake: false,
+    });
+    carePlanPatient = {
+      patientNextSteps: carePlan.patientNextSteps,
+      patientTimingSuggestion: carePlan.patientTimingSuggestion,
+    };
   }
   const hasResultsUploaded = bloodRequests.some((br) => br.status === "results_uploaded");
 
@@ -101,6 +125,29 @@ export default async function PortalDashboardPage() {
       <div className="mt-8" aria-labelledby="next-step-heading">
         <PortalNextStep intakes={list} hasResultsUploaded={hasResultsUploaded} />
       </div>
+
+      {carePlanPatient && (carePlanPatient.patientNextSteps.length > 0 || carePlanPatient.patientTimingSuggestion) && (
+        <section className="mt-6 rounded-2xl border border-[rgb(var(--gold))]/20 bg-[rgb(var(--gold))]/5 p-5" aria-labelledby="what-to-do-next-heading">
+          <h2 id="what-to-do-next-heading" className="text-base font-semibold text-white">
+            What to do next
+          </h2>
+          <p className="mt-1 text-sm text-white/70">
+            Practical next steps based on your current care journey. Your clinician can adjust this with you at your next review.
+          </p>
+          {carePlanPatient.patientNextSteps.length > 0 && (
+            <ul className="mt-3 space-y-2 text-sm text-white/90">
+              {carePlanPatient.patientNextSteps.map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          )}
+          {carePlanPatient.patientTimingSuggestion && (
+            <p className="mt-3 text-sm text-[rgb(var(--gold))]/90">
+              {carePlanPatient.patientTimingSuggestion}
+            </p>
+          )}
+        </section>
+      )}
 
       <CareJourneyTimeline
         intakes={list}

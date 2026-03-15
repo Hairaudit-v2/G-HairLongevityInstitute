@@ -20,6 +20,7 @@ import { listPendingBloodMarkerExtractionDraftsForIntake } from "@/lib/longevity
 import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
+import { generateCarePlan } from "@/lib/longevity/carePlan";
 
 export const dynamic = "force-dynamic";
 
@@ -88,13 +89,21 @@ export async function GET(
       documents: (documents ?? []).map((d) => ({ doc_type: d.doc_type })),
     });
 
-    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts, case_comparison] = await Promise.all([
+    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts, case_comparison, hasNewerSubmittedIntake] = await Promise.all([
       getInterpretedMarkersWithIdsForIntake(supabase, id),
       getMarkersForIntake(supabase, id),
       getBloodRequestByIntake(supabase, id),
       getCurrentVsPreviousForIntake(supabase, intake.profile_id, id),
       listPendingBloodMarkerExtractionDraftsForIntake(supabase, id),
       getCaseComparisonForIntake(supabase, intake.profile_id, id),
+      supabase
+        .from("hli_longevity_intakes")
+        .select("id")
+        .eq("profile_id", intake.profile_id)
+        .neq("status", "draft")
+        .gt("created_at", intake.created_at)
+        .limit(1)
+        .then((r) => (r.data?.length ?? 0) > 0),
     ]);
     const clinical_insights = generateClinicalInsights({
       derivedFlags: triage.flags,
@@ -111,6 +120,20 @@ export async function GET(
       },
     });
 
+    const care_plan = generateCarePlan({
+      caseComparison: case_comparison ?? null,
+      clinicalInsights: clinical_insights,
+      interpretedMarkers: blood_results,
+      markerTrends: marker_trends,
+      bloodRequest: blood_request ? { status: blood_request.status } : null,
+      reviewOutcome: intake.review_outcome,
+      hasBloodResultUploadDocument: (documents ?? []).some(
+        (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
+      ),
+      hasStructuredMarkers: blood_results.length > 0,
+      hasNewerSubmittedIntake: hasNewerSubmittedIntake,
+    });
+
     return NextResponse.json({
       ok: true,
       complexity,
@@ -118,6 +141,7 @@ export async function GET(
       marker_trends,
       clinical_insights,
       case_comparison,
+      care_plan,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,

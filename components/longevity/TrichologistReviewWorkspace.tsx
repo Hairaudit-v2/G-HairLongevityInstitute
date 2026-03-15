@@ -10,6 +10,7 @@ import type { MarkerTrendRow } from "@/lib/longevity/bloodMarkerTrends";
 import { getBloodMarkerOptionsByCategory } from "@/lib/longevity/bloodMarkerOptions";
 import { getMarkerDefinition, getDefaultUnit } from "@/lib/longevity/bloodMarkerRegistry";
 import type { ClinicalInsights } from "@/lib/longevity/clinicalInsights";
+import type { CarePlanOutput } from "@/lib/longevity/carePlan";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
@@ -106,6 +107,7 @@ export type CaseDetail = {
   blood_request?: { id: string; status: string } | null;
   marker_trends?: MarkerTrendRow[];
   clinical_insights?: ClinicalInsights;
+  care_plan?: CarePlanOutput | null;
 };
 
 export type BloodMarkerRaw = {
@@ -325,6 +327,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         blood_request: data.blood_request ?? null,
         marker_trends: data.marker_trends ?? undefined,
         clinical_insights: data.clinical_insights ?? undefined,
+        care_plan: data.care_plan ?? null,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -1043,6 +1046,37 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                         )}
                       </div>
                     </div>
+                    </div>
+                  )}
+
+                {caseDetail.care_plan && (
+                  <div className="mt-6 rounded-lg border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Recommended next steps</h3>
+                    {caseDetail.care_plan.nextStepRecommendations.length === 0 ? (
+                      <p className="mt-2 text-xs text-white/50">No specific next steps from the care plan engine.</p>
+                    ) : (
+                      <ul className="mt-2 space-y-1.5 text-sm text-white/85">
+                        {caseDetail.care_plan.nextStepRecommendations.map((item) => (
+                          <li key={item}>• {item}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {caseDetail.care_plan.repeatBloodsConsideration.length > 0 && (
+                      <p className="mt-3 text-xs text-white/60">
+                        Repeat bloods: {caseDetail.care_plan.repeatBloodsConsideration.join(" ")}
+                      </p>
+                    )}
+                    {caseDetail.care_plan.followUpTimingSuggestion && (
+                      <p className="mt-2 text-xs text-[rgb(var(--gold))]/90">
+                        Timing: {caseDetail.care_plan.followUpTimingSuggestion}
+                      </p>
+                    )}
+                    {(caseDetail.care_plan.scalpPhotoFollowUpNeeded || caseDetail.care_plan.gpFollowUpSuggested) && (
+                      <p className="mt-2 text-xs text-white/50">
+                        {caseDetail.care_plan.scalpPhotoFollowUpNeeded && "Scalp photo follow-up suggested. "}
+                        {caseDetail.care_plan.gpFollowUpSuggested && "GP follow-up suggested."}
+                      </p>
+                    )}
                   </div>
                 )}
 

@@ -5,6 +5,10 @@ import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { computeTriage } from "@/lib/longevity/triage";
 import { ruleBasedEligible, recommendedTestsFromFlags, reasonFromFlags } from "@/lib/longevity/bloodRequestEligibility";
 import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
+import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationOutbox";
+import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
+import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
+import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +68,11 @@ export async function POST(
 
     // Phase B: run triage and set review_status / review_priority / review_decision_source.
     // Best-effort: if questionnaire missing or triage throws, leave review_* null (backward compatible).
+    let triageFlags: ReturnType<typeof computeTriage>["flags"] | null = null;
+    let reviewStatus: string | null = null;
+    let reviewPriority: string | null = null;
+    let activeBloodRequest: { id: string; status: string } | null = null;
+    let bloodRequestCreated = false;
     try {
       const { data: questionnaire } = await supabase
         .from("hli_longevity_questionnaires")
@@ -75,6 +84,9 @@ export async function POST(
       const responses = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
       if (responses && typeof responses === "object") {
         const triage = computeTriage(responses);
+        triageFlags = triage.flags;
+        reviewStatus = triage.review_status;
+        reviewPriority = triage.review_priority;
         await supabase
           .from("hli_longevity_intakes")
           .update({
@@ -89,13 +101,20 @@ export async function POST(
 
         if (ruleBasedEligible(responses) && profileId) {
           try {
-            await ensureBloodRequest(supabase, {
+            const bloodRequest = await ensureBloodRequest(supabase, {
               intake_id: id,
               profile_id: profileId,
               recommended_tests: recommendedTestsFromFlags(responses),
               reason: reasonFromFlags(responses),
               recommended_by: "rules",
             });
+            if (!("error" in bloodRequest)) {
+              activeBloodRequest = {
+                id: bloodRequest.id,
+                status: bloodRequest.status,
+              };
+              bloodRequestCreated = bloodRequest.created;
+            }
           } catch {
             // Best-effort; do not fail submit
           }
@@ -103,6 +122,73 @@ export async function POST(
       }
     } catch {
       // Triage is additive; do not fail submit if triage fails.
+    }
+
+    try {
+      const intakeOccurredAt = new Date().toISOString();
+      await stageLongevityIntegrationArtifacts(supabase, {
+        profile_id: profileId,
+        intake_id: id,
+        blood_request_id: activeBloodRequest?.id ?? null,
+        event: buildLongevityEventEnvelope({
+          event_type: LONGEVITY_EVENT_TYPE.INTAKE_SUBMITTED,
+          actor_type: "user",
+          occurred_at: intakeOccurredAt,
+          local_entity_type: "intake",
+          local_entity_id: id,
+          payload: {
+            profile_id: profileId,
+            intake_id: id,
+            status: "submitted",
+            review_status: reviewStatus,
+            review_priority: reviewPriority,
+          },
+        }),
+        signals: buildLongevitySignals({
+          profileId,
+          intakeId: id,
+          derivedFlags: triageFlags,
+          bloodRequest: activeBloodRequest,
+          hasBloodResultUploadDocument: false,
+          hasStructuredMarkers: false,
+          generatedAt: intakeOccurredAt,
+          sourceEventType: LONGEVITY_EVENT_TYPE.INTAKE_SUBMITTED,
+        }),
+      });
+
+      if (bloodRequestCreated && activeBloodRequest) {
+        const bloodRequestOccurredAt = new Date().toISOString();
+        await stageLongevityIntegrationArtifacts(supabase, {
+          profile_id: profileId,
+          intake_id: id,
+          blood_request_id: activeBloodRequest.id,
+          event: buildLongevityEventEnvelope({
+            event_type: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+            actor_type: "system",
+            occurred_at: bloodRequestOccurredAt,
+            local_entity_type: "blood_request",
+            local_entity_id: activeBloodRequest.id,
+            payload: {
+              profile_id: profileId,
+              intake_id: id,
+              blood_request_id: activeBloodRequest.id,
+              recommended_by: "rules",
+            },
+          }),
+          signals: buildLongevitySignals({
+            profileId,
+            intakeId: id,
+            derivedFlags: triageFlags,
+            bloodRequest: activeBloodRequest,
+            hasBloodResultUploadDocument: false,
+            hasStructuredMarkers: false,
+            generatedAt: bloodRequestOccurredAt,
+            sourceEventType: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+          }),
+        });
+      }
+    } catch {
+      // Integration staging is additive; do not fail submit if it fails.
     }
 
     return NextResponse.json({ ok: true, status: "submitted" });

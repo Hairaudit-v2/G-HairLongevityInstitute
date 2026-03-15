@@ -11,7 +11,12 @@ import { REVIEW_OUTCOME, REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewCo
 import { auditLongevityEvent } from "@/lib/longevity/documents";
 import { getEligibility } from "@/lib/longevity/bloodRequestEligibility";
 import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
+import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationOutbox";
+import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
+import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
+import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
+import { computeTriage } from "@/lib/longevity/triage";
 
 export const dynamic = "force-dynamic";
 
@@ -90,15 +95,57 @@ export async function POST(req: Request) {
           .maybeSingle();
         const responses = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
         if (responses && typeof responses === "object") {
+          const triageFlags = computeTriage(responses).flags;
           const eligibility = getEligibility(responses, review_outcome);
           if (eligibility?.eligible && eligibility.recommended_by === "trichologist") {
-            await ensureBloodRequest(supabase, {
+            const bloodRequest = await ensureBloodRequest(supabase, {
               intake_id,
               profile_id: intake.profile_id,
               recommended_tests: eligibility.recommended_tests,
               reason: eligibility.reason,
               recommended_by: "trichologist",
             });
+            if (!("error" in bloodRequest) && bloodRequest.created) {
+              try {
+                const occurredAt = new Date().toISOString();
+                await stageLongevityIntegrationArtifacts(supabase, {
+                  profile_id: intake.profile_id,
+                  intake_id,
+                  blood_request_id: bloodRequest.id,
+                  event: buildLongevityEventEnvelope({
+                    event_type: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+                    actor_type: "trichologist",
+                    occurred_at: occurredAt,
+                    local_entity_type: "blood_request",
+                    local_entity_id: bloodRequest.id,
+                    payload: {
+                      profile_id: intake.profile_id,
+                      intake_id,
+                      blood_request_id: bloodRequest.id,
+                      recommended_by: "trichologist",
+                      review_outcome,
+                    },
+                  }),
+                  signals: buildLongevitySignals({
+                    profileId: intake.profile_id,
+                    intakeId: intake_id,
+                    derivedFlags: triageFlags,
+                    bloodRequest: {
+                      id: bloodRequest.id,
+                      status: bloodRequest.status,
+                      recommended_by: "trichologist",
+                    },
+                    reviewOutcome: review_outcome,
+                    hasBloodResultUploadDocument: false,
+                    hasStructuredMarkers: false,
+                    generatedAt: occurredAt,
+                    sourceEventType: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+                  }),
+                });
+              } catch {
+                // Integration staging is additive; do not fail outcome set if it fails.
+              }
+            }
           }
         }
       } catch {

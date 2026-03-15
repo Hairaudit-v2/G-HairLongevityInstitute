@@ -12,6 +12,10 @@ import {
   createDocumentRecord,
   auditLongevityEvent,
 } from "@/lib/longevity/documents";
+import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationOutbox";
+import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
+import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
+import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 
 export const dynamic = "force-dynamic";
 
@@ -160,6 +164,43 @@ export async function POST(req: Request) {
       },
       actor_type: "user",
     });
+
+    if (bloodRequestId) {
+      try {
+        const occurredAt = new Date().toISOString();
+        await stageLongevityIntegrationArtifacts(supabase, {
+          profile_id: profileId,
+          intake_id: intakeId,
+          blood_request_id: bloodRequestId,
+          document_id: recordResult.id,
+          event: buildLongevityEventEnvelope({
+            event_type: LONGEVITY_EVENT_TYPE.BLOOD_RESULTS_UPLOADED,
+            actor_type: "user",
+            occurred_at: occurredAt,
+            local_entity_type: "document",
+            local_entity_id: recordResult.id,
+            payload: {
+              profile_id: profileId,
+              intake_id: intakeId,
+              document_id: recordResult.id,
+              blood_request_id: bloodRequestId,
+              doc_type: docType,
+            },
+          }),
+          signals: buildLongevitySignals({
+            profileId,
+            intakeId,
+            bloodRequest: { id: bloodRequestId, status: "results_uploaded" },
+            hasBloodResultUploadDocument: true,
+            hasStructuredMarkers: false,
+            generatedAt: occurredAt,
+            sourceEventType: LONGEVITY_EVENT_TYPE.BLOOD_RESULTS_UPLOADED,
+          }),
+        });
+      } catch {
+        // Integration staging is additive; do not fail upload if it fails.
+      }
+    }
 
     return NextResponse.json({
       ok: true,
