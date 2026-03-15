@@ -76,6 +76,12 @@ export default function LongevityPage() {
                 specialist review, and your summary — with continuity built in so
                 you can return for follow-up anytime.
               </p>
+              <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-white/65" role="doc-subtitle">
+                One place. One journey. Full visibility.
+              </p>
+              <p className="mt-5 text-xs font-medium uppercase tracking-[0.08em] text-white/45" aria-hidden>
+                No referral required · Usually 48 hours to your summary
+              </p>
               <div className="mt-10 flex flex-col items-center gap-4 sm:mt-12 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
                 <PrimaryButton href="/longevity/start">
                   Start assessment

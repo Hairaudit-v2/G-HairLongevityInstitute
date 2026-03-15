@@ -7,6 +7,9 @@ import { REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
 import type { ReviewComplexityResult } from "@/lib/longevity/reviewComplexity";
 import type { InterpretedMarker } from "@/lib/longevity/bloodInterpretation";
 import type { MarkerTrendRow } from "@/lib/longevity/bloodMarkerTrends";
+import { getBloodMarkerOptionsByCategory } from "@/lib/longevity/bloodMarkerOptions";
+import { getMarkerDefinition, getDefaultUnit } from "@/lib/longevity/bloodMarkerRegistry";
+import type { ClinicalInsights } from "@/lib/longevity/clinicalInsights";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
@@ -100,6 +103,7 @@ export type CaseDetail = {
   blood_markers?: BloodMarkerRaw[];
   blood_request?: { id: string; status: string } | null;
   marker_trends?: MarkerTrendRow[];
+  clinical_insights?: ClinicalInsights;
 };
 
 export type BloodMarkerRaw = {
@@ -225,7 +229,8 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   const [outcomeSelect, setOutcomeSelect] = useState<string>("");
   const [editingMarkerId, setEditingMarkerId] = useState<string | null>(null);
   const [addMarkerForm, setAddMarkerForm] = useState({
-    marker_name: "",
+    marker_key: "",
+    marker_other: "",
     value: "",
     unit: "",
     reference_low: "",
@@ -282,6 +287,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         blood_markers: data.blood_markers ?? undefined,
         blood_request: data.blood_request ?? null,
         marker_trends: data.marker_trends ?? undefined,
+        clinical_insights: data.clinical_insights ?? undefined,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -398,11 +404,17 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     }
   }, [selectedId, noteText, fetchCase]);
 
+  const markerOptionsByCategory = useMemo(() => getBloodMarkerOptionsByCategory(), []);
+
   const addBloodMarker = useCallback(async () => {
     if (!selectedId || !caseDetail) return;
+    const markerName =
+      addMarkerForm.marker_key === "__other__"
+        ? addMarkerForm.marker_other.trim()
+        : addMarkerForm.marker_key;
     const valueNum = Number(addMarkerForm.value);
-    if (!addMarkerForm.marker_name.trim() || !Number.isFinite(valueNum)) {
-      setActionError("Marker name and numeric value are required.");
+    if (!markerName || !Number.isFinite(valueNum)) {
+      setActionError("Select a marker (or enter Other) and enter a numeric value.");
       return;
     }
     setActionLoading(true);
@@ -414,7 +426,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         credentials: "include",
         body: JSON.stringify({
           intake_id: selectedId,
-          marker_name: addMarkerForm.marker_name.trim(),
+          marker_name: markerName,
           value: valueNum,
           unit: addMarkerForm.unit.trim() || undefined,
           reference_low: addMarkerForm.reference_low.trim() ? Number(addMarkerForm.reference_low) : undefined,
@@ -430,7 +442,8 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         return;
       }
       setAddMarkerForm({
-        marker_name: "",
+        marker_key: "",
+        marker_other: "",
         value: "",
         unit: "",
         reference_low: "",
@@ -795,14 +808,47 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Add blood marker</h3>
                 <div className="mt-2 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
+                  <p className="text-xs text-white/60">
+                    Core hair markers are shown first for common trichology workups. Additional markers are available below when needed.
+                  </p>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    <input
-                      type="text"
-                      placeholder="Marker name"
-                      value={addMarkerForm.marker_name}
-                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, marker_name: e.target.value }))}
-                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
-                    />
+                    <div className="sm:col-span-2">
+                      <select
+                        value={addMarkerForm.marker_key}
+                        onChange={(e) => {
+                          const key = e.target.value;
+                          const defaultUnit = key && key !== "__other__" ? getDefaultUnit(key) : "";
+                          setAddMarkerForm((f) => ({
+                            ...f,
+                            marker_key: key,
+                            marker_other: key === "__other__" ? f.marker_other : "",
+                            unit: defaultUnit || f.unit,
+                          }));
+                        }}
+                        className="w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      >
+                        <option value="">Choose marker…</option>
+                        {markerOptionsByCategory.map((grp) => (
+                          <optgroup key={grp.category} label={grp.category}>
+                            {grp.options.map((opt) => (
+                              <option key={opt.key} value={opt.key}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </optgroup>
+                        ))}
+                        <option value="__other__">Other (free text)</option>
+                      </select>
+                      {addMarkerForm.marker_key === "__other__" && (
+                        <input
+                          type="text"
+                          placeholder="Enter marker name"
+                          value={addMarkerForm.marker_other}
+                          onChange={(e) => setAddMarkerForm((f) => ({ ...f, marker_other: e.target.value }))}
+                          className="mt-1.5 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                        />
+                      )}
+                    </div>
                     <input
                       type="text"
                       placeholder="Value"
@@ -898,14 +944,48 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                 {editingMarkerId && editMarkerForm && (
                   <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
                     <h4 className="text-sm font-medium text-white/90">Edit marker</h4>
+                    <p className="mt-1 text-xs text-white/60">
+                      Core hair markers are shown first for common trichology workups. Additional markers are available below when needed.
+                    </p>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                      <input
-                        type="text"
-                        placeholder="Marker name"
-                        value={editMarkerForm.marker_name}
-                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, marker_name: e.target.value } : f))}
-                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
-                      />
+                      <div className="sm:col-span-2">
+                        <select
+                          value={getMarkerDefinition(editMarkerForm.marker_name)?.key ?? "__other__"}
+                          onChange={(e) => {
+                            const key = e.target.value;
+                            setEditMarkerForm((f) =>
+                              f
+                                ? {
+                                    ...f,
+                                    marker_name: key === "__other__" ? f.marker_name : key,
+                                    unit: key !== "__other__" && !f.unit ? getDefaultUnit(key) : f.unit,
+                                  }
+                                : f
+                            );
+                          }}
+                          className="w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        >
+                          {markerOptionsByCategory.map((grp) => (
+                            <optgroup key={grp.category} label={grp.category}>
+                              {grp.options.map((opt) => (
+                                <option key={opt.key} value={opt.key}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                          <option value="__other__">Other (free text)</option>
+                        </select>
+                        {(getMarkerDefinition(editMarkerForm.marker_name)?.key ?? "__other__") === "__other__" && (
+                          <input
+                            type="text"
+                            placeholder="Marker name"
+                            value={editMarkerForm.marker_name}
+                            onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, marker_name: e.target.value } : f))}
+                            className="mt-1.5 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                          />
+                        )}
+                      </div>
                       <input
                         type="number"
                         placeholder="Value"
@@ -1017,6 +1097,56 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                )}
+
+                <h3 className="mt-6 text-sm font-medium text-white/90">Clinical insights</h3>
+                {!caseDetail.clinical_insights ? (
+                  <p className="mt-2 text-sm text-white/50">No structured insights yet.</p>
+                ) : (
+                  <div className="mt-2 space-y-4 rounded-lg border border-white/10 bg-white/5 p-4">
+                    {caseDetail.clinical_insights.clinicianInsights.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">Clinician summary</h4>
+                        <ul className="mt-2 space-y-1 text-sm text-white/85">
+                          {caseDetail.clinical_insights.clinicianInsights.map((item) => (
+                            <li key={item}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {caseDetail.clinical_insights.activeDrivers.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">Active drivers</h4>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {caseDetail.clinical_insights.activeDrivers.map((item) => (
+                            <span key={item} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-100">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {caseDetail.clinical_insights.improvedAreas.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">Improved areas</h4>
+                        <ul className="mt-2 space-y-1 text-sm text-emerald-200">
+                          {caseDetail.clinical_insights.improvedAreas.map((item) => (
+                            <li key={item}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {caseDetail.clinical_insights.followUpConsiderations.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">Follow-up considerations</h4>
+                        <ul className="mt-2 space-y-1 text-sm text-white/75">
+                          {caseDetail.clinical_insights.followUpConsiderations.map((item) => (
+                            <li key={item}>• {item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
 

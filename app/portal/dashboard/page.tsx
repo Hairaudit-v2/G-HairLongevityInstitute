@@ -5,7 +5,9 @@ import { setLongevitySession } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
 import { listBloodRequestsForProfile } from "@/lib/longevity/bloodRequests";
-import { profileHasTrendData } from "@/lib/longevity/bloodMarkerTrends";
+import { getCurrentVsPreviousForIntake, profileHasTrendData } from "@/lib/longevity/bloodMarkerTrends";
+import { getInterpretedMarkersForIntake } from "@/lib/longevity/bloodResultMarkers";
+import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
@@ -56,6 +58,18 @@ export default async function PortalDashboardPage() {
   const intakesWithReleasedSummary = list.filter(
     (i) => i.patient_visible_released_at != null && (i.patient_visible_summary ?? "").trim() !== ""
   );
+  const latestIntakeId = list[0]?.id ?? null;
+  let patientSafeInsights: string[] = [];
+  if (latestIntakeId) {
+    const [bloodResults, markerTrends] = await Promise.all([
+      getInterpretedMarkersForIntake(supabase, latestIntakeId),
+      getCurrentVsPreviousForIntake(supabase, profileId, latestIntakeId),
+    ]);
+    patientSafeInsights = generateClinicalInsights({
+      interpretedMarkers: bloodResults,
+      markerTrends,
+    }).patientSafeInsights.slice(0, 3);
+  }
   const hasResultsUploaded = bloodRequests.some((br) => br.status === "results_uploaded");
 
   return (
@@ -94,6 +108,22 @@ export default async function PortalDashboardPage() {
           <p className="mt-2 text-sm text-white/70">
             Your key blood results are tracked over time. Your clinician can discuss any changes with you at your next review.
           </p>
+        </section>
+      )}
+
+      {patientSafeInsights.length > 0 && (
+        <section className="mt-6 rounded-2xl border border-[rgb(var(--gold))]/20 bg-[rgb(var(--gold))]/5 p-5" aria-labelledby="blood-insights-heading">
+          <h2 id="blood-insights-heading" className="text-base font-semibold text-white">
+            Your blood results summary
+          </h2>
+          <p className="mt-2 text-sm text-white/70">
+            These are simple, high-level observations from your tracked blood results. Your clinician will interpret them in context with you.
+          </p>
+          <ul className="mt-3 space-y-2 text-sm text-white/85">
+            {patientSafeInsights.map((item) => (
+              <li key={item}>• {item}</li>
+            ))}
+          </ul>
         </section>
       )}
 

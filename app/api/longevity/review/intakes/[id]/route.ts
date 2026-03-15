@@ -16,6 +16,8 @@ import { computeReviewComplexity } from "@/lib/longevity/reviewComplexity";
 import { getInterpretedMarkersWithIdsForIntake, getMarkersForIntake } from "@/lib/longevity/bloodResultMarkers";
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
 import { getCurrentVsPreviousForIntake } from "@/lib/longevity/bloodMarkerTrends";
+import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
+import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 
 export const dynamic = "force-dynamic";
 
@@ -90,12 +92,27 @@ export async function GET(
       getBloodRequestByIntake(supabase, id),
       getCurrentVsPreviousForIntake(supabase, intake.profile_id, id),
     ]);
+    const clinical_insights = generateClinicalInsights({
+      derivedFlags: triage.flags,
+      interpretedMarkers: blood_results,
+      markerTrends: marker_trends,
+      review_outcome: intake.review_outcome,
+      bloodRequest: blood_request ? { status: blood_request.status } : null,
+      questionnaireResponses: responses,
+      workflow: {
+        hasBloodResultUploadDocument: (documents ?? []).some(
+          (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
+        ),
+        hasStructuredMarkers: blood_results.length > 0,
+      },
+    });
 
     return NextResponse.json({
       ok: true,
       complexity,
       blood_results,
       marker_trends,
+      clinical_insights,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,

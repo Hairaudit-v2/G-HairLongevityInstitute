@@ -9,9 +9,9 @@ export default function PublicFooter() {
             <img
               src="/brand/hli-mark.png"
               alt="Hair Longevity Institute"
-              width={28}
-              height={28}
-              className="h-7 w-7 opacity-90"
+              width={44}
+              height={44}
+              className="h-11 w-11 opacity-90"
             />
             <span className="text-sm text-white/55">
               © {new Date().getFullYear()} Hair Longevity Institute™

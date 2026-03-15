@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getMarkersForProfile } from "./bloodResultMarkers";
 import { getMarkersForIntake } from "./bloodResultMarkers";
 import { getNormalisedMarkerKey, KEY_MARKERS_FOR_TRENDS } from "./bloodInterpretation";
+import { getDisplayLabel } from "./bloodMarkerRegistry";
 
 export type MarkerSnapshot = {
   value: number;
@@ -119,7 +120,7 @@ export async function getCurrentVsPreviousForIntake(
 
     result.push({
       markerKey: key,
-      displayName: current.marker_name,
+      displayName: getDisplayLabel(current.marker_name) || current.marker_name,
       current,
       previous,
       direction,

@@ -44,9 +44,9 @@ export default function PublicHeader({
             <img
               src="/brand/hli-logo.png"
               alt="Hair Longevity Institute"
-              width={220}
-              height={44}
-              className="h-10 w-auto sm:h-11"
+              width={280}
+              height={56}
+              className="h-12 w-auto sm:h-14 md:h-16"
             />
           </Link>
 

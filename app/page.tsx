@@ -66,13 +66,13 @@ function HeroPlatformPreview() {
         {/* Outputs — premium card within card */}
         <div className="mt-4 rounded-2xl border border-white/[0.06] bg-black/20 p-4 shadow-lg shadow-black/20 sm:mt-5 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/15 sm:h-12 sm:w-12">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/15 sm:h-16 sm:w-16">
               <img
                 src="/brand/hli-mark.png"
                 alt=""
-                width={28}
-                height={28}
-                className="h-7 w-7 sm:h-8 sm:w-8 opacity-90"
+                width={40}
+                height={40}
+                className="h-10 w-10 sm:h-12 sm:w-12 opacity-90"
               />
             </div>
             <div>
@@ -181,6 +181,9 @@ function CarePathwaySection({
             Six steps. One journey. From first assessment to ongoing continuity —
             guided at every step so you always know where you stand.
           </p>
+          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-[rgb(var(--gold))]/90" role="doc-subtitle">
+            One path. No conflicting advice.
+          </p>
         </header>
 
         {/* Timeline — vertical on mobile, horizontal on desktop */}
@@ -269,6 +272,9 @@ function CarePathwaySection({
             This is structured care — not a one-off appointment. Your data, your
             timeline, and your ongoing strategy live in one place.
           </p>
+          <p className="text-center text-xs font-medium uppercase tracking-[0.08em] text-white/45" aria-hidden>
+            No referral required · Usually 48 hours to your summary
+          </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
             <PrimaryButton href={startHref}>
               Start assessment
@@ -329,6 +335,9 @@ export default function Page() {
                   Hair for life.
                 </span>
               </h1>
+              <p className="mt-4 text-sm font-medium tracking-wide text-white/65 sm:text-base" role="doc-subtitle">
+                Clarity on what&apos;s driving your hair — and a clear path forward.
+              </p>
 
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80 sm:mt-8 sm:text-xl">
                 Your biology, mapped. Your strategy, clear. Your hair, protected
@@ -356,6 +365,9 @@ export default function Page() {
                   </>
                 )}
               </p>
+              <p className="mt-5 text-xs font-medium uppercase tracking-[0.08em] text-white/45 sm:mt-6" aria-hidden>
+                No referral required · Typically 48 hours to your summary
+              </p>
 
               <p className="mt-8 text-xs leading-relaxed text-white/50 sm:mt-10">
                 We provide structured biological interpretation and strategy.
@@ -375,6 +387,9 @@ export default function Page() {
       {/* Trust bar */}
       <section className="border-y border-white/10 bg-black/10 py-6">
         <Container>
+          <p className="mb-4 text-center text-xs font-medium uppercase tracking-[0.08em] text-white/50 sm:mb-5 sm:text-sm">
+            Focus on your next step — we handle the rest.
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-center text-sm text-white/75 sm:justify-between sm:gap-6">
             <span className="flex items-center justify-center gap-2">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[rgb(var(--gold))]/15 text-[rgb(var(--gold))]">
@@ -431,6 +446,11 @@ export default function Page() {
               People come to us when they want clearer answers, less guesswork,
               and a sense of forward direction — not another product push.
             </p>
+            <div className="mt-5 border-l-2 border-[rgb(var(--gold))]/50 pl-4 py-0.5" role="presentation" aria-hidden>
+              <p className="text-base font-semibold tracking-wide text-[rgb(var(--gold))]/95">
+                Where clarity replaces the noise.
+              </p>
+            </div>
           </header>
 
           <div className="mt-12 grid gap-5 sm:mt-16 sm:grid-cols-2 lg:grid-cols-4">
@@ -469,6 +489,9 @@ export default function Page() {
               </div>
             ))}
           </div>
+          <p className="mt-10 text-center text-sm font-semibold uppercase tracking-[0.08em] text-[rgb(var(--gold))]/80 sm:mt-12" aria-hidden>
+            That&apos;s why we built it this way.
+          </p>
         </Container>
       </section>
 
@@ -495,6 +518,9 @@ export default function Page() {
             <p className="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
               Assessment progress, uploads, review status, and your summary —
               all in one place. This is what the platform looks like in practice.
+            </p>
+            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-white/70" role="doc-subtitle">
+              You always see where your case stands.
             </p>
           </header>
 
@@ -641,6 +667,9 @@ export default function Page() {
               From how your data is handled to how your summary is prepared —
               here’s what you can expect.
             </p>
+            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-white/65" role="doc-subtitle">
+              No surprises once you begin.
+            </p>
           </header>
 
           {/* Trust cards */}
@@ -727,8 +756,8 @@ export default function Page() {
             </p>
             <div className="mx-auto mt-6 max-w-md rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] sm:p-6">
               <div className="flex items-center gap-3 border-b border-white/[0.06] pb-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/10">
-                  <img src="/brand/hli-mark.png" alt="" width={24} height={24} className="h-6 w-6 opacity-80" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/10">
+                  <img src="/brand/hli-mark.png" alt="" width={32} height={32} className="h-8 w-8 opacity-80" />
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--gold))]/90">
@@ -989,6 +1018,9 @@ export default function Page() {
               Clear expectations help you decide. Here are the answers that
               matter most before you start.
             </p>
+            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-white/65" role="doc-subtitle">
+              The first step is easier when you have answers.
+            </p>
           </header>
 
           <div className="mx-auto mt-12 max-w-3xl space-y-3 sm:mt-16">
@@ -1003,7 +1035,7 @@ export default function Page() {
               },
               {
                 q: "What happens after I submit?",
-                a: "Your case is triaged and routed to a senior trichologist. They review your intake, bloods, and photos using our Follicle Intelligence™ framework, then prepare a structured diagnostic summary and next-step recommendations. You receive this in your portal (and by email where applicable), usually within 48 hours of us having everything we need. No guessing — you’ll know when it’s with the specialist and when your summary is ready.",
+                a: "Your case is triaged and routed to a senior trichologist. They review your intake, bloods, and photos using our Follicle Intelligence™ framework, then prepare a structured diagnostic summary and next-step recommendations. You receive this in your portal (and by email where applicable), usually within 48 hours of us having everything we need. You'll see status in your portal — you’ll know when it’s with the specialist and when your summary is ready.",
               },
               {
                 q: "What do I need before I start?",
@@ -1063,7 +1095,10 @@ export default function Page() {
 
           <div className="mt-12 text-center sm:mt-16">
             <p className="text-sm text-white/60">
-              Ready to start? No referral needed.
+              Ready to start?
+            </p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-white/45" aria-hidden>
+              No referral needed · Typically 48 hours to your summary
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               <PrimaryButton href={startHref}>Start assessment</PrimaryButton>
@@ -1092,6 +1127,9 @@ export default function Page() {
                   Begin with a structured diagnostic review. Escalate to
                   specialist consultation for a deeper roadmap and ongoing
                   optimisation.
+                </p>
+                <p className="mt-3 text-xs font-medium uppercase tracking-[0.08em] text-white/45" aria-hidden>
+                  No referral required · Typically 48 hours to your summary
                 </p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
