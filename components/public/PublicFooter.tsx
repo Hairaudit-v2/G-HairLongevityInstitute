@@ -19,6 +19,9 @@ export default function PublicFooter() {
             </span>
           </div>
           <nav className="flex flex-wrap gap-6 text-sm" aria-label="Legal">
+            <Link href="/portal/login" className="text-white/55 transition hover:text-white/80">
+              Patient / Trichologist login
+            </Link>
             <Link href="/privacy" className="text-white/55 transition hover:text-white/80">
               Privacy
             </Link>

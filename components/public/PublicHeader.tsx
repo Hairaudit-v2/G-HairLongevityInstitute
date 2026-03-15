@@ -84,6 +84,13 @@ export default function PublicHeader({
                 Patient portal
               </Link>
             )}
+            <Link
+              href="/portal/login"
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/65 transition hover:bg-white/5 hover:text-white"
+              title="Portal sign in for patients and trichologists"
+            >
+              Patient / Trichologist login
+            </Link>
             <div className="ml-2">
               <PrimaryButton href={ctaHref}>{ctaLabel}</PrimaryButton>
             </div>
@@ -152,6 +159,14 @@ export default function PublicHeader({
                 Patient portal
               </Link>
             )}
+            <Link
+              href="/portal/login"
+              onClick={() => setMobileOpen(false)}
+              className="min-h-[48px] rounded-xl px-4 py-3 text-base font-medium text-white/85 hover:bg-white/10 hover:text-white"
+              title="Portal sign in for patients and trichologists"
+            >
+              Patient / Trichologist login
+            </Link>
           </div>
         </div>
       </div>
