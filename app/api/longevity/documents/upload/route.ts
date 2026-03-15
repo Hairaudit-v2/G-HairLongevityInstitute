@@ -210,6 +210,40 @@ export async function POST(req: Request) {
       } catch {
         // Reminder staging is additive; do not fail upload if it fails.
       }
+
+      try {
+        const {
+          recordReminderOutcome,
+          REMINDER_OUTCOME_TYPE: OUTCOME_TYPE,
+        } = await import("@/lib/longevity/reminderOutcomes");
+        await recordReminderOutcome(supabase, {
+          profileId,
+          outcomeType: OUTCOME_TYPE.BLOOD_RESULTS_UPLOADED,
+          relatedIntakeId: intakeId,
+          relatedDocumentId: recordResult.id,
+          occurredAt: new Date().toISOString(),
+        });
+      } catch {
+        // Outcome attribution is additive; do not fail upload.
+      }
+    }
+
+    if (docType === LONGEVITY_DOC_TYPE.SCALP_PHOTO) {
+      try {
+        const {
+          recordReminderOutcome,
+          REMINDER_OUTCOME_TYPE: OUTCOME_TYPE,
+        } = await import("@/lib/longevity/reminderOutcomes");
+        await recordReminderOutcome(supabase, {
+          profileId,
+          outcomeType: OUTCOME_TYPE.SCALP_PHOTO_UPLOADED,
+          relatedIntakeId: intakeId,
+          relatedDocumentId: recordResult.id,
+          occurredAt: new Date().toISOString(),
+        });
+      } catch {
+        // Outcome attribution is additive; do not fail upload.
+      }
     }
 
     return NextResponse.json({

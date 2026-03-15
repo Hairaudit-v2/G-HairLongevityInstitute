@@ -10,6 +10,9 @@ import {
   isValidReminderEmail,
   sendLongevityReminderEmail,
 } from "./reminderEmail";
+import { LONGEVITY_EVENT_TYPE } from "./integrationContracts";
+import { buildLongevityEventEnvelope } from "./normalizedEvents";
+import { stageLongevityIntegrationArtifacts } from "./integrationOutbox";
 
 export const LONGEVITY_REMINDER_TYPE = {
   FOLLOW_UP_DUE: "follow_up_due",
@@ -777,6 +780,28 @@ export async function sendStagedLongevityReminders(
           },
           actor_type: "system",
         });
+        try {
+          await stageLongevityIntegrationArtifacts(supabase, {
+            profile_id: row.profile_id,
+            intake_id: row.intake_id,
+            event: buildLongevityEventEnvelope({
+              event_type: LONGEVITY_EVENT_TYPE.REMINDER_FAILED,
+              occurred_at: now,
+              actor_type: "system",
+              local_entity_type: "intake",
+              local_entity_id: row.intake_id,
+              payload: {
+                reminder_id: row.id,
+                profile_id: row.profile_id,
+                intake_id: row.intake_id,
+                dedupe_key: row.dedupe_key,
+                error: "Invalid or missing recipient email",
+              },
+            }),
+          });
+        } catch {
+          // Outbox staging is additive.
+        }
       }
       continue;
     }
@@ -814,6 +839,29 @@ export async function sendStagedLongevityReminders(
           },
           actor_type: "system",
         });
+        try {
+          await stageLongevityIntegrationArtifacts(supabase, {
+            profile_id: row.profile_id,
+            intake_id: row.intake_id,
+            event: buildLongevityEventEnvelope({
+              event_type: LONGEVITY_EVENT_TYPE.REMINDER_SENT,
+              occurred_at: now,
+              actor_type: "system",
+              local_entity_type: "intake",
+              local_entity_id: row.intake_id,
+              payload: {
+                reminder_id: row.id,
+                profile_id: row.profile_id,
+                intake_id: row.intake_id,
+                dedupe_key: row.dedupe_key,
+                provider: result.provider,
+                sent_at: now,
+              },
+            }),
+          });
+        } catch {
+          // Outbox staging is additive; do not fail send.
+        }
       }
     } else {
       const updateErr = await supabase
@@ -840,6 +888,29 @@ export async function sendStagedLongevityReminders(
         },
         actor_type: "system",
       });
+      try {
+        await stageLongevityIntegrationArtifacts(supabase, {
+          profile_id: row.profile_id,
+          intake_id: row.intake_id,
+          event: buildLongevityEventEnvelope({
+            event_type: LONGEVITY_EVENT_TYPE.REMINDER_FAILED,
+            occurred_at: now,
+            actor_type: "system",
+            local_entity_type: "intake",
+            local_entity_id: row.intake_id,
+            payload: {
+              reminder_id: row.id,
+              profile_id: row.profile_id,
+              intake_id: row.intake_id,
+              dedupe_key: row.dedupe_key,
+              provider: result.provider,
+              error: result.error,
+            },
+          }),
+        });
+      } catch {
+        // Outbox staging is additive; do not fail send.
+      }
     }
   }
 

@@ -8,6 +8,11 @@ export const LONGEVITY_EVENT_TYPE = {
   BLOOD_REQUEST_CREATED: "longevity.blood_request.created",
   BLOOD_RESULTS_UPLOADED: "longevity.blood_results.uploaded",
   CARE_PLAN_GENERATED: "longevity.care_plan.generated",
+  REMINDER_SENT: "longevity.reminder.sent",
+  REMINDER_FAILED: "longevity.reminder.failed",
+  FOLLOW_UP_COMPLETED_AFTER_REMINDER: "longevity.follow_up_completed_after_reminder",
+  BLOOD_RESULTS_UPLOADED_AFTER_REMINDER: "longevity.blood_results_uploaded_after_reminder",
+  SCALP_PHOTO_UPLOADED_AFTER_REMINDER: "longevity.scalp_photo_uploaded_after_reminder",
 } as const;
 
 export type LongevityEventType =
@@ -24,6 +29,7 @@ export const LONGEVITY_SIGNAL_KEY = {
   VISUAL_CHANGE_DETECTED: "visual_change_detected",
   VISUAL_CONCERN_PERSISTENT: "visual_concern_persistent",
   VISUAL_COMPARISON_LIMITED: "visual_comparison_limited",
+  REENGAGEMENT_DELAY_DAYS: "reengagement_delay_days",
 } as const;
 
 export type LongevitySignalKey =

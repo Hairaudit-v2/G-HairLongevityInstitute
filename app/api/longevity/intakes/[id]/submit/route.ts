@@ -191,6 +191,21 @@ export async function POST(
       // Integration staging is additive; do not fail submit if it fails.
     }
 
+    try {
+      const {
+        recordReminderOutcome,
+        REMINDER_OUTCOME_TYPE: OUTCOME_TYPE,
+      } = await import("@/lib/longevity/reminderOutcomes");
+      await recordReminderOutcome(supabase, {
+        profileId,
+        outcomeType: OUTCOME_TYPE.FOLLOW_UP_INTAKE_SUBMITTED,
+        relatedIntakeId: id,
+        occurredAt: new Date().toISOString(),
+      });
+    } catch {
+      // Outcome attribution is additive; do not fail submit.
+    }
+
     return NextResponse.json({ ok: true, status: "submitted" });
   } catch (e: unknown) {
     return NextResponse.json(
