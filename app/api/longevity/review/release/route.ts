@@ -15,6 +15,7 @@ import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationO
 import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
 import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
 import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
+import { stageLongevityRemindersForIntake } from "@/lib/longevity/reminders";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { getLongevityWorkflowSnapshotForIntake } from "@/lib/longevity/workflowSnapshot";
 
@@ -267,6 +268,16 @@ export async function POST(req: Request) {
         });
       } catch {
         // Integration staging is additive; do not fail release if it fails.
+      }
+
+      try {
+        await stageLongevityRemindersForIntake(supabase, {
+          profileId: intake.profile_id,
+          intakeId: intake_id,
+          reviewOutcome: updated.review_outcome ?? null,
+        });
+      } catch {
+        // Reminder staging is additive; do not fail release if it fails.
       }
     }
 

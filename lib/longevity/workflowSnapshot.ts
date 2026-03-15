@@ -23,6 +23,9 @@ import type { CaseComparisonResult } from "./caseComparison";
 export type LongevityWorkflowSnapshot = {
   profileId: string;
   intakeId: string;
+  intakeCreatedAt: string | null;
+  lastReviewedAt: string | null;
+  patientVisibleReleasedAt: string | null;
   derivedFlags: TriageFlags;
   questionnaireResponses: LongevityQuestionnaireResponses;
   bloodResults: InterpretedMarker[];
@@ -67,7 +70,7 @@ export async function getLongevityWorkflowSnapshotForIntake(
         .eq("intake_id", params.intakeId),
       supabase
         .from("hli_longevity_intakes")
-        .select("created_at")
+        .select("created_at, last_reviewed_at, patient_visible_released_at, review_outcome")
         .eq("id", params.intakeId)
         .single(),
       getInterpretedMarkersForIntake(supabase, params.intakeId),
@@ -135,7 +138,7 @@ export async function getLongevityWorkflowSnapshotForIntake(
   });
   const followUpCadence = generateFollowUpCadence({
     carePlan,
-    reviewOutcome: params.reviewOutcome ?? null,
+    reviewOutcome: params.reviewOutcome ?? intakeRow?.review_outcome ?? null,
     bloodRequest: bloodRequest
       ? {
           status: bloodRequest.status,
@@ -149,11 +152,16 @@ export async function getLongevityWorkflowSnapshotForIntake(
     hasNewerSubmittedIntake: newerSubmittedIntakes,
     scalpPhotoFollowUpRecommended: carePlan.scalpPhotoFollowUpNeeded,
     intakeCreatedAt: intakeRow?.created_at ?? null,
+    lastReviewedAt: intakeRow?.last_reviewed_at ?? null,
+    patientVisibleReleasedAt: intakeRow?.patient_visible_released_at ?? null,
   });
 
   return {
     profileId: params.profileId,
     intakeId: params.intakeId,
+    intakeCreatedAt: intakeRow?.created_at ?? null,
+    lastReviewedAt: intakeRow?.last_reviewed_at ?? null,
+    patientVisibleReleasedAt: intakeRow?.patient_visible_released_at ?? null,
     derivedFlags,
     questionnaireResponses,
     bloodResults,

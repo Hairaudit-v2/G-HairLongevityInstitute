@@ -11,6 +11,7 @@ import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { generateGpSupportLetterPdf } from "@/lib/longevity/gpLetterGenerator";
 import { buildLetterStoragePath, uploadLongevityFile } from "@/lib/longevity/storage";
 import { createBloodRequestLetterDocument, auditLongevityEvent } from "@/lib/longevity/documents";
+import { stageLongevityRemindersForIntake } from "@/lib/longevity/reminders";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,15 @@ export async function POST(
       payload: { blood_request_id: bloodRequestId, document_id: docResult.id },
       actor_type: "system",
     });
+
+    try {
+      await stageLongevityRemindersForIntake(supabase, {
+        profileId,
+        intakeId: br.intake_id,
+      });
+    } catch {
+      // Reminder staging is additive; do not fail letter generation if it fails.
+    }
 
     return NextResponse.json({
       ok: true,

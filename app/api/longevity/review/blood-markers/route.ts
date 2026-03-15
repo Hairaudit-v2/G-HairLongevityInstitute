@@ -10,6 +10,7 @@ import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { auditLongevityEvent } from "@/lib/longevity/documents";
 import { createBloodResultMarker } from "@/lib/longevity/bloodResultMarkers";
+import { stageLongevityRemindersForIntake } from "@/lib/longevity/reminders";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +92,15 @@ export async function POST(req: Request) {
       payload: { trichologist_id: trichologist.id, marker_id: result.id, marker_name },
       actor_type: "trichologist",
     });
+
+    try {
+      await stageLongevityRemindersForIntake(supabase, {
+        profileId: intake.profile_id,
+        intakeId: intake_id,
+      });
+    } catch {
+      // Reminder staging is additive; do not fail marker creation if it fails.
+    }
 
     return NextResponse.json({
       ok: true,

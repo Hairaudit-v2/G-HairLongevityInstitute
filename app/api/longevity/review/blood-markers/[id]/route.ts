@@ -14,6 +14,7 @@ import {
   updateBloodResultMarker,
   type UpdateBloodResultMarkerPayload,
 } from "@/lib/longevity/bloodResultMarkers";
+import { stageLongevityRemindersForIntake } from "@/lib/longevity/reminders";
 
 export const dynamic = "force-dynamic";
 
@@ -93,6 +94,15 @@ export async function PATCH(
       payload: { trichologist_id: trichologist.id, marker_id, updates: Object.keys(payload) },
       actor_type: "trichologist",
     });
+
+    try {
+      await stageLongevityRemindersForIntake(supabase, {
+        profileId: intake.profile_id,
+        intakeId: marker.intake_id,
+      });
+    } catch {
+      // Reminder staging is additive; do not fail marker update if it fails.
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
