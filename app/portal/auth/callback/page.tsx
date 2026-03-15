@@ -34,7 +34,7 @@ export default function PortalAuthCallbackPage() {
           return;
         }
         setStatus("done");
-        router.replace("/portal/dashboard");
+        router.replace("/portal");
         router.refresh();
         return;
       }
@@ -52,7 +52,7 @@ export default function PortalAuthCallbackPage() {
           return;
         }
         setStatus("done");
-        router.replace("/portal/dashboard");
+        router.replace("/portal");
         router.refresh();
         return;
       }

@@ -17,6 +17,7 @@ import { getInterpretedMarkersWithIdsForIntake, getMarkersForIntake } from "@/li
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
 import { getCurrentVsPreviousForIntake } from "@/lib/longevity/bloodMarkerTrends";
 import { listPendingBloodMarkerExtractionDraftsForIntake } from "@/lib/longevity/bloodMarkerExtractionDrafts";
+import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 
@@ -87,12 +88,13 @@ export async function GET(
       documents: (documents ?? []).map((d) => ({ doc_type: d.doc_type })),
     });
 
-    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts] = await Promise.all([
+    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts, case_comparison] = await Promise.all([
       getInterpretedMarkersWithIdsForIntake(supabase, id),
       getMarkersForIntake(supabase, id),
       getBloodRequestByIntake(supabase, id),
       getCurrentVsPreviousForIntake(supabase, intake.profile_id, id),
       listPendingBloodMarkerExtractionDraftsForIntake(supabase, id),
+      getCaseComparisonForIntake(supabase, intake.profile_id, id),
     ]);
     const clinical_insights = generateClinicalInsights({
       derivedFlags: triage.flags,
@@ -115,6 +117,7 @@ export async function GET(
       blood_results,
       marker_trends,
       clinical_insights,
+      case_comparison,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,

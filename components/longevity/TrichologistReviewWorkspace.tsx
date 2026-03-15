@@ -102,6 +102,7 @@ export type CaseDetail = {
   blood_results?: (InterpretedMarker & { id: string })[];
   blood_markers?: BloodMarkerRaw[];
   blood_marker_extraction_drafts?: BloodMarkerExtractionDraft[];
+  case_comparison?: CaseComparisonResult | null;
   blood_request?: { id: string; status: string } | null;
   marker_trends?: MarkerTrendRow[];
   clinical_insights?: ClinicalInsights;
@@ -132,6 +133,24 @@ export type BloodMarkerExtractionDraft = {
   confidence: number | null;
   source_filename: string | null;
   extracted_at: string;
+};
+
+export type CaseComparisonResult = {
+  previousIntake: {
+    id: string;
+    created_at: string;
+    review_outcome: string | null;
+  } | null;
+  improvedAreas: string[];
+  worsenedAreas: string[];
+  persistentDrivers: string[];
+  newConcerns: string[];
+  suggestedReviewFocus: string[];
+  patientSummary: {
+    whatHasImproved: string[];
+    stillNeedsFollowUp: string[];
+    nextStepMayBe: string[];
+  };
 };
 
 function FlagIcons({ flags }: { flags: ReviewQueueItem["flags"] }) {
@@ -302,6 +321,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         blood_results: data.blood_results ?? undefined,
         blood_markers: data.blood_markers ?? undefined,
         blood_marker_extraction_drafts: data.blood_marker_extraction_drafts ?? undefined,
+        case_comparison: data.case_comparison ?? null,
         blood_request: data.blood_request ?? null,
         marker_trends: data.marker_trends ?? undefined,
         clinical_insights: data.clinical_insights ?? undefined,
@@ -960,6 +980,71 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                     </div>
                   )}
                 </div>
+
+                <h3 className="mt-6 text-sm font-medium text-white/90">Change since previous review</h3>
+                {!caseDetail.case_comparison?.previousIntake ? (
+                  <p className="mt-2 text-sm text-white/50">No previous submitted intake available for comparison yet.</p>
+                ) : (
+                  <div className="mt-2 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <p className="text-xs text-white/50">
+                      Compared with intake from {new Date(caseDetail.case_comparison.previousIntake.created_at).toLocaleDateString()}.
+                    </p>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-emerald-200/80">Improved areas</h4>
+                        {caseDetail.case_comparison.improvedAreas.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">No clear improvements detected yet.</p>
+                        ) : (
+                          <ul className="mt-2 space-y-1 text-sm text-white/85">
+                            {caseDetail.case_comparison.improvedAreas.map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-amber-200/80">Needs attention</h4>
+                        {caseDetail.case_comparison.worsenedAreas.length === 0 && caseDetail.case_comparison.newConcerns.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">No newly worsened areas flagged.</p>
+                        ) : (
+                          <ul className="mt-2 space-y-1 text-sm text-white/85">
+                            {[...caseDetail.case_comparison.worsenedAreas, ...caseDetail.case_comparison.newConcerns].map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">Persistent drivers</h4>
+                        {caseDetail.case_comparison.persistentDrivers.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">None identified across both reviews.</p>
+                        ) : (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {caseDetail.case_comparison.persistentDrivers.map((item) => (
+                              <span key={item} className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white/80">
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">Suggested review focus</h4>
+                        {caseDetail.case_comparison.suggestedReviewFocus.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">No additional comparison-driven focus items.</p>
+                        ) : (
+                          <ul className="mt-2 space-y-1 text-sm text-white/85">
+                            {caseDetail.case_comparison.suggestedReviewFocus.map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Add blood marker</h3>
                 <div className="mt-2 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">

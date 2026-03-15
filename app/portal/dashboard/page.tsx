@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { setLongevitySession } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
+import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
 import { listBloodRequestsForProfile } from "@/lib/longevity/bloodRequests";
 import { getCurrentVsPreviousForIntake, profileHasTrendData } from "@/lib/longevity/bloodMarkerTrends";
 import { getInterpretedMarkersForIntake } from "@/lib/longevity/bloodResultMarkers";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
+import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
@@ -24,6 +26,9 @@ import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 export default async function PortalDashboardPage() {
   const user = await getPortalUser();
   if (!user) redirect("/portal/login");
+
+  const trichologist = await getTrichologistFromRequest();
+  if (trichologist) redirect("/portal/trichologist/review");
 
   const supabase = supabaseAdmin();
   const profileId = await ensurePortalProfile(supabase, user);
@@ -58,8 +63,10 @@ export default async function PortalDashboardPage() {
   const intakesWithReleasedSummary = list.filter(
     (i) => i.patient_visible_released_at != null && (i.patient_visible_summary ?? "").trim() !== ""
   );
-  const latestIntakeId = list[0]?.id ?? null;
+  const latestSubmittedIntake = list.find((intake) => intake.status !== "draft") ?? null;
+  const latestIntakeId = latestSubmittedIntake?.id ?? null;
   let patientSafeInsights: string[] = [];
+  let caseComparison = null;
   if (latestIntakeId) {
     const [bloodResults, markerTrends] = await Promise.all([
       getInterpretedMarkersForIntake(supabase, latestIntakeId),
@@ -69,6 +76,7 @@ export default async function PortalDashboardPage() {
       interpretedMarkers: bloodResults,
       markerTrends,
     }).patientSafeInsights.slice(0, 3);
+    caseComparison = await getCaseComparisonForIntake(supabase, profileId, latestIntakeId);
   }
   const hasResultsUploaded = bloodRequests.some((br) => br.status === "results_uploaded");
 
@@ -124,6 +132,47 @@ export default async function PortalDashboardPage() {
               <li key={item}>• {item}</li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {caseComparison && (
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5" aria-labelledby="progress-summary-heading">
+          <h2 id="progress-summary-heading" className="text-base font-semibold text-white">
+            Progress since your previous review
+          </h2>
+          <p className="mt-2 text-sm text-white/70">
+            A simple comparison with your previous submitted intake. Your clinician will still interpret the full picture with you.
+          </p>
+          {caseComparison.patientSummary.whatHasImproved.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-xs font-medium uppercase tracking-wide text-emerald-200/80">What has improved</h3>
+              <ul className="mt-2 space-y-2 text-sm text-white/85">
+                {caseComparison.patientSummary.whatHasImproved.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {caseComparison.patientSummary.stillNeedsFollowUp.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-xs font-medium uppercase tracking-wide text-white/50">Still needs follow-up</h3>
+              <ul className="mt-2 space-y-2 text-sm text-white/85">
+                {caseComparison.patientSummary.stillNeedsFollowUp.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {caseComparison.patientSummary.nextStepMayBe.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-xs font-medium uppercase tracking-wide text-[rgb(var(--gold))]/80">What the next step may be</h3>
+              <ul className="mt-2 space-y-2 text-sm text-white/85">
+                {caseComparison.patientSummary.nextStepMayBe.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       )}
 

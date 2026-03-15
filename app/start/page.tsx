@@ -1,8 +1,9 @@
 // app/start/page.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
 
 type Sex = "male" | "female" | "other";
 type PrimaryConcern = "hair_loss" | "scalp_condition" | "post_transplant" | "other";
@@ -350,6 +351,21 @@ export default function StartPage() {
     const [submitErr, setSubmitErr] = useState<string | null>(null);
     const [intakeId, setIntakeId] = useState<string | null>(null);
     const [submitWarning, setSubmitWarning] = useState<string | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const supabase = createLongevitySupabaseBrowserClient();
+                const { data: { session } } = await supabase.auth.getSession();
+                if (mounted) setIsAuthenticated(!!session);
+            } catch {
+                if (mounted) setIsAuthenticated(false);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
 
     const progress = useMemo(() => {
         const order: StepId[] = ["intro", "basics", "sex", "primary", "branch", "meds", "goals", "notes", "uploads", "review"];
@@ -1020,7 +1036,7 @@ export default function StartPage() {
                             <div className="text-sm tracking-widest text-[rgb(198,167,94)]">SUBMITTED</div>
                             <h2 className="mt-2 text-2xl font-semibold">You’re in.</h2>
                             <p className="mt-3 text-white/70">
-                                Your intake has been received. We’ll review your bloods/photos and begin your diagnostic review.
+                                Your intake has been received and your diagnostic review is now underway. We’ll review your bloods/photos and update your case as it progresses.
                             </p>
                             {email ? (
                                 <div className="mt-5 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-white/80">
@@ -1038,12 +1054,29 @@ export default function StartPage() {
                                     {submitWarning}
                                 </div>
                             ) : null}
-                            <div className="mt-8 grid gap-3 md:grid-cols-2">
+
+                            <div className="mt-8 rounded-2xl border border-white/10 bg-black/10 p-5">
+                                <h3 className="text-base font-semibold text-white">Your account</h3>
+                                <p className="mt-2 text-sm text-white/75">
+                                    Your submission is linked to your email address and can be accessed again through your patient portal.
+                                </p>
+                            </div>
+
+                            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                                {isAuthenticated === true ? (
+                                    <Link href="/portal" className="block">
+                                        <Button>Go to My Portal</Button>
+                                    </Link>
+                                ) : (
+                                    <Link href="/portal/login" className="block">
+                                        <Button>Sign in to View My Portal</Button>
+                                    </Link>
+                                )}
+                                <Link href="/book" className="block">
+                                    <Button variant="secondary">Book a specialist consult</Button>
+                                </Link>
                                 <Link href="/" className="block">
                                     <Button variant="secondary">Return to homepage</Button>
-                                </Link>
-                                <Link href="/book" className="block">
-                                    <Button>Book a specialist consult</Button>
                                 </Link>
                             </div>
                         </Card>
