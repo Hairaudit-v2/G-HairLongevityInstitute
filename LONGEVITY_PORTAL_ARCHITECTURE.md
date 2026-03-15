@@ -28,8 +28,20 @@ No new tables reference `hli_intakes`, `hli_reports`, or referral tables.
   1. Look up profile by `auth_user_id`; if found, use it.
   2. Else look up profile by **email** (auth user’s email) among profiles **not yet linked** to any auth user; if found, **link** it via `auth_user_id` and use it (avoids binding another account’s profile).
   3. Else **create** a new profile with that email and `auth_user_id`, then use it.
+- **No duplicate profile in normal flow**: we only create a new profile when the auth user has no linked profile and no unlinked profile matches their email. One profile per portal user; clinician workflows can assume stable `profile_id` for a patient’s intakes and documents.
 
 So returning cookie-only users who later sign up with the same email get their existing intakes and documents linked to their account.
+
+## Longitudinal case model (stable for clinicians)
+
+This model is **stable** so future Trichologist or clinician workflows can rely on it without rework:
+
+- **Profile** is the durable patient identity; one row per patient (linked to auth when they use the portal).
+- **Intakes** are **additive**: each “Start new intake” or POST to create intake creates a **new row**. Submitted intakes are never overwritten or replaced. “Resume” continues an **existing draft** (same row); it does not create a new intake.
+- **Questionnaire** edits are allowed only while status is `draft`; after **submit**, the questionnaire is locked. Document uploads remain allowed for that intake after submission (longitudinal document continuity).
+- **Documents** attach to an intake (or profile); listing is per profile across all intakes. Patients can add documents during a draft or after submitting an intake.
+
+Future clinician (Trichologist) features should treat **profile → many intakes (additive), documents per intake/profile** as the source of truth. See `docs/TRICHOLOGIST_PORTAL_SPEC.md`.
 
 ## Routes
 

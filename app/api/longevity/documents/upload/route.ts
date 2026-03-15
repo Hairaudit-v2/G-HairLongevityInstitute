@@ -26,7 +26,12 @@ function isAllowedDocType(s: string): s is LongevityDocType {
   return ALLOWED_DOC_TYPES.includes(s as LongevityDocType);
 }
 
-/** Upload a document. Multipart: intakeId, docType, file. */
+/**
+ * Upload a document. Multipart: intakeId, docType, file.
+ * Allowed for both draft and submitted intakes (longitudinal document continuity: patients can add
+ * documents after submission). Intake questionnaire edits remain locked after submit; only document
+ * uploads stay open for that intake.
+ */
 export async function POST(req: Request) {
   if (!isLongevityApiEnabled()) {
     return NextResponse.json({ ok: false, error: "Longevity API is disabled." }, { status: 404 });

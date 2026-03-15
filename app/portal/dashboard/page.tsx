@@ -10,6 +10,10 @@ import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 
 /**
  * Portal dashboard: auth required; resolves profile from auth, sets longevity cookie, lists intakes + documents.
+ * Handoff: If the user previously had a cookie-only session with the same email, ensurePortalProfile
+ * links that profile to auth_user_id so all prior intakes and documents appear here. Session cookie
+ * is set so "Resume" and "New intake" use this profile. Longitudinal model: one profile, many intakes
+ * (additive); no overwrite of submitted intakes. Safe for future Trichologist workflows (see docs/TRICHOLOGIST_PORTAL_SPEC.md).
  */
 export default async function PortalDashboardPage() {
   const user = await getPortalUser();
@@ -62,7 +66,7 @@ export default async function PortalDashboardPage() {
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8" aria-labelledby="next-step-heading">
         <PortalNextStep intakes={list} />
       </div>
 
@@ -70,6 +74,9 @@ export default async function PortalDashboardPage() {
         <h2 id="intake-history-heading" className="text-lg font-semibold text-white">
           Intake history
         </h2>
+        <p className="mt-1 text-sm text-white/60">
+          All your intakes, newest first. Each submission is kept; starting a new intake adds a follow-up and does not replace the previous one.
+        </p>
         <div className="mt-4 space-y-4">
           {list.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-white/70">
@@ -89,10 +96,10 @@ export default async function PortalDashboardPage() {
                   <div>
                     {index === 0 && (
                       <span className="text-xs font-medium uppercase tracking-wider text-[rgb(var(--gold))]">
-                        Latest
+                        Latest intake
                       </span>
                     )}
-                    <span className="text-xs text-white/50">
+                    <span className="text-xs text-white/50 block mt-0.5">
                       {new Date(intake.created_at).toLocaleDateString()}
                     </span>
                     <p className="mt-1 font-medium text-white">

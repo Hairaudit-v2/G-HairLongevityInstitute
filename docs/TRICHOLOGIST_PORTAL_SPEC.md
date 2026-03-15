@@ -1,6 +1,6 @@
 # Trichologist Portal — Planning & Specification (Future)
 
-This document is a **planning and specification** for a future **Trichologist login and dashboard** within the Hair Longevity Institute longevity module. It is **not an implementation plan for immediate build**; it defines role, workflow, dashboard, data model, security, and a staged implementation sequence so that:
+This document is a **planning and specification** for a future **Trichologist login and dashboard**. The **patient-side longitudinal case model** (profile, additive intakes, document continuity) is stable and documented in **`LONGEVITY_PORTAL_ARCHITECTURE.md`** (§ Longitudinal case model); Trichologist implementation should rely on that model without changing it. within the Hair Longevity Institute longevity module. It is **not an implementation plan for immediate build**; it defines role, workflow, dashboard, data model, security, and a staged implementation sequence so that:
 
 - Current **patient portal** progress is not interrupted.
 - Trichologist features can be added later without rework.
@@ -219,9 +219,9 @@ Recommendation: **start with Option A**; add Option B only if needed.
   - Add migration: `hli_longevity_review_notes` table.
   - Implement Trichologist auth: resolve auth_user_id → trichologist record; reject if not a Trichologist on Trichologist routes.
 
-- **Phase B – Triage and queue (no UI yet)**
-  - On intake submit (or async job), compute derived flags and set `review_status` (e.g. human_review_required when manualReviewRecommended) and optionally `review_priority`.
-  - API: list intakes for Trichologist (filter by review_status, assigned_trichologist_id); return minimal fields for queue.
+- **Phase B – Triage and queue (no UI yet)** — *Implemented.* See **docs/LONGEVITY_TRIAGE.md** for how triage works and how Phase C should rely on it.
+  - On intake submit, compute derived flags and set `review_status` (e.g. human_review_required when manualReviewRecommended), `review_priority`, and `review_decision_source = 'rules'`.
+  - API: `GET /api/longevity/review/queue` (Trichologist auth); filter by review_status; returns priority and key derived flags.
 
 - **Phase C – Trichologist dashboard UI**
   - Routes: e.g. `/longevity/trichologist` or `/trichologist` (redirect to login or dashboard).
@@ -254,3 +254,22 @@ Recommendation: **start with Option A**; add Option B only if needed.
 | **Sequence** | Plan now; build data/identity after patient portal is stable; then triage/queue API; then Trichologist UI; then patient-visible summary. |
 
 This spec is **safe to implement later** without disrupting the current patient portal roadmap and keeps the Trichologist experience **separate but connected** to the patient experience within the isolated longevity namespace.
+
+---
+
+## Phase A implementation (foundations)
+
+Phase A adds **backend/schema/auth foundations only**; no Trichologist dashboard UI or blood request workflow.
+
+**Schema (migration `20250316000004_hli_longevity_trichologist_foundations.sql`):**
+- **hli_longevity_trichologists**: id, auth_user_id, display_name, email, is_active, created_at, updated_at.
+- **hli_longevity_intakes** (additive nullable columns): review_status, review_priority, review_decision_source (rules | ai | trichologist | mixed), assigned_trichologist_id, assigned_at, last_reviewed_at, review_outcome, patient_visible_summary, patient_visible_released_at. Patient-facing `status` unchanged.
+- **hli_longevity_review_notes**: id, intake_id, trichologist_id, body, created_at.
+- **hli_longevity_audit_events**: actor_type check extended to include `trichologist`.
+
+**Code (longevity module only):**
+- **lib/longevity/trichologistAuth.ts**: `getTrichologistFromRequest()`, `getTrichologistById()` — resolve Trichologist from Supabase Auth via hli_longevity_trichologists; does not affect patient or admin auth.
+- **lib/longevity/reviewConstants.ts**: `REVIEW_STATUS`, `REVIEW_PRIORITY`, `REVIEW_DECISION_SOURCE` (rules, ai, trichologist, mixed), types; `REVIEW_STATUS_IN_QUEUE`; `AUDIT_ACTOR_TRICHOLOGIST`.
+- **lib/longevity/documents.ts**: `auditLongevityEvent` accepts `actor_type: "trichologist"`; comment for Trichologist audit payload (trichologist_id in payload when needed).
+
+**Phase B/C can rely on:** Trichologist identity table and auth helpers; intake review columns; review_notes table; shared review status/priority constants; audit events supporting actor_type trichologist.

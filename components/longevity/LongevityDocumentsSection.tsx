@@ -73,7 +73,7 @@ export function LongevityDocumentsSection({
         Documents
       </h2>
       <p className="mt-1 text-sm text-white/60">
-        Uploaded documents. Open to view or download (link expires in 1 hour).
+        All documents you’ve uploaded across your intakes (newest first). Each document stays linked to the intake you uploaded it to; you can add more to any intake during a draft or after submission. Open to view or download (link expires in 1 hour).
       </p>
       {error && (
         <div className="mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
@@ -83,7 +83,7 @@ export function LongevityDocumentsSection({
       <div className="mt-4 space-y-3">
         {documents.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-white/50">
-            No documents yet. Upload from the intake flow or when resuming a draft.
+            No documents yet. Upload from the intake flow (during a draft or after submission) or when resuming a draft.
           </div>
         ) : (
           documents.map((doc) => (

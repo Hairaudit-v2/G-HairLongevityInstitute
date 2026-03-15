@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
+import { computeTriage } from "@/lib/longevity/triage";
+import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Submit an intake (draft → submitted). Submission is final for the questionnaire (no overwrite;
+ * questionnaire is locked for PATCH). New follow-up activity uses a new intake (POST /api/longevity/intakes).
+ * Longitudinal: this intake row is never replaced; documents can still be added to it after submit.
+ */
 export async function POST(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -52,6 +59,35 @@ export async function POST(
       payload: {},
       actor_type: "user",
     });
+
+    // Phase B: run triage and set review_status / review_priority / review_decision_source.
+    // Best-effort: if questionnaire missing or triage throws, leave review_* null (backward compatible).
+    try {
+      const { data: questionnaire } = await supabase
+        .from("hli_longevity_questionnaires")
+        .select("responses")
+        .eq("intake_id", id)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const responses = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
+      if (responses && typeof responses === "object") {
+        const triage = computeTriage(responses);
+        await supabase
+          .from("hli_longevity_intakes")
+          .update({
+            review_status: triage.review_status,
+            review_priority: triage.review_priority,
+            review_decision_source: triage.review_decision_source,
+            triaged_at: triage.triaged_at,
+            triage_version: triage.triage_version,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id);
+      }
+    } catch {
+      // Triage is additive; do not fail submit if triage fails.
+    }
 
     return NextResponse.json({ ok: true, status: "submitted" });
   } catch (e: unknown) {

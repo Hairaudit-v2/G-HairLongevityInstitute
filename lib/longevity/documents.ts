@@ -29,7 +29,12 @@ export type LongevityDocumentMeta = {
   created_at: string;
 };
 
-/** List documents for profile: intake-linked and profile-level. Optionally filter by intakeId. */
+/**
+ * List documents for profile: intake-linked and profile-level. Optionally filter by intakeId.
+ * Profile-centric and additive: returns all documents the patient can see (across intakes); does not
+ * overwrite or replace prior data. Document continuity: each document remains linked to its intake
+ * (or profile). Future clinician workflows can rely on this listing as the patient-visible set.
+ */
 export async function listDocumentsForProfile(
   supabase: SupabaseClient,
   profileId: string,
@@ -113,7 +118,11 @@ export async function createDocumentRecord(
   return { id: data.id };
 }
 
-/** Append audit event for document actions. */
+/**
+ * Append audit event. Use for patient, system, admin, and Trichologist actions.
+ * For Trichologist actions pass actor_type: "trichologist" and include trichologist_id in payload
+ * when needed for audit-readiness. See docs/TRICHOLOGIST_PORTAL_SPEC.md and reviewConstants.AUDIT_ACTOR_TRICHOLOGIST.
+ */
 export async function auditLongevityEvent(
   supabase: SupabaseClient,
   params: {
@@ -121,7 +130,7 @@ export async function auditLongevityEvent(
     intake_id: string | null;
     event_type: string;
     payload?: Record<string, unknown>;
-    actor_type?: "user" | "system" | "admin";
+    actor_type?: "user" | "system" | "admin" | "trichologist";
   }
 ): Promise<void> {
   await supabase.from("hli_longevity_audit_events").insert({

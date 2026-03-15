@@ -38,6 +38,9 @@ export async function GET() {
  * Create draft intake. Create or resolve profile; set session cookie; create intake + questionnaire.
  * Contract: intakeId is returned only after both hli_longevity_intakes and hli_longevity_questionnaires
  * rows exist, so the client can rely on a stable draft and intakeId before any later step actions.
+ * Longitudinal: POST always creates a new intake row (additive). It never overwrites or replaces a
+ * prior submitted intake. "Resume" is a separate flow: client uses GET /api/longevity/intakes/:id and
+ * continues editing that draft; no new row is created for resume.
  */
 export async function POST(req: Request) {
   if (!isLongevityApiEnabled()) {

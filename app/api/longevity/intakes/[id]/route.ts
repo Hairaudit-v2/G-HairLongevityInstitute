@@ -11,7 +11,12 @@ function ownedBySession(profileId: string | null, intake: { profile_id: string }
   return !!profileId && !!intake && intake.profile_id === profileId;
 }
 
-/** Get one intake with questionnaire (only if owned by session profile). */
+/**
+ * Get one intake with questionnaire (only if owned by session profile).
+ * Patient-visible status: draft = questionnaire editable, submitted = questionnaire locked (document
+ * uploads still allowed for that intake). Submitted intakes are never reopened as drafts; resume in
+ * the UI is only offered for status draft. Future clinician workflows can rely on this lifecycle.
+ */
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -79,7 +84,11 @@ export async function GET(
   }
 }
 
-/** Update draft intake (questionnaire responses by section, optional profile full_name). Only draft and owned. */
+/**
+ * Update draft intake (questionnaire responses by section, optional profile full_name). Only draft and owned.
+ * Submitted intakes are never converted back to draft; status transition is one-way (draft → submitted).
+ * Resume in the UI is only shown for status draft; this PATCH enforces that questionnaire edits apply to drafts only.
+ */
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

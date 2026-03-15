@@ -2,6 +2,12 @@
  * Longevity portal: resolve profile from Supabase Auth.
  * One profile per auth user; link by auth_user_id. Match by email when linking existing profile.
  * All code under longevity namespace; no changes to HLI report/referral flows.
+ *
+ * Anonymous-to-authenticated handoff: When a user who previously used the cookie-only flow
+ * (e.g. started an intake without an account) later signs in with the same email, ensurePortalProfile
+ * finds the unlinked profile by email (onlyUnlinked: true) and links it. The same profile—and thus
+ * the same intakes and documents—is then used. The portal dashboard sets the longevity session
+ * cookie so /longevity/start and /api/longevity/* see the same profile_id.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -93,6 +99,10 @@ export async function linkProfileToAuthUser(
 /**
  * Ensure the current portal user has a longevity profile: by auth_user_id, or by email (then link).
  * Creates a new profile only if none exists for this auth user or email.
+ * No duplicate profile in normal flow: (1) if auth_user_id already linked, return that profile;
+ * (2) else if an unlinked profile matches email, link it and return; (3) only then insert one new row.
+ * Future clinician (Trichologist) workflows can assume one profile per portal user and stable
+ * profile_id for that patient's intakes and documents.
  * Returns profile id or null.
  */
 export async function ensurePortalProfile(
