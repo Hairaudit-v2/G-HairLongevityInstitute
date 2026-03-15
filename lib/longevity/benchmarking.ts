@@ -1,10 +1,12 @@
 /**
  * Internal benchmarking foundation for future Follicle Intelligence (FI) comparisons.
- * Longevity namespace only.
+ * Longevity namespace only. Not a public ranking system; no clinic or doctor scores.
  *
- * This is a benchmark foundation layer only — not a final public ranking system.
- * No clinic or doctor scores are produced or exposed. Outputs are transparent
- * metric summaries (numerator, denominator, percentage) for internal comparison.
+ * Outputs are transparent metric summaries (numerator, denominator, percentage) for
+ * internal comparison. Predictive readiness is included as a benchmark dimension only,
+ * not a clinical claim. Discordance metrics are emitted only when supported by real
+ * cohort-level data from the outbox/derived-state pipeline.
+ *
  * Future: segmentation by age band, sex, driver pattern, treatment type.
  */
 
@@ -14,8 +16,11 @@ import {
   getCohortAdherenceSummary,
   getCohortDriverSummary,
   getCohortTreatmentSummary,
+  getCohortDiscordanceSummary,
 } from "./analytics";
 import { getTreatmentEffectivenessSummary } from "./treatmentEffectivenessAnalytics";
+import { getCohortReadinessSummary } from "./predictiveReadiness";
+import type { ReadinessDimension } from "./predictiveReadiness";
 
 /** Transparent benchmark metric for internal comparison. Not for public display. */
 export type BenchmarkMetric = {
@@ -47,12 +52,15 @@ export async function getBenchmarkMetrics(
 ): Promise<BenchmarkMetric[]> {
   const cohortLabel = "internal";
   const metrics: BenchmarkMetric[] = [];
+  const adherenceOptions = options ? { since: options.since, limit: options.limit } : undefined;
 
-  const [adherence, drivers, treatments, effectiveness] = await Promise.all([
-    getCohortAdherenceSummary(supabase),
+  const [adherence, drivers, treatments, effectiveness, readiness, discordance] = await Promise.all([
+    getCohortAdherenceSummary(supabase, adherenceOptions),
     getCohortDriverSummary(supabase, options),
     getCohortTreatmentSummary(supabase, options),
     getTreatmentEffectivenessSummary(supabase, options),
+    getCohortReadinessSummary(supabase, options),
+    getCohortDiscordanceSummary(supabase, options),
   ]);
 
   const nReminders = adherence.intakes_with_reminders;
@@ -155,23 +163,49 @@ export async function getBenchmarkMetrics(
     });
   }
 
-  // --- Visual vs marker discordance placeholders ---
-  // Future: derive from cohort-level aggregation of derived states (visual_progression_without_marker_improvement,
-  // marker_improvement_without_visual_change). For v1 we expose metric keys with denominator from intakes_with_both.
+  // --- Predictive readiness distribution (benchmark dimension only; not a clinical claim) ---
+  const nProfiles = readiness.profile_count;
+  const levelKeys = ["low", "moderate", "high"] as const;
+  for (const level of levelKeys) {
+    const count = readiness.level_counts[level];
+    metrics.push({
+      metric_key: "readiness_level_" + level + "_rate",
+      metric_version: METRIC_VERSION,
+      numerator: count,
+      denominator: nProfiles,
+      percentage: pct(count, nProfiles),
+      cohort_label: cohortLabel,
+    });
+  }
+  for (const dim of Object.keys(readiness.dimension_prevalence) as ReadinessDimension[]) {
+    const count = readiness.dimension_prevalence[dim];
+    const key = "readiness_dimension_" + dim + "_rate";
+    metrics.push({
+      metric_key: key,
+      metric_version: METRIC_VERSION,
+      numerator: count,
+      denominator: nProfiles,
+      percentage: pct(count, nProfiles),
+      cohort_label: cohortLabel,
+    });
+  }
+
+  // --- Visual vs marker discordance (only when supported by real cohort-level data) ---
+  const nVisualMarker = discordance.intakes_with_visual_and_marker;
   metrics.push({
     metric_key: "visual_progression_without_marker_improvement_rate",
     metric_version: METRIC_VERSION,
-    numerator: 0,
-    denominator: nBoth,
-    percentage: 0,
+    numerator: discordance.visual_progression_without_marker_improvement_count,
+    denominator: nVisualMarker,
+    percentage: pct(discordance.visual_progression_without_marker_improvement_count, nVisualMarker),
     cohort_label: cohortLabel,
   });
   metrics.push({
     metric_key: "marker_improvement_without_visual_change_rate",
     metric_version: METRIC_VERSION,
-    numerator: 0,
-    denominator: nBoth,
-    percentage: 0,
+    numerator: discordance.marker_improvement_without_visual_change_count,
+    denominator: nVisualMarker,
+    percentage: pct(discordance.marker_improvement_without_visual_change_count, nVisualMarker),
     cohort_label: cohortLabel,
   });
 

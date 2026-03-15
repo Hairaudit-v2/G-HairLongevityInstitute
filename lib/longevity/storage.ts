@@ -9,7 +9,21 @@ import type { LongevityDocType } from "./documentTypes";
 export const LONGEVITY_BUCKET = "hli-intakes";
 export const LONGEVITY_PREFIX = "longevity";
 
-/** Build storage path: longevity/{profileId}/{intakeId}/{docType}/{timestamp}-{safeFilename} */
+/** Short random string for unique paths (collision-resistant with timestamp). */
+function shortRandom(): string {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const arr = new Uint8Array(4);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, (x) => x.toString(16).padStart(2, "0")).join("");
+  }
+  return Math.random().toString(36).slice(2, 10);
+}
+
+/**
+ * Build a unique storage path: longevity/{profileId}/{intakeId}/{docType}/{intakeId}_{timestamp}_{random}_{safeFilename}
+ * Ensures no filename collisions when the same file is uploaded twice quickly (upsert: false).
+ * Uploads remain grouped by profile and intake.
+ */
 export function buildLongevityStoragePath(
   profileId: string,
   intakeId: string,
@@ -17,8 +31,10 @@ export function buildLongevityStoragePath(
   safeFilename: string
 ): string {
   const timestamp = Date.now();
+  const random = shortRandom();
   const safe = safeFilename.replace(/[^a-zA-Z0-9._-]/g, "_");
-  return `${LONGEVITY_PREFIX}/${profileId}/${intakeId}/${docType}/${timestamp}-${safe}`;
+  const uniqueSegment = `${intakeId}_${timestamp}_${random}_${safe}`;
+  return `${LONGEVITY_PREFIX}/${profileId}/${intakeId}/${docType}/${uniqueSegment}`;
 }
 
 /** Build storage path for GP support letter: longevity/{profileId}/blood-requests/{bloodRequestId}/gp-support-letter-{timestamp}.pdf */

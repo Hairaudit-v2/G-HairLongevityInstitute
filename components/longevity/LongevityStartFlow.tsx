@@ -405,6 +405,11 @@ export function LongevityStartFlow() {
     try {
       const res = await fetch(`/api/longevity/intakes/${id}`);
       const json = await res.json();
+      if (res.status === 401 && json.requiresAuth === true && typeof json.redirectTo === "string") {
+        setError(json.message ?? "Please sign in to resume your assessment.");
+        window.location.href = json.redirectTo;
+        return;
+      }
       if (!res.ok || !json.ok) {
         setError(json.error ?? "Failed to load intake.");
         return;
@@ -466,29 +471,55 @@ export function LongevityStartFlow() {
     }
   }, [identifyEmail, identifyName]);
 
-  const saveProgress = useCallback(async () => {
-    if (!intakeId) return;
-    setSaving(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/longevity/intakes/${intakeId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questionnaire: responses }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.ok) setError(json.error ?? "Save failed.");
-      else setSavedAt(Date.now());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed.");
-    } finally {
-      setSaving(false);
-    }
-  }, [intakeId, responses]);
+  const saveProgress = useCallback(
+    async (): Promise<{ ok: true } | { ok: false; error: unknown }> => {
+      if (!intakeId) return { ok: false, error: new Error("No intakeId") };
+      setSaving(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/longevity/intakes/${intakeId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questionnaire: responses }),
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) {
+          const err = json.error ?? "Save failed.";
+          setError(typeof err === "string" ? err : "Save failed.");
+          return { ok: false, error: err };
+        }
+        setSavedAt(Date.now());
+        return { ok: true };
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Save failed.");
+        return { ok: false, error: e };
+      } finally {
+        setSaving(false);
+      }
+    },
+    [intakeId, responses]
+  );
+
+  const SAVE_FAILED_MESSAGE = "We couldn't save your progress. Please try again.";
 
   const goNext = useCallback(
-    (nextStep: StepId) => {
-      saveProgress().then(() => setStep(nextStep));
+    async (nextStep: StepId) => {
+      try {
+        const result = await saveProgress();
+        if (result.ok) {
+          setStep(nextStep);
+        } else {
+          setError(SAVE_FAILED_MESSAGE);
+          if (typeof console !== "undefined" && console.error) {
+            console.error("[LongevityStartFlow] goNext: save failed", result.error);
+          }
+        }
+      } catch (e) {
+        setError(SAVE_FAILED_MESSAGE);
+        if (typeof console !== "undefined" && console.error) {
+          console.error("[LongevityStartFlow] goNext: save error", e);
+        }
+      }
     },
     [saveProgress]
   );

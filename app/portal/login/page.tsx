@@ -2,87 +2,121 @@
 
 import { useCallback, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
 
 const GOLD = "rgb(198,167,94)";
 
-function getRedirectUrl(): string {
+/** Build callback URL for magic link; optional redirect param is preserved so auth callback can send user there after login. */
+function getRedirectUrl(redirectPath?: string | null): string {
   if (typeof window === "undefined") return "";
-  return `${window.location.origin}/portal/auth/callback`;
+  const base = `${window.location.origin}/portal/auth/callback`;
+  if (redirectPath && redirectPath.startsWith("/")) {
+    return `${base}?redirect=${encodeURIComponent(redirectPath)}`;
+  }
+  return base;
 }
 
+/** Allowed post-login redirect paths (same-origin only). */
+function isAllowedRedirect(path: string | null): path is string {
+  if (!path || typeof path !== "string") return false;
+  return path.startsWith("/longevity/") || path.startsWith("/portal/");
+}
+
+const NO_EMAIL_MESSAGE =
+  "We could not create your profile because your sign-in provider did not provide an email address. Please sign in using an email-based login.";
+
+const SESSION_EXPIRED_MESSAGE = "Your session expired. Please sign in to continue.";
+
 export default function PortalLoginPage() {
+  const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
+  const errorParam = searchParams.get("error");
+  const afterLoginRedirect = isAllowedRedirect(redirectParam) ? redirectParam : null;
+  const showNoEmailMessage = errorParam === "no-email";
+  const showSessionExpiredMessage = errorParam === "session-expired";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const sendMagicLink = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    if (!email.trim()) {
-      setMessage({ type: "error", text: "Please enter your email address." });
-      return;
-    }
-    setLoading(true);
-    try {
-      const supabase = createLongevitySupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim().toLowerCase(),
-        options: {
-          emailRedirectTo: getRedirectUrl(),
-          shouldCreateUser: true,
-        },
-      });
-      if (error) {
-        setMessage({ type: "error", text: error.message });
-        setLoading(false);
+  const sendMagicLink = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setMessage(null);
+      if (!email.trim()) {
+        setMessage({ type: "error", text: "Please enter your email address." });
         return;
       }
-      setMessage({
-        type: "success",
-        text: "Check your email for a sign-in link. Click the link to open your dashboard.",
-      });
-    } catch (err) {
-      setMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Something went wrong.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [email]);
+      setLoading(true);
+      try {
+        const supabase = createLongevitySupabaseBrowserClient();
+        const { error } = await supabase.auth.signInWithOtp({
+          email: email.trim().toLowerCase(),
+          options: {
+            emailRedirectTo: getRedirectUrl(afterLoginRedirect),
+            shouldCreateUser: true,
+          },
+        });
+        if (error) {
+          setMessage({ type: "error", text: error.message });
+          setLoading(false);
+          return;
+        }
+        setMessage({
+          type: "success",
+          text: "Check your email for a sign-in link. Click the link to open your dashboard.",
+        });
+      } catch (err) {
+        setMessage({
+          type: "error",
+          text: err instanceof Error ? err.message : "Something went wrong.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [email, afterLoginRedirect]
+  );
 
-  const signInWithPassword = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    if (!email.trim() || !password) {
-      setMessage({ type: "error", text: "Email and password are required." });
-      return;
-    }
-    setLoading(true);
-    try {
-      const supabase = createLongevitySupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (error) {
-        setMessage({ type: "error", text: error.message });
-        setLoading(false);
+  const signInWithPassword = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setMessage(null);
+      if (!email.trim() || !password) {
+        setMessage({ type: "error", text: "Email and password are required." });
         return;
       }
-      window.location.href = "/portal/dashboard";
-    } catch (err) {
-      setMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Something went wrong.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [email, password]);
+      setLoading(true);
+      try {
+        const supabase = createLongevitySupabaseBrowserClient();
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (error) {
+          setMessage({ type: "error", text: error.message });
+          setLoading(false);
+          return;
+        }
+        // Send via dashboard when resuming so longevity cookie is set, then dashboard redirects.
+        const dest = afterLoginRedirect
+          ? `/portal/dashboard?redirect=${encodeURIComponent(afterLoginRedirect)}`
+          : "/portal/dashboard";
+        window.location.href = dest;
+      } catch (err) {
+        setMessage({
+          type: "error",
+          text: err instanceof Error ? err.message : "Something went wrong.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [email, password, afterLoginRedirect]
+  );
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
@@ -91,8 +125,21 @@ export default function PortalLoginPage() {
       </div>
       <h1 className="mt-2 text-2xl font-semibold text-white">Sign in</h1>
       <p className="mt-1 text-white/70">
-        Use your email to access your intakes and documents.
+        {afterLoginRedirect?.startsWith("/longevity/intake/")
+          ? "Please sign in to resume your assessment."
+          : "Use your email to access your intakes and documents."}
       </p>
+
+      {showNoEmailMessage && (
+        <div className="mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200">
+          {NO_EMAIL_MESSAGE}
+        </div>
+      )}
+      {showSessionExpiredMessage && (
+        <div className="mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200">
+          {SESSION_EXPIRED_MESSAGE}
+        </div>
+      )}
 
       {/* Magic link (primary) */}
       <form onSubmit={sendMagicLink} className="mt-6 space-y-4">

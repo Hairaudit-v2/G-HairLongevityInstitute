@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { normalizeEmail } from "@/lib/longevity/email";
 import { getLongevitySessionFromRequest, setLongevitySession } from "@/lib/longevityAuth";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
 
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
   }
   try {
     const body = await req.json().catch(() => ({}));
-    const email = String(body.email ?? "").trim();
+    const email = normalizeEmail(String(body.email ?? ""));
     const full_name = String(body.full_name ?? "").trim();
     if (!email) {
       return NextResponse.json({ ok: false, error: "Email is required." }, { status: 400 });
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       const { data: existing } = await supabase
         .from("hli_longevity_profiles")
         .select("id")
-        .eq("email", email)
+        .ilike("email", email)
         .limit(1)
         .maybeSingle();
       if (existing?.id) {

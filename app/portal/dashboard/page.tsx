@@ -22,14 +22,25 @@ import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocum
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 
+/** Allowed post-login redirect paths (same-origin paths only). */
+function isAllowedRedirect(path: string | null | undefined): path is string {
+  if (!path || typeof path !== "string") return false;
+  return path.startsWith("/longevity/") || path.startsWith("/portal/");
+}
+
 /**
  * Portal dashboard: auth required; resolves profile from auth, sets longevity cookie, lists intakes + documents.
  * Handoff: If the user previously had a cookie-only session with the same email, ensurePortalProfile
  * links that profile to auth_user_id so all prior intakes and documents appear here. Session cookie
  * is set so "Resume" and "New intake" use this profile. Longitudinal model: one profile, many intakes
  * (additive); no overwrite of submitted intakes. Safe for future Trichologist workflows (see docs/TRICHOLOGIST_PORTAL_SPEC.md).
+ * When ?redirect= is present (e.g. after login to resume an intake), redirect there after setting the cookie.
  */
-export default async function PortalDashboardPage() {
+export default async function PortalDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string }>;
+}) {
   const user = await getPortalUser();
   if (!user) redirect("/portal/login");
 
@@ -37,13 +48,22 @@ export default async function PortalDashboardPage() {
   if (trichologist) redirect("/portal/trichologist/review");
 
   const supabase = supabaseAdmin();
-  const profileId = await ensurePortalProfile(supabase, user);
-  if (!profileId) {
+  const profileResult = await ensurePortalProfile(supabase, user);
+  if (!profileResult.ok) {
+    if (profileResult.reason === "no_email") {
+      redirect("/portal/login?error=no-email");
+    }
     redirect("/portal/login?error=profile");
   }
 
-  await setLongevitySession(profileId);
+  await setLongevitySession(profileResult.profileId);
 
+  const { redirect: redirectTo } = await searchParams;
+  if (isAllowedRedirect(redirectTo)) {
+    redirect(redirectTo);
+  }
+
+  const profileId = profileResult.profileId;
   const { data: intakes, error } = await supabase
     .from("hli_longevity_intakes")
     .select("id, status, created_at, updated_at, last_reviewed_at, patient_visible_summary, patient_visible_released_at, review_outcome")

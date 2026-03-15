@@ -23,6 +23,13 @@ export default function PortalAuthCallbackPage() {
       const accessToken = fragment.get("access_token");
       const refreshToken = fragment.get("refresh_token");
 
+      // Preserve redirect in URL so dashboard can send user there after setting longevity cookie.
+      const redirectTo = searchParams.get("redirect");
+      const allowedRedirect =
+        redirectTo &&
+        (redirectTo.startsWith("/longevity/") || redirectTo.startsWith("/portal/"));
+      const destination = allowedRedirect ? `/portal/dashboard?redirect=${encodeURIComponent(redirectTo)}` : "/portal";
+
       if (accessToken && refreshToken) {
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
@@ -34,7 +41,7 @@ export default function PortalAuthCallbackPage() {
           return;
         }
         setStatus("done");
-        router.replace("/portal");
+        router.replace(destination);
         router.refresh();
         return;
       }
@@ -52,7 +59,7 @@ export default function PortalAuthCallbackPage() {
           return;
         }
         setStatus("done");
-        router.replace("/portal");
+        router.replace(destination);
         router.refresh();
         return;
       }

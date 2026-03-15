@@ -30,6 +30,23 @@ export async function GET(
     if (!id) {
       return NextResponse.json({ ok: false, error: "Missing intake id." }, { status: 400 });
     }
+
+    // No session: instruct frontend to redirect to login so user can resume after signing in.
+    // Do not fetch intake (avoids leaking existence); no intake data is returned.
+    if (!profileId) {
+      const redirectPath = `/longevity/intake/${id}`;
+      const loginRedirect = `/portal/login?redirect=${encodeURIComponent(redirectPath)}`;
+      return NextResponse.json(
+        {
+          ok: false,
+          requiresAuth: true,
+          redirectTo: loginRedirect,
+          message: "Please sign in to resume your assessment.",
+        },
+        { status: 401 }
+      );
+    }
+
     const supabase = supabaseAdmin();
     const { data: intake, error: intakeErr } = await supabase
       .from("hli_longevity_intakes")

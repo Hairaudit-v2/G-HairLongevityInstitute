@@ -11,6 +11,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { normalizeEmail } from "./email";
 import { createLongevitySupabaseServerClient } from "./supabaseServer";
 
 export type PortalUser = {
@@ -58,7 +59,7 @@ export async function getProfileByEmail(
   email: string,
   options?: { onlyUnlinked?: boolean }
 ): Promise<{ id: string; email: string; full_name: string | null; auth_user_id: string | null } | null> {
-  const normalized = email.trim().toLowerCase();
+  const normalized = normalizeEmail(email);
   if (!normalized) return null;
   let query = supabase
     .from("hli_longevity_profiles")
@@ -96,6 +97,11 @@ export async function linkProfileToAuthUser(
   return { ok: true };
 }
 
+export type EnsurePortalProfileResult =
+  | { ok: true; profileId: string }
+  | { ok: false; reason: "no_email" }
+  | { ok: false; reason: "error" };
+
 /**
  * Ensure the current portal user has a longevity profile: by auth_user_id, or by email (then link).
  * Creates a new profile only if none exists for this auth user or email.
@@ -103,22 +109,22 @@ export async function linkProfileToAuthUser(
  * (2) else if an unlinked profile matches email, link it and return; (3) only then insert one new row.
  * Future clinician (Trichologist) workflows can assume one profile per portal user and stable
  * profile_id for that patient's intakes and documents.
- * Returns profile id or null.
+ * Returns a result so the caller can distinguish "no email" (sign-in provider did not provide email) from other failures.
  */
 export async function ensurePortalProfile(
   supabaseAdmin: SupabaseClient,
   authUser: PortalUser
-): Promise<string | null> {
+): Promise<EnsurePortalProfileResult> {
   let profile = await getProfileByAuthUserId(supabaseAdmin, authUser.id);
-  if (profile) return profile.id;
+  if (profile) return { ok: true, profileId: profile.id };
 
-  const email = (authUser.email ?? "").trim().toLowerCase();
-  if (!email) return null;
+  const email = normalizeEmail(authUser.email ?? "");
+  if (!email) return { ok: false, reason: "no_email" };
 
   profile = await getProfileByEmail(supabaseAdmin, email, { onlyUnlinked: true });
   if (profile) {
     const link = await linkProfileToAuthUser(supabaseAdmin, profile.id, authUser.id);
-    return link.ok ? profile.id : null;
+    return link.ok ? { ok: true, profileId: profile.id } : { ok: false, reason: "error" };
   }
 
   const { data: created, error } = await supabaseAdmin
@@ -130,6 +136,6 @@ export async function ensurePortalProfile(
     })
     .select("id")
     .single();
-  if (error || !created?.id) return null;
-  return created.id;
+  if (error || !created?.id) return { ok: false, reason: "error" };
+  return { ok: true, profileId: created.id };
 }

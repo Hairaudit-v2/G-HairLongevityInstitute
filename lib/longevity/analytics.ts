@@ -8,6 +8,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { LONGEVITY_SIGNAL_KEY } from "./integrationContracts";
 import { computeAdherenceStates } from "./adherenceStates";
 import type { AdherenceContextResult } from "./adherenceContext";
+import { computeDerivedReportingStates } from "./derivedReportingStates";
+import type { SignalLike } from "./derivedReportingStates";
 
 /** Single row from hli_longevity_integration_outbox (consumption view). */
 export type OutboxRow = {
@@ -160,19 +162,35 @@ export type CohortAdherenceSummary = {
   };
 };
 
+/** Optional scoping for adherence cohort (since/limit only; no profile_id). */
+export type AdherenceCohortOptions = {
+  since?: string | null;
+  limit?: number;
+};
+
 /**
  * Build adherence context from reminders + outcomes, then aggregate using computeAdherenceStates.
  * Reuses adherence rule logic; no duplication.
+ * Optional since/limit scope reminders for consistent benchmark cohort (additive; does not change operational workflows).
  */
 export async function getCohortAdherenceSummary(
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  options?: AdherenceCohortOptions
 ): Promise<CohortAdherenceSummary> {
-  const { data: reminders } = await supabase
+  const since = options?.since?.trim() || null;
+  const limit = Math.min(Math.max(options?.limit ?? 10000, 1), 10000);
+
+  let query = supabase
     .from("hli_longevity_reminders")
     .select("id, profile_id, intake_id, sent_at")
     .eq("status", "sent")
-    .not("sent_at", "is", null);
-
+    .not("sent_at", "is", null)
+    .order("sent_at", { ascending: false })
+    .limit(limit);
+  if (since) {
+    query = query.gte("sent_at", since);
+  }
+  const { data: reminders } = await query;
   const list = reminders ?? [];
   if (list.length === 0) {
     return {
@@ -326,5 +344,57 @@ export async function getCohortTreatmentSummary(
     outcome_correlation_count,
     continuity_distribution,
     correlation_state_counts,
+  };
+}
+
+/** Cohort-level counts for visual vs marker discordance (derived from outbox signals). */
+export type CohortDiscordanceSummary = {
+  visual_progression_without_marker_improvement_count: number;
+  marker_improvement_without_visual_change_count: number;
+  /** Intakes with both visual and marker signals; denominator for discordance rates. */
+  intakes_with_visual_and_marker: number;
+};
+
+/**
+ * Aggregate cohort discordance from outbox signals using derived reporting states.
+ * Only intakes that have both visual and marker signals are included; rates are emitted only when supported by real data.
+ */
+export async function getCohortDiscordanceSummary(
+  supabase: SupabaseClient,
+  options?: ConsumeOutboxOptions
+): Promise<CohortDiscordanceSummary> {
+  const rows = await consumeOutbox(supabase, options);
+  const signals = rows.filter((r) => r.emission_kind === "signal" && r.intake_id);
+
+  const byIntake = new Map<string, SignalLike[]>();
+  for (const row of signals) {
+    const intakeId = row.intake_id as string;
+    if (!byIntake.has(intakeId)) byIntake.set(intakeId, []);
+    byIntake.get(intakeId)!.push({ signal_key: row.emission_key, payload: row.payload ?? {} });
+  }
+
+  let visual_progression_without_marker_improvement_count = 0;
+  let marker_improvement_without_visual_change_count = 0;
+  let intakes_with_visual_and_marker = 0;
+
+  for (const intakeSignals of byIntake.values()) {
+    const hasVisual = intakeSignals.some((s) => s.signal_key === LONGEVITY_SIGNAL_KEY.VISUAL_CHANGE_DETECTED);
+    const hasMarker = intakeSignals.some((s) => s.signal_key === LONGEVITY_SIGNAL_KEY.MARKER_IMPROVING);
+    if (!hasVisual || !hasMarker) continue;
+
+    intakes_with_visual_and_marker++;
+    const flags = computeDerivedReportingStates({
+      signals: intakeSignals,
+      adherenceContexts: [],
+      caseComparisons: [],
+    });
+    if (flags.visual_progression_without_marker_improvement) visual_progression_without_marker_improvement_count++;
+    if (flags.marker_improvement_without_visual_change) marker_improvement_without_visual_change_count++;
+  }
+
+  return {
+    visual_progression_without_marker_improvement_count,
+    marker_improvement_without_visual_change_count,
+    intakes_with_visual_and_marker,
   };
 }

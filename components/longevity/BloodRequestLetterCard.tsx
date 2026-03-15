@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 type BloodRequestForPatient = {
   id: string;
@@ -15,10 +16,46 @@ type BloodRequestForPatient = {
 const BLOOD_TEST_UPLOAD_DOC_TYPE = "blood_test_upload";
 
 export function BloodRequestLetterCard({ br }: { br: BloodRequestForPatient }) {
+  const pathname = usePathname();
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLetterDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setError(null);
+    setDownloading(true);
+    try {
+      const res = await fetch(`/api/longevity/blood-requests/${br.id}/letter-download`, {
+        credentials: "include",
+        redirect: "manual",
+      });
+      if (res.status === 401) {
+        const redirectPath = pathname ? `/portal/login?error=session-expired&redirect=${encodeURIComponent(pathname)}` : "/portal/login?error=session-expired";
+        window.location.href = redirectPath;
+        return;
+      }
+      if (res.status === 302 || res.status === 301) {
+        const location = res.headers.get("Location");
+        if (location) {
+          window.open(location, "_blank", "noopener,noreferrer");
+        } else {
+          setError("Download link could not be opened.");
+        }
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError((data as { error?: string }).error ?? "Download failed.");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Download failed.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -106,14 +143,14 @@ export function BloodRequestLetterCard({ br }: { br: BloodRequestForPatient }) {
       )}
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {br.letter_document_id ? (
-          <a
-            href={`/api/longevity/blood-requests/${br.id}/letter-download`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex rounded-xl border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-4 py-2 text-sm font-medium text-white hover:bg-[rgb(var(--gold))]/20"
+          <button
+            type="button"
+            onClick={handleLetterDownload}
+            disabled={downloading}
+            className="inline-flex rounded-xl border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-4 py-2 text-sm font-medium text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
           >
-            Download GP support letter
-          </a>
+            {downloading ? "Opening…" : "Download GP support letter"}
+          </button>
         ) : (
           <button
             type="button"
