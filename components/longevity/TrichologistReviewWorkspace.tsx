@@ -999,6 +999,9 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         </div>
         <div className="flex items-center gap-3">
           <PortalSignOut />
+          <Link href="/portal/trichologist/reminders" className="text-sm text-white/70 hover:text-white">
+            Reminders
+          </Link>
           <Link href="/portal" className="text-sm text-white/70 hover:text-white">
             Portal
           </Link>

@@ -487,6 +487,138 @@ export async function stageLongevityRemindersForIntake(
   });
 }
 
+export type LongevityReminderWithMeta = {
+  id: string;
+  profile_id: string;
+  intake_id: string;
+  blood_request_id: string | null;
+  reminder_type: LongevityReminderType;
+  delivery_channel: "email";
+  status: "staged" | "sent" | "cancelled" | "failed";
+  dedupe_key: string;
+  recipient_email: string;
+  subject: string;
+  follow_up_status: "due" | "overdue" | "upcoming" | "complete" | "none" | null;
+  scheduled_for: string;
+  created_at: string;
+  updated_at: string;
+  cancelled_at: string | null;
+  sent_at: string | null;
+  last_error: string | null;
+  payload: Record<string, unknown>;
+  profile?: { id: string; email: string; full_name: string | null } | null;
+  intake?: { id: string; created_at: string } | null;
+};
+
+export type ListLongevityRemindersFilters = {
+  profile_id?: string | null;
+  intake_id?: string | null;
+  status?: "staged" | "sent" | "cancelled" | "failed" | null;
+  limit?: number;
+};
+
+/**
+ * List longevity reminders for internal inspection. Use with Trichologist or internal auth only.
+ */
+export async function listLongevityReminders(
+  supabase: SupabaseClient,
+  filters?: ListLongevityRemindersFilters
+): Promise<LongevityReminderWithMeta[]> {
+  const limit = Math.max(1, Math.min(filters?.limit ?? 200, 500));
+  let query = supabase
+    .from("hli_longevity_reminders")
+    .select(
+      "id, profile_id, intake_id, blood_request_id, reminder_type, delivery_channel, status, dedupe_key, recipient_email, subject, follow_up_status, scheduled_for, created_at, updated_at, cancelled_at, sent_at, last_error, payload"
+    )
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (filters?.profile_id) {
+    query = query.eq("profile_id", filters.profile_id);
+  }
+  if (filters?.intake_id) {
+    query = query.eq("intake_id", filters.intake_id);
+  }
+  if (filters?.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  const { data: rows, error } = await query;
+  if (error) throw new Error(error.message);
+  const list = (rows ?? []) as Array<{
+    id: string;
+    profile_id: string;
+    intake_id: string;
+    blood_request_id: string | null;
+    reminder_type: string;
+    delivery_channel: string;
+    status: string;
+    dedupe_key: string;
+    recipient_email: string;
+    subject: string;
+    follow_up_status: string | null;
+    scheduled_for: string;
+    created_at: string;
+    updated_at: string;
+    cancelled_at: string | null;
+    sent_at: string | null;
+    last_error: string | null;
+    payload: Record<string, unknown>;
+  }>;
+
+  if (list.length === 0) return [];
+
+  const profileIds = [...new Set(list.map((r) => r.profile_id))];
+  const intakeIds = [...new Set(list.map((r) => r.intake_id))];
+
+  const [profilesRes, intakesRes] = await Promise.all([
+    supabase
+      .from("hli_longevity_profiles")
+      .select("id, email, full_name")
+      .in("id", profileIds),
+    supabase
+      .from("hli_longevity_intakes")
+      .select("id, created_at")
+      .in("id", intakeIds),
+  ]);
+
+  const profilesMap = new Map<string, { id: string; email: string; full_name: string | null }>();
+  for (const p of profilesRes.data ?? []) {
+    profilesMap.set(p.id, {
+      id: p.id,
+      email: p.email ?? "",
+      full_name: p.full_name ?? null,
+    });
+  }
+  const intakesMap = new Map<string, { id: string; created_at: string }>();
+  for (const i of intakesRes.data ?? []) {
+    intakesMap.set(i.id, { id: i.id, created_at: i.created_at });
+  }
+
+  return list.map((r) => ({
+    id: r.id,
+    profile_id: r.profile_id,
+    intake_id: r.intake_id,
+    blood_request_id: r.blood_request_id,
+    reminder_type: r.reminder_type as LongevityReminderType,
+    delivery_channel: r.delivery_channel as "email",
+    status: r.status as "staged" | "sent" | "cancelled" | "failed",
+    dedupe_key: r.dedupe_key,
+    recipient_email: r.recipient_email,
+    subject: r.subject,
+    follow_up_status: r.follow_up_status as LongevityReminderWithMeta["follow_up_status"],
+    scheduled_for: r.scheduled_for,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
+    cancelled_at: r.cancelled_at,
+    sent_at: r.sent_at,
+    last_error: r.last_error,
+    payload: r.payload ?? {},
+    profile: profilesMap.get(r.profile_id) ?? null,
+    intake: intakesMap.get(r.intake_id) ?? null,
+  }));
+}
+
 export async function runLongevityReminderSweep(
   supabase: SupabaseClient,
   params?: {
