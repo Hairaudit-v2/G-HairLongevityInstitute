@@ -9,6 +9,20 @@
   --gold: 198 167 94;    /* #C6A75E */
   --platinum: 217 217 214; /* #D9D9D6 */
   --sage: 79 107 99;     /* #4F6B63 */
+  /* Section rhythm */
+  --section-py: 4rem;
+  --section-py-lg: 5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --section-py: 5rem;
+    --section-py-lg: 6.25rem;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html, body {
@@ -18,6 +32,7 @@ html, body {
 body {
   background: rgb(var(--bg));
   color: rgb(var(--platinum));
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 * {

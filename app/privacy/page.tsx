@@ -1,37 +1,25 @@
 // app/privacy/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isLongevityEnabled } from "@/lib/features";
+import PublicHeader from "@/components/public/PublicHeader";
+import PublicFooter from "@/components/public/PublicFooter";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Hair Longevity Institute™",
   description: "How we collect, use, and protect your personal data.",
 };
 
-function Container({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-3xl px-6">{children}</div>;
-}
-
 export default function PrivacyPage() {
+  const useLongevity = isLongevityEnabled();
+  const startHref = useLongevity ? "/longevity/start" : "/start";
+
   return (
     <main className="min-h-screen">
-      <header className="border-b border-white/10 bg-black/10">
-        <Container>
-          <div className="flex items-center justify-between py-4">
-            <Link href="/" className="flex items-center gap-3">
-              <img src="/brand/hli-logo.png" alt="Hair Longevity Institute" width={220} height={44} className="h-11 w-auto" />
-            </Link>
-            <nav className="flex items-center gap-4 text-sm text-white/75">
-              <Link href="/" className="hover:text-white">Home</Link>
-              <Link href="/privacy" className="text-white">Privacy</Link>
-              <Link href="/terms" className="hover:text-white">Terms</Link>
-              <Link href="/disclaimer" className="hover:text-white">Disclaimer</Link>
-            </nav>
-          </div>
-        </Container>
-      </header>
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
 
       <section className="py-12">
-        <Container>
+        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
           <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
             Privacy Policy
           </h1>
@@ -109,24 +97,10 @@ export default function PrivacyPage() {
               ← Back to home
             </Link>
           </div>
-        </Container>
+        </div>
       </section>
 
-      <footer className="mt-16 border-t border-white/10 py-8">
-        <Container>
-          <div className="flex flex-col items-start justify-between gap-4 text-xs text-white/55 md:flex-row">
-            <div className="flex items-center gap-3">
-              <img src="/brand/hli-mark.png" alt="Hair Longevity Institute mark" width={28} height={28} />
-              <div>© {new Date().getFullYear()} Hair Longevity Institute™</div>
-            </div>
-            <div className="flex gap-4">
-              <Link href="/privacy" className="text-white">Privacy</Link>
-              <Link href="/terms" className="hover:text-white">Terms</Link>
-              <Link href="/disclaimer" className="hover:text-white">Disclaimer</Link>
-            </div>
-          </div>
-        </Container>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }

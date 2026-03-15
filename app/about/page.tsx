@@ -1,8 +1,12 @@
 // app/about/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isLongevityEnabled } from "@/lib/features";
 import AnimatedFollicleSystemMap from "@/components/AnimatedFollicleSystemMap";
 import SurgicalReadinessMatrixInteractive from "@/components/SurgicalReadinessMatrixInteractive";
+import PublicHeader from "@/components/public/PublicHeader";
+import PublicFooter from "@/components/public/PublicFooter";
+import { Container, SectionTitle, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
 
 export const metadata: Metadata = {
   title: "About | Hair Longevity Institute™",
@@ -10,104 +14,22 @@ export const metadata: Metadata = {
     "30+ years clinical experience. Biology-first strategy. International trichologist, surgical hair restoration, hormone mapping, and regenerative integration.",
 };
 
-function Container({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-4xl px-6">{children}</div>;
-}
-
-function SectionTitle({
-  eyebrow,
-  title,
-  subtitle,
-}: {
-  eyebrow?: string;
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div className="max-w-3xl">
-      {eyebrow ? (
-        <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
-          {eyebrow.toUpperCase()}
-        </div>
-      ) : null}
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-        {title}
-      </h2>
-      {subtitle ? (
-        <p className="mt-4 text-base leading-relaxed text-white/75 md:text-lg">
-          {subtitle}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function PrimaryButton({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center justify-center rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--bg))] shadow-lg shadow-black/20 transition hover:opacity-90"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function SecondaryButton({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/10"
-    >
-      {children}
-    </Link>
-  );
-}
-
 export default function AboutPage() {
+  const useLongevity = isLongevityEnabled();
+  const startHref = useLongevity ? "/longevity/start" : "/start";
+
   return (
     <main className="min-h-screen">
-      <header className="border-b border-white/10 bg-black/10">
-        <Container>
-          <div className="flex items-center justify-between py-4">
-            <Link href="/" className="flex items-center gap-3">
-              <img src="/brand/hli-logo.png" alt="Hair Longevity Institute" width={220} height={44} className="h-11 w-auto" />
-            </Link>
-            <nav className="flex items-center gap-4 text-sm text-white/75">
-              <Link href="/" className="hover:text-white">
-                Home
-              </Link>
-              <Link href="/start" className="hover:text-white">
-                Start Review
-              </Link>
-              <Link href="/book" className="hover:text-white">
-                Book Consultation
-              </Link>
-            </nav>
-          </div>
-        </Container>
-      </header>
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
 
       {/* Hero */}
-      <section className="relative overflow-hidden py-16 md:py-24">
+      <section className="relative overflow-hidden py-14 md:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(198,167,94,0.12),transparent_60%)]" />
         <Container>
           <div className="relative">
-            <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
+            <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
               HAIR LONGEVITY INSTITUTE™
-            </div>
+            </p>
             <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white md:text-5xl">
               International Hair Longevity Specialist
             </h1>
@@ -195,11 +117,11 @@ export default function AboutPage() {
       </section>
 
       {/* The System Map */}
-      <section className="py-20 border-t border-white/10">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-sm tracking-widest text-[rgb(198,167,94)]">
+      <section className="border-t border-white/10 py-[var(--section-py)] md:py-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
             THE SYSTEM
-          </div>
+          </p>
 
           <h2 className="mt-3 text-3xl font-semibold text-white">
             The Hair Longevity System Map™
@@ -217,11 +139,11 @@ export default function AboutPage() {
       </section>
 
       {/* Surgical Readiness Matrix */}
-      <section className="py-20 border-t border-white/10">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="text-sm tracking-widest text-[rgb(198,167,94)]">
+      <section className="border-t border-white/10 py-[var(--section-py)] md:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
             SURGICAL DECISIONING
-          </div>
+          </p>
 
           <h2 className="mt-3 text-3xl font-semibold text-white">
             Surgical Readiness Matrix™
@@ -441,44 +363,24 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="border-t border-white/10 bg-black/10 py-16">
+      <section className="border-t border-white/10 bg-black/10 py-[var(--section-py)]">
         <Container>
           <div className="text-center">
-            <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
+            <p className="text-sm font-semibold tracking-[0.2em] text-[rgb(var(--gold))]">
               READY TO UNDERSTAND YOUR BIOLOGY?
-            </div>
-            <h3 className="mt-3 text-2xl font-semibold text-white">
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
               Take the next step
-            </h3>
+            </h2>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <PrimaryButton href="/start">Start Your Diagnostic Review</PrimaryButton>
-              <SecondaryButton href="/book">Book Specialist Consultation</SecondaryButton>
+              <PrimaryButton href={startHref}>Start your assessment</PrimaryButton>
+              <SecondaryButton href="/book">Book specialist consultation</SecondaryButton>
             </div>
           </div>
         </Container>
       </section>
 
-      <footer className="border-t border-white/10 py-8">
-        <Container>
-          <div className="flex flex-col items-start justify-between gap-4 text-xs text-white/55 md:flex-row">
-            <div className="flex items-center gap-3">
-              <img src="/brand/hli-mark.png" alt="Hair Longevity Institute mark" width={28} height={28} />
-              <div>© {new Date().getFullYear()} Hair Longevity Institute™</div>
-            </div>
-            <div className="flex gap-4">
-              <Link href="/privacy" className="hover:text-white">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-white">
-                Terms
-              </Link>
-              <Link href="/disclaimer" className="hover:text-white">
-                Disclaimer
-              </Link>
-            </div>
-          </div>
-        </Container>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }

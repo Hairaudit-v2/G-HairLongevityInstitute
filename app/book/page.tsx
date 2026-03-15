@@ -1,59 +1,29 @@
 // app/book/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { isLongevityEnabled } from "@/lib/features";
+import PublicHeader from "@/components/public/PublicHeader";
+import PublicFooter from "@/components/public/PublicFooter";
+import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 
 export const metadata: Metadata = {
   title: "Book Specialist Consultation | Hair Longevity Institute™",
   description: "45-minute Zoom consultation with a senior trichologist. Full blood interpretation, personalised roadmap, and GP guidance.",
 };
 
-function Container({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-4xl px-6">{children}</div>;
-}
-
-function PrimaryButton({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center justify-center rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--bg))] shadow-lg shadow-black/20 transition hover:opacity-90"
-    >
-      {children}
-    </Link>
-  );
-}
-
 export default function BookPage() {
+  const useLongevity = isLongevityEnabled();
+  const startHref = useLongevity ? "/longevity/start" : "/start";
+
   return (
     <main className="min-h-screen">
-      <header className="border-b border-white/10 bg-black/10">
-        <Container>
-          <div className="flex items-center justify-between py-4">
-            <Link href="/" className="flex items-center gap-3">
-              <img src="/brand/hli-logo.png" alt="Hair Longevity Institute" width={220} height={44} className="h-11 w-auto" />
-            </Link>
-            <nav className="flex items-center gap-4 text-sm text-white/75">
-              <Link href="/" className="hover:text-white">
-                Home
-              </Link>
-              <Link href="/start" className="hover:text-white">
-                Start Review
-              </Link>
-            </nav>
-          </div>
-        </Container>
-      </header>
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
 
-      <section className="py-16">
+      <section className="py-14 md:py-16">
         <Container>
-          <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
+          <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
             SPECIALIST CONSULTATION
-          </div>
+          </p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white md:text-5xl">
             Book a Specialist Strategy Consultation
           </h1>
@@ -103,10 +73,10 @@ export default function BookPage() {
           </div>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <PrimaryButton href="/start">Start with Diagnostic Review first</PrimaryButton>
+            <PrimaryButton href={startHref}>Start with diagnostic review first</PrimaryButton>
             <Link
               href="/"
-              className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/10"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/10"
             >
               ← Back to home
             </Link>
@@ -114,21 +84,7 @@ export default function BookPage() {
         </Container>
       </section>
 
-      <footer className="mt-16 border-t border-white/10 py-8">
-        <Container>
-          <div className="flex flex-col items-start justify-between gap-4 text-xs text-white/55 md:flex-row">
-            <div className="flex items-center gap-3">
-              <img src="/brand/hli-mark.png" alt="Hair Longevity Institute mark" width={28} height={28} />
-              <div>© {new Date().getFullYear()} Hair Longevity Institute™</div>
-            </div>
-            <div className="flex gap-4">
-              <Link href="/privacy" className="hover:text-white">Privacy</Link>
-              <Link href="/terms" className="hover:text-white">Terms</Link>
-              <Link href="/disclaimer" className="hover:text-white">Disclaimer</Link>
-            </div>
-          </div>
-        </Container>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }
