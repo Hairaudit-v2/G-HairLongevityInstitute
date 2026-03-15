@@ -5,6 +5,11 @@ import {
   getLongevityWorkflowSnapshotForIntake,
   type LongevityWorkflowSnapshot,
 } from "./workflowSnapshot";
+import {
+  getLongevityReminderEmailAdapter,
+  isValidReminderEmail,
+  sendLongevityReminderEmail,
+} from "./reminderEmail";
 
 export const LONGEVITY_REMINDER_TYPE = {
   FOLLOW_UP_DUE: "follow_up_due",
@@ -693,4 +698,150 @@ export async function runLongevityReminderSweep(
     cancelled,
     results,
   };
+}
+
+export type SendStagedLongevityRemindersResult = {
+  sent: number;
+  failed: number;
+  skipped: number;
+  errors: Array<{ reminderId: string; error: string }>;
+  message?: string;
+};
+
+/**
+ * Send staged reminders by email. Only processes rows with status = 'staged'.
+ * Skips when email delivery is not configured or recipient email is invalid.
+ * Updates each row to 'sent' (sent_at) or 'failed' (last_error) and records audit events.
+ */
+export async function sendStagedLongevityReminders(
+  supabase: SupabaseClient,
+  params?: { limit?: number }
+): Promise<SendStagedLongevityRemindersResult> {
+  const limit = Math.max(1, Math.min(params?.limit ?? 50, 100));
+  const adapter = getLongevityReminderEmailAdapter();
+  if (!adapter) {
+    return {
+      sent: 0,
+      failed: 0,
+      skipped: 0,
+      errors: [],
+      message: "Email delivery not configured (LONGEVITY_EMAIL_PROVIDER).",
+    };
+  }
+
+  const { data: rows, error } = await supabase
+    .from("hli_longevity_reminders")
+    .select(
+      "id, profile_id, intake_id, recipient_email, subject, body_text, dedupe_key"
+    )
+    .eq("status", "staged")
+    .eq("delivery_channel", "email")
+    .order("scheduled_for", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  const list = rows ?? [];
+
+  let sent = 0;
+  let failed = 0;
+  let skipped = 0;
+  const errors: Array<{ reminderId: string; error: string }> = [];
+  const now = new Date().toISOString();
+
+  for (const row of list) {
+    if (!isValidReminderEmail(row.recipient_email)) {
+      const updateErr = await supabase
+        .from("hli_longevity_reminders")
+        .update({
+          status: "failed",
+          last_error: "Invalid or missing recipient email",
+          updated_at: now,
+        })
+        .eq("id", row.id);
+      if (!updateErr.error) {
+        failed += 1;
+        errors.push({
+          reminderId: row.id,
+          error: "Invalid or missing recipient email",
+        });
+        await auditLongevityEvent(supabase, {
+          profile_id: row.profile_id,
+          intake_id: row.intake_id,
+          event_type: "reminder_send_failed",
+          payload: {
+            reminder_id: row.id,
+            dedupe_key: row.dedupe_key,
+            reason: "invalid_recipient",
+          },
+          actor_type: "system",
+        });
+      }
+      continue;
+    }
+
+    const result = await sendLongevityReminderEmail({
+      to: row.recipient_email.trim(),
+      subject: row.subject,
+      bodyText: row.body_text,
+      reminderId: row.id,
+    });
+
+    if (result.ok) {
+      const updateErr = await supabase
+        .from("hli_longevity_reminders")
+        .update({
+          status: "sent",
+          sent_at: now,
+          last_error: null,
+          updated_at: now,
+        })
+        .eq("id", row.id);
+      if (updateErr.error) {
+        failed += 1;
+        errors.push({ reminderId: row.id, error: updateErr.error.message });
+      } else {
+        sent += 1;
+        await auditLongevityEvent(supabase, {
+          profile_id: row.profile_id,
+          intake_id: row.intake_id,
+          event_type: "reminder_sent",
+          payload: {
+            reminder_id: row.id,
+            dedupe_key: row.dedupe_key,
+            provider: result.provider,
+          },
+          actor_type: "system",
+        });
+      }
+    } else {
+      const updateErr = await supabase
+        .from("hli_longevity_reminders")
+        .update({
+          status: "failed",
+          last_error: result.error,
+          updated_at: now,
+        })
+        .eq("id", row.id);
+      if (!updateErr.error) {
+        failed += 1;
+        errors.push({ reminderId: row.id, error: result.error });
+      }
+      await auditLongevityEvent(supabase, {
+        profile_id: row.profile_id,
+        intake_id: row.intake_id,
+        event_type: "reminder_send_failed",
+        payload: {
+          reminder_id: row.id,
+          dedupe_key: row.dedupe_key,
+          provider: result.provider,
+          error: result.error,
+        },
+        actor_type: "system",
+      });
+    }
+  }
+
+  return { sent, failed, skipped, errors };
 }
