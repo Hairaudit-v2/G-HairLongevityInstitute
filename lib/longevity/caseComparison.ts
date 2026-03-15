@@ -499,6 +499,49 @@ export async function getCaseComparisonForIntake(
     intake_id
   );
 
+  for (const item of scalpImageComparison.visualProgressSummary) {
+    const lower = item.toLowerCase();
+    if (lower.includes("less prominent") || lower.includes("lower visible severity")) {
+      pushUnique(comparison.improvedAreas, item);
+    } else if (
+      lower.includes("more prominent") ||
+      lower.includes("higher visible severity")
+    ) {
+      pushUnique(comparison.worsenedAreas, item);
+    } else if (lower.includes("stable")) {
+      pushUnique(comparison.suggestedReviewFocus, item);
+    } else {
+      pushUnique(comparison.suggestedReviewFocus, item);
+    }
+  }
+
+  for (const item of scalpImageComparison.visualPersistentDrivers) {
+    pushUnique(comparison.persistentDrivers, item);
+  }
+  for (const item of scalpImageComparison.visualFollowUpConsiderations) {
+    pushUnique(comparison.suggestedReviewFocus, item);
+  }
+  for (const item of scalpImageComparison.patientVisualProgressSummary) {
+    if (
+      scalpImageComparison.comparisonStatus ===
+      SCALP_IMAGE_COMPARISON_STATUS.IMPROVED
+    ) {
+      pushUnique(comparison.patientSummary.whatHasImproved, item);
+    } else if (
+      scalpImageComparison.comparisonStatus ===
+      SCALP_IMAGE_COMPARISON_STATUS.WORSENED
+    ) {
+      pushUnique(comparison.patientSummary.stillNeedsFollowUp, item);
+    } else if (
+      scalpImageComparison.comparisonStatus === SCALP_IMAGE_COMPARISON_STATUS.STABLE ||
+      scalpImageComparison.comparisonStatus === SCALP_IMAGE_COMPARISON_STATUS.UNCERTAIN ||
+      scalpImageComparison.comparisonStatus ===
+        SCALP_IMAGE_COMPARISON_STATUS.INSUFFICIENT_IMAGES
+    ) {
+      pushUnique(comparison.patientSummary.stillNeedsFollowUp, item);
+    }
+  }
+
   if (
     scalpImageComparison.comparisonStatus ===
     SCALP_IMAGE_COMPARISON_STATUS.IMPROVED
@@ -534,7 +577,9 @@ export async function getCaseComparisonForIntake(
   ) {
     pushUnique(
       comparison.suggestedReviewFocus,
-      "Review the current and previous scalp photo sets and record a structured visual comparison."
+      scalpImageComparison.hasPreviousConfirmedFindings
+        ? "Review the current scalp photos, confirm the visible findings, and save the structured visual comparison."
+        : "Confirm the current scalp-photo findings so this intake can be used as a visual baseline for future comparison."
     );
   }
 
@@ -546,7 +591,8 @@ export async function getCaseComparisonForIntake(
   ) {
     pushUnique(
       comparison.patientSummary.stillNeedsFollowUp,
-      "Updated scalp photos may still help your clinician track visible progress over time."
+      scalpImageComparison.patientVisualProgressSummary[0] ??
+        "Updated scalp photos may still help your clinician track visible progress over time."
     );
   }
 

@@ -16,7 +16,18 @@ import {
   type ScalpImageComparisonSummary,
   type ScalpImageComparisonStatus,
 } from "@/lib/longevity/scalpImageComparisons";
+import {
+  SCALP_FINDING_CONFIDENCE,
+  SCALP_VISUAL_LIKELIHOOD,
+  type ConfirmedScalpImageFindings,
+  type ScalpFindingConfidence,
+  type ScalpVisualLikelihood,
+} from "@/lib/longevity/scalpImageComparison";
 import type { TreatmentResponseComparison } from "@/lib/longevity/treatmentResponse";
+import {
+  SCALP_IMAGE_QUALITY,
+  SCALP_SEVERITY_ESTIMATE,
+} from "@/lib/longevity/scalpImageAnalysis";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
@@ -186,6 +197,33 @@ const SCALP_COMPARISON_LABELS: Record<string, string> = {
   [SCALP_IMAGE_COMPARISON_STATUS.INSUFFICIENT_IMAGES]: "Insufficient images",
 };
 
+const SCALP_VISUAL_LIKELIHOOD_LABELS: Record<ScalpVisualLikelihood, string> = {
+  unlikely: "Unlikely",
+  possible: "Possible",
+  likely: "Likely",
+  uncertain: "Uncertain",
+};
+
+const SCALP_CONFIDENCE_LABELS: Record<ScalpFindingConfidence, string> = {
+  low: "Low",
+  moderate: "Moderate",
+  high: "High",
+};
+
+const SCALP_SEVERITY_LABELS: Record<string, string> = {
+  [SCALP_SEVERITY_ESTIMATE.MINIMAL]: "Minimal",
+  [SCALP_SEVERITY_ESTIMATE.MILD]: "Mild",
+  [SCALP_SEVERITY_ESTIMATE.MODERATE]: "Moderate",
+  [SCALP_SEVERITY_ESTIMATE.ADVANCED]: "Advanced",
+  [SCALP_SEVERITY_ESTIMATE.UNCERTAIN]: "Uncertain",
+};
+
+const SCALP_QUALITY_LABELS: Record<string, string> = {
+  [SCALP_IMAGE_QUALITY.USABLE]: "Usable",
+  [SCALP_IMAGE_QUALITY.BORDERLINE]: "Borderline",
+  [SCALP_IMAGE_QUALITY.POOR]: "Poor",
+};
+
 const SCALP_COMPARISON_REGIONS = [
   { key: "frontal_hairline", label: "Frontal hairline" },
   { key: "temples", label: "Temples" },
@@ -194,6 +232,70 @@ const SCALP_COMPARISON_REGIONS = [
   { key: "part_line", label: "Part line" },
   { key: "whole_scalp", label: "Whole scalp" },
 ] as const;
+
+function VisualFindingCard({
+  title,
+  findings,
+}: {
+  title: string;
+  findings:
+    | (ConfirmedScalpImageFindings & { suitableForComparison?: boolean })
+    | null
+    | undefined;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+      <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">
+        {title}
+      </h4>
+      {!findings ? (
+        <p className="mt-2 text-sm text-white/50">No confirmed visual findings saved yet.</p>
+      ) : (
+        <ul className="mt-2 space-y-1 text-sm text-white/80">
+          <li>
+            Thinning distribution:{" "}
+            {findings.thinningDistribution.length > 0
+              ? findings.thinningDistribution.join(", ").replace(/_/g, " ")
+              : "—"}
+          </li>
+          <li>
+            Severity band:{" "}
+            {findings.severityBand
+              ? SCALP_SEVERITY_LABELS[findings.severityBand] ?? findings.severityBand
+              : "—"}
+          </li>
+          <li>
+            Visible scale:{" "}
+            {findings.visibleScaleLikelihood
+              ? SCALP_VISUAL_LIKELIHOOD_LABELS[findings.visibleScaleLikelihood]
+              : "—"}
+          </li>
+          <li>
+            Visible redness / inflammatory features:{" "}
+            {findings.visibleRednessLikelihood
+              ? SCALP_VISUAL_LIKELIHOOD_LABELS[findings.visibleRednessLikelihood]
+              : "—"}
+          </li>
+          <li>
+            Image quality:{" "}
+            {findings.imageQuality
+              ? SCALP_QUALITY_LABELS[findings.imageQuality] ?? findings.imageQuality
+              : "—"}
+          </li>
+          <li>
+            Finding confidence:{" "}
+            {findings.findingConfidence
+              ? SCALP_CONFIDENCE_LABELS[findings.findingConfidence]
+              : "—"}
+          </li>
+          {"suitableForComparison" in findings && findings.suitableForComparison === false && (
+            <li className="text-amber-200">Comparison suitability: limited</li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function FlagIcons({ flags }: { flags: ReviewQueueItem["flags"] }) {
   const items: { key: string; on: boolean; label: string }[] = [
@@ -308,10 +410,19 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     comparison_status: ScalpImageComparisonStatus;
     compared_regions: string[];
     clinician_summary: string;
+    current_findings: ConfirmedScalpImageFindings;
   }>({
     comparison_status: SCALP_IMAGE_COMPARISON_STATUS.PENDING_REVIEW,
     compared_regions: [],
     clinician_summary: "",
+    current_findings: {
+      thinningDistribution: [],
+      severityBand: SCALP_SEVERITY_ESTIMATE.UNCERTAIN,
+      visibleScaleLikelihood: SCALP_VISUAL_LIKELIHOOD.UNCERTAIN,
+      visibleRednessLikelihood: SCALP_VISUAL_LIKELIHOOD.UNCERTAIN,
+      imageQuality: SCALP_IMAGE_QUALITY.BORDERLINE,
+      findingConfidence: SCALP_FINDING_CONFIDENCE.MODERATE,
+    },
   });
   const [editingMarkerId, setEditingMarkerId] = useState<string | null>(null);
   const [addMarkerForm, setAddMarkerForm] = useState({
@@ -391,6 +502,26 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
           data.case_comparison?.scalpImageComparison?.comparedRegions ?? [],
         clinician_summary:
           data.case_comparison?.scalpImageComparison?.clinicianNotes ?? "",
+        current_findings: {
+          thinningDistribution:
+            data.case_comparison?.scalpImageComparison?.currentFindings
+              ?.thinningDistribution ?? [],
+          severityBand:
+            data.case_comparison?.scalpImageComparison?.currentFindings
+              ?.severityBand ?? SCALP_SEVERITY_ESTIMATE.UNCERTAIN,
+          visibleScaleLikelihood:
+            data.case_comparison?.scalpImageComparison?.currentFindings
+              ?.visibleScaleLikelihood ?? SCALP_VISUAL_LIKELIHOOD.UNCERTAIN,
+          visibleRednessLikelihood:
+            data.case_comparison?.scalpImageComparison?.currentFindings
+              ?.visibleRednessLikelihood ?? SCALP_VISUAL_LIKELIHOOD.UNCERTAIN,
+          imageQuality:
+            data.case_comparison?.scalpImageComparison?.currentFindings
+              ?.imageQuality ?? SCALP_IMAGE_QUALITY.BORDERLINE,
+          findingConfidence:
+            data.case_comparison?.scalpImageComparison?.currentFindings
+              ?.findingConfidence ?? SCALP_FINDING_CONFIDENCE.MODERATE,
+        },
       });
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Failed to load case");
@@ -517,6 +648,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
           comparison_status: scalpComparisonForm.comparison_status,
           compared_regions: scalpComparisonForm.compared_regions,
           clinician_summary: scalpComparisonForm.clinician_summary.trim(),
+          current_findings: scalpComparisonForm.current_findings,
         }),
       });
       const data = await res.json();
@@ -1255,35 +1387,145 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                 {caseDetail.case_comparison?.scalpImageComparison && (
                   <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
                     <h3 className="text-sm font-medium text-white/90">Scalp-image comparison</h3>
-                    <p className="mt-2 text-xs text-white/60">
-                      Current photos: {caseDetail.case_comparison.scalpImageComparison.currentPhotoCount} · Previous photos: {caseDetail.case_comparison.scalpImageComparison.previousPhotoCount}
-                    </p>
-                    <p className="mt-1 text-xs text-white/50">
-                      Status: {SCALP_COMPARISON_LABELS[caseDetail.case_comparison.scalpImageComparison.comparisonStatus] ?? caseDetail.case_comparison.scalpImageComparison.comparisonStatus}
-                    </p>
-                    {caseDetail.case_comparison.scalpImageComparison.clinicianSummary.length > 0 && (
-                      <ul className="mt-3 space-y-1 text-sm text-white/80">
-                        {caseDetail.case_comparison.scalpImageComparison.clinicianSummary.map((item) => (
-                          <li key={item}>• {item}</li>
-                        ))}
-                      </ul>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/60">
+                      <span>
+                        Current photos: {caseDetail.case_comparison.scalpImageComparison.currentPhotoCount}
+                      </span>
+                      <span>·</span>
+                      <span>
+                        Previous photos: {caseDetail.case_comparison.scalpImageComparison.previousPhotoCount}
+                      </span>
+                      <span>·</span>
+                      <span>
+                        Status:{" "}
+                        {SCALP_COMPARISON_LABELS[
+                          caseDetail.case_comparison.scalpImageComparison
+                            .comparisonStatus
+                        ] ??
+                          caseDetail.case_comparison.scalpImageComparison
+                            .comparisonStatus}
+                      </span>
+                      <span>·</span>
+                      <span>
+                        Comparison confidence:{" "}
+                        {
+                          SCALP_CONFIDENCE_LABELS[
+                            caseDetail.case_comparison.scalpImageComparison
+                              .visualComparisonConfidence
+                          ]
+                        }
+                      </span>
+                    </div>
+                    {caseDetail.case_comparison.scalpImageComparison
+                      .comparisonLimitedByImageQuality && (
+                      <p className="mt-2 text-xs text-amber-200">
+                        Comparison limited by image quality. Interpret subtle change
+                        cautiously.
+                      </p>
                     )}
+                    {!caseDetail.case_comparison.scalpImageComparison
+                      .hasPreviousConfirmedFindings && (
+                      <p className="mt-2 text-xs text-white/50">
+                        No previous confirmed scalp-image findings are available yet,
+                        so this intake will act as the structured visual baseline once
+                        saved.
+                      </p>
+                    )}
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      <VisualFindingCard
+                        title="Current confirmed findings"
+                        findings={
+                          caseDetail.case_comparison.scalpImageComparison
+                            .currentFindings
+                        }
+                      />
+                      <VisualFindingCard
+                        title="Previous confirmed findings"
+                        findings={
+                          caseDetail.case_comparison.scalpImageComparison
+                            .previousFindings
+                        }
+                      />
+                    </div>
+                    <div className="mt-4 grid gap-4 md:grid-cols-3">
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-emerald-200/80">
+                          Progress summary
+                        </h4>
+                        {caseDetail.case_comparison.scalpImageComparison
+                          .visualProgressSummary.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">
+                            No confirmed visual progression summary yet.
+                          </p>
+                        ) : (
+                          <ul className="mt-2 space-y-1 text-sm text-white/80">
+                            {caseDetail.case_comparison.scalpImageComparison.visualProgressSummary.map(
+                              (item) => (
+                                <li key={item}>• {item}</li>
+                              )
+                            )}
+                          </ul>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">
+                          Persistent visible drivers
+                        </h4>
+                        {caseDetail.case_comparison.scalpImageComparison
+                          .visualPersistentDrivers.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">
+                            No persistent visible drivers flagged.
+                          </p>
+                        ) : (
+                          <ul className="mt-2 space-y-1 text-sm text-white/80">
+                            {caseDetail.case_comparison.scalpImageComparison.visualPersistentDrivers.map(
+                              (item) => (
+                                <li key={item}>• {item}</li>
+                              )
+                            )}
+                          </ul>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-amber-200/80">
+                          Follow-up considerations
+                        </h4>
+                        {caseDetail.case_comparison.scalpImageComparison
+                          .visualFollowUpConsiderations.length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">
+                            No additional visual follow-up caveats.
+                          </p>
+                        ) : (
+                          <ul className="mt-2 space-y-1 text-sm text-white/80">
+                            {caseDetail.case_comparison.scalpImageComparison.visualFollowUpConsiderations.map(
+                              (item) => (
+                                <li key={item}>• {item}</li>
+                              )
+                            )}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                       <div>
                         <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
-                          Comparison status
+                          Current severity band
                         </label>
                         <select
-                          value={scalpComparisonForm.comparison_status}
+                          value={scalpComparisonForm.current_findings.severityBand ?? ""}
                           onChange={(e) =>
                             setScalpComparisonForm((prev) => ({
                               ...prev,
-                              comparison_status: e.target.value as ScalpImageComparisonStatus,
+                              current_findings: {
+                                ...prev.current_findings,
+                                severityBand: e.target
+                                  .value as ConfirmedScalpImageFindings["severityBand"],
+                              },
                             }))
                           }
                           className="mt-2 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white focus:border-[rgb(var(--gold))] focus:outline-none"
                         >
-                          {Object.entries(SCALP_COMPARISON_LABELS).map(([value, label]) => (
+                          {Object.entries(SCALP_SEVERITY_LABELS).map(([value, label]) => (
                             <option key={value} value={value}>
                               {label}
                             </option>
@@ -1292,34 +1534,176 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                       </div>
                       <div>
                         <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
-                          Compared regions
+                          Current image quality
                         </label>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {SCALP_COMPARISON_REGIONS.map((region) => {
-                            const active = scalpComparisonForm.compared_regions.includes(region.key);
-                            return (
-                              <button
-                                key={region.key}
-                                type="button"
-                                onClick={() =>
-                                  setScalpComparisonForm((prev) => ({
-                                    ...prev,
-                                    compared_regions: active
-                                      ? prev.compared_regions.filter((item) => item !== region.key)
-                                      : [...prev.compared_regions, region.key],
-                                  }))
-                                }
-                                className={`rounded border px-2.5 py-1 text-xs ${
-                                  active
-                                    ? "border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 text-white"
-                                    : "border-white/20 bg-white/5 text-white/70"
-                                }`}
-                              >
-                                {region.label}
-                              </button>
-                            );
-                          })}
+                        <select
+                          value={scalpComparisonForm.current_findings.imageQuality ?? ""}
+                          onChange={(e) =>
+                            setScalpComparisonForm((prev) => ({
+                              ...prev,
+                              current_findings: {
+                                ...prev.current_findings,
+                                imageQuality: e.target
+                                  .value as ConfirmedScalpImageFindings["imageQuality"],
+                              },
+                            }))
+                          }
+                          className="mt-2 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        >
+                          {Object.entries(SCALP_QUALITY_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                          Visible scale likelihood
+                        </label>
+                        <select
+                          value={
+                            scalpComparisonForm.current_findings
+                              .visibleScaleLikelihood ?? ""
+                          }
+                          onChange={(e) =>
+                            setScalpComparisonForm((prev) => ({
+                              ...prev,
+                              current_findings: {
+                                ...prev.current_findings,
+                                visibleScaleLikelihood: e.target
+                                  .value as ConfirmedScalpImageFindings["visibleScaleLikelihood"],
+                              },
+                            }))
+                          }
+                          className="mt-2 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        >
+                          {Object.entries(SCALP_VISUAL_LIKELIHOOD_LABELS).map(
+                            ([value, label]) => (
+                              <option key={value} value={value}>
+                                {label}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                          Visible redness / inflammatory features
+                        </label>
+                        <select
+                          value={
+                            scalpComparisonForm.current_findings
+                              .visibleRednessLikelihood ?? ""
+                          }
+                          onChange={(e) =>
+                            setScalpComparisonForm((prev) => ({
+                              ...prev,
+                              current_findings: {
+                                ...prev.current_findings,
+                                visibleRednessLikelihood: e.target
+                                  .value as ConfirmedScalpImageFindings["visibleRednessLikelihood"],
+                              },
+                            }))
+                          }
+                          className="mt-2 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        >
+                          {Object.entries(SCALP_VISUAL_LIKELIHOOD_LABELS).map(
+                            ([value, label]) => (
+                              <option key={value} value={value}>
+                                {label}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                          Finding confidence
+                        </label>
+                        <select
+                          value={
+                            scalpComparisonForm.current_findings.findingConfidence ??
+                            ""
+                          }
+                          onChange={(e) =>
+                            setScalpComparisonForm((prev) => ({
+                              ...prev,
+                              current_findings: {
+                                ...prev.current_findings,
+                                findingConfidence: e.target
+                                  .value as ConfirmedScalpImageFindings["findingConfidence"],
+                              },
+                            }))
+                          }
+                          className="mt-2 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        >
+                          {Object.entries(SCALP_CONFIDENCE_LABELS).map(
+                            ([value, label]) => (
+                              <option key={value} value={value}>
+                                {label}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                          Derived comparison status
+                        </label>
+                        <div className="mt-2 rounded border border-white/20 bg-black/20 px-3 py-2 text-sm text-white/80">
+                          {SCALP_COMPARISON_LABELS[
+                            caseDetail.case_comparison.scalpImageComparison
+                              .comparisonStatus
+                          ] ??
+                            caseDetail.case_comparison.scalpImageComparison
+                              .comparisonStatus}
                         </div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-xs font-medium uppercase tracking-wide text-white/50">
+                        Current thinning distribution
+                      </label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {SCALP_COMPARISON_REGIONS.map((region) => {
+                          const active = scalpComparisonForm.current_findings.thinningDistribution.includes(
+                            region.key
+                          );
+                          return (
+                            <button
+                              key={region.key}
+                              type="button"
+                              onClick={() =>
+                                setScalpComparisonForm((prev) => {
+                                  const thinningDistribution = active
+                                    ? prev.current_findings.thinningDistribution.filter(
+                                        (item) => item !== region.key
+                                      )
+                                    : [
+                                        ...prev.current_findings.thinningDistribution,
+                                        region.key,
+                                      ];
+                                  return {
+                                    ...prev,
+                                    compared_regions: thinningDistribution,
+                                    current_findings: {
+                                      ...prev.current_findings,
+                                      thinningDistribution,
+                                    },
+                                  };
+                                })
+                              }
+                              className={`rounded border px-2.5 py-1 text-xs ${
+                                active
+                                  ? "border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 text-white"
+                                  : "border-white/20 bg-white/5 text-white/70"
+                              }`}
+                            >
+                              {region.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                     <div className="mt-3">
@@ -1335,7 +1719,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                           }))
                         }
                         rows={3}
-                        placeholder="Visible change, density pattern, scalp coverage, or photo limitations."
+                        placeholder="Visible pattern, confidence caveats, or photo limitations."
                         className="mt-2 w-full rounded border border-white/20 bg-black/20 px-3 py-2 text-sm text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
                       />
                     </div>

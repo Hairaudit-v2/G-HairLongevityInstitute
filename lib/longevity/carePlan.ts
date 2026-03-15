@@ -83,7 +83,8 @@ export function buildCarePlan(input: CarePlanInput): CarePlanOutput {
   const hasStructuredMarkers = input.hasStructuredMarkers ?? false;
   const hasNewerIntake = input.hasNewerSubmittedIntake ?? false;
   const treatmentResponseSummary = input.treatmentResponseSummary ?? [];
-  const scalpImageComparison = input.scalpImageComparison ?? [];
+  const legacyScalpImageComparison = input.scalpImageComparison ?? [];
+  const scalpImageComparison = comparison?.scalpImageComparison ?? null;
 
   const brStatus = bloodRequest?.status ?? null;
   const letterExists = brStatus && ["letter_requested", "letter_generated", "results_uploaded"].includes(brStatus);
@@ -159,8 +160,23 @@ export function buildCarePlan(input: CarePlanInput): CarePlanOutput {
     pushUnique(nextStepRecommendations, item);
   }
 
-  for (const item of scalpImageComparison) {
+  for (const item of scalpImageComparison?.visualProgressSummary ?? []) {
     pushUnique(nextStepRecommendations, item);
+  }
+  for (const item of scalpImageComparison?.visualPersistentDrivers ?? []) {
+    pushUnique(nextStepRecommendations, item);
+  }
+  for (const item of scalpImageComparison?.visualFollowUpConsiderations ?? []) {
+    pushUnique(nextStepRecommendations, item);
+  }
+  for (const item of legacyScalpImageComparison) {
+    pushUnique(nextStepRecommendations, item);
+  }
+  if (scalpImageComparison?.comparisonLimitedByImageQuality) {
+    pushUnique(
+      nextStepRecommendations,
+      "Scalp photo comparison is limited by image quality; request a more consistent follow-up photo set if visual tracking remains clinically useful."
+    );
   }
 
   // --- Referral recommended ---

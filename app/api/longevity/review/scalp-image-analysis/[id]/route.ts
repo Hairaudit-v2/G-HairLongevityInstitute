@@ -10,6 +10,10 @@ import {
   markScalpImageAnalysisDraftApplied,
 } from "@/lib/longevity/scalpImageAnalysisDrafts";
 import { upsertScalpImageComparison } from "@/lib/longevity/scalpImageComparisons";
+import {
+  mapNumericConfidenceToBand,
+  mapVisibleFindingsToLikelihoods,
+} from "@/lib/longevity/scalpImageComparison";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +126,16 @@ export async function PATCH(
       comparison_status: mapComparisonDirectionToStatus(draft.comparison_direction),
       compared_regions: draft.thinning_distribution,
       clinician_summary: draft.draft_summary,
+      current_findings: {
+        thinningDistribution: draft.thinning_distribution,
+        severityBand: draft.severity_estimate,
+        ...mapVisibleFindingsToLikelihoods({
+          visibleFindings: draft.visible_findings,
+          imageQuality: draft.image_quality,
+        }),
+        imageQuality: draft.image_quality,
+        findingConfidence: mapNumericConfidenceToBand(draft.confidence),
+      },
     });
     if ("error" in comparison) {
       return NextResponse.json({ ok: false, error: comparison.error }, { status: 500 });

@@ -120,6 +120,16 @@ export async function GET(
         ),
         hasStructuredMarkers: blood_results.length > 0,
       },
+      longitudinalSignals: {
+        scalpChanges: [
+          ...(case_comparison?.scalpImageComparison?.visualProgressSummary ?? []),
+          ...(case_comparison?.scalpImageComparison?.visualPersistentDrivers ?? []),
+          ...(case_comparison?.scalpImageComparison?.visualFollowUpConsiderations ??
+            []),
+        ],
+        treatmentResponseChanges:
+          case_comparison?.treatmentResponse?.clinicianSummary ?? [],
+      },
     });
 
     const care_plan = generateCarePlan({

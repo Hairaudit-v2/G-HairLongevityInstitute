@@ -99,6 +99,16 @@ export async function getLongevityWorkflowSnapshotForIntake(
       hasBloodResultUploadDocument,
       hasStructuredMarkers,
     },
+    longitudinalSignals: {
+      scalpChanges: [
+        ...(caseComparison?.scalpImageComparison?.visualProgressSummary ?? []),
+        ...(caseComparison?.scalpImageComparison?.visualPersistentDrivers ?? []),
+        ...(caseComparison?.scalpImageComparison?.visualFollowUpConsiderations ??
+          []),
+      ],
+      treatmentResponseChanges:
+        caseComparison?.treatmentResponse?.clinicianSummary ?? [],
+    },
   });
 
   const newerSubmittedIntakes =

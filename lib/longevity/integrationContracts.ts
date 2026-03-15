@@ -21,6 +21,9 @@ export const LONGEVITY_SIGNAL_KEY = {
   FOLLOW_UP_RECOMMENDED: "follow_up_recommended",
   BLOOD_RESULTS_PENDING: "blood_results_pending",
   GP_FOLLOW_UP_SUGGESTED: "gp_follow_up_suggested",
+  VISUAL_CHANGE_DETECTED: "visual_change_detected",
+  VISUAL_CONCERN_PERSISTENT: "visual_concern_persistent",
+  VISUAL_COMPARISON_LIMITED: "visual_comparison_limited",
 } as const;
 
 export type LongevitySignalKey =

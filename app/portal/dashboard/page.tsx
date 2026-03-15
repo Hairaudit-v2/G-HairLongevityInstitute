@@ -77,12 +77,22 @@ export default async function PortalDashboardPage() {
       getCurrentVsPreviousForIntake(supabase, profileId, latestIntakeId),
       getBloodRequestByIntake(supabase, latestIntakeId),
     ]);
+    caseComparison = await getCaseComparisonForIntake(supabase, profileId, latestIntakeId);
     const clinicalInsightsForLatest = generateClinicalInsights({
       interpretedMarkers: bloodResults,
       markerTrends,
+      longitudinalSignals: {
+        scalpChanges: [
+          ...(caseComparison?.scalpImageComparison?.visualProgressSummary ?? []),
+          ...(caseComparison?.scalpImageComparison?.visualPersistentDrivers ?? []),
+          ...(caseComparison?.scalpImageComparison?.visualFollowUpConsiderations ??
+            []),
+        ],
+        treatmentResponseChanges:
+          caseComparison?.treatmentResponse?.clinicianSummary ?? [],
+      },
     });
     patientSafeInsights = clinicalInsightsForLatest.patientSafeInsights.slice(0, 3);
-    caseComparison = await getCaseComparisonForIntake(supabase, profileId, latestIntakeId);
     const hasBloodResultUploadDocument = documents.some(
       (d) => d.intake_id === latestIntakeId && d.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
     );
@@ -239,12 +249,15 @@ export default async function PortalDashboardPage() {
                   </ul>
                 </div>
               )}
-              {caseComparison.scalpImageComparison?.comparisonStatus === "improved" && (
+              {caseComparison.scalpImageComparison &&
+                caseComparison.scalpImageComparison.patientVisualProgressSummary.length > 0 && (
                 <div>
                   <h3 className="text-xs font-medium uppercase tracking-wide text-white/50">Photo progress</h3>
-                  <p className="mt-2 text-sm text-white/85">
-                    Your clinician has noted improvement when comparing your scalp photos over time.
-                  </p>
+                  <ul className="mt-2 space-y-2 text-sm text-white/85">
+                    {caseComparison.scalpImageComparison.patientVisualProgressSummary.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>

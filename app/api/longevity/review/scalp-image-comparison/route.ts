@@ -10,6 +10,15 @@ import {
   upsertScalpImageComparison,
   type ScalpImageComparisonStatus,
 } from "@/lib/longevity/scalpImageComparisons";
+import {
+  SCALP_FINDING_CONFIDENCE,
+  SCALP_VISUAL_LIKELIHOOD,
+  type ConfirmedScalpImageFindings,
+} from "@/lib/longevity/scalpImageComparison";
+import {
+  SCALP_IMAGE_QUALITY,
+  SCALP_SEVERITY_ESTIMATE,
+} from "@/lib/longevity/scalpImageAnalysis";
 
 const ALLOWED_COMPARISON_STATUSES = Object.values(
   SCALP_IMAGE_COMPARISON_STATUS
@@ -51,6 +60,61 @@ export async function POST(req: Request) {
       typeof body.clinician_summary === "string"
         ? body.clinician_summary.trim()
         : "";
+    const current_findings_raw =
+      body.current_findings && typeof body.current_findings === "object"
+        ? (body.current_findings as Record<string, unknown>)
+        : null;
+
+    const current_findings: ConfirmedScalpImageFindings | null =
+      current_findings_raw
+        ? {
+            thinningDistribution: Array.isArray(
+              current_findings_raw.thinningDistribution
+            )
+              ? current_findings_raw.thinningDistribution
+                  .filter((value): value is string => typeof value === "string")
+                  .map((value) => value.trim())
+                  .filter(Boolean)
+              : compared_regions,
+            severityBand: Object.values(SCALP_SEVERITY_ESTIMATE).includes(
+              current_findings_raw.severityBand as
+                (typeof SCALP_SEVERITY_ESTIMATE)[keyof typeof SCALP_SEVERITY_ESTIMATE]
+            )
+              ? (current_findings_raw.severityBand as
+                  (typeof SCALP_SEVERITY_ESTIMATE)[keyof typeof SCALP_SEVERITY_ESTIMATE])
+              : null,
+            visibleScaleLikelihood: Object.values(SCALP_VISUAL_LIKELIHOOD).includes(
+              current_findings_raw.visibleScaleLikelihood as
+                (typeof SCALP_VISUAL_LIKELIHOOD)[keyof typeof SCALP_VISUAL_LIKELIHOOD]
+            )
+              ? (current_findings_raw.visibleScaleLikelihood as
+                  (typeof SCALP_VISUAL_LIKELIHOOD)[keyof typeof SCALP_VISUAL_LIKELIHOOD])
+              : null,
+            visibleRednessLikelihood: Object.values(
+              SCALP_VISUAL_LIKELIHOOD
+            ).includes(
+              current_findings_raw.visibleRednessLikelihood as
+                (typeof SCALP_VISUAL_LIKELIHOOD)[keyof typeof SCALP_VISUAL_LIKELIHOOD]
+            )
+              ? (current_findings_raw.visibleRednessLikelihood as
+                  (typeof SCALP_VISUAL_LIKELIHOOD)[keyof typeof SCALP_VISUAL_LIKELIHOOD])
+              : null,
+            imageQuality: Object.values(SCALP_IMAGE_QUALITY).includes(
+              current_findings_raw.imageQuality as
+                (typeof SCALP_IMAGE_QUALITY)[keyof typeof SCALP_IMAGE_QUALITY]
+            )
+              ? (current_findings_raw.imageQuality as
+                  (typeof SCALP_IMAGE_QUALITY)[keyof typeof SCALP_IMAGE_QUALITY])
+              : null,
+            findingConfidence: Object.values(SCALP_FINDING_CONFIDENCE).includes(
+              current_findings_raw.findingConfidence as
+                (typeof SCALP_FINDING_CONFIDENCE)[keyof typeof SCALP_FINDING_CONFIDENCE]
+            )
+              ? (current_findings_raw.findingConfidence as
+                  (typeof SCALP_FINDING_CONFIDENCE)[keyof typeof SCALP_FINDING_CONFIDENCE])
+              : null,
+          }
+        : null;
 
     if (!intake_id) {
       return NextResponse.json(
@@ -103,6 +167,7 @@ export async function POST(req: Request) {
       comparison_status: comparison_status as ScalpImageComparisonStatus,
       compared_regions,
       clinician_summary: clinician_summary || null,
+      current_findings,
     });
     if ("error" in result) {
       return NextResponse.json({ ok: false, error: result.error }, { status: 400 });

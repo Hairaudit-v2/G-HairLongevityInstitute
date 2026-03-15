@@ -264,5 +264,74 @@ export function buildLongevitySignals(
     });
   }
 
+  const visualComparison = comparison?.scalpImageComparison ?? null;
+  if (
+    visualComparison &&
+    visualComparison.canCompareConfirmed &&
+    visualComparison.progressionSignals.some((signal) =>
+      [
+        "visual_improvement_likely",
+        "visual_progression_likely",
+        "mixed_visual_change",
+        "thinning_distribution_expanded",
+        "thinning_distribution_reduced",
+      ].includes(signal)
+    )
+  ) {
+    pushSignal(signals, {
+      signal_key: LONGEVITY_SIGNAL_KEY.VISUAL_CHANGE_DETECTED,
+      status:
+        visualComparison.comparisonStatus === "improved" ? "improving" : "active",
+      severity:
+        visualComparison.comparisonStatus === "worsened" ? "attention" : "info",
+      entity_refs,
+      generated_at,
+      source_event_type: input.sourceEventType,
+      payload: {
+        profile_id: input.profileId ?? null,
+        intake_id: input.intakeId,
+        comparison_status: visualComparison.comparisonStatus,
+        comparison_confidence: visualComparison.visualComparisonConfidence,
+        progression_signals: visualComparison.progressionSignals,
+        visual_progress_summary: visualComparison.visualProgressSummary,
+      },
+    });
+  }
+
+  if (visualComparison && visualComparison.visualPersistentDrivers.length > 0) {
+    pushSignal(signals, {
+      signal_key: LONGEVITY_SIGNAL_KEY.VISUAL_CONCERN_PERSISTENT,
+      status: "active",
+      severity: "attention",
+      entity_refs,
+      generated_at,
+      source_event_type: input.sourceEventType,
+      payload: {
+        profile_id: input.profileId ?? null,
+        intake_id: input.intakeId,
+        comparison_status: visualComparison.comparisonStatus,
+        persistent_visible_drivers: visualComparison.visualPersistentDrivers,
+      },
+    });
+  }
+
+  if (visualComparison?.comparisonLimitedByImageQuality) {
+    pushSignal(signals, {
+      signal_key: LONGEVITY_SIGNAL_KEY.VISUAL_COMPARISON_LIMITED,
+      status: "pending",
+      severity: "attention",
+      entity_refs,
+      generated_at,
+      source_event_type: input.sourceEventType,
+      payload: {
+        profile_id: input.profileId ?? null,
+        intake_id: input.intakeId,
+        comparison_status: visualComparison.comparisonStatus,
+        comparison_confidence: visualComparison.visualComparisonConfidence,
+        follow_up_considerations: visualComparison.visualFollowUpConsiderations,
+      },
+    });
+  }
+
   return signals;
 }

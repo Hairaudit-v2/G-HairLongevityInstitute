@@ -236,6 +236,22 @@ export function buildClinicalInsights(input: ClinicalInsightInput): ClinicalInsi
     pushUnique(followUpConsiderations, "Key markers remain active without a clear interval improvement pattern.");
   }
 
+  for (const item of input.longitudinalSignals?.scalpChanges ?? []) {
+    pushUnique(clinicianInsights, item);
+    const lower = item.toLowerCase();
+    if (
+      lower.includes("limited by image quality") ||
+      lower.includes("follow-up") ||
+      lower.includes("repeat scalp photos")
+    ) {
+      pushUnique(followUpConsiderations, item);
+    }
+  }
+
+  for (const item of input.longitudinalSignals?.treatmentResponseChanges ?? []) {
+    pushUnique(clinicianInsights, item);
+  }
+
   return {
     clinicianInsights,
     patientSafeInsights,

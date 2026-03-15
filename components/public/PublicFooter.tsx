@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { isLongevityPortalEnabled } from "@/lib/features";
 
 export default function PublicFooter() {
+  const showPortalLogin = isLongevityPortalEnabled();
+
   return (
     <footer className="border-t border-white/10 bg-black/10">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
@@ -19,9 +22,11 @@ export default function PublicFooter() {
             </span>
           </div>
           <nav className="flex flex-wrap gap-6 text-sm" aria-label="Legal">
-            <Link href="/portal/login" className="text-white/55 transition hover:text-white/80">
-              Patient / Trichologist login
-            </Link>
+            {showPortalLogin && (
+              <Link href="/portal/login" className="text-white/55 transition hover:text-white/80">
+                Patient / Trichologist login
+              </Link>
+            )}
             <Link href="/privacy" className="text-white/55 transition hover:text-white/80">
               Privacy
             </Link>
