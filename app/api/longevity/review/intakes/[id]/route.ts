@@ -16,6 +16,7 @@ import { computeReviewComplexity } from "@/lib/longevity/reviewComplexity";
 import { getInterpretedMarkersWithIdsForIntake, getMarkersForIntake } from "@/lib/longevity/bloodResultMarkers";
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
 import { getCurrentVsPreviousForIntake } from "@/lib/longevity/bloodMarkerTrends";
+import { listPendingBloodMarkerExtractionDraftsForIntake } from "@/lib/longevity/bloodMarkerExtractionDrafts";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 
@@ -86,11 +87,12 @@ export async function GET(
       documents: (documents ?? []).map((d) => ({ doc_type: d.doc_type })),
     });
 
-    const [blood_results, blood_markers_raw, blood_request, marker_trends] = await Promise.all([
+    const [blood_results, blood_markers_raw, blood_request, marker_trends, extraction_drafts] = await Promise.all([
       getInterpretedMarkersWithIdsForIntake(supabase, id),
       getMarkersForIntake(supabase, id),
       getBloodRequestByIntake(supabase, id),
       getCurrentVsPreviousForIntake(supabase, intake.profile_id, id),
+      listPendingBloodMarkerExtractionDraftsForIntake(supabase, id),
     ]);
     const clinical_insights = generateClinicalInsights({
       derivedFlags: triage.flags,
@@ -123,6 +125,20 @@ export async function GET(
         collected_at: m.collected_at,
         lab_name: m.lab_name,
         blood_request_id: m.blood_request_id,
+      })),
+      blood_marker_extraction_drafts: extraction_drafts.map((draft) => ({
+        id: draft.id,
+        marker_name: draft.marker_name,
+        display_name: draft.display_name,
+        raw_marker_name: draft.raw_marker_name,
+        value: draft.value,
+        unit: draft.unit,
+        reference_low: draft.reference_low,
+        reference_high: draft.reference_high,
+        raw_reference_range: draft.raw_reference_range,
+        confidence: draft.confidence,
+        source_filename: draft.source_filename,
+        extracted_at: draft.extracted_at,
       })),
       blood_request: blood_request ? { id: blood_request.id, status: blood_request.status } : null,
       intake: {

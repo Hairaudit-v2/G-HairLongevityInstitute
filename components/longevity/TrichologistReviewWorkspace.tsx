@@ -101,6 +101,7 @@ export type CaseDetail = {
   complexity?: ReviewComplexityResult;
   blood_results?: (InterpretedMarker & { id: string })[];
   blood_markers?: BloodMarkerRaw[];
+  blood_marker_extraction_drafts?: BloodMarkerExtractionDraft[];
   blood_request?: { id: string; status: string } | null;
   marker_trends?: MarkerTrendRow[];
   clinical_insights?: ClinicalInsights;
@@ -116,6 +117,21 @@ export type BloodMarkerRaw = {
   collected_at: string | null;
   lab_name: string | null;
   blood_request_id: string | null;
+};
+
+export type BloodMarkerExtractionDraft = {
+  id: string;
+  marker_name: string;
+  display_name: string;
+  raw_marker_name: string | null;
+  value: number;
+  unit: string | null;
+  reference_low: number | null;
+  reference_high: number | null;
+  raw_reference_range: string | null;
+  confidence: number | null;
+  source_filename: string | null;
+  extracted_at: string;
 };
 
 function FlagIcons({ flags }: { flags: ReviewQueueItem["flags"] }) {
@@ -285,6 +301,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         complexity: data.complexity ?? undefined,
         blood_results: data.blood_results ?? undefined,
         blood_markers: data.blood_markers ?? undefined,
+        blood_marker_extraction_drafts: data.blood_marker_extraction_drafts ?? undefined,
         blood_request: data.blood_request ?? null,
         marker_trends: data.marker_trends ?? undefined,
         clinical_insights: data.clinical_insights ?? undefined,
@@ -459,6 +476,54 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       setActionLoading(false);
     }
   }, [selectedId, caseDetail, addMarkerForm, fetchCase]);
+
+  const runBloodMarkerExtraction = useCallback(async () => {
+    if (!selectedId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/longevity/review/blood-marker-extractions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ intake_id: selectedId }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Failed to extract blood markers");
+        return;
+      }
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Failed to extract blood markers");
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, fetchCase]);
+
+  const reviewExtractionDraft = useCallback(async (draftId: string, action: "apply" | "dismiss") => {
+    if (!selectedId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/longevity/review/blood-marker-extractions/${draftId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? `Failed to ${action} extracted draft`);
+        return;
+      }
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : `Failed to ${action} extracted draft`);
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, fetchCase]);
 
   const [editMarkerForm, setEditMarkerForm] = useState<BloodMarkerRaw | null>(null);
   useEffect(() => {
@@ -763,6 +828,10 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
             </div>
           ) : caseDetail ? (
             <>
+              {(() => {
+                const hasBloodUploadDocument = caseDetail.documents.some((doc) => doc.doc_type === "blood_test_upload");
+                const extractionDrafts = caseDetail.blood_marker_extraction_drafts ?? [];
+                return (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-lg font-semibold text-white">Case: {caseDetail.intake.id}</h2>
@@ -805,6 +874,92 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                     ))}
                   </ul>
                 )}
+
+                <h3 className="mt-6 text-sm font-medium text-white/90">Extracted blood marker drafts</h3>
+                <div className="mt-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs text-white/60">
+                      Reuses the existing OCR/PDF blood extraction flow. Drafts stay internal until you apply them.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={runBloodMarkerExtraction}
+                      disabled={actionLoading || !hasBloodUploadDocument}
+                      className="rounded border border-white/20 bg-white/5 px-3 py-1.5 text-sm text-white hover:bg-white/10 disabled:opacity-50"
+                    >
+                      {extractionDrafts.length > 0 ? "Re-run extraction" : "Extract from uploaded blood results"}
+                    </button>
+                  </div>
+                  {!hasBloodUploadDocument ? (
+                    <p className="mt-3 text-sm text-white/50">Upload a `blood_test_upload` document before running extraction.</p>
+                  ) : extractionDrafts.length === 0 ? (
+                    <p className="mt-3 text-sm text-white/50">No pending extracted drafts yet.</p>
+                  ) : (
+                    <div className="mt-3 overflow-hidden rounded-lg border border-white/10">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-white/10 bg-white/5 text-left text-white/70">
+                            <th className="px-3 py-2 font-medium">Marker</th>
+                            <th className="px-3 py-2 font-medium">Value</th>
+                            <th className="px-3 py-2 font-medium">Reference</th>
+                            <th className="px-3 py-2 font-medium">Confidence</th>
+                            <th className="px-3 py-2 font-medium">Source</th>
+                            <th className="px-3 py-2 font-medium">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {extractionDrafts.map((draft) => (
+                            <tr key={draft.id} className="border-b border-white/5 text-white/90">
+                              <td className="px-3 py-2">
+                                <div className="font-medium">{draft.display_name}</div>
+                                {draft.raw_marker_name && draft.raw_marker_name !== draft.display_name && (
+                                  <div className="text-xs text-white/50">Extracted as {draft.raw_marker_name}</div>
+                                )}
+                              </td>
+                              <td className="px-3 py-2">
+                                {draft.unit ? `${draft.value} ${draft.unit}` : draft.value}
+                              </td>
+                              <td className="px-3 py-2 text-white/70">
+                                {draft.raw_reference_range
+                                  ? draft.raw_reference_range
+                                  : draft.reference_low != null || draft.reference_high != null
+                                    ? `${draft.reference_low ?? "—"} - ${draft.reference_high ?? "—"}`
+                                    : "—"}
+                              </td>
+                              <td className="px-3 py-2 text-white/70">
+                                {draft.confidence != null ? `${Math.round(draft.confidence * 100)}%` : "—"}
+                              </td>
+                              <td className="px-3 py-2 text-xs text-white/60">
+                                <div>{draft.source_filename ?? "Uploaded document"}</div>
+                                <div>{new Date(draft.extracted_at).toLocaleString()}</div>
+                              </td>
+                              <td className="px-3 py-2">
+                                <div className="flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => reviewExtractionDraft(draft.id, "apply")}
+                                    disabled={actionLoading}
+                                    className="rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-2.5 py-1 text-xs text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+                                  >
+                                    Apply
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => reviewExtractionDraft(draft.id, "dismiss")}
+                                    disabled={actionLoading}
+                                    className="rounded border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-50"
+                                  >
+                                    Dismiss
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Add blood marker</h3>
                 <div className="mt-2 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
@@ -1164,6 +1319,8 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                   </ul>
                 )}
               </div>
+                );
+              })()}
 
               {actionError && (
                 <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">

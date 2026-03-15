@@ -66,13 +66,13 @@ function HeroPlatformPreview() {
         {/* Outputs — premium card within card */}
         <div className="mt-4 rounded-2xl border border-white/[0.06] bg-black/20 p-4 shadow-lg shadow-black/20 sm:mt-5 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/15 sm:h-16 sm:w-16">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/15 sm:h-[4.5rem] sm:w-[4.5rem]">
               <img
                 src="/brand/hli-mark.png"
                 alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 sm:h-12 sm:w-12 opacity-90"
+                width={64}
+                height={64}
+                className="h-11 w-11 object-contain opacity-95 sm:h-12 sm:w-12"
               />
             </div>
             <div>
@@ -756,8 +756,8 @@ export default function Page() {
             </p>
             <div className="mx-auto mt-6 max-w-md rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.35),0_0_0_1px_rgba(255,255,255,0.04)_inset] sm:p-6">
               <div className="flex items-center gap-3 border-b border-white/[0.06] pb-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/10">
-                  <img src="/brand/hli-mark.png" alt="" width={32} height={32} className="h-8 w-8 opacity-80" />
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--gold))]/10">
+                  <img src="/brand/hli-mark.png" alt="" width={56} height={56} className="h-9 w-9 object-contain opacity-90 sm:h-10 sm:w-10" />
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--gold))]/90">
@@ -941,18 +941,18 @@ export default function Page() {
             title="Choose your level of support."
             subtitle="Start with a diagnostic review, then escalate to specialist consultation and ongoing membership if needed."
           />
-          <div className="mt-10 grid gap-6 sm:mt-12 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 sm:mt-14 md:grid-cols-3 md:gap-8">
             {[
               {
                 name: "Digital Diagnostic Review",
-                price: "From $59",
+                price: "From $25",
                 items: [
                   "Structured blood analysis",
                   "Risk profiling + summary",
                   "Written recommendations",
                   "48-hour turnaround",
                 ],
-                cta: { label: "Start review", href: startHref },
+                cta: { label: "Start Review", href: startHref },
               },
               {
                 name: "Specialist Strategy Consultation",
@@ -963,32 +963,39 @@ export default function Page() {
                   "Protocol plan + GP guidance",
                   "Regenerative & timing advice",
                 ],
-                cta: { label: "Book consultation", href: "/book" },
+                cta: { label: "Book Consultation", href: "/book" },
               },
               {
                 name: "Hair Longevity Membership",
-                price: "$49 / month",
+                price: "$19 / month",
                 items: [
                   "Ongoing optimisation",
                   "6-month reassessments",
                   "Score tracking over time",
                   "Priority support",
                 ],
-                cta: { label: "Join membership", href: "/membership" },
+                cta: { label: "Join Membership", href: "/membership" },
               },
             ].map((p) => (
               <div
                 key={p.name}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/20 sm:p-7"
+                className="flex flex-col rounded-3xl border border-white/[0.12] bg-white/[0.04] p-6 shadow-xl shadow-black/20 sm:p-8 md:min-h-0"
               >
-                <h3 className="text-xl font-semibold text-white">{p.name}</h3>
-                <p className="mt-2 text-[rgb(var(--gold))]">{p.price}</p>
-                <ul className="mt-6 space-y-2 text-sm text-white/75">
+                <h3 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                  {p.name}
+                </h3>
+                <p className="mt-3 text-lg font-semibold text-[rgb(var(--gold))] sm:text-xl">
+                  {p.price}
+                </p>
+                <ul className="mt-6 flex-1 space-y-3 text-sm leading-relaxed text-white/80 sm:mt-8 sm:space-y-3.5">
                   {p.items.map((i) => (
-                    <li key={i}>• {i}</li>
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="mt-0.5 shrink-0 text-[rgb(var(--gold))]/80" aria-hidden>•</span>
+                      <span>{i}</span>
+                    </li>
                   ))}
                 </ul>
-                <div className="mt-8">
+                <div className="mt-8 pt-2 sm:mt-10">
                   <PrimaryButton href={p.cta.href}>{p.cta.label}</PrimaryButton>
                 </div>
               </div>

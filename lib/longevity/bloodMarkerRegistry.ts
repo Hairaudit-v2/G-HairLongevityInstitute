@@ -713,7 +713,7 @@ const ALIAS_MAP = buildAliasMap(REGISTRY);
 export function resolveMarkerKey(input: string): string {
   if (!input || typeof input !== "string") return "";
   const t = input.trim().replace(/\s+/g, " ");
-  return ALIAS_MAP.get(t) ?? t;
+  return ALIAS_MAP.get(normaliseLookupValue(t)) ?? t;
 }
 
 /**

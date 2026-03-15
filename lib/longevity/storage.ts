@@ -46,6 +46,20 @@ export async function uploadLongevityFile(
   return { ok: true };
 }
 
+/** Download a private longevity file as bytes for internal processing. */
+export async function downloadLongevityFile(
+  supabase: SupabaseClient,
+  path: string
+): Promise<{ ok: true; bytes: Uint8Array } | { ok: false; error: string }> {
+  const { data, error } = await supabase.storage
+    .from(LONGEVITY_BUCKET)
+    .download(path);
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Failed to download file." };
+  }
+  return { ok: true, bytes: new Uint8Array(await data.arrayBuffer()) };
+}
+
 /** Create a short-lived signed URL (e.g. 1 hour). */
 export async function createLongevitySignedUrl(
   supabase: SupabaseClient,

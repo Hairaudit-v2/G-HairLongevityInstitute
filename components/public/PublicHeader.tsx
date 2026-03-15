@@ -39,14 +39,19 @@ export default function PublicHeader({
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[rgb(var(--bg))]/95 backdrop-blur-sm">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <div className="flex min-h-[64px] items-center justify-between gap-4">
-          <Link href="/" className="flex shrink-0 items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg))] rounded-lg">
+        <div className="flex min-h-[76px] items-center justify-between gap-6 py-2 sm:min-h-[80px] sm:gap-8">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center py-1 pr-2 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg))] rounded-lg sm:pr-3 md:py-1.5 md:pr-4"
+            aria-label="Hair Longevity Institute — Home"
+          >
             <img
               src="/brand/hli-logo.png"
-              alt="Hair Longevity Institute"
-              width={280}
-              height={56}
-              className="h-12 w-auto sm:h-14 md:h-16"
+              alt=""
+              width={480}
+              height={96}
+              className="h-[3.5rem] w-auto object-contain object-left sm:h-[4.25rem] md:h-[5.25rem]"
+              style={{ imageRendering: "auto" }}
             />
           </Link>
 
