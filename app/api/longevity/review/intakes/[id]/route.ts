@@ -23,6 +23,8 @@ import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 import { generateCarePlan } from "@/lib/longevity/carePlan";
 import { generateFollowUpCadence } from "@/lib/longevity/followUpCadence";
+import { getAdherenceContextForIntake } from "@/lib/longevity/adherenceContext";
+import { computeAdherenceStates } from "@/lib/longevity/adherenceStates";
 
 export const dynamic = "force-dynamic";
 
@@ -167,6 +169,12 @@ export async function GET(
       patientVisibleReleasedAt: intake.patient_visible_released_at ?? null,
     });
 
+    const adherence_context = await getAdherenceContextForIntake(supabase, {
+      profileId: intake.profile_id,
+      intakeId: id,
+    });
+    const adherence_states = computeAdherenceStates(adherence_context);
+
     return NextResponse.json({
       ok: true,
       complexity,
@@ -176,6 +184,8 @@ export async function GET(
       case_comparison,
       care_plan,
       follow_up_cadence,
+      adherence_context,
+      adherence_states,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,

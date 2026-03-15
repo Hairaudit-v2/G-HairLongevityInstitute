@@ -236,12 +236,20 @@ export function ReminderInspectionPageContent() {
             intake linkage only — no outbound delivery yet.
           </p>
         </div>
-        <Link
-          href="/portal/trichologist/review"
-          className="rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10"
-        >
-          Back to review
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/portal/trichologist/adherence"
+            className="rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10"
+          >
+            Adherence overview
+          </Link>
+          <Link
+            href="/portal/trichologist/review"
+            className="rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10"
+          >
+            Back to review
+          </Link>
+        </div>
       </div>
       <div className="mt-8">
         <ReminderInspectionTable />

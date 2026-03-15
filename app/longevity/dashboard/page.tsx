@@ -3,6 +3,7 @@ import { isLongevityEnabled } from "@/lib/features";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
+import { getPatientProgressForProfile } from "@/lib/longevity/patientProgress";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 
 export default async function LongevityDashboardPage() {
@@ -62,6 +63,7 @@ export default async function LongevityDashboardPage() {
   const list = intakes ?? [];
 
   const documents = await listDocumentsForProfile(supabase, profileId);
+  const { progress } = await getPatientProgressForProfile(supabase, profileId);
 
   return (
     <main className="min-h-screen bg-[rgb(var(--bg))] px-6 py-16">
@@ -89,6 +91,74 @@ export default async function LongevityDashboardPage() {
           >
             New intake
           </Link>
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">
+            Your progress
+          </h2>
+          <ul className="mt-4 space-y-3 text-sm text-white/90">
+            <li className="flex items-center gap-3">
+              <span
+                className={
+                  progress.blood_results_uploaded
+                    ? "text-emerald-400"
+                    : "text-white/40"
+                }
+                aria-hidden
+              >
+                {progress.blood_results_uploaded ? "✓" : "○"}
+              </span>
+              Blood results uploaded
+            </li>
+            <li className="flex items-center gap-3">
+              <span
+                className={
+                  progress.follow_up_completed
+                    ? "text-emerald-400"
+                    : "text-white/40"
+                }
+                aria-hidden
+              >
+                {progress.follow_up_completed ? "✓" : "○"}
+              </span>
+              Follow-up completed
+            </li>
+            <li className="flex items-center gap-3">
+              <span
+                className={
+                  progress.scalp_images_reviewed
+                    ? "text-emerald-400"
+                    : "text-white/40"
+                }
+                aria-hidden
+              >
+                {progress.scalp_images_reviewed ? "✓" : "○"}
+              </span>
+              Scalp images reviewed
+            </li>
+            <li className="flex items-center gap-3">
+              <span
+                className={
+                  progress.clinician_summary_released
+                    ? "text-emerald-400"
+                    : "text-white/40"
+                }
+                aria-hidden
+              >
+                {progress.clinician_summary_released ? "✓" : "○"}
+              </span>
+              Clinician summary released
+            </li>
+            {progress.next_review_timing && (
+              <li className="flex items-center gap-3 border-t border-white/10 pt-3 text-white/80">
+                <span className="text-[rgb(var(--gold))]" aria-hidden>
+                  →
+                </span>
+                Next review: {progress.next_review_timing}
+              </li>
+            )}
+          </ul>
         </div>
 
         <div className="mt-8 space-y-4">

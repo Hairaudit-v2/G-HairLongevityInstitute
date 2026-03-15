@@ -131,6 +131,20 @@ export type CaseDetail = {
   clinical_insights?: ClinicalInsights;
   care_plan?: CarePlanOutput | null;
   follow_up_cadence?: FollowUpCadenceOutput | null;
+  adherence_context?: {
+    returned_after_reminder: boolean;
+    days_to_return: number | null;
+    repeated_overdue_pattern: boolean;
+    reminder_response_context: string[];
+    reminders_sent_count: number;
+    outcome_types: string[];
+  } | null;
+  adherence_states?: {
+    high_adherence: boolean;
+    delayed_follow_up_pattern: boolean;
+    repeat_reminder_required: boolean;
+    prompt_response_good: boolean;
+  } | null;
 };
 
 export type BloodMarkerRaw = {
@@ -495,6 +509,8 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         clinical_insights: data.clinical_insights ?? undefined,
         care_plan: data.care_plan ?? null,
         follow_up_cadence: data.follow_up_cadence ?? null,
+        adherence_context: data.adherence_context ?? null,
+        adherence_states: data.adherence_states ?? null,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -1371,6 +1387,45 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                     description="Compact reminder context for whether follow-up looks upcoming, due, overdue, complete, or not yet set."
                     className="mt-6"
                   />
+                )}
+
+                {(caseDetail.adherence_context || caseDetail.adherence_states) && (
+                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Adherence context</h3>
+                    {caseDetail.adherence_context?.reminder_response_context?.length ? (
+                      <ul className="mt-2 space-y-1 text-sm text-white/80">
+                        {caseDetail.adherence_context.reminder_response_context.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-sm text-white/50">No reminder activity for this intake.</p>
+                    )}
+                    {caseDetail.adherence_states && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {caseDetail.adherence_states.high_adherence && (
+                          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200">
+                            High adherence
+                          </span>
+                        )}
+                        {caseDetail.adherence_states.prompt_response_good && !caseDetail.adherence_states.high_adherence && (
+                          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-200">
+                            Prompt response
+                          </span>
+                        )}
+                        {caseDetail.adherence_states.delayed_follow_up_pattern && (
+                          <span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-1 text-xs text-amber-200">
+                            Delayed follow-up pattern
+                          </span>
+                        )}
+                        {caseDetail.adherence_states.repeat_reminder_required && (
+                          <span className="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white/70">
+                            Repeat reminder possible
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {caseDetail.case_comparison?.treatmentResponse && (
