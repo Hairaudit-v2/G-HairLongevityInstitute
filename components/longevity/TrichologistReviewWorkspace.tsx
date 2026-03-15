@@ -1458,56 +1458,57 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                   </div>
                 )}
 
-                {(caseDetail.treatment_continuity || caseDetail.outcome_correlation) && (
-                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
-                    <h3 className="text-sm font-medium text-white/90">Treatment adherence & outcome correlation</h3>
-                    {caseDetail.treatment_continuity?.items?.length ? (
-                      <div className="mt-2">
-                        <p className="text-xs text-white/50">Status vs previous intake</p>
-                        <div className="mt-1.5 flex flex-wrap gap-2">
-                          {caseDetail.treatment_continuity.items.map((item) => (
-                            <span
-                              key={item.key}
-                              className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white/80"
-                            >
-                              {item.label} · {(item.status ?? item.key).replace(/_/g, " ")}
-                            </span>
-                          ))}
-                        </div>
-                        {!caseDetail.treatment_continuity.hasPreviousIntake && (
-                          <p className="mt-1.5 text-xs text-white/50">No previous intake for comparison yet.</p>
-                        )}
+                {/* Phase U: treatment adherence & outcome correlation — always shown in case detail */}
+                <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                  <h3 className="text-sm font-medium text-white/90">Treatment adherence & outcome correlation</h3>
+                  {caseDetail.treatment_continuity?.items?.length ? (
+                    <div className="mt-2">
+                      <p className="text-xs text-white/50">Status vs previous intake</p>
+                      <div className="mt-1.5 flex flex-wrap gap-2">
+                        {caseDetail.treatment_continuity.items.map((item) => (
+                          <span
+                            key={item.key}
+                            className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white/80"
+                          >
+                            {item.label} · {(item.status ?? item.key).replace(/_/g, " ")}
+                          </span>
+                        ))}
                       </div>
-                    ) : (
-                      <p className="mt-2 text-sm text-white/50">No treatment adherence data for this intake.</p>
-                    )}
-                    {caseDetail.outcome_correlation && (
-                      <div className="mt-3 border-t border-white/10 pt-3">
-                        <p className="text-xs text-white/50">Correlation state</p>
-                        <p className="mt-1 text-sm font-medium text-white/90">
-                          {caseDetail.outcome_correlation.correlation_state.replace(/_/g, " ")}
-                        </p>
-                        {caseDetail.outcome_correlation.clinicianSummary?.length > 0 && (
-                          <ul className="mt-2 space-y-1 text-sm text-white/80">
-                            {caseDetail.outcome_correlation.clinicianSummary.map((line, i) => (
-                              <li key={i}>• {line}</li>
+                      {!caseDetail.treatment_continuity.hasPreviousIntake && (
+                        <p className="mt-1.5 text-xs text-white/50">No previous intake for comparison yet.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm text-white/50">No treatment adherence data for this intake.</p>
+                  )}
+                  {caseDetail.outcome_correlation ? (
+                    <div className="mt-3 border-t border-white/10 pt-3">
+                      <p className="text-xs text-white/50">Correlation state</p>
+                      <p className="mt-1 text-sm font-medium text-white/90">
+                        {caseDetail.outcome_correlation.correlation_state.replace(/_/g, " ")}
+                      </p>
+                      {caseDetail.outcome_correlation.clinicianSummary?.length > 0 && (
+                        <ul className="mt-2 space-y-1 text-sm text-white/80">
+                          {caseDetail.outcome_correlation.clinicianSummary.map((line, i) => (
+                            <li key={i}>• {line}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {caseDetail.outcome_correlation.caveats?.length > 0 && (
+                        <>
+                          <p className="mt-2 text-xs text-white/50">Caveats</p>
+                          <ul className="mt-1 space-y-0.5 text-xs text-white/60">
+                            {caseDetail.outcome_correlation.caveats.map((c, i) => (
+                              <li key={i}>• {c}</li>
                             ))}
                           </ul>
-                        )}
-                        {caseDetail.outcome_correlation.caveats?.length > 0 && (
-                          <>
-                            <p className="mt-2 text-xs text-white/50">Caveats</p>
-                            <ul className="mt-1 space-y-0.5 text-xs text-white/60">
-                              {caseDetail.outcome_correlation.caveats.map((c, i) => (
-                                <li key={i}>• {c}</li>
-                              ))}
-                            </ul>
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-3 border-t border-white/10 pt-3 text-sm text-white/50">No correlation data for this intake.</p>
+                  )}
+                </div>
 
                 {caseDetail.protocol_assessment && (
                   <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">

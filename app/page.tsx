@@ -10,6 +10,7 @@ import {
   SecondaryButton,
   UtilityLink,
 } from "@/components/public/PublicCTA";
+import { HairEcosystemSection } from "@/components/public/HairEcosystemSection";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -843,7 +844,7 @@ export default function Page() {
           <SectionTitle
             eyebrow="Our approach"
             title="Precision trichology, built for long-term stability."
-            subtitle="Using Follicle Intelligence™, we assess five biological domains and convert complexity into clear, actionable strategy."
+            subtitle="Using Follicle Intelligence™ — the biological and analytical engine for structured case interpretation and patient roadmaps — we assess five biological domains and convert complexity into clear, actionable strategy."
           />
           <div className="mt-10 grid gap-4 sm:mt-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {[
@@ -863,6 +864,24 @@ export default function Page() {
           </div>
         </Container>
       </section>
+
+      {/* Pre-section: bridge to surgery / HairAudit */}
+      <section className="border-t border-white/[0.06] bg-black/[0.04] py-8 sm:py-10">
+        <Container>
+          <p className="mx-auto max-w-2xl text-center text-sm text-white/70 sm:text-base">
+            Considering surgery later? HairAudit helps patients compare transplant quality, outcomes,
+            and clinic transparency.
+          </p>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-sm font-medium text-white/80 sm:text-base">
+            HLI helps you understand why hair loss is happening and how to optimise your biology.
+            When surgery becomes relevant, HairAudit helps you evaluate surgeons, outcomes, and
+            surgical standards.
+          </p>
+        </Container>
+      </section>
+
+      {/* Hair Intelligence Ecosystem — reusable across HLI, HairAudit, Follicle Intelligence */}
+      <HairEcosystemSection site="hli" currentPlatform="hli" showContextualHelper={false} />
 
       {/* How it works — simplified for conversion */}
       <section
@@ -1060,7 +1079,7 @@ export default function Page() {
               },
               {
                 q: "What happens after I submit?",
-                a: "Your case is triaged and routed to a senior trichologist. They review your intake, bloods, and photos using our Follicle Intelligence™ framework, then prepare a structured diagnostic summary and next-step recommendations. You receive this in your portal (and by email where applicable), usually within 48 hours of us having everything we need. You'll see status in your portal — you’ll know when it’s with the specialist and when your summary is ready.",
+                a: "Your case is triaged and routed to a senior trichologist. They review your intake, bloods, and photos using our Follicle Intelligence™ framework — the biological and analytical engine we use to structure case interpretation and generate patient roadmaps (the same technology is used within the HairAudit platform to evaluate transplant procedures). They then prepare a structured diagnostic summary and next-step recommendations. You receive this in your portal (and by email where applicable), usually within 48 hours of us having everything we need. You'll see status in your portal — you’ll know when it’s with the specialist and when your summary is ready.",
               },
               {
                 q: "What do I need before I start?",

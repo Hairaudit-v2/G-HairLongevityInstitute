@@ -130,6 +130,7 @@ export default function AboutPage() {
           <p className="mt-4 text-white/70 max-w-3xl">
             Hair loss is rarely caused by one variable.
             Follicle Intelligence™ maps five biological domains that determine long-term follicle survival.
+            It is the biological and analytical engine we use for structured case interpretation and patient roadmaps, and is also used within the HairAudit platform to evaluate transplant procedures.
           </p>
 
           <div className="mt-16">

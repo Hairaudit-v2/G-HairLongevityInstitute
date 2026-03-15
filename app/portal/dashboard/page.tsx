@@ -13,6 +13,7 @@ import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { generateCarePlan } from "@/lib/longevity/carePlan";
 import { generateFollowUpCadence } from "@/lib/longevity/followUpCadence";
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
+import { getPatientProgressForProfile } from "@/lib/longevity/patientProgress";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
@@ -64,6 +65,7 @@ export default async function PortalDashboardPage() {
   const list = intakes ?? [];
   const documents = await listDocumentsForProfile(supabase, profileId);
   const bloodRequests = await listBloodRequestsForProfile(supabase, profileId);
+  const patientProgress = await getPatientProgressForProfile(supabase, profileId);
   const hasTrendData = await profileHasTrendData(supabase, profileId);
   const intakesWithReleasedSummary = list.filter(
     (i) => i.patient_visible_released_at != null && (i.patient_visible_summary ?? "").trim() !== ""
@@ -191,6 +193,17 @@ export default async function PortalDashboardPage() {
               {carePlanPatient.patientTimingSuggestion}
             </p>
           )}
+        </section>
+      )}
+
+      {patientProgress.treatment_outcome_summary && (
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5" aria-labelledby="treatment-progress-summary-heading">
+          <h2 id="treatment-progress-summary-heading" className="text-base font-semibold text-white">
+            Your treatment progress
+          </h2>
+          <p className="mt-2 text-sm text-white/80">
+            {patientProgress.treatment_outcome_summary}
+          </p>
         </section>
       )}
 

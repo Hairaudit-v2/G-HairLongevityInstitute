@@ -73,3 +73,20 @@ export function buildLongevityEntityRefs(
     local_entity_id,
   };
 }
+
+/** Phase U: FI-ready payload shape for treatment_adherence_summary signal (HLI source of truth). */
+export type PhaseUTreatmentAdherenceSummaryPayload = {
+  profile_id: string | null;
+  intake_id: string;
+  items: { key: string; label: string; state: string }[];
+};
+
+/** Phase U: FI-ready payload shape for outcome_correlation signal (HLI source of truth). */
+export type PhaseUOutcomeCorrelationPayload = {
+  profile_id: string | null;
+  intake_id: string;
+  correlation_state: string;
+  outcome_domains_used: string[];
+  clinician_summary: string[];
+  caveats: string[];
+};

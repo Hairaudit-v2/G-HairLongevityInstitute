@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
+import { HairEcosystemNav } from "@/components/public/HairEcosystemNav";
 
 export const metadata: Metadata = {
   title: "Hair Longevity Institute™ | Biology First. Hair for Life.",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body style={{ margin: 0, minHeight: "100vh", background: "#0F1B2D", color: "#D9D9D6" }}>
+        <HairEcosystemNav currentSite="hli" currentSiteInternalHref="/" />
         {children}
       </body>
     </html>
