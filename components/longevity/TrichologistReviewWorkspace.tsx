@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 import { REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
 import type { ReviewComplexityResult } from "@/lib/longevity/reviewComplexity";
@@ -28,6 +29,7 @@ import {
   SCALP_IMAGE_QUALITY,
   SCALP_SEVERITY_ESTIMATE,
 } from "@/lib/longevity/scalpImageAnalysis";
+import type { FollowUpCadenceOutput } from "@/lib/longevity/followUpCadence";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
@@ -105,6 +107,8 @@ export type CaseDetail = {
     review_priority: string | null;
     created_at: string;
     updated_at: string;
+    last_reviewed_at: string | null;
+    patient_visible_released_at: string | null;
     assigned_trichologist_id: string | null;
     patient_visible_summary: string | null;
     review_outcome: string | null;
@@ -126,6 +130,7 @@ export type CaseDetail = {
   marker_trends?: MarkerTrendRow[];
   clinical_insights?: ClinicalInsights;
   care_plan?: CarePlanOutput | null;
+  follow_up_cadence?: FollowUpCadenceOutput | null;
 };
 
 export type BloodMarkerRaw = {
@@ -489,6 +494,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         marker_trends: data.marker_trends ?? undefined,
         clinical_insights: data.clinical_insights ?? undefined,
         care_plan: data.care_plan ?? null,
+        follow_up_cadence: data.follow_up_cadence ?? null,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -1352,6 +1358,16 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                       </p>
                     )}
                   </div>
+                )}
+
+                {caseDetail.follow_up_cadence && (
+                  <FollowUpCadenceCard
+                    cadence={caseDetail.follow_up_cadence}
+                    audience="clinician"
+                    title="Follow-up cadence"
+                    description="Compact reminder context for whether follow-up looks upcoming, due, overdue, complete, or not yet set."
+                    className="mt-6"
+                  />
                 )}
 
                 {caseDetail.case_comparison?.treatmentResponse && (

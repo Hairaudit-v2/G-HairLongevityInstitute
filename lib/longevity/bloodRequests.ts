@@ -14,6 +14,7 @@ export type BloodRequestRow = {
   recommended_by: string | null;
   status: string;
   created_at: string;
+  updated_at: string | null;
   approved_at: string | null;
   letter_document_id: string | null;
 };
@@ -98,7 +99,7 @@ export async function getBloodRequestByIntake(
 ): Promise<BloodRequestRow | null> {
   const { data, error } = await supabase
     .from("hli_longevity_blood_requests")
-    .select("id, intake_id, profile_id, recommended_tests, reason, recommended_by, status, created_at, approved_at, letter_document_id")
+    .select("id, intake_id, profile_id, recommended_tests, reason, recommended_by, status, created_at, updated_at, approved_at, letter_document_id")
     .eq("intake_id", intake_id)
     .order("created_at", { ascending: false })
     .limit(1)

@@ -22,6 +22,7 @@ import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 import { generateCarePlan } from "@/lib/longevity/carePlan";
+import { generateFollowUpCadence } from "@/lib/longevity/followUpCadence";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,7 @@ export async function GET(
     const supabase = supabaseAdmin();
     const { data: intake, error: intakeErr } = await supabase
       .from("hli_longevity_intakes")
-      .select("id, profile_id, status, review_status, review_priority, created_at, updated_at, assigned_trichologist_id, patient_visible_summary, review_outcome")
+      .select("id, profile_id, status, review_status, review_priority, created_at, updated_at, last_reviewed_at, patient_visible_released_at, assigned_trichologist_id, patient_visible_summary, review_outcome")
       .eq("id", id)
       .single();
     if (intakeErr || !intake) {
@@ -107,6 +108,9 @@ export async function GET(
         .limit(1)
         .then((r) => (r.data?.length ?? 0) > 0),
     ]);
+    const hasBloodResultUploadDocument = (documents ?? []).some(
+      (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
+    );
     const clinical_insights = generateClinicalInsights({
       derivedFlags: triage.flags,
       interpretedMarkers: blood_results,
@@ -115,9 +119,7 @@ export async function GET(
       bloodRequest: blood_request ? { status: blood_request.status } : null,
       questionnaireResponses: responses,
       workflow: {
-        hasBloodResultUploadDocument: (documents ?? []).some(
-          (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
-        ),
+        hasBloodResultUploadDocument,
         hasStructuredMarkers: blood_results.length > 0,
       },
       longitudinalSignals: {
@@ -139,13 +141,30 @@ export async function GET(
       markerTrends: marker_trends,
       bloodRequest: blood_request ? { status: blood_request.status } : null,
       reviewOutcome: intake.review_outcome,
-      hasBloodResultUploadDocument: (documents ?? []).some(
-        (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD
-      ),
+      hasBloodResultUploadDocument,
       hasStructuredMarkers: blood_results.length > 0,
       hasNewerSubmittedIntake: hasNewerSubmittedIntake,
       treatmentResponseSummary: case_comparison?.treatmentResponse?.clinicianSummary ?? [],
       scalpImageComparison: case_comparison?.scalpImageComparison?.clinicianSummary ?? [],
+    });
+    const follow_up_cadence = generateFollowUpCadence({
+      carePlan: care_plan,
+      reviewOutcome: intake.review_outcome,
+      bloodRequest: blood_request
+        ? {
+            status: blood_request.status,
+            created_at: blood_request.created_at,
+            updated_at: blood_request.updated_at,
+            approved_at: blood_request.approved_at,
+          }
+        : null,
+      hasBloodResultUploadDocument,
+      hasStructuredMarkers: blood_results.length > 0,
+      hasNewerSubmittedIntake: hasNewerSubmittedIntake,
+      scalpPhotoFollowUpRecommended: care_plan.scalpPhotoFollowUpNeeded,
+      intakeCreatedAt: intake.created_at,
+      lastReviewedAt: intake.last_reviewed_at ?? null,
+      patientVisibleReleasedAt: intake.patient_visible_released_at ?? null,
     });
 
     return NextResponse.json({
@@ -156,6 +175,7 @@ export async function GET(
       clinical_insights,
       case_comparison,
       care_plan,
+      follow_up_cadence,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,
@@ -201,6 +221,8 @@ export async function GET(
         review_priority: intake.review_priority,
         created_at: intake.created_at,
         updated_at: intake.updated_at,
+        last_reviewed_at: intake.last_reviewed_at ?? null,
+        patient_visible_released_at: intake.patient_visible_released_at ?? null,
         assigned_trichologist_id: intake.assigned_trichologist_id,
         patient_visible_summary: intake.patient_visible_summary,
         review_outcome: intake.review_outcome,

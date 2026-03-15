@@ -8,6 +8,10 @@ import {
   type ClinicalInsights,
 } from "./clinicalInsights";
 import { generateCarePlan, type CarePlanOutput } from "./carePlan";
+import {
+  generateFollowUpCadence,
+  type FollowUpCadenceOutput,
+} from "./followUpCadence";
 import { LONGEVITY_DOC_TYPE } from "./documentTypes";
 import type { LongevityQuestionnaireResponses } from "./schema";
 import { computeTriage, type TriageFlags } from "./triage";
@@ -27,6 +31,7 @@ export type LongevityWorkflowSnapshot = {
   caseComparison: CaseComparisonResult | null;
   clinicalInsights: ClinicalInsights;
   carePlan: CarePlanOutput;
+  followUpCadence: FollowUpCadenceOutput;
   hasBloodResultUploadDocument: boolean;
   hasStructuredMarkers: boolean;
 };
@@ -128,6 +133,23 @@ export async function getLongevityWorkflowSnapshotForIntake(
     treatmentResponseSummary: caseComparison?.treatmentResponse?.clinicianSummary ?? [],
     scalpImageComparison: caseComparison?.scalpImageComparison?.clinicianSummary ?? [],
   });
+  const followUpCadence = generateFollowUpCadence({
+    carePlan,
+    reviewOutcome: params.reviewOutcome ?? null,
+    bloodRequest: bloodRequest
+      ? {
+          status: bloodRequest.status,
+          created_at: bloodRequest.created_at,
+          updated_at: bloodRequest.updated_at,
+          approved_at: bloodRequest.approved_at,
+        }
+      : null,
+    hasBloodResultUploadDocument,
+    hasStructuredMarkers,
+    hasNewerSubmittedIntake: newerSubmittedIntakes,
+    scalpPhotoFollowUpRecommended: carePlan.scalpPhotoFollowUpNeeded,
+    intakeCreatedAt: intakeRow?.created_at ?? null,
+  });
 
   return {
     profileId: params.profileId,
@@ -140,6 +162,7 @@ export async function getLongevityWorkflowSnapshotForIntake(
     caseComparison,
     clinicalInsights,
     carePlan,
+    followUpCadence,
     hasBloodResultUploadDocument,
     hasStructuredMarkers,
   };

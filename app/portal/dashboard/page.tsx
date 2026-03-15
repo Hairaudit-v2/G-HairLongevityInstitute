@@ -11,10 +11,12 @@ import { getInterpretedMarkersForIntake } from "@/lib/longevity/bloodResultMarke
 import { generateClinicalInsights } from "@/lib/longevity/clinicalInsights";
 import { getCaseComparisonForIntake } from "@/lib/longevity/caseComparison";
 import { generateCarePlan } from "@/lib/longevity/carePlan";
+import { generateFollowUpCadence } from "@/lib/longevity/followUpCadence";
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
+import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
@@ -43,7 +45,7 @@ export default async function PortalDashboardPage() {
 
   const { data: intakes, error } = await supabase
     .from("hli_longevity_intakes")
-    .select("id, status, created_at, updated_at, patient_visible_summary, patient_visible_released_at, review_outcome")
+    .select("id, status, created_at, updated_at, last_reviewed_at, patient_visible_summary, patient_visible_released_at, review_outcome")
     .eq("profile_id", profileId)
     .order("created_at", { ascending: false });
 
@@ -71,6 +73,7 @@ export default async function PortalDashboardPage() {
   let patientSafeInsights: string[] = [];
   let caseComparison = null;
   let carePlanPatient: { patientNextSteps: string[]; patientTimingSuggestion: string | null } | null = null;
+  let followUpCadence = null;
   if (latestIntakeId) {
     const [bloodResults, markerTrends, bloodRequestForLatest] = await Promise.all([
       getInterpretedMarkersForIntake(supabase, latestIntakeId),
@@ -113,6 +116,26 @@ export default async function PortalDashboardPage() {
       patientNextSteps: carePlan.patientNextSteps,
       patientTimingSuggestion: carePlan.patientTimingSuggestion,
     };
+    followUpCadence = generateFollowUpCadence({
+      carePlan,
+      reviewOutcome: latestSubmittedIntake?.review_outcome ?? null,
+      bloodRequest: bloodRequestForLatest
+        ? {
+            status: bloodRequestForLatest.status,
+            created_at: bloodRequestForLatest.created_at,
+            updated_at: bloodRequestForLatest.updated_at,
+            approved_at: bloodRequestForLatest.approved_at,
+          }
+        : null,
+      hasBloodResultUploadDocument,
+      hasStructuredMarkers: bloodResults.length > 0,
+      hasNewerSubmittedIntake: false,
+      scalpPhotoFollowUpRecommended: carePlan.scalpPhotoFollowUpNeeded,
+      intakeCreatedAt: latestSubmittedIntake?.created_at ?? null,
+      lastReviewedAt: latestSubmittedIntake?.last_reviewed_at ?? null,
+      patientVisibleReleasedAt:
+        latestSubmittedIntake?.patient_visible_released_at ?? null,
+    });
   }
   const hasResultsUploaded = bloodRequests.some((br) => br.status === "results_uploaded");
 
@@ -137,6 +160,16 @@ export default async function PortalDashboardPage() {
       <div className="mt-8" aria-labelledby="next-step-heading">
         <PortalNextStep intakes={list} hasResultsUploaded={hasResultsUploaded} />
       </div>
+
+      {followUpCadence && (
+        <FollowUpCadenceCard
+          cadence={followUpCadence}
+          audience="patient"
+          title="Your next review timing"
+          description="A simple reminder of when the next step in your longevity plan is likely to be helpful."
+          className="mt-6"
+        />
+      )}
 
       {carePlanPatient && (carePlanPatient.patientNextSteps.length > 0 || carePlanPatient.patientTimingSuggestion) && (
         <section className="mt-6 rounded-2xl border border-[rgb(var(--gold))]/20 bg-[rgb(var(--gold))]/5 p-5" aria-labelledby="what-to-do-next-heading">
