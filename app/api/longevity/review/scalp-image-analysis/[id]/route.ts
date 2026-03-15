@@ -14,6 +14,7 @@ import {
   mapNumericConfidenceToBand,
   mapVisibleFindingsToLikelihoods,
 } from "@/lib/longevity/scalpImageComparison";
+import type { ConfirmedScalpImageFindings } from "@/lib/longevity/scalpImageComparison";
 
 export const dynamic = "force-dynamic";
 
@@ -128,12 +129,14 @@ export async function PATCH(
       clinician_summary: draft.draft_summary,
       current_findings: {
         thinningDistribution: draft.thinning_distribution,
-        severityBand: draft.severity_estimate,
+        severityBand:
+          draft.severity_estimate as ConfirmedScalpImageFindings["severityBand"],
         ...mapVisibleFindingsToLikelihoods({
           visibleFindings: draft.visible_findings,
           imageQuality: draft.image_quality,
         }),
-        imageQuality: draft.image_quality,
+        imageQuality:
+          draft.image_quality as ConfirmedScalpImageFindings["imageQuality"],
         findingConfidence: mapNumericConfidenceToBand(draft.confidence),
       },
     });
