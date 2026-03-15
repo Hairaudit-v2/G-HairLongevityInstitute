@@ -38,6 +38,26 @@ export function SecondaryButton({
   );
 }
 
+/** Lower-priority / utility actions (e.g. Book consultation, Patient portal). */
+export function UtilityLink({
+  href,
+  children,
+  className = "",
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`text-sm font-medium text-white/60 transition hover:text-white/85 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg))] rounded-lg ${className}`}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function Container({ children }: { children: React.ReactNode }) {
   return <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">{children}</div>;
 }

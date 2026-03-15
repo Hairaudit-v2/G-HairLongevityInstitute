@@ -30,7 +30,7 @@ export default function PublicHeader({
 
   const navLinks = [
     { href: "/about", label: "About" },
-    { href: "#how-it-works", label: "How it works" },
+    { href: "#how-it-works", label: "See how it works" },
     { href: "#who-its-for", label: "Who it's for" },
     { href: "#services", label: "Services" },
     { href: "#faq", label: "FAQ" },
@@ -73,7 +73,8 @@ export default function PublicHeader({
             {showLongevityLinks && (
               <Link
                 href="/portal"
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/75 transition hover:bg-white/5 hover:text-white"
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition hover:text-white/75"
+                title="Returning patients"
               >
                 Patient portal
               </Link>
@@ -140,7 +141,8 @@ export default function PublicHeader({
               <Link
                 href="/portal"
                 onClick={() => setMobileOpen(false)}
-                className="min-h-[48px] rounded-xl px-4 py-3 text-base font-medium text-white/85 hover:bg-white/10 hover:text-white"
+                className="min-h-[48px] rounded-xl px-4 py-3 text-sm font-medium text-white/55 hover:bg-white/5 hover:text-white/75"
+                title="Returning patients"
               >
                 Patient portal
               </Link>
