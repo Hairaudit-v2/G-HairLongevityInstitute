@@ -5,8 +5,15 @@ type Intake = { id: string; status: string; created_at: string };
 /**
  * Shows current case status and suggested next step for the portal dashboard.
  * Preserves longitudinal model: does not overwrite; suggests resume (existing draft) or new intake (creates a new row).
+ * When hasResultsUploaded, reinforces follow-up reassessment CTA (Phase F).
  */
-export function PortalNextStep({ intakes }: { intakes: Intake[] }) {
+export function PortalNextStep({
+  intakes,
+  hasResultsUploaded = false,
+}: {
+  intakes: Intake[];
+  hasResultsUploaded?: boolean;
+}) {
   const latest = intakes[0] ?? null;
   const hasDraft = intakes.some((i) => i.status === "draft");
   const submittedCount = intakes.filter((i) => i.status === "submitted").length;
@@ -63,15 +70,17 @@ export function PortalNextStep({ intakes }: { intakes: Intake[] }) {
         Current status
       </h2>
       <p className="mt-2 text-white/90">
-        {submittedCount > 0 && !hasDraft
-          ? "Your latest intake has been submitted. You can add more documents to it from the intake flow, or start a follow-up intake when ready (each follow-up is a new, separate intake)."
-          : "View your intakes below."}
+        {hasResultsUploaded
+          ? "Ready for a follow-up reassessment? Start a new intake—your previous data stays safe and is not overwritten."
+          : submittedCount > 0 && !hasDraft
+            ? "Your latest intake has been submitted. You can add more documents to it from the intake flow, or start a follow-up intake when ready (each follow-up is a new, separate intake)."
+            : "View your intakes below."}
       </p>
       <Link
         href="/longevity/start"
         className="mt-4 inline-flex rounded-2xl border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-6 py-3 text-sm font-semibold text-white hover:bg-[rgb(var(--gold))]/20"
       >
-        Start follow-up intake
+        {hasResultsUploaded ? "Start follow-up reassessment" : "Start follow-up intake"}
       </Link>
     </section>
   );

@@ -88,7 +88,7 @@ export async function getDocumentIfOwnedByProfile(
   return null;
 }
 
-/** Insert document row and return id. */
+/** Insert document row and return id. Optional blood_request_id for returned blood results (Phase F). */
 export async function createDocumentRecord(
   supabase: SupabaseClient,
   params: {
@@ -98,13 +98,14 @@ export async function createDocumentRecord(
     filename: string | null;
     mime_type: string | null;
     size_bytes: number | null;
+    blood_request_id?: string | null;
   }
 ): Promise<{ id: string } | { error: string }> {
   const { data, error } = await supabase
     .from("hli_longevity_documents")
     .insert({
       intake_id: params.intake_id,
-      blood_request_id: null,
+      blood_request_id: params.blood_request_id ?? null,
       doc_type: params.doc_type,
       storage_path: params.storage_path,
       filename: params.filename,

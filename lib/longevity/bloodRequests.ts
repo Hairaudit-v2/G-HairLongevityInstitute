@@ -25,6 +25,7 @@ export type BloodRequestForPatient = {
   reason: string | null;
   status: string;
   created_at: string;
+  updated_at: string;
   letter_document_id: string | null;
 };
 
@@ -113,7 +114,7 @@ export async function listBloodRequestsForProfile(
 ): Promise<BloodRequestForPatient[]> {
   const { data, error } = await supabase
     .from("hli_longevity_blood_requests")
-    .select("id, intake_id, recommended_tests, reason, status, created_at, letter_document_id")
+    .select("id, intake_id, recommended_tests, reason, status, created_at, updated_at, letter_document_id")
     .eq("profile_id", profile_id)
     .neq("status", "cancelled")
     .order("created_at", { ascending: false });
@@ -125,6 +126,7 @@ export async function listBloodRequestsForProfile(
     reason: r.reason ?? null,
     status: r.status,
     created_at: r.created_at,
+    updated_at: r.updated_at ?? r.created_at,
     letter_document_id: r.letter_document_id ?? null,
   }));
 }

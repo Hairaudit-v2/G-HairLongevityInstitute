@@ -13,6 +13,9 @@ import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { computeTriage } from "@/lib/longevity/triage";
 import { computeReviewComplexity } from "@/lib/longevity/reviewComplexity";
+import { getInterpretedMarkersWithIdsForIntake, getMarkersForIntake } from "@/lib/longevity/bloodResultMarkers";
+import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
+import { getCurrentVsPreviousForIntake } from "@/lib/longevity/bloodMarkerTrends";
 
 export const dynamic = "force-dynamic";
 
@@ -81,9 +84,30 @@ export async function GET(
       documents: (documents ?? []).map((d) => ({ doc_type: d.doc_type })),
     });
 
+    const [blood_results, blood_markers_raw, blood_request, marker_trends] = await Promise.all([
+      getInterpretedMarkersWithIdsForIntake(supabase, id),
+      getMarkersForIntake(supabase, id),
+      getBloodRequestByIntake(supabase, id),
+      getCurrentVsPreviousForIntake(supabase, intake.profile_id, id),
+    ]);
+
     return NextResponse.json({
       ok: true,
       complexity,
+      blood_results,
+      marker_trends,
+      blood_markers: blood_markers_raw.map((m) => ({
+        id: m.id,
+        marker_name: m.marker_name,
+        value: m.value,
+        unit: m.unit,
+        reference_low: m.reference_low,
+        reference_high: m.reference_high,
+        collected_at: m.collected_at,
+        lab_name: m.lab_name,
+        blood_request_id: m.blood_request_id,
+      })),
+      blood_request: blood_request ? { id: blood_request.id, status: blood_request.status } : null,
       intake: {
         id: intake.id,
         status: intake.status,

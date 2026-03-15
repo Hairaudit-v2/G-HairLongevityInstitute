@@ -72,6 +72,31 @@ Future clinician (Trichologist) features should treat **profile → many intakes
 
 - `20250316000002_hli_longevity_portal_auth.sql`: adds `auth_user_id` to `hli_longevity_profiles`, adds `profile_id` to `hli_longevity_documents`, and relaxes the document parent constraint.
 
+## Phase G: Blood results interpretation
+
+- **Structured markers:** Table `hli_longevity_blood_result_markers` stores marker_name, value, unit, reference_low/high, collected_at, lab_name, linked to profile_id, intake_id, and optional blood_request_id. Multiple rows per intake/profile over time support longitudinal trend tracking.
+- **Interpretation engine:** `lib/longevity/bloodInterpretation.ts` applies hair-specific optimal ranges (Ferritin, Vitamin D, TSH, Free T3/T4, B12, CRP, Zinc, HbA1c, Testosterone, SHBG) and returns status (optimal | normal | low | high | critical | unknown), clinical_flag (Fe, T, A, ⊕, !), and short explanation. Deterministic only; no AI.
+- **Review workspace:** Trichologist case detail includes a "Blood Results Summary" panel with colour-coded status and explanations; flags map to triage icons (Fe = iron, T = thyroid, A = androgen, ⊕ = inflammatory, ! = stress).
+
+## Phase I: Longitudinal blood marker trends and comparison
+
+- **Longitudinal helpers:** `lib/longevity/bloodMarkerTrends.ts` — `getProfileMarkerHistoryGrouped(profile_id)` returns profile-level markers grouped by normalised marker name (via `getNormalisedMarkerKey` from bloodInterpretation); `getCurrentVsPreviousForIntake(profile_id, intake_id)` returns current vs previous value per marker with direction (up / down / stable). `profileHasTrendData(profile_id)` indicates whether the profile has enough history for a trend view (multiple intakes or dates).
+- **Trichologist workspace:** Case detail includes a "Marker trends (previous comparison)" section: table of marker name, current value, previous value, direction, current/previous collection dates. Shown only when there is at least one marker with a prior value.
+- **Patient portal:** When `profileHasTrendData` is true, the dashboard shows a short reassurance card: "Blood results over time — Your key blood results are tracked over time. Your clinician can discuss any changes with you at your next review." No numbers or internal reasoning.
+
+## Phase H: Blood result ingestion workflow
+
+- **Marker ingestion API:** POST `/api/longevity/review/blood-markers` (create) and PATCH `/api/longevity/review/blood-markers/[id]` (update). Trichologist-only; intake must be in review queue. Supports profile_id, intake_id, blood_request_id (optional), marker_name, value, unit, reference_low/high, collected_at, lab_name. Additive only; no deletion.
+- **Review workspace UI:** "Add blood marker" form in case detail (marker name, value, unit, ref ranges, collected_at, lab name, optional link to blood request). Blood Results Summary shows each marker with an "Edit" action; edit form updates existing marker. New/updated markers appear in the summary after refresh.
+- **Document linkage:** Optional blood_request_id when adding or editing a marker links the marker to the intake’s blood request (e.g. results from GP letter).
+- **Audit:** `blood_marker_created` and `blood_marker_updated` events logged to `hli_longevity_audit_events` with actor_type `trichologist` and payload (trichologist_id, marker_id, marker_name / updates).
+
+## Phase F: Returned blood results and follow-up reassessment
+
+- **Returned blood results**: After a GP support letter is generated, the patient can upload returned blood results via the portal. The upload API accepts optional `bloodRequestId`; the document is linked to the intake and blood request, and the request status is set to `results_uploaded`.
+- **Follow-up reassessment**: The patient can start a **new** intake at any time (e.g. "Start follow-up reassessment"). This creates a new row in `hli_longevity_intakes`; prior submitted data is never overwritten. The portal shows a longitudinal "Your care journey" timeline (intakes, clinician summary, blood request, returned results, follow-up intakes).
+- **Re-review readiness**: Follow-up intakes are triaged on submit (existing flow) and can re-enter the review queue. Returned blood result uploads are visible to clinicians with the intake/documents and can be used for re-review; no new review automation is required for Phase F.
+
 ## Related
 
 - **Trichologist portal (future):** See **`docs/TRICHOLOGIST_PORTAL_SPEC.md`** for planning and specification of a dedicated Trichologist login and dashboard. No implementation required until patient portal is stable.

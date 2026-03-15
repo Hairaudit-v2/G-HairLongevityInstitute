@@ -30,6 +30,7 @@ const ALLOWED_MIMES: Record<LongevityDocType, string[]> = {
     "image/jpg",
     "image/png",
   ],
+  [LONGEVITY_DOC_TYPE.BLOOD_REQUEST_LETTER]: ["application/pdf"],
   [LONGEVITY_DOC_TYPE.OTHER]: [
     "application/pdf",
     "image/jpeg",
@@ -44,6 +45,7 @@ const ALLOWED_EXTENSIONS: Record<LongevityDocType, string[]> = {
   [LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD]: ["pdf", "jpg", "jpeg", "png"],
   [LONGEVITY_DOC_TYPE.SCALP_PHOTO]: ["jpg", "jpeg", "png", "webp"],
   [LONGEVITY_DOC_TYPE.MEDICAL_LETTER]: ["pdf", "jpg", "jpeg", "png"],
+  [LONGEVITY_DOC_TYPE.BLOOD_REQUEST_LETTER]: ["pdf"],
   [LONGEVITY_DOC_TYPE.OTHER]: ["pdf", "jpg", "jpeg", "png", "webp"],
 };
 

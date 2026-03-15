@@ -84,7 +84,7 @@ export async function POST(
     const uploadResult = await uploadLongevityFile(
       supabase,
       storagePath,
-      pdfBytes,
+      Buffer.from(pdfBytes),
       "application/pdf"
     );
     if (!uploadResult.ok) {

@@ -27,10 +27,13 @@ function isAllowedDocType(s: string): s is LongevityDocType {
 }
 
 /**
- * Upload a document. Multipart: intakeId, docType, file.
+ * Upload a document. Multipart: intakeId, docType, file; optional bloodRequestId (Phase F).
  * Allowed for both draft and submitted intakes (longitudinal document continuity: patients can add
  * documents after submission). Intake questionnaire edits remain locked after submit; only document
  * uploads stay open for that intake.
+ * When bloodRequestId is provided: links the document to the blood request, sets request status to
+ * results_uploaded. Re-review readiness: returned blood result uploads are visible to clinicians
+ * with the intake/documents and can re-enter the review lifecycle; no new automation required.
  */
 export async function POST(req: Request) {
   if (!isLongevityApiEnabled()) {
@@ -48,6 +51,7 @@ export async function POST(req: Request) {
     }
 
     const intakeId = formData.get("intakeId")?.toString()?.trim();
+    const bloodRequestId = formData.get("bloodRequestId")?.toString()?.trim() || null;
     const docTypeRaw = formData.get("docType")?.toString()?.trim();
     const file = formData.get("file");
 
@@ -86,6 +90,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Intake not found or not authorized." }, { status: 404 });
     }
 
+    if (bloodRequestId) {
+      const { data: br, error: brErr } = await supabase
+        .from("hli_longevity_blood_requests")
+        .select("id, intake_id, profile_id, status")
+        .eq("id", bloodRequestId)
+        .single();
+      if (brErr || !br || br.profile_id !== profileId || br.intake_id !== intakeId) {
+        return NextResponse.json({ ok: false, error: "Blood request not found or not authorized." }, { status: 404 });
+      }
+      if (br.status !== "letter_generated") {
+        return NextResponse.json(
+          { ok: false, error: "Generate your GP support letter first, then you can upload returned results." },
+          { status: 400 }
+        );
+      }
+    }
+
     const storagePath = buildLongevityStoragePath(
       profileId,
       intakeId,
@@ -111,16 +132,32 @@ export async function POST(req: Request) {
       filename: file.name || validation.sanitizedFilename,
       mime_type: validation.mimeType,
       size_bytes: validation.sizeBytes,
+      blood_request_id: bloodRequestId || undefined,
     });
     if ("error" in recordResult) {
       return NextResponse.json({ ok: false, error: recordResult.error }, { status: 500 });
     }
 
+    if (bloodRequestId) {
+      await supabase
+        .from("hli_longevity_blood_requests")
+        .update({
+          status: "results_uploaded",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", bloodRequestId);
+    }
+
     await auditLongevityEvent(supabase, {
       profile_id: profileId,
       intake_id: intakeId,
-      event_type: "document_uploaded",
-      payload: { document_id: recordResult.id, doc_type: docType, filename: file.name },
+      event_type: bloodRequestId ? "returned_blood_results_uploaded" : "document_uploaded",
+      payload: {
+        document_id: recordResult.id,
+        doc_type: docType,
+        filename: file.name,
+        ...(bloodRequestId ? { blood_request_id: bloodRequestId } : {}),
+      },
       actor_type: "user",
     });
 
@@ -133,6 +170,7 @@ export async function POST(req: Request) {
         filename: file.name || validation.sanitizedFilename,
         mime_type: validation.mimeType,
         size_bytes: validation.sizeBytes,
+        ...(bloodRequestId ? { blood_request_id: bloodRequestId } : {}),
       },
     });
   } catch (e: unknown) {

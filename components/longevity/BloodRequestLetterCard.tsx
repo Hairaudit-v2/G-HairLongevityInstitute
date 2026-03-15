@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 type BloodRequestForPatient = {
   id: string;
@@ -12,9 +12,13 @@ type BloodRequestForPatient = {
   letter_document_id: string | null;
 };
 
+const BLOOD_TEST_UPLOAD_DOC_TYPE = "blood_test_upload";
+
 export function BloodRequestLetterCard({ br }: { br: BloodRequestForPatient }) {
   const [generating, setGenerating] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -37,12 +41,50 @@ export function BloodRequestLetterCard({ br }: { br: BloodRequestForPatient }) {
     }
   };
 
+  const handleUploadReturnedResults = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      setError("Please select a file.");
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.set("intakeId", br.intake_id);
+      formData.set("bloodRequestId", br.id);
+      formData.set("docType", BLOOD_TEST_UPLOAD_DOC_TYPE);
+      formData.set("file", file);
+      const res = await fetch("/api/longevity/documents/upload", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setError(data.error ?? "Upload failed");
+        return;
+      }
+      window.location.reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const statusLabel =
     br.status === "letter_generated"
       ? "Letter ready"
-      : br.status === "pending"
-        ? "Pending"
-        : br.status.replace(/_/g, " ");
+      : br.status === "results_uploaded"
+        ? "Results uploaded"
+        : br.status === "completed"
+          ? "Completed"
+          : br.status === "pending"
+            ? "Pending"
+            : br.status.replace(/_/g, " ");
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
@@ -83,6 +125,38 @@ export function BloodRequestLetterCard({ br }: { br: BloodRequestForPatient }) {
           </button>
         )}
       </div>
+
+      {/* Upload returned blood results (Phase F): after letter is generated, patient can upload results */}
+      {br.status === "letter_generated" && br.letter_document_id && (
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4">
+          <p className="text-sm font-medium text-white/90">Upload returned blood results</p>
+          <p className="mt-1 text-xs text-white/60">
+            After your GP has requested tests and you have your results, upload them here (PDF or image).
+          </p>
+          <form onSubmit={handleUploadReturnedResults} className="mt-3 flex flex-wrap items-end gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,image/*"
+              className="block w-full max-w-xs text-sm text-white/80 file:mr-2 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-sm file:text-white"
+              aria-label="Choose file"
+            />
+            <button
+              type="submit"
+              disabled={uploading}
+              className="rounded-xl border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-4 py-2 text-sm font-medium text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+            >
+              {uploading ? "Uploading…" : "Upload results"}
+            </button>
+          </form>
+        </div>
+      )}
+      {br.status === "results_uploaded" && (
+        <p className="mt-3 text-sm text-emerald-200/90">
+          Returned blood results have been uploaded. You can start a follow-up reassessment when ready.
+        </p>
+      )}
+
       {error && (
         <p className="mt-2 text-sm text-red-200" role="alert">
           {error}

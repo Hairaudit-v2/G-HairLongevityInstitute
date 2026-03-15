@@ -5,6 +5,8 @@ import Link from "next/link";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 import { REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
 import type { ReviewComplexityResult } from "@/lib/longevity/reviewComplexity";
+import type { InterpretedMarker } from "@/lib/longevity/bloodInterpretation";
+import type { MarkerTrendRow } from "@/lib/longevity/bloodMarkerTrends";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
@@ -94,6 +96,22 @@ export type CaseDetail = {
   documents: { id: string; doc_type: string; filename: string | null; created_at: string }[];
   notes: { id: string; body: string; created_at: string }[];
   complexity?: ReviewComplexityResult;
+  blood_results?: (InterpretedMarker & { id: string })[];
+  blood_markers?: BloodMarkerRaw[];
+  blood_request?: { id: string; status: string } | null;
+  marker_trends?: MarkerTrendRow[];
+};
+
+export type BloodMarkerRaw = {
+  id: string;
+  marker_name: string;
+  value: number;
+  unit: string | null;
+  reference_low: number | null;
+  reference_high: number | null;
+  collected_at: string | null;
+  lab_name: string | null;
+  blood_request_id: string | null;
 };
 
 function FlagIcons({ flags }: { flags: ReviewQueueItem["flags"] }) {
@@ -137,6 +155,58 @@ function flagsSummary(flags: ReviewQueueItem["flags"]): string {
   return active.length ? active.join(", ") : "—";
 }
 
+const BLOOD_STATUS_STYLE: Record<InterpretedMarker["status"], string> = {
+  optimal: "bg-emerald-500/20 text-emerald-200 border-emerald-500/40",
+  normal: "bg-white/10 text-white/80 border-white/20",
+  low: "bg-amber-500/20 text-amber-200 border-amber-500/40",
+  high: "bg-amber-500/20 text-amber-200 border-amber-500/40",
+  critical: "bg-red-500/20 text-red-200 border-red-500/40",
+  unknown: "bg-white/10 text-white/50 border-white/10",
+};
+
+function BloodResultRow({
+  marker,
+  onEdit,
+}: {
+  marker: InterpretedMarker & { id: string };
+  onEdit?: (id: string) => void;
+}) {
+  const statusStyle = BLOOD_STATUS_STYLE[marker.status];
+  const valueStr = marker.unit ? `${marker.value} ${marker.unit}` : String(marker.value);
+  return (
+    <tr className="border-b border-white/5 text-white/90">
+      <td className="px-3 py-2 font-medium">{marker.marker}</td>
+      <td className="px-3 py-2">{valueStr}</td>
+      <td className="px-3 py-2">
+        <span className={`inline-flex rounded border px-1.5 py-0.5 text-xs capitalize ${statusStyle}`}>
+          {marker.status}
+        </span>
+      </td>
+      <td className="px-3 py-2">
+        {marker.clinical_flag ? (
+          <span className="inline-flex h-5 w-5 items-center justify-center rounded border border-amber-500/50 bg-amber-500/20 text-[10px] font-medium text-amber-200" title={marker.clinical_flag === "Fe" ? "Iron" : marker.clinical_flag === "T" ? "Thyroid" : marker.clinical_flag === "A" ? "Androgen" : marker.clinical_flag === "⊕" ? "Inflammatory" : "Stress"}>
+            {marker.clinical_flag}
+          </span>
+        ) : (
+          "—"
+        )}
+      </td>
+      <td className="max-w-xs px-3 py-2 text-xs text-white/70">{marker.explanation}</td>
+      {onEdit && (
+        <td className="px-3 py-2">
+          <button
+            type="button"
+            onClick={() => onEdit(marker.id)}
+            className="text-xs text-[rgb(var(--gold))] hover:underline"
+          >
+            Edit
+          </button>
+        </td>
+      )}
+    </tr>
+  );
+}
+
 export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId: string }) {
   const [items, setItems] = useState<ReviewQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,6 +223,17 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   const [filterAssignedToMe, setFilterAssignedToMe] = useState(false);
   const [sortBy, setSortBy] = useState<"priority" | "complexity">("complexity");
   const [outcomeSelect, setOutcomeSelect] = useState<string>("");
+  const [editingMarkerId, setEditingMarkerId] = useState<string | null>(null);
+  const [addMarkerForm, setAddMarkerForm] = useState({
+    marker_name: "",
+    value: "",
+    unit: "",
+    reference_low: "",
+    reference_high: "",
+    collected_at: "",
+    lab_name: "",
+    blood_request_id: "",
+  });
 
   const fetchQueue = useCallback(async () => {
     setLoading(true);
@@ -197,6 +278,10 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         documents: data.documents ?? [],
         notes: data.notes ?? [],
         complexity: data.complexity ?? undefined,
+        blood_results: data.blood_results ?? undefined,
+        blood_markers: data.blood_markers ?? undefined,
+        blood_request: data.blood_request ?? null,
+        marker_trends: data.marker_trends ?? undefined,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -312,6 +397,100 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       setActionLoading(false);
     }
   }, [selectedId, noteText, fetchCase]);
+
+  const addBloodMarker = useCallback(async () => {
+    if (!selectedId || !caseDetail) return;
+    const valueNum = Number(addMarkerForm.value);
+    if (!addMarkerForm.marker_name.trim() || !Number.isFinite(valueNum)) {
+      setActionError("Marker name and numeric value are required.");
+      return;
+    }
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/longevity/review/blood-markers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          intake_id: selectedId,
+          marker_name: addMarkerForm.marker_name.trim(),
+          value: valueNum,
+          unit: addMarkerForm.unit.trim() || undefined,
+          reference_low: addMarkerForm.reference_low.trim() ? Number(addMarkerForm.reference_low) : undefined,
+          reference_high: addMarkerForm.reference_high.trim() ? Number(addMarkerForm.reference_high) : undefined,
+          collected_at: addMarkerForm.collected_at.trim() || undefined,
+          lab_name: addMarkerForm.lab_name.trim() || undefined,
+          blood_request_id: addMarkerForm.blood_request_id.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Failed to add marker");
+        return;
+      }
+      setAddMarkerForm({
+        marker_name: "",
+        value: "",
+        unit: "",
+        reference_low: "",
+        reference_high: "",
+        collected_at: "",
+        lab_name: "",
+        blood_request_id: "",
+      });
+      fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Failed to add marker");
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, caseDetail, addMarkerForm, fetchCase]);
+
+  const [editMarkerForm, setEditMarkerForm] = useState<BloodMarkerRaw | null>(null);
+  useEffect(() => {
+    if (editingMarkerId && caseDetail?.blood_markers) {
+      const raw = caseDetail.blood_markers.find((m) => m.id === editingMarkerId);
+      setEditMarkerForm(raw ? { ...raw } : null);
+    } else {
+      setEditMarkerForm(null);
+    }
+  }, [editingMarkerId, caseDetail?.blood_markers]);
+
+  const saveEditMarker = useCallback(async () => {
+    if (!editingMarkerId || !editMarkerForm) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/longevity/review/blood-markers/${editingMarkerId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          marker_name: editMarkerForm.marker_name,
+          value: editMarkerForm.value,
+          unit: editMarkerForm.unit || null,
+          reference_low: editMarkerForm.reference_low,
+          reference_high: editMarkerForm.reference_high,
+          collected_at: editMarkerForm.collected_at,
+          lab_name: editMarkerForm.lab_name,
+          blood_request_id: editMarkerForm.blood_request_id,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Failed to update marker");
+        return;
+      }
+      setEditingMarkerId(null);
+      setEditMarkerForm(null);
+      if (selectedId) fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Failed to update marker");
+    } finally {
+      setActionLoading(false);
+    }
+  }, [editingMarkerId, editMarkerForm, selectedId, fetchCase]);
 
   const releaseSummary = useCallback(async () => {
     if (!selectedId || !summaryText.trim()) return;
@@ -612,6 +791,233 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                       </li>
                     ))}
                   </ul>
+                )}
+
+                <h3 className="mt-6 text-sm font-medium text-white/90">Add blood marker</h3>
+                <div className="mt-2 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <input
+                      type="text"
+                      placeholder="Marker name"
+                      value={addMarkerForm.marker_name}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, marker_name: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value"
+                      value={addMarkerForm.value}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, value: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Unit"
+                      value={addMarkerForm.unit}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, unit: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Lab name"
+                      value={addMarkerForm.lab_name}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, lab_name: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <input
+                      type="text"
+                      placeholder="Ref low"
+                      value={addMarkerForm.reference_low}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, reference_low: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Ref high"
+                      value={addMarkerForm.reference_high}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, reference_high: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Collected at (ISO date)"
+                      value={addMarkerForm.collected_at}
+                      onChange={(e) => setAddMarkerForm((f) => ({ ...f, collected_at: e.target.value }))}
+                      className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                    />
+                    {caseDetail.blood_request && (
+                      <select
+                        value={addMarkerForm.blood_request_id}
+                        onChange={(e) => setAddMarkerForm((f) => ({ ...f, blood_request_id: e.target.value }))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      >
+                        <option value="">No blood request link</option>
+                        <option value={caseDetail.blood_request.id}>
+                          Blood request ({caseDetail.blood_request.status})
+                        </option>
+                      </select>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addBloodMarker}
+                    disabled={actionLoading}
+                    className="w-fit rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-3 py-1.5 text-sm text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+                  >
+                    Add marker
+                  </button>
+                </div>
+
+                <h3 className="mt-6 text-sm font-medium text-white/90">Blood Results Summary</h3>
+                {!caseDetail.blood_results || caseDetail.blood_results.length === 0 ? (
+                  <p className="mt-2 text-sm text-white/50">No structured blood results for this intake.</p>
+                ) : (
+                  <div className="mt-2 overflow-hidden rounded-lg border border-white/10">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-white/5 text-left text-white/70">
+                          <th className="px-3 py-2 font-medium">Marker</th>
+                          <th className="px-3 py-2 font-medium">Value</th>
+                          <th className="px-3 py-2 font-medium">Status</th>
+                          <th className="px-3 py-2 font-medium">Flag</th>
+                          <th className="px-3 py-2 font-medium">Explanation</th>
+                          <th className="px-3 py-2 font-medium">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {caseDetail.blood_results.map((m, i) => (
+                          <BloodResultRow key={m.id} marker={m} onEdit={setEditingMarkerId} />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {editingMarkerId && editMarkerForm && (
+                  <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+                    <h4 className="text-sm font-medium text-white/90">Edit marker</h4>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      <input
+                        type="text"
+                        placeholder="Marker name"
+                        value={editMarkerForm.marker_name}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, marker_name: e.target.value } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Value"
+                        value={editMarkerForm.value}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, value: Number(e.target.value) } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Unit"
+                        value={editMarkerForm.unit ?? ""}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, unit: e.target.value || null } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Lab name"
+                        value={editMarkerForm.lab_name ?? ""}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, lab_name: e.target.value || null } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Ref low"
+                        value={editMarkerForm.reference_low ?? ""}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, reference_low: e.target.value === "" ? null : Number(e.target.value) } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Ref high"
+                        value={editMarkerForm.reference_high ?? ""}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, reference_high: e.target.value === "" ? null : Number(e.target.value) } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Collected at"
+                        value={editMarkerForm.collected_at ?? ""}
+                        onChange={(e) => setEditMarkerForm((f) => (f ? { ...f, collected_at: e.target.value || null } : f))}
+                        className="rounded border border-white/20 bg-black/20 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                      />
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={saveEditMarker}
+                        disabled={actionLoading}
+                        className="rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-3 py-1.5 text-sm text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditingMarkerId(null); setEditMarkerForm(null); }}
+                        className="rounded border border-white/20 bg-white/5 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <h3 className="mt-6 text-sm font-medium text-white/90">Marker trends (previous comparison)</h3>
+                {!caseDetail.marker_trends || caseDetail.marker_trends.length === 0 ? (
+                  <p className="mt-2 text-sm text-white/50">No trend data for this intake (single set of results or no previous values).</p>
+                ) : (
+                  <div className="mt-2 overflow-hidden rounded-lg border border-white/10">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-white/5 text-left text-white/70">
+                          <th className="px-3 py-2 font-medium">Marker</th>
+                          <th className="px-3 py-2 font-medium">Current</th>
+                          <th className="px-3 py-2 font-medium">Previous</th>
+                          <th className="px-3 py-2 font-medium">Direction</th>
+                          <th className="px-3 py-2 font-medium">Current date</th>
+                          <th className="px-3 py-2 font-medium">Previous date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {caseDetail.marker_trends.map((row) => (
+                          <tr key={row.markerKey} className="border-b border-white/5 text-white/90">
+                            <td className="px-3 py-2 font-medium">{row.displayName}</td>
+                            <td className="px-3 py-2">
+                              {row.current.unit ? `${row.current.value} ${row.current.unit}` : row.current.value}
+                            </td>
+                            <td className="px-3 py-2">
+                              {row.previous
+                                ? (row.previous.unit ? `${row.previous.value} ${row.previous.unit}` : row.previous.value)
+                                : "—"}
+                            </td>
+                            <td className="px-3 py-2">
+                              {row.direction === "up" && <span className="text-amber-300">↑ up</span>}
+                              {row.direction === "down" && <span className="text-sky-300">↓ down</span>}
+                              {row.direction === "stable" && <span className="text-white/60">→ stable</span>}
+                              {row.direction === null && <span className="text-white/40">—</span>}
+                            </td>
+                            <td className="px-3 py-2 text-white/70">
+                              {row.current.collected_at
+                                ? new Date(row.current.collected_at).toLocaleDateString()
+                                : "—"}
+                            </td>
+                            <td className="px-3 py-2 text-white/70">
+                              {row.previous?.collected_at
+                                ? new Date(row.previous.collected_at).toLocaleDateString()
+                                : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Internal notes</h3>

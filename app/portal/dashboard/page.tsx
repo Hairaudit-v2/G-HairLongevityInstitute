@@ -5,7 +5,9 @@ import { setLongevitySession } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
 import { listBloodRequestsForProfile } from "@/lib/longevity/bloodRequests";
+import { profileHasTrendData } from "@/lib/longevity/bloodMarkerTrends";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
+import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
@@ -50,9 +52,11 @@ export default async function PortalDashboardPage() {
   const list = intakes ?? [];
   const documents = await listDocumentsForProfile(supabase, profileId);
   const bloodRequests = await listBloodRequestsForProfile(supabase, profileId);
+  const hasTrendData = await profileHasTrendData(supabase, profileId);
   const intakesWithReleasedSummary = list.filter(
     (i) => i.patient_visible_released_at != null && (i.patient_visible_summary ?? "").trim() !== ""
   );
+  const hasResultsUploaded = bloodRequests.some((br) => br.status === "results_uploaded");
 
   return (
     <>
@@ -73,8 +77,25 @@ export default async function PortalDashboardPage() {
       </div>
 
       <div className="mt-8" aria-labelledby="next-step-heading">
-        <PortalNextStep intakes={list} />
+        <PortalNextStep intakes={list} hasResultsUploaded={hasResultsUploaded} />
       </div>
+
+      <CareJourneyTimeline
+        intakes={list}
+        bloodRequests={bloodRequests}
+        intakesWithReleasedSummary={intakesWithReleasedSummary}
+      />
+
+      {hasTrendData && (
+        <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5" aria-labelledby="trend-summary-heading">
+          <h2 id="trend-summary-heading" className="text-base font-semibold text-white">
+            Blood results over time
+          </h2>
+          <p className="mt-2 text-sm text-white/70">
+            Your key blood results are tracked over time. Your clinician can discuss any changes with you at your next review.
+          </p>
+        </section>
+      )}
 
       {bloodRequests.length > 0 && (
         <section className="mt-10" aria-labelledby="blood-requests-heading">
