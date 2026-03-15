@@ -19,6 +19,14 @@ import type { InterpretedMarker } from "./bloodInterpretation";
 import type { MarkerTrendRow } from "./bloodMarkerTrends";
 import type { BloodRequestRow } from "./bloodRequests";
 import type { CaseComparisonResult } from "./caseComparison";
+import { getAdherenceContextForIntake } from "./adherenceContext";
+import { computeAdherenceStates } from "./adherenceStates";
+import { getTreatmentAdherenceForIntake } from "./treatmentAdherence";
+import {
+  computeTreatmentOutcomeCorrelation,
+  type TreatmentOutcomeCorrelationResult,
+} from "./treatmentOutcomeCorrelation";
+import type { TreatmentAdherenceResult } from "./treatmentAdherence";
 
 export type LongevityWorkflowSnapshot = {
   profileId: string;
@@ -37,6 +45,9 @@ export type LongevityWorkflowSnapshot = {
   followUpCadence: FollowUpCadenceOutput;
   hasBloodResultUploadDocument: boolean;
   hasStructuredMarkers: boolean;
+  /** Phase U */
+  treatmentAdherence: TreatmentAdherenceResult;
+  outcomeCorrelation: TreatmentOutcomeCorrelationResult;
 };
 
 function asQuestionnaireResponses(
@@ -77,17 +88,19 @@ export async function getLongevityWorkflowSnapshotForIntake(
       getBloodRequestByIntake(supabase, params.intakeId),
     ]);
 
-  const [markerTrends, caseComparison, hasNewerSubmittedIntake] = await Promise.all([
-    getCurrentVsPreviousForIntake(supabase, params.profileId, params.intakeId),
-    getCaseComparisonForIntake(supabase, params.profileId, params.intakeId),
-    supabase
-      .from("hli_longevity_intakes")
-      .select("id")
-      .eq("profile_id", params.profileId)
-      .neq("status", "draft")
-      .gt("created_at", intakeRow?.created_at ?? new Date().toISOString())
-      .limit(1),
-  ]);
+  const [markerTrends, caseComparison, hasNewerSubmittedIntake, treatmentAdherence] =
+    await Promise.all([
+      getCurrentVsPreviousForIntake(supabase, params.profileId, params.intakeId),
+      getCaseComparisonForIntake(supabase, params.profileId, params.intakeId),
+      supabase
+        .from("hli_longevity_intakes")
+        .select("id")
+        .eq("profile_id", params.profileId)
+        .neq("status", "draft")
+        .gt("created_at", intakeRow?.created_at ?? new Date().toISOString())
+        .limit(1),
+      getTreatmentAdherenceForIntake(supabase, params.profileId, params.intakeId),
+    ]);
 
   const questionnaireResponses = asQuestionnaireResponses(questionnaire?.responses);
   const derivedFlags = computeTriage(questionnaireResponses).flags;
@@ -122,6 +135,20 @@ export async function getLongevityWorkflowSnapshotForIntake(
   const newerSubmittedIntakes =
     (hasNewerSubmittedIntake.data ?? []).filter((row) => row.id !== params.intakeId)
       .length > 0;
+
+  const adherenceContext = await getAdherenceContextForIntake(supabase, {
+    profileId: params.profileId,
+    intakeId: params.intakeId,
+  });
+  const adherenceStates = computeAdherenceStates(adherenceContext);
+  const outcomeCorrelation = computeTreatmentOutcomeCorrelation({
+    treatmentAdherence: treatmentAdherence.items,
+    hasPreviousIntake: treatmentAdherence.hasPreviousIntake,
+    caseComparison,
+    clinicalInsights,
+    markerTrends,
+    adherenceStates,
+  });
 
   const carePlan = generateCarePlan({
     caseComparison: caseComparison ?? null,
@@ -173,5 +200,7 @@ export async function getLongevityWorkflowSnapshotForIntake(
     followUpCadence,
     hasBloodResultUploadDocument,
     hasStructuredMarkers,
+    treatmentAdherence,
+    outcomeCorrelation,
   };
 }

@@ -34,6 +34,7 @@ export async function GET() {
       ok: true,
       progress: result.progress,
       latest_intake_id: result.latest_intake_id,
+      treatment_outcome_summary: result.treatment_outcome_summary ?? null,
     });
   } catch (e: unknown) {
     return NextResponse.json(

@@ -25,6 +25,8 @@ import { generateCarePlan } from "@/lib/longevity/carePlan";
 import { generateFollowUpCadence } from "@/lib/longevity/followUpCadence";
 import { getAdherenceContextForIntake } from "@/lib/longevity/adherenceContext";
 import { computeAdherenceStates } from "@/lib/longevity/adherenceStates";
+import { getTreatmentAdherenceForIntake } from "@/lib/longevity/treatmentAdherence";
+import { computeTreatmentOutcomeCorrelation } from "@/lib/longevity/treatmentOutcomeCorrelation";
 
 export const dynamic = "force-dynamic";
 
@@ -175,6 +177,20 @@ export async function GET(
     });
     const adherence_states = computeAdherenceStates(adherence_context);
 
+    const treatment_adherence = await getTreatmentAdherenceForIntake(
+      supabase,
+      intake.profile_id,
+      id
+    );
+    const outcome_correlation = computeTreatmentOutcomeCorrelation({
+      treatmentAdherence: treatment_adherence.items,
+      hasPreviousIntake: treatment_adherence.hasPreviousIntake,
+      caseComparison: case_comparison ?? null,
+      clinicalInsights: clinical_insights,
+      markerTrends: marker_trends,
+      adherenceStates: adherence_states,
+    });
+
     return NextResponse.json({
       ok: true,
       complexity,
@@ -186,6 +202,8 @@ export async function GET(
       follow_up_cadence,
       adherence_context,
       adherence_states,
+      treatment_continuity: treatment_adherence,
+      outcome_correlation,
       blood_markers: blood_markers_raw.map((m) => ({
         id: m.id,
         marker_name: m.marker_name,

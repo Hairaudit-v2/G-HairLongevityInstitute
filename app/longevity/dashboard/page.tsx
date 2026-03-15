@@ -63,7 +63,8 @@ export default async function LongevityDashboardPage() {
   const list = intakes ?? [];
 
   const documents = await listDocumentsForProfile(supabase, profileId);
-  const { progress } = await getPatientProgressForProfile(supabase, profileId);
+  const { progress, treatment_outcome_summary } =
+    await getPatientProgressForProfile(supabase, profileId);
 
   return (
     <main className="min-h-screen bg-[rgb(var(--bg))] px-6 py-16">
@@ -156,6 +157,14 @@ export default async function LongevityDashboardPage() {
                   →
                 </span>
                 Next review: {progress.next_review_timing}
+              </li>
+            )}
+            {treatment_outcome_summary && (
+              <li className="flex items-start gap-3 border-t border-white/10 pt-3 text-sm text-white/80">
+                <span className="text-[rgb(var(--gold))] mt-0.5" aria-hidden>
+                  •
+                </span>
+                <span>{treatment_outcome_summary}</span>
               </li>
             )}
           </ul>

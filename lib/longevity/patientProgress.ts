@@ -1,6 +1,7 @@
 /**
  * Phase T: Patient-facing progress states for dashboard.
  * Longevity-only. Safe, high-level states derived from workflow snapshot and documents.
+ * Phase U: adds optional treatment/outcome summary when clinician summary is released.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -9,6 +10,12 @@ import { getBloodRequestByIntake } from "./bloodRequests";
 import { getInterpretedMarkersForIntake } from "./bloodResultMarkers";
 import { generateFollowUpCadence } from "./followUpCadence";
 import { getCaseComparisonForIntake } from "./caseComparison";
+import { getTreatmentAdherenceForIntake } from "./treatmentAdherence";
+import { computeTreatmentOutcomeCorrelation } from "./treatmentOutcomeCorrelation";
+import { getAdherenceContextForIntake } from "./adherenceContext";
+import { computeAdherenceStates } from "./adherenceStates";
+import { generateClinicalInsights } from "./clinicalInsights";
+import { getCurrentVsPreviousForIntake } from "./bloodMarkerTrends";
 
 export type PatientProgressState = {
   blood_results_uploaded: boolean;
@@ -23,6 +30,8 @@ export type PatientProgressResult = {
   latest_intake_id: string | null;
   /** High-level progress states */
   progress: PatientProgressState;
+  /** Phase U: non-judgmental treatment/outcome summary when clinician has released; null otherwise */
+  treatment_outcome_summary: string | null;
 };
 
 /**
@@ -51,6 +60,7 @@ export async function getPatientProgressForProfile(
         clinician_summary_released: false,
         next_review_timing: null,
       },
+      treatment_outcome_summary: null,
     };
   }
 
@@ -104,6 +114,50 @@ export async function getPatientProgressForProfile(
     (cadence.patientReminderText && cadence.patientReminderText[0]) ||
     null;
 
+  let treatmentOutcomeSummary: string | null = null;
+  if (clinicianSummaryReleased && caseComparison?.previousIntake) {
+    try {
+      const [treatmentAdherence, adherenceContext] = await Promise.all([
+        getTreatmentAdherenceForIntake(supabase, profileId, intakeId),
+        getAdherenceContextForIntake(supabase, { profileId, intakeId }),
+      ]);
+      const adherenceStates = computeAdherenceStates(adherenceContext);
+      const markerTrends = await getCurrentVsPreviousForIntake(
+        supabase,
+        profileId,
+        intakeId
+      );
+      const interpretedMarkers = await getInterpretedMarkersForIntake(
+        supabase,
+        intakeId
+      );
+      const clinicalInsights = generateClinicalInsights({
+        derivedFlags: {},
+        interpretedMarkers,
+        markerTrends,
+        review_outcome: null,
+        bloodRequest: bloodRequest ? { status: bloodRequest.status } : null,
+        questionnaireResponses: {},
+        workflow: {
+          hasBloodResultUploadDocument: hasBloodUpload,
+          hasStructuredMarkers: hasStructuredMarkers,
+        },
+      });
+      const outcomeCorrelation = computeTreatmentOutcomeCorrelation({
+        treatmentAdherence: treatmentAdherence.items,
+        hasPreviousIntake: treatmentAdherence.hasPreviousIntake,
+        caseComparison,
+        clinicalInsights,
+        markerTrends,
+        adherenceStates,
+      });
+      treatmentOutcomeSummary =
+        outcomeCorrelation.patient_safe_summary ?? null;
+    } catch {
+      // Best-effort; do not fail progress
+    }
+  }
+
   return {
     latest_intake_id: intakeId,
     progress: {
@@ -113,5 +167,6 @@ export async function getPatientProgressForProfile(
       clinician_summary_released: clinicianSummaryReleased,
       next_review_timing: nextReviewTiming,
     },
+    treatment_outcome_summary: treatmentOutcomeSummary,
   };
 }

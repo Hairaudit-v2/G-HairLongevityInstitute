@@ -177,6 +177,8 @@ export async function POST(req: Request) {
               hasStructuredMarkers: snapshot.hasStructuredMarkers,
               generatedAt: bloodRequestOccurredAt,
               sourceEventType: LONGEVITY_EVENT_TYPE.BLOOD_REQUEST_CREATED,
+              treatmentContinuity: snapshot.treatmentAdherence?.items ?? null,
+              outcomeCorrelation: snapshot.outcomeCorrelation ?? null,
             }),
           });
         }
@@ -219,6 +221,8 @@ export async function POST(req: Request) {
             hasStructuredMarkers: snapshot.hasStructuredMarkers,
             generatedAt: reviewOccurredAt,
             sourceEventType: LONGEVITY_EVENT_TYPE.REVIEW_COMPLETED,
+            treatmentContinuity: snapshot.treatmentAdherence?.items ?? null,
+            outcomeCorrelation: snapshot.outcomeCorrelation ?? null,
           }),
         });
 
@@ -264,6 +268,8 @@ export async function POST(req: Request) {
             hasStructuredMarkers: snapshot.hasStructuredMarkers,
             generatedAt: carePlanOccurredAt,
             sourceEventType: LONGEVITY_EVENT_TYPE.CARE_PLAN_GENERATED,
+            treatmentContinuity: snapshot.treatmentAdherence?.items ?? null,
+            outcomeCorrelation: snapshot.outcomeCorrelation ?? null,
           }),
         });
       } catch {

@@ -30,6 +30,10 @@ export const LONGEVITY_SIGNAL_KEY = {
   VISUAL_CONCERN_PERSISTENT: "visual_concern_persistent",
   VISUAL_COMPARISON_LIMITED: "visual_comparison_limited",
   REENGAGEMENT_DELAY_DAYS: "reengagement_delay_days",
+  /** Phase U: treatment continuity summary (FI-ready) */
+  TREATMENT_ADHERENCE_SUMMARY: "treatment_adherence_summary",
+  /** Phase U: outcome correlation state (FI-ready) */
+  OUTCOME_CORRELATION: "outcome_correlation",
 } as const;
 
 export type LongevitySignalKey =

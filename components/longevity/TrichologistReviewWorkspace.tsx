@@ -145,6 +145,20 @@ export type CaseDetail = {
     repeat_reminder_required: boolean;
     prompt_response_good: boolean;
   } | null;
+  /** Phase U: treatment adherence (started/continued/stopped/inconsistent/uncertain/not_using) */
+  treatment_continuity?: {
+    items: { key: string; label: string; status: string }[];
+    hasPreviousIntake: boolean;
+    hasTwoPreviousIntakes?: boolean;
+  } | null;
+  /** Phase U: outcome correlation state, clinician summary, caveats */
+  outcome_correlation?: {
+    correlation_state: string;
+    clinicianSummary: string[];
+    caveats: string[];
+    patient_safe_summary: string | null;
+    outcome_domains_used: string[];
+  } | null;
 };
 
 export type BloodMarkerRaw = {
@@ -511,6 +525,8 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         follow_up_cadence: data.follow_up_cadence ?? null,
         adherence_context: data.adherence_context ?? null,
         adherence_states: data.adherence_states ?? null,
+        treatment_continuity: data.treatment_continuity ?? null,
+        outcome_correlation: data.outcome_correlation ?? null,
       });
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
@@ -1422,6 +1438,57 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                           <span className="rounded-full border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white/70">
                             Repeat reminder possible
                           </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(caseDetail.treatment_continuity || caseDetail.outcome_correlation) && (
+                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Treatment adherence & outcome correlation</h3>
+                    {caseDetail.treatment_continuity?.items?.length ? (
+                      <div className="mt-2">
+                        <p className="text-xs text-white/50">Status vs previous intake</p>
+                        <div className="mt-1.5 flex flex-wrap gap-2">
+                          {caseDetail.treatment_continuity.items.map((item) => (
+                            <span
+                              key={item.key}
+                              className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white/80"
+                            >
+                              {item.label} · {(item.status ?? item.key).replace(/_/g, " ")}
+                            </span>
+                          ))}
+                        </div>
+                        {!caseDetail.treatment_continuity.hasPreviousIntake && (
+                          <p className="mt-1.5 text-xs text-white/50">No previous intake for comparison yet.</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm text-white/50">No treatment adherence data for this intake.</p>
+                    )}
+                    {caseDetail.outcome_correlation && (
+                      <div className="mt-3 border-t border-white/10 pt-3">
+                        <p className="text-xs text-white/50">Correlation state</p>
+                        <p className="mt-1 text-sm font-medium text-white/90">
+                          {caseDetail.outcome_correlation.correlation_state.replace(/_/g, " ")}
+                        </p>
+                        {caseDetail.outcome_correlation.clinicianSummary?.length > 0 && (
+                          <ul className="mt-2 space-y-1 text-sm text-white/80">
+                            {caseDetail.outcome_correlation.clinicianSummary.map((line, i) => (
+                              <li key={i}>• {line}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {caseDetail.outcome_correlation.caveats?.length > 0 && (
+                          <>
+                            <p className="mt-2 text-xs text-white/50">Caveats</p>
+                            <ul className="mt-1 space-y-0.5 text-xs text-white/60">
+                              {caseDetail.outcome_correlation.caveats.map((c, i) => (
+                                <li key={i}>• {c}</li>
+                              ))}
+                            </ul>
+                          </>
                         )}
                       </div>
                     )}

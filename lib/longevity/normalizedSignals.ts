@@ -53,6 +53,17 @@ export type LongevitySignalBuilderInput = {
   hasStructuredMarkers?: boolean;
   generatedAt?: string;
   sourceEventType?: LongevityEventType;
+  /** Phase U: treatment adherence items (FI-ready; state or status) */
+  treatmentContinuity?: { key: string; label: string; state?: string; status?: string }[] | null;
+  /** Phase U: outcome correlation result (FI-ready) */
+  outcomeCorrelation?: {
+    correlation_state: string;
+    clinicianSummary?: string[];
+    caveats?: string[];
+    summary_lines?: string[];
+    patient_safe_summary: string | null;
+    outcome_domains_used: string[];
+  } | null;
 };
 
 function hasDriver(
@@ -329,6 +340,58 @@ export function buildLongevitySignals(
         comparison_status: visualComparison.comparisonStatus,
         comparison_confidence: visualComparison.visualComparisonConfidence,
         follow_up_considerations: visualComparison.visualFollowUpConsiderations,
+      },
+    });
+  }
+
+  // Phase U: treatment adherence summary (FI-ready)
+  const treatmentContinuity = input.treatmentContinuity ?? null;
+  if (treatmentContinuity && treatmentContinuity.length > 0) {
+    pushSignal(signals, {
+      signal_key: LONGEVITY_SIGNAL_KEY.TREATMENT_ADHERENCE_SUMMARY,
+      status: "active",
+      severity: "info",
+      entity_refs,
+      generated_at,
+      source_event_type: input.sourceEventType,
+      payload: {
+        profile_id: input.profileId ?? null,
+        intake_id: input.intakeId,
+        items: treatmentContinuity.map((i) => ({
+          key: i.key,
+          label: i.label,
+          state: i.state ?? i.status,
+        })),
+      },
+    });
+  }
+
+  // Phase U: outcome correlation (FI-ready)
+  const outcomeCorrelation = input.outcomeCorrelation ?? null;
+  if (outcomeCorrelation) {
+    pushSignal(signals, {
+      signal_key: LONGEVITY_SIGNAL_KEY.OUTCOME_CORRELATION,
+      status:
+        outcomeCorrelation.correlation_state ===
+        "improvement_with_treatment_continuity"
+          ? "improving"
+          : outcomeCorrelation.correlation_state === "possible_partial_response"
+            ? "active"
+            : "active",
+      severity:
+        outcomeCorrelation.correlation_state === "worsening_after_stopping"
+          ? "attention"
+          : "info",
+      entity_refs,
+      generated_at,
+      source_event_type: input.sourceEventType,
+      payload: {
+        profile_id: input.profileId ?? null,
+        intake_id: input.intakeId,
+        correlation_state: outcomeCorrelation.correlation_state,
+        outcome_domains_used: outcomeCorrelation.outcome_domains_used,
+        clinician_summary: outcomeCorrelation.clinicianSummary ?? outcomeCorrelation.summary_lines ?? [],
+        caveats: outcomeCorrelation.caveats ?? [],
       },
     });
   }
