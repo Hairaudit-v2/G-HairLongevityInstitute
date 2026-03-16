@@ -12,6 +12,7 @@ import {
 } from "@/components/public/PublicCTA";
 import { HairEcosystemSection } from "@/components/public/HairEcosystemSection";
 import { HairIntelligenceEcosystemIntro } from "@/components/public/HairIntelligenceEcosystemIntro";
+import { EcosystemDiagramAnimated } from "@/components/EcosystemDiagramAnimated";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -962,6 +963,18 @@ export default function Page() {
             When surgery becomes relevant, HairAudit helps you evaluate surgeons, outcomes, and
             surgical standards.
           </p>
+        </Container>
+      </section>
+
+      {/* Animated ecosystem diagram — hero visual */}
+      <section className="border-t border-white/[0.08] bg-black/[0.04] py-12 sm:py-16 md:py-20" aria-labelledby="ecosystem-diagram-heading">
+        <Container>
+          <h2 id="ecosystem-diagram-heading" className="sr-only">
+            Surgical Intelligence Ecosystem
+          </h2>
+          <div className="mx-auto max-w-[min(1000px,100%)]">
+            <EcosystemDiagramAnimated theme="dark" expandable title="Surgical Intelligence Ecosystem: Follicle Intelligence at the center, with IIOHR, HairAudit, and Hair Longevity Institute" />
+          </div>
         </Container>
       </section>
 

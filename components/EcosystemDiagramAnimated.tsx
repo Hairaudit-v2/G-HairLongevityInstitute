@@ -8,7 +8,7 @@ import {
   useReducedMotion,
   type MotionValue,
 } from "framer-motion";
-import { useMemo, useRef, useState, useCallback } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 const VIEW_SIZE = 1000;
 const CX = 500;
@@ -80,10 +80,8 @@ function useOrbitingPosition(
 }
 
 // ----- Styles (theme-aware) -----
-function useThemeColors(theme: EcosystemTheme) {
-  const isDark =
-    theme === "dark" ||
-    (theme === "auto" && typeof window !== "undefined" && !window.matchMedia("(prefers-color-scheme: light)").matches);
+function useThemeColors(resolvedTheme: "light" | "dark") {
+  const isDark = resolvedTheme === "dark";
   return useMemo(
     () =>
       isDark
@@ -121,26 +119,22 @@ function useThemeColors(theme: EcosystemTheme) {
   );
 }
 
-// Client-only theme: "auto" needs window
-function useResolvedTheme(theme: EcosystemTheme) {
+// Resolve "auto" to "light" | "dark" via system preference
+function useResolvedTheme(theme: EcosystemTheme): "light" | "dark" {
   const [resolved, setResolved] = useState<"light" | "dark">("dark");
-  const mounted = typeof window !== "undefined";
-  useMemo(() => {
-    if (theme === "auto" && mounted) {
-      setResolved(window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-    } else if (theme !== "auto") {
+  useEffect(() => {
+    if (theme !== "auto") {
       setResolved(theme);
+      return;
     }
-  }, [theme, mounted]);
-  if (theme === "auto" && typeof window !== "undefined") {
-    try {
-      const mq = window.matchMedia("(prefers-color-scheme: light)");
-      const handler = () => setResolved(mq.matches ? "light" : "dark");
-      mq.addEventListener("change", handler);
-      return () => mq.removeEventListener("change", handler);
-    } catch (_) {}
-  }
-  return resolved;
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-color-scheme: light)");
+    setResolved(mq.matches ? "light" : "dark");
+    const handler = () => setResolved(mq.matches ? "light" : "dark");
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [theme]);
+  return resolved as "light" | "dark";
 }
 
 export interface EcosystemDiagramAnimatedProps {
@@ -167,7 +161,9 @@ export function EcosystemDiagramAnimated({
   const noAnimation = staticMode || reduceMotion;
   const orbitAngle = useOrbitAngle(!!noAnimation);
   const resolvedTheme = useResolvedTheme(theme);
-  const colors = useThemeColors(resolvedTheme);
+  const themeForColors: "light" | "dark" =
+    resolvedTheme === "light" || resolvedTheme === "dark" ? resolvedTheme : "dark";
+  const colors = useThemeColors(themeForColors);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
 
@@ -239,6 +235,7 @@ export function EcosystemDiagramAnimated({
           <ConnectorLine
             key={OUTER_NODES[i].id}
             position={pos}
+            baseAngle={BASE_ANGLES[i]}
             label={OUTER_NODES[i].label}
             animate={!noAnimation}
             lineStroke={colors.lineStroke}
@@ -248,7 +245,7 @@ export function EcosystemDiagramAnimated({
         ))}
 
         {/* Center node */}
-        <CenterNode colors={colors} />
+        <CenterNode colors={colors} animate={!noAnimation} />
 
         {/* Outer nodes (orbiting) */}
         {positions.map((pos, i) => {
@@ -259,6 +256,7 @@ export function EcosystemDiagramAnimated({
             <OuterNodeGroup
               key={node.id}
               position={pos}
+              baseAngle={BASE_ANGLES[i]}
               node={node}
               colors={colors}
               isExpanded={isExpanded}
@@ -276,9 +274,15 @@ export function EcosystemDiagramAnimated({
 }
 
 // ----- Center node: pulse + glow -----
-function CenterNode({ colors }: { colors: ReturnType<typeof useThemeColors> }) {
+function CenterNode({
+  colors,
+  animate,
+}: {
+  colors: ReturnType<typeof useThemeColors>;
+  animate: boolean;
+}) {
   return (
-    <g filter="url(#ecosys-center-glow)">
+    <g filter={animate ? "url(#ecosys-center-glow)" : undefined}>
       <motion.circle
         cx={CX}
         cy={CY}
@@ -287,18 +291,21 @@ function CenterNode({ colors }: { colors: ReturnType<typeof useThemeColors> }) {
         stroke={colors.centerStroke}
         strokeWidth={1.5}
         initial={false}
-        animate={{
-          scale: [1, 1.03, 1],
-          filter: [
-            "drop-shadow(0 0 0px rgba(198,167,94,0))",
-            `drop-shadow(0 0 20px ${colors.centerGlow})`,
-            "drop-shadow(0 0 0px rgba(198,167,94,0))",
-          ],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut",
+        animate={
+          animate
+            ? {
+                scale: [1, 1.03, 1],
+                opacity: [0.95, 1, 0.95],
+              }
+            : { scale: 1, opacity: 1 }
+        }
+        transition={
+          animate
+            ? { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
+            : { duration: 0 }
+        }
+        style={{
+          filter: animate ? `drop-shadow(0 0 12px ${colors.centerGlow})` : undefined,
         }}
       />
       <text
@@ -342,6 +349,7 @@ function CenterNode({ colors }: { colors: ReturnType<typeof useThemeColors> }) {
 // ----- Connector line with optional dash animation -----
 function ConnectorLine({
   position,
+  baseAngle,
   label,
   animate,
   lineStroke,
@@ -349,6 +357,7 @@ function ConnectorLine({
   textMuted,
 }: {
   position: MotionValue<{ x: number; y: number }>;
+  baseAngle: number;
   label: string;
   animate: boolean;
   lineStroke: string;
@@ -356,7 +365,7 @@ function ConnectorLine({
   textMuted: string;
 }) {
   const ref = useRef<SVGLineElement>(null);
-  const [end, setEnd] = useState({ x: CX, y: CY });
+  const [end, setEnd] = useState(() => polarToCartesian(CX, CY, ORBIT_R, baseAngle));
 
   // Start point: center edge toward the moving end (so line doesn't cross center circle)
   const start = useMemo(() => {
@@ -424,6 +433,7 @@ function ConnectorLine({
 // ----- Outer node group (orbiting circle + text + tooltip) -----
 function OuterNodeGroup({
   position,
+  baseAngle,
   node,
   colors,
   isExpanded,
@@ -434,6 +444,7 @@ function OuterNodeGroup({
   onClick,
 }: {
   position: MotionValue<{ x: number; y: number }>;
+  baseAngle: number;
   node: OuterNodeData;
   colors: ReturnType<typeof useThemeColors>;
   isExpanded: boolean;
@@ -443,7 +454,7 @@ function OuterNodeGroup({
   onLeave: () => void;
   onClick: () => void;
 }) {
-  const [coords, setCoords] = useState(() => polarToCartesian(CX, CY, ORBIT_R, BASE_ANGLES[OUTER_NODES.indexOf(node)]));
+  const [coords, setCoords] = useState(() => polarToCartesian(CX, CY, ORBIT_R, baseAngle));
   const unsub = useRef<(() => void) | null>(null);
   useMemo(() => {
     unsub.current?.();
