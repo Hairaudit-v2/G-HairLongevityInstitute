@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" aria-label="Surgical Intelligence Ecosystem diagram">
+  <defs>
+    <!-- Gold gradient for center node -->
+    <linearGradient id="gold-center" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C6A75E"/>
+      <stop offset="100%" stop-color="#A68B4B"/>
+    </linearGradient>
+    <!-- Subtle shadow for center -->
+    <filter id="center-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+    <!-- Outer ring stroke -->
+    <linearGradient id="ring-stroke" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E8E6E0"/>
+      <stop offset="100%" stop-color="#D4D2CC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="1000" fill="#F9F9F7"/>
+
+  <!-- Outer faint ring -->
+  <circle cx="500" cy="500" r="420" fill="none" stroke="url(#ring-stroke)" stroke-width="1.5" opacity="0.9"/>
+  <text x="500" y="945" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" font-weight="500" letter-spacing="0.2em" fill="#8A8884">GLOBAL HAIR INTELLIGENCE NETWORK</text>
+
+  <!-- Connection lines: center circle r=100, outer circles r=88; lines meet circle edges -->
+  <!-- Top: (500,400) to (500,268) -->
+  <line x1="500" y1="400" x2="500" y2="268" stroke="#D4D2CC" stroke-width="1.2"/>
+  <text x="500" y="338" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#A8A6A2" letter-spacing="0.12em">STANDARDS</text>
+
+  <!-- Bottom-right: (587,550) to (701,616) -->
+  <line x1="587" y1="550" x2="701" y2="616" stroke="#D4D2CC" stroke-width="1.2"/>
+  <text x="642" y="580" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#A8A6A2" letter-spacing="0.12em">OUTCOMES</text>
+
+  <!-- Bottom-left: (413,550) to (299,616) -->
+  <line x1="413" y1="550" x2="299" y2="616" stroke="#D4D2CC" stroke-width="1.2"/>
+  <text x="358" y="580" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#A8A6A2" letter-spacing="0.12em">DATA</text>
+
+  <!-- Center node -->
+  <g filter="url(#center-shadow)">
+    <circle cx="500" cy="500" r="100" fill="url(#gold-center)" stroke="#B8984A" stroke-width="1.5"/>
+  </g>
+  <text x="500" y="485" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" font-weight="600" fill="#2C2A26">Follicle Intelligence&#8482;</text>
+  <text x="500" y="508" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="500" fill="#2C2A26" opacity="0.9">AI Analysis Engine</text>
+  <text x="500" y="532" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#2C2A26" opacity="0.7">Data &#8226; Pattern Recognition &#8226; Prediction</text>
+
+  <!-- Outer node 1: Top - IIOHR -->
+  <circle cx="500" cy="180" r="88" fill="#FFFFFF" stroke="#E0DED8" stroke-width="1.5"/>
+  <text x="500" y="165" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#2C2A26">IIOHR&#8482;</text>
+  <text x="500" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#5C5A56">Education &#38; Certification</text>
+  <text x="500" y="205" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#8A8884">Training &#8226; Standards &#8226; Accreditation</text>
+
+  <!-- Outer node 2: Bottom-right - HairAudit -->
+  <circle cx="777" cy="660" r="88" fill="#FFFFFF" stroke="#E0DED8" stroke-width="1.5"/>
+  <text x="777" y="645" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="#2C2A26">HairAudit&#8482;</text>
+  <text x="777" y="665" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#5C5A56">Surgical Audit System</text>
+  <text x="777" y="685" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#8A8884">Scoring &#8226; Validation &#8226; Global Ranking</text>
+
+  <!-- Outer node 3: Bottom-left - Hair Longevity Institute -->
+  <circle cx="223" cy="660" r="88" fill="#FFFFFF" stroke="#E0DED8" stroke-width="1.5"/>
+  <text x="223" y="638" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#2C2A26">Hair Longevity</text>
+  <text x="223" y="655" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#2C2A26">Institute&#8482;</text>
+  <text x="223" y="675" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#5C5A56">Biological Treatment Pathway</text>
+  <text x="223" y="695" text-anchor="middle" font-family="system-ui, sans-serif" font-size="9" fill="#8A8884">Diagnosis &#8226; Intervention &#8226; Monitoring</text>
+</svg>
