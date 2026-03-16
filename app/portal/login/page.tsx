@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
@@ -31,7 +31,7 @@ const NO_EMAIL_MESSAGE =
 
 const SESSION_EXPIRED_MESSAGE = "Your session expired. Please sign in to continue.";
 
-export default function PortalLoginPage() {
+function PortalLoginContent() {
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
   const errorParam = searchParams.get("error");
@@ -348,5 +348,23 @@ export default function PortalLoginPage() {
         ← Back to Longevity
       </Link>
     </div>
+  );
+}
+
+export default function PortalLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
+          <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
+            Hair Longevity Institute™ — Patient Portal
+          </div>
+          <h1 className="mt-2 text-2xl font-semibold text-white">Sign in</h1>
+          <p className="mt-4 text-white/50">Loading…</p>
+        </div>
+      }
+    >
+      <PortalLoginContent />
+    </Suspense>
   );
 }
