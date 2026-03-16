@@ -5,6 +5,11 @@ import Link from "next/link";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 import { REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
+import {
+  BLOOD_TEST_CODES,
+  ALL_BLOOD_TEST_CODES,
+  type BloodTestCode,
+} from "@/lib/longevity/bloodRequestEligibility";
 import type { ReviewComplexityResult } from "@/lib/longevity/reviewComplexity";
 import type { InterpretedMarker } from "@/lib/longevity/bloodInterpretation";
 import type { MarkerTrendRow } from "@/lib/longevity/bloodMarkerTrends";
@@ -129,7 +134,17 @@ export type CaseDetail = {
   blood_marker_extraction_drafts?: BloodMarkerExtractionDraft[];
   scalp_image_analysis_drafts?: ScalpImageAnalysisDraft[];
   case_comparison?: CaseComparisonResult | null;
-  blood_request?: { id: string; status: string } | null;
+  blood_request?: {
+    id: string;
+    status: string;
+    recommended_tests: string[];
+    reason: string | null;
+    recommended_by: string | null;
+    clinician_edited: boolean;
+    created_at?: string;
+    updated_at?: string | null;
+    approved_at?: string | null;
+  } | null;
   marker_trends?: MarkerTrendRow[];
   clinical_insights?: ClinicalInsights;
   care_plan?: CarePlanOutput | null;
@@ -485,6 +500,12 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     lab_name: "",
     blood_request_id: "",
   });
+  const [bloodRequestEditing, setBloodRequestEditing] = useState(false);
+  const [bloodRequestForm, setBloodRequestForm] = useState<{
+    recommended_tests: string[];
+    reason: string;
+  }>({ recommended_tests: [], reason: "" });
+  const [bloodRequestSaving, setBloodRequestSaving] = useState(false);
 
   const fetchQueue = useCallback(async () => {
     setLoading(true);
@@ -545,6 +566,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         outcome_correlation: data.outcome_correlation ?? null,
         protocol_assessment: data.protocol_assessment ?? null,
       });
+      setBloodRequestEditing(false);
       if (data.intake.patient_visible_summary) {
         setSummaryText(data.intake.patient_visible_summary);
       }
@@ -663,6 +685,36 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       setActionLoading(false);
     }
   }, [selectedId, outcomeSelect, caseDetail]);
+
+  const saveBloodRequestRefinement = useCallback(async () => {
+    if (!selectedId || !caseDetail?.blood_request) return;
+    setBloodRequestSaving(true);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/longevity/review/blood-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          intake_id: selectedId,
+          blood_request_id: caseDetail.blood_request.id,
+          recommended_tests: bloodRequestForm.recommended_tests,
+          reason: bloodRequestForm.reason.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Failed to update blood request");
+        return;
+      }
+      setBloodRequestEditing(false);
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Failed to update blood request");
+    } finally {
+      setBloodRequestSaving(false);
+    }
+  }, [selectedId, caseDetail?.blood_request, bloodRequestForm, fetchCase]);
 
   const addNote = useCallback(async () => {
     if (!selectedId || !noteText.trim()) return;
@@ -2066,6 +2118,107 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                     </div>
                   )}
                 </div>
+
+                {caseDetail.blood_request && (
+                  <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
+                    <h3 className="text-sm font-medium text-white/90">Blood request</h3>
+                    <p className="mt-1 text-xs text-white/50">
+                      Status: {caseDetail.blood_request.status}
+                      {" · "}
+                      {caseDetail.blood_request.recommended_by === "rules"
+                        ? "Rule-derived"
+                        : caseDetail.blood_request.clinician_edited
+                          ? "Clinician-edited"
+                          : "Clinician-confirmed (unchanged)"}
+                    </p>
+                    {!bloodRequestEditing ? (
+                      <>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {caseDetail.blood_request.recommended_tests.map((code) => (
+                            <span
+                              key={code}
+                              className="rounded border border-white/20 bg-white/5 px-2 py-1 text-xs text-white/90 capitalize"
+                            >
+                              {code.replace(/_/g, " ")}
+                            </span>
+                          ))}
+                        </div>
+                        {caseDetail.blood_request.reason && (
+                          <p className="mt-2 text-xs text-white/70">{caseDetail.blood_request.reason}</p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBloodRequestForm({
+                              recommended_tests: [...caseDetail.blood_request!.recommended_tests],
+                              reason: caseDetail.blood_request!.reason ?? "",
+                            });
+                            setBloodRequestEditing(true);
+                          }}
+                          className="mt-3 rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-3 py-1.5 text-xs text-white hover:bg-[rgb(var(--gold))]/20"
+                        >
+                          Refine tests &amp; reason
+                        </button>
+                      </>
+                    ) : (
+                      <div className="mt-3 space-y-3">
+                        <p className="text-xs text-white/60">
+                          Select approved tests only. Patient and GP letter will use this list.
+                        </p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          {(ALL_BLOOD_TEST_CODES as readonly BloodTestCode[]).map((code) => (
+                            <label key={code} className="flex items-center gap-1.5 text-sm text-white/90">
+                              <input
+                                type="checkbox"
+                                checked={bloodRequestForm.recommended_tests.includes(code)}
+                                onChange={(e) => {
+                                  setBloodRequestForm((f) => ({
+                                    ...f,
+                                    recommended_tests: e.target.checked
+                                      ? [...f.recommended_tests, code]
+                                      : f.recommended_tests.filter((c) => c !== code),
+                                  }));
+                                }}
+                                className="rounded border-white/30"
+                              />
+                              <span className="capitalize">{code.replace(/_/g, " ")}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <div>
+                          <label className="block text-xs text-white/60">Reason (patient/GP-facing)</label>
+                          <textarea
+                            value={bloodRequestForm.reason}
+                            onChange={(e) =>
+                              setBloodRequestForm((f) => ({ ...f, reason: e.target.value }))
+                            }
+                            rows={2}
+                            placeholder="e.g. Iron/ferritin relevance; thyroid relevance"
+                            className="mt-1 w-full rounded border border-white/20 bg-black/20 px-2 py-1.5 text-sm text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={saveBloodRequestRefinement}
+                            disabled={bloodRequestSaving || bloodRequestForm.recommended_tests.length === 0}
+                            className="rounded border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-3 py-1.5 text-xs text-white hover:bg-[rgb(var(--gold))]/20 disabled:opacity-50"
+                          >
+                            {bloodRequestSaving ? "Saving…" : "Save"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setBloodRequestEditing(false)}
+                            disabled={bloodRequestSaving}
+                            className="rounded border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10 disabled:opacity-50"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Add blood marker</h3>
                 <div className="mt-2 grid gap-2 rounded-lg border border-white/10 bg-white/5 p-3 text-sm">

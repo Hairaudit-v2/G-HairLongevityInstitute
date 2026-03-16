@@ -29,6 +29,22 @@ export const BLOOD_TEST_CODES = {
 
 export type BloodTestCode = (typeof BLOOD_TEST_CODES)[keyof typeof BLOOD_TEST_CODES];
 
+/** All valid test codes as an array (for validation). */
+export const ALL_BLOOD_TEST_CODES: readonly BloodTestCode[] = Object.values(
+  BLOOD_TEST_CODES
+) as BloodTestCode[];
+
+const BLOOD_TEST_CODE_SET = new Set<string>(ALL_BLOOD_TEST_CODES);
+
+/**
+ * Validate that every element is an approved BLOOD_TEST_CODE. Returns true only if all are valid.
+ * Use for trichologist refinement: do not allow arbitrary free-text test codes.
+ */
+export function isValidBloodTestCodes(arr: unknown): arr is BloodTestCode[] {
+  if (!Array.isArray(arr)) return false;
+  return arr.every((item) => typeof item === "string" && BLOOD_TEST_CODE_SET.has(item));
+}
+
 export type BloodRequestEligibilityResult = {
   eligible: boolean;
   recommended_tests: BloodTestCode[];

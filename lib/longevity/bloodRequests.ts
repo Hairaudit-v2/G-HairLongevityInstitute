@@ -12,6 +12,7 @@ export type BloodRequestRow = {
   recommended_tests: BloodTestCode[];
   reason: string | null;
   recommended_by: string | null;
+  clinician_edited: boolean;
   status: string;
   created_at: string;
   updated_at: string | null;
@@ -99,13 +100,44 @@ export async function getBloodRequestByIntake(
 ): Promise<BloodRequestRow | null> {
   const { data, error } = await supabase
     .from("hli_longevity_blood_requests")
-    .select("id, intake_id, profile_id, recommended_tests, reason, recommended_by, status, created_at, updated_at, approved_at, letter_document_id")
+    .select("id, intake_id, profile_id, recommended_tests, reason, recommended_by, clinician_edited, status, created_at, updated_at, approved_at, letter_document_id")
     .eq("intake_id", intake_id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error || !data) return null;
-  return data as BloodRequestRow;
+  return {
+    ...data,
+    clinician_edited: data.clinician_edited === true,
+  } as BloodRequestRow;
+}
+
+/**
+ * Update an existing blood request's recommended_tests and/or reason (Phase D.1 trichologist refinement).
+ * Sets clinician_edited = true. Does not change status, letter_document_id, or other lifecycle fields.
+ * When reason is undefined, the existing reason is left unchanged.
+ */
+export async function updateBloodRequest(
+  supabase: SupabaseClient,
+  params: {
+    blood_request_id: string;
+    recommended_tests: BloodTestCode[];
+    reason?: string | null;
+  }
+): Promise<{ id: string } | { error: string }> {
+  const now = new Date().toISOString();
+  const payload: Record<string, unknown> = {
+    recommended_tests: params.recommended_tests,
+    clinician_edited: true,
+    updated_at: now,
+  };
+  if (params.reason !== undefined) payload.reason = params.reason;
+  const { error } = await supabase
+    .from("hli_longevity_blood_requests")
+    .update(payload)
+    .eq("id", params.blood_request_id);
+  if (error) return { error: error.message };
+  return { id: params.blood_request_id };
 }
 
 /**

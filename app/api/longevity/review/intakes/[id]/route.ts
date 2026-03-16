@@ -263,7 +263,21 @@ export async function GET(
         draft_summary: draft.draft_summary,
         created_at: draft.created_at,
       })),
-      blood_request: blood_request ? { id: blood_request.id, status: blood_request.status } : null,
+      blood_request: blood_request
+        ? {
+            id: blood_request.id,
+            status: blood_request.status,
+            recommended_tests: Array.isArray(blood_request.recommended_tests)
+              ? blood_request.recommended_tests
+              : [],
+            reason: blood_request.reason ?? null,
+            recommended_by: blood_request.recommended_by ?? null,
+            clinician_edited: blood_request.clinician_edited === true,
+            created_at: blood_request.created_at,
+            updated_at: blood_request.updated_at ?? null,
+            approved_at: blood_request.approved_at ?? null,
+          }
+        : null,
       intake: {
         id: intake.id,
         status: intake.status,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
 
@@ -8,7 +8,7 @@ import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBr
  * Handles Supabase Auth redirect after magic link (or OAuth) click.
  * Exchanges token/hash for session and redirects to portal dashboard.
  */
-export default function PortalAuthCallbackPage() {
+function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"exchanging" | "done" | "error">("exchanging");
@@ -102,5 +102,19 @@ export default function PortalAuthCallbackPage() {
     <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-white/80">
       <p>Completing sign-in…</p>
     </div>
+  );
+}
+
+export default function PortalAuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-white/80">
+          <p>Completing sign-in…</p>
+        </div>
+      }
+    >
+      <CallbackContent />
+    </Suspense>
   );
 }
