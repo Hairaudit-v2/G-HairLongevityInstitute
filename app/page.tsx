@@ -11,6 +11,7 @@ import {
   UtilityLink,
 } from "@/components/public/PublicCTA";
 import { HairEcosystemSection } from "@/components/public/HairEcosystemSection";
+import { HairIntelligenceEcosystemIntro } from "@/components/public/HairIntelligenceEcosystemIntro";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -965,7 +966,7 @@ export default function Page() {
       </section>
 
       {/* Hair Intelligence Ecosystem — reusable across HLI, HairAudit, Follicle Intelligence */}
-      <HairEcosystemSection site="hli" currentPlatform="hli" showContextualHelper={false} />
+      <HairEcosystemSection id="full-ecosystem" site="hli" currentPlatform="hli" showContextualHelper={false} />
 
       {/* How it works — simplified for conversion */}
       <section
@@ -1019,6 +1020,9 @@ export default function Page() {
           </div>
         </Container>
       </section>
+
+      {/* Hair Intelligence Ecosystem intro — diagram + CTAs */}
+      <HairIntelligenceEcosystemIntro startHref={startHref} exploreHref="#full-ecosystem" />
 
       {/* Who it's for */}
       <section

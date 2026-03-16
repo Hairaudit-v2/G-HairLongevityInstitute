@@ -98,6 +98,8 @@ export interface HairEcosystemSectionProps {
   showContextualHelper?: boolean;
   /** Optional className for the section wrapper. */
   className?: string;
+  /** Optional id for anchor links (e.g. full-ecosystem). */
+  id?: string;
 }
 
 export function HairEcosystemSection({
@@ -106,6 +108,7 @@ export function HairEcosystemSection({
   currentPlatform,
   showContextualHelper = true,
   className = "",
+  id,
 }: HairEcosystemSectionProps) {
   const intro =
     introParagraph ?? (site ? INTRO_BY_SITE[site] : DEFAULT_INTRO);
@@ -114,6 +117,7 @@ export function HairEcosystemSection({
 
   return (
     <section
+      id={id}
       className={`border-t border-white/[0.08] bg-black/[0.06] py-16 sm:py-20 md:py-24 ${className}`}
       aria-labelledby="ecosystem-heading"
     >
