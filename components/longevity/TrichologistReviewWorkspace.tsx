@@ -128,6 +128,13 @@ export type CaseDetail = {
   };
   documents: { id: string; doc_type: string; filename: string | null; created_at: string }[];
   notes: { id: string; body: string; created_at: string }[];
+  /** Snapshot of what was released to the patient (for traceability and review). */
+  released_summary_snapshot?: {
+    id: string;
+    summary_text: string;
+    released_at: string;
+    released_by_trichologist_id: string | null;
+  } | null;
   complexity?: ReviewComplexityResult;
   blood_results?: (InterpretedMarker & { id: string })[];
   blood_markers?: BloodMarkerRaw[];
@@ -467,8 +474,10 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   const [actionLoading, setActionLoading] = useState(false);
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [filterReviewStatus, setFilterReviewStatus] = useState<string>("all");
-  const [filterAssignedToMe, setFilterAssignedToMe] = useState(false);
-  const [sortBy, setSortBy] = useState<"priority" | "complexity">("complexity");
+  const [viewMode, setViewMode] = useState<"all" | "mine">("all");
+  const [sortBy, setSortBy] = useState<"priority" | "complexity">("priority");
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [outcomeSelect, setOutcomeSelect] = useState<string>("");
   const [scalpComparisonForm, setScalpComparisonForm] = useState<{
     comparison_status: ScalpImageComparisonStatus;
@@ -507,25 +516,54 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   }>({ recommended_tests: [], reason: "" });
   const [bloodRequestSaving, setBloodRequestSaving] = useState(false);
 
-  const fetchQueue = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/longevity/review/queue", { credentials: "include" });
-      const data = await res.json();
-      if (!data.ok) {
-        setError(data.error ?? "Failed to load queue");
-        setItems([]);
-        return;
+  const [includeReleased, setIncludeReleased] = useState(false);
+  const buildQueueParams = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set("limit", "50");
+    if (filterReviewStatus !== "all") params.set("review_status", filterReviewStatus);
+    if (filterPriority !== "all") params.set("priority", filterPriority);
+    if (viewMode === "mine") params.set("assigned_to_me", "1");
+    if (includeReleased) params.set("include_released", "1");
+    return params;
+  }, [filterReviewStatus, filterPriority, viewMode, includeReleased]);
+
+  const fetchQueue = useCallback(
+    async (pageOffset?: number) => {
+      const append = pageOffset != null && pageOffset > 0;
+      const offset = pageOffset ?? 0;
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+        setError(null);
       }
-      setItems(data.items ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load queue");
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      try {
+        const params = buildQueueParams();
+        params.set("offset", String(offset));
+        const res = await fetch(`/api/longevity/review/queue?${params.toString()}`, { credentials: "include" });
+        const data = await res.json();
+        if (!data.ok) {
+          setError(data.error ?? "Failed to load queue");
+          if (!append) setItems([]);
+          return;
+        }
+        const next = data.items ?? [];
+        setHasMore(!!data.hasMore);
+        if (append) {
+          setItems((prev) => [...prev, ...next]);
+        } else {
+          setItems(next);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load queue");
+        if (!append) setItems([]);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [buildQueueParams]
+  );
 
   useEffect(() => {
     fetchQueue();
@@ -549,6 +587,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         questionnaire: data.questionnaire,
         documents: data.documents ?? [],
         notes: data.notes ?? [],
+        released_summary_snapshot: data.released_summary_snapshot ?? null,
         complexity: data.complexity ?? undefined,
         blood_results: data.blood_results ?? undefined,
         blood_markers: data.blood_markers ?? undefined,
@@ -1029,19 +1068,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     }
   }, [selectedId, summaryText, fetchCase]);
 
-  const filteredItems = useMemo(() => {
-    let list = items;
-    if (filterPriority !== "all") {
-      list = list.filter((i) => (i.review_priority ?? "normal") === filterPriority);
-    }
-    if (filterReviewStatus !== "all") {
-      list = list.filter((i) => i.review_status === filterReviewStatus);
-    }
-    if (filterAssignedToMe) {
-      list = list.filter((i) => i.assigned_trichologist_id === trichologistId);
-    }
-    return list;
-  }, [items, filterPriority, filterReviewStatus, filterAssignedToMe, trichologistId]);
+  const filteredItems = useMemo(() => items, [items]);
 
   const sortedByPriority = useMemo(() => {
     const order = (a: ReviewQueueItem, b: ReviewQueueItem) => {
@@ -1062,9 +1089,6 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   }, [filteredItems]);
 
   const displayList = sortBy === "complexity" ? sortedByComplexity : sortedByPriority;
-  const highPriority = displayList.filter((i) => i.review_priority === "high" || i.review_priority === "urgent");
-  const normalPriority = displayList.filter((i) => i.review_priority === "normal" || i.review_priority === "low");
-  const assignedToMe = displayList.filter((i) => i.assigned_trichologist_id === trichologistId);
 
   const metrics = useMemo(() => {
     const awaiting = items.filter((i) => i.review_status === "human_review_required").length;
@@ -1075,7 +1099,10 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
     return { awaiting, underReview, avgDays };
   }, [items]);
 
-  const renderCard = (item: ReviewQueueItem) => (
+  const renderCard = (item: ReviewQueueItem) => {
+    const isAssignedToMe = item.assigned_trichologist_id === trichologistId;
+    const isAwaitingDocs = item.review_status === "awaiting_patient_documents";
+    return (
     <button
       type="button"
       key={item.id}
@@ -1083,13 +1110,25 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       className={`w-full rounded-xl border p-4 text-left transition ${
         selectedId === item.id
           ? "border-[rgb(var(--gold))] bg-[rgb(var(--gold))]/10"
-          : "border-white/10 bg-white/5 hover:border-white/20"
+          : isAssignedToMe
+            ? "border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/5 hover:border-[rgb(var(--gold))]/50"
+            : "border-white/10 bg-white/5 hover:border-white/20"
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-mono text-xs text-white/70">{item.id}</span>
         <PriorityBadge priority={item.review_priority} />
         <ComplexityBadge complexity={item.complexity} />
+        {isAssignedToMe && (
+          <span className="inline-flex rounded-md border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/15 px-2 py-0.5 text-xs font-medium text-[rgb(var(--gold))]">
+            You
+          </span>
+        )}
+        {isAwaitingDocs && (
+          <span className="inline-flex rounded-md border border-amber-500/40 bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-200">
+            Awaiting docs
+          </span>
+        )}
         <span className="text-xs text-white/50">{item.review_status.replace(/_/g, " ")}</span>
       </div>
       <div className="mt-1 text-xs text-white/50">
@@ -1114,6 +1153,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       </div>
     </button>
   );
+  };
 
   return (
     <div className="space-y-6">
@@ -1127,6 +1167,9 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         </div>
         <div className="flex items-center gap-3">
           <PortalSignOut />
+          <Link href="/portal/trichologist/provisioning" className="text-sm text-white/70 hover:text-white">
+            Trichologist management
+          </Link>
           <Link href="/portal/trichologist/reminders" className="text-sm text-white/70 hover:text-white">
             Reminders
           </Link>
@@ -1162,6 +1205,28 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       </div>
 
       <div className="flex flex-wrap items-center gap-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+        <span className="text-sm font-medium text-white/80">View</span>
+        <div className="flex rounded-lg border border-white/20 bg-white/5 p-0.5">
+          <button
+            type="button"
+            onClick={() => setViewMode("all")}
+            className={`rounded-md px-3 py-1.5 text-sm transition ${
+              viewMode === "all" ? "bg-white/15 text-white" : "text-white/70 hover:text-white/90"
+            }`}
+          >
+            All cases
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("mine")}
+            className={`rounded-md px-3 py-1.5 text-sm transition ${
+              viewMode === "mine" ? "bg-[rgb(var(--gold))]/20 text-[rgb(var(--gold))]" : "text-white/70 hover:text-white/90"
+            }`}
+          >
+            My cases
+          </button>
+        </div>
+        <span className="text-white/30">|</span>
         <span className="text-sm text-white/70">Filters:</span>
         <label className="flex items-center gap-2 text-sm text-white/80">
           <span className="text-white/50">Priority</span>
@@ -1190,62 +1255,60 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
             <option value="awaiting_patient_documents">Awaiting documents</option>
           </select>
         </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-white/80">
-          <input
-            type="checkbox"
-            checked={filterAssignedToMe}
-            onChange={(e) => setFilterAssignedToMe(e.target.checked)}
-            className="rounded border-white/20 bg-white/5 text-[rgb(var(--gold))] focus:ring-[rgb(var(--gold))]"
-          />
-          <span>Assigned to me</span>
-        </label>
         <label className="flex items-center gap-2 text-sm text-white/80">
-          <span className="text-white/50">Sort by</span>
+          <span className="text-white/50">Sort</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as "priority" | "complexity")}
             className="rounded-lg border border-white/20 bg-white/5 px-2 py-1.5 text-white focus:border-[rgb(var(--gold))] focus:outline-none"
           >
-            <option value="complexity">Complexity (high first)</option>
             <option value="priority">Priority then age</option>
+            <option value="complexity">Complexity (high first)</option>
           </select>
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-white/80">
+          <input
+            type="checkbox"
+            checked={includeReleased}
+            onChange={(e) => setIncludeReleased(e.target.checked)}
+            className="rounded border-white/20 bg-white/5 text-[rgb(var(--gold))] focus:ring-[rgb(var(--gold))]"
+          />
+          <span>Include released</span>
         </label>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1fr,1fr]">
         <div className="space-y-6">
           <section>
-            <h2 className="text-lg font-semibold text-white">High priority</h2>
-            <p className="text-xs text-white/50">Oldest first</p>
+            <h2 className="text-lg font-semibold text-white">
+              {viewMode === "mine" ? "My cases" : "Queue"}
+            </h2>
+            <p className="text-xs text-white/50">
+              {viewMode === "mine"
+                ? "Cases assigned to you"
+                : "Highest priority first, then oldest. You = assigned to you; Awaiting docs = waiting on patient."}
+            </p>
             <div className="mt-3 space-y-2">
               {loading ? (
                 <p className="text-white/50">Loading…</p>
-              ) : highPriority.length === 0 ? (
-                <p className="text-white/50">None</p>
+              ) : displayList.length === 0 ? (
+                <p className="text-white/50">{viewMode === "mine" ? "No cases assigned to you" : "No cases in queue"}</p>
               ) : (
-                highPriority.map(renderCard)
+                displayList.map(renderCard)
               )}
             </div>
-          </section>
-          <section>
-            <h2 className="text-lg font-semibold text-white">Normal priority</h2>
-            <div className="mt-3 space-y-2">
-              {loading ? null : normalPriority.length === 0 ? (
-                <p className="text-white/50">None</p>
-              ) : (
-                normalPriority.map(renderCard)
-              )}
-            </div>
-          </section>
-          <section>
-            <h2 className="text-lg font-semibold text-white">Assigned to me</h2>
-            <div className="mt-3 space-y-2">
-              {loading ? null : assignedToMe.length === 0 ? (
-                <p className="text-white/50">None</p>
-              ) : (
-                assignedToMe.map(renderCard)
-              )}
-            </div>
+            {!loading && hasMore && (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => fetchQueue(items.length)}
+                  disabled={loadingMore}
+                  className="rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 hover:bg-white/10 disabled:opacity-50"
+                >
+                  {loadingMore ? "Loading…" : "Load more"}
+                </button>
+              </div>
+            )}
           </section>
         </div>
 
@@ -2663,9 +2726,24 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                   </button>
                 </div>
 
+                {caseDetail.released_summary_snapshot && (
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                    <h4 className="text-sm font-semibold text-emerald-200">
+                      Released summary (what the patient saw)
+                    </h4>
+                    <p className="mt-1 text-xs text-white/50">
+                      Released {new Date(caseDetail.released_summary_snapshot.released_at).toLocaleString()}
+                    </p>
+                    <div className="mt-3 whitespace-pre-wrap rounded-lg border border-white/10 bg-black/20 p-3 text-sm text-white/90">
+                      {caseDetail.released_summary_snapshot.summary_text}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label htmlFor="patient-summary" className="block text-sm font-medium text-white/90">
-                    Patient summary (release to patient)
+                    {caseDetail.released_summary_snapshot
+                      ? "Patient summary (current / draft — already released above)"
+                      : "Patient summary (release to patient)"}
                   </label>
                   <textarea
                     id="patient-summary"

@@ -4,13 +4,22 @@
 
 ### Create trichologist account
 
-1. Ensure env has `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
-2. Run (idempotent):
-   ```bash
-   npx tsx scripts/setup-trichologist.ts
-   ```
-3. Optional: set `TRICHOLOGIST_INITIAL_PASSWORD` so the script uses a known password; otherwise it prints a one-time password.
+**First trichologist (script, one-time)**  
+1. Ensure env has `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.  
+2. Run (idempotent):  
+   ```bash  
+   npx tsx scripts/setup-trichologist.ts  
+   ```  
+3. Optional: set `TRICHOLOGIST_INITIAL_PASSWORD` so the script uses a known password; otherwise it prints a one-time password.  
 4. Email used: **trichologist@evolvedhair.com.au**. The script creates the Supabase Auth user (if missing) and a row in `hli_longevity_trichologists` linked by `auth_user_id`. Role is implicit: presence in `hli_longevity_trichologists` with `is_active = true`.
+
+**Additional trichologists (in-app provisioning)**  
+- Only existing trichologists can add others. From the review workspace, open **Trichologist management** (`/portal/trichologist/provisioning`).  
+- Enter **email** (required) and **full name** (optional), then **Add trichologist**.  
+- If the email is new: an Auth user is created with a generated one-time password; the UI shows it once—share it securely. The new trichologist signs in at `/portal/login` and can change the password after first sign-in.  
+- If the email already exists in Auth but is not yet a trichologist: they are linked (no password shown); they sign in with their existing credentials at `/portal/login`.  
+- New trichologists get full workspace access: queue, assign cases, add notes, release summaries. No extra role assignment; a row with `is_active = true` is sufficient.  
+- APIs: `GET /api/longevity/trichologists` (list), `POST /api/longevity/trichologists` (create). Both require trichologist auth and longevity API enabled.
 
 ### Access control
 
