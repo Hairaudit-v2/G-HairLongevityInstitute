@@ -865,6 +865,90 @@ export default function Page() {
         </Container>
       </section>
 
+      {/* For clinicians who don't operate */}
+      <section
+        className="border-t border-white/[0.06] py-[var(--section-py)] md:py-[var(--section-py-lg)]"
+        aria-labelledby="clinicians-heading"
+      >
+        <Container>
+          <header className="mx-auto max-w-3xl">
+            <h2
+              id="clinicians-heading"
+              className="text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+            >
+              For clinicians who don&apos;t operate
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
+              Hair Longevity Institute supports trichologists, GPs, and dermatology practitioners
+              in understanding hair loss biology, diagnosis, and treatment pathways. We focus on
+              structured interpretation and strategy — not procedures — so you can give patients
+              clear, evidence-based guidance on causes and next steps.
+            </p>
+          </header>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {[
+              { label: "Hair loss biology", desc: "Androgen sensitivity, thyroid, iron, inflammation, and follicle integrity." },
+              { label: "Diagnosis", desc: "Structured case interpretation and risk indices from bloods, history, and goals." },
+              { label: "Treatment pathways", desc: "Non-surgical options, optimisation, and when to consider onward referral." },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5 text-white/85"
+              >
+                <h3 className="text-base font-semibold text-white">{item.label}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/65">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* If surgery becomes relevant — connection links */}
+          <div className="mt-12 rounded-2xl border border-white/[0.08] bg-black/[0.06] p-6 sm:p-8">
+            <h3 className="text-lg font-semibold text-white sm:text-xl">
+              If surgery becomes relevant
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-white/70">
+              When a patient&apos;s pathway may include surgical options, these connected resources
+              support training, measurement, and analysis within the same ecosystem.
+            </p>
+            <ul className="mt-6 flex flex-wrap gap-4 sm:gap-6" role="list">
+              <li>
+                <a
+                  href="https://iiohr.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/90 transition hover:border-[rgb(var(--gold))]/30 hover:bg-white/[0.06]"
+                >
+                  <span className="text-[rgb(var(--gold))]/90">IIOHR</span>
+                  <span className="text-white/60">— training</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://hairaudit.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/90 transition hover:border-[rgb(var(--gold))]/30 hover:bg-white/[0.06]"
+                >
+                  <span className="text-[rgb(var(--gold))]/90">HairAudit</span>
+                  <span className="text-white/60">— measurement</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://follicleintelligence.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/90 transition hover:border-[rgb(var(--gold))]/30 hover:bg-white/[0.06]"
+                >
+                  <span className="text-[rgb(var(--gold))]/90">Follicle Intelligence</span>
+                  <span className="text-white/60">— analysis</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </Container>
+      </section>
+
       {/* Pre-section: bridge to surgery / HairAudit */}
       <section className="border-t border-white/[0.06] bg-black/[0.04] py-8 sm:py-10">
         <Container>

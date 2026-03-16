@@ -466,11 +466,17 @@ function BloodResultRow({
   );
 }
 
-export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId: string }) {
+export function TrichologistReviewWorkspace({
+  trichologistId,
+  initialIntakeId = null,
+}: {
+  trichologistId: string;
+  initialIntakeId?: string | null;
+}) {
   const [items, setItems] = useState<ReviewQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialIntakeId ?? null);
   const [caseDetail, setCaseDetail] = useState<CaseDetail | null>(null);
   const [caseLoading, setCaseLoading] = useState(false);
   const [noteText, setNoteText] = useState("");
@@ -1189,6 +1195,12 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         </div>
         <div className="flex items-center gap-3">
           <PortalSignOut />
+          <Link href="/portal/trichologist/insights" className="text-sm text-white/70 hover:text-white">
+            Beta insights
+          </Link>
+          <Link href="/portal/trichologist/exceptions" className="text-sm text-white/70 hover:text-white">
+            Exceptions
+          </Link>
           <Link href="/portal/trichologist/provisioning" className="text-sm text-white/70 hover:text-white">
             Trichologist management
           </Link>

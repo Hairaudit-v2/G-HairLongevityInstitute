@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { isLongevityPortalEnabled } from "@/lib/features";
+import { SurgicalIntelligenceEcosystemBand } from "@/components/public/SurgicalIntelligenceEcosystemBand";
 
 export default function PublicFooter() {
   const showPortalLogin = isLongevityPortalEnabled();
@@ -95,6 +96,10 @@ export default function PublicFooter() {
           </div>
         </div>
       </div>
+      <SurgicalIntelligenceEcosystemBand
+        currentSite="hli"
+        currentSiteInternalHref="/"
+      />
     </footer>
   );
 }
