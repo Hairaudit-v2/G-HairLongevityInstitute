@@ -47,6 +47,11 @@ export const REVIEW_STATUS_IN_QUEUE: ReviewStatus[] = [
 
 /** Allowed values for hli_longevity_intakes.review_outcome (Phase C). Conservative, clinician-friendly. */
 export const REVIEW_OUTCOME = {
+  /** Phase C initial values */
+  REVIEW_COMPLETE: "review_complete",
+  AWAITING_PATIENT_DOCUMENTS: "awaiting_patient_documents",
+  FOLLOW_UP_RECOMMENDED: "follow_up_recommended",
+  /** Extended set (backward-compatible) */
   STANDARD_PATHWAY: "standard_pathway",
   BLOODS_RECOMMENDED: "bloods_recommended",
   REFERRAL_RECOMMENDED: "referral_recommended",

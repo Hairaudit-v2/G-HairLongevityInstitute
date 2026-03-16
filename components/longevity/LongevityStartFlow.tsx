@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type {
   LongevityQuestionnaireResponses,
@@ -271,6 +271,21 @@ const PAST_YEAR_EVENTS = [
   { key: "none", label: "None" },
 ];
 
+const TRT_STATUS_OPTIONS: { key: string; label: string }[] = [
+  { key: "no", label: "No" },
+  { key: "yes_prescribed", label: "Yes – prescribed TRT" },
+  { key: "yes_non_prescribed", label: "Yes – non-prescribed" },
+  { key: "previously_used", label: "Previously used TRT" },
+];
+
+const TRT_STARTED_WHEN_OPTIONS: { key: string; label: string }[] = [
+  { key: "less_than_6_months", label: "Less than 6 months ago" },
+  { key: "six_to_twelve_months", label: "6–12 months ago" },
+  { key: "one_to_two_years", label: "1–2 years ago" },
+  { key: "more_than_two_years", label: "2+ years ago" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
 const DIAGNOSES = [
   { key: "iron_deficiency", label: "Iron deficiency" },
   { key: "low_ferritin", label: "Low ferritin" },
@@ -381,6 +396,159 @@ const AVAILABLE_UPLOADS = [
   { key: "prior_treatment_plans", label: "Prior treatment plans" },
 ];
 
+function AboutYouStep({
+  a,
+  identifyEmail,
+  setAboutYou,
+  setStep,
+  goNext,
+  saving,
+}: {
+  a: AboutYou;
+  identifyEmail: string;
+  setAboutYou: (next: Partial<AboutYou>) => void;
+  setStep: (step: StepId) => void;
+  goNext: (nextStep: StepId) => void | Promise<void>;
+  saving: boolean;
+}) {
+  const [showOptionalDetails, setShowOptionalDetails] = useState(false);
+  const email = (a.email ?? identifyEmail).trim();
+  const firstName = (a.firstName ?? "").trim();
+  const lastName = (a.lastName ?? "").trim();
+  const dateOfBirth = (a.dateOfBirth ?? "").trim();
+  const hasConsent = a.consents?.healthData === true;
+  const canContinue =
+    email.length > 0 &&
+    firstName.length > 0 &&
+    lastName.length > 0 &&
+    dateOfBirth.length > 0 &&
+    a.sexAtBirth != null &&
+    hasConsent;
+
+  return (
+    <Card>
+      <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 1</div>
+      <h2 className="mt-2 text-2xl font-semibold">About you</h2>
+      <p className="mt-2 text-white/70">
+        You can complete your assessment with just the basic information below. Additional details help us personalise your analysis.
+      </p>
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <Input
+          label="First name *"
+          value={a.firstName ?? ""}
+          onChange={(v) => setAboutYou({ firstName: v })}
+          placeholder="First name"
+          required
+        />
+        <Input
+          label="Last name *"
+          value={a.lastName ?? ""}
+          onChange={(v) => setAboutYou({ lastName: v })}
+          placeholder="Last name"
+          required
+        />
+        <Input
+          label="Email *"
+          value={a.email ?? identifyEmail}
+          onChange={(v) => setAboutYou({ email: v })}
+          type="email"
+          placeholder="you@example.com"
+          required
+        />
+        <Input
+          label="Date of birth *"
+          value={a.dateOfBirth ?? ""}
+          onChange={(v) => setAboutYou({ dateOfBirth: v })}
+          type="date"
+          required
+        />
+        <div className="md:col-span-2">
+          <SingleSelect<SexAtBirth>
+            label="Sex at birth *"
+            value={a.sexAtBirth}
+            options={[
+              { key: "female", label: "Female" },
+              { key: "male", label: "Male" },
+              { key: "intersex", label: "Intersex" },
+              { key: "prefer_not_to_say", label: "Prefer not to say" },
+            ]}
+            onChange={(k) => setAboutYou({ sexAtBirth: k })}
+          />
+        </div>
+      </div>
+      <div className="mt-6 border-t border-white/10 pt-6">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={a.consents?.healthData ?? false}
+            onChange={(e) => setAboutYou({ consents: { ...a.consents, healthData: e.target.checked } })}
+            className="mt-1 rounded border-white/20"
+            aria-describedby="consent-health-desc"
+          />
+          <span id="consent-health-desc" className="text-sm text-white/80">
+            I consent to my health data being used for this intake and care pathway. *
+          </span>
+        </label>
+      </div>
+      <div className="mt-6 border border-white/10 rounded-2xl overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowOptionalDetails((open) => !open)}
+          className="flex w-full items-center justify-between gap-2 bg-white/[0.03] px-4 py-3 text-left text-sm font-medium text-white/90 hover:bg-white/[0.06]"
+          aria-expanded={showOptionalDetails}
+        >
+          <span>Optional: Additional details (helps personalise your assessment)</span>
+          <span className="text-white/60" aria-hidden>{showOptionalDetails ? "−" : "+"}</span>
+        </button>
+        {showOptionalDetails && (
+          <div className="border-t border-white/10 p-4 space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input label="Mobile" value={a.mobile ?? ""} onChange={(v) => setAboutYou({ mobile: v })} placeholder="+61 400 000 000" />
+              <Input label="Country" value={a.country ?? ""} onChange={(v) => setAboutYou({ country: v })} placeholder="e.g. Australia" />
+              <Input label="State / Region" value={a.stateRegion ?? ""} onChange={(v) => setAboutYou({ stateRegion: v })} placeholder="e.g. NSW" />
+              <Input label="City" value={a.city ?? ""} onChange={(v) => setAboutYou({ city: v })} placeholder="City" />
+              <Input label="Postcode" value={a.postcode ?? ""} onChange={(v) => setAboutYou({ postcode: v })} placeholder="Postcode" />
+            </div>
+            <div className="border-t border-white/10 pt-4">
+              <div className="text-sm font-medium text-white/90">GP (optional)</div>
+              <div className="mt-3 grid gap-4 md:grid-cols-2">
+                <Input label="GP name" value={a.gp?.name ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, name: v } })} />
+                <Input label="Clinic" value={a.gp?.clinic ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, clinic: v } })} />
+                <Input label="GP email" value={a.gp?.email ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, email: v } })} type="email" />
+                <Input label="GP phone" value={a.gp?.phone ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, phone: v } })} />
+              </div>
+            </div>
+            <div className="border-t border-white/10 pt-4 space-y-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={a.consents?.aiAssist ?? false}
+                  onChange={(e) => setAboutYou({ consents: { ...a.consents, aiAssist: e.target.checked } })}
+                  className="rounded border-white/20"
+                />
+                <span className="text-sm text-white/80">I consent to AI-assisted analysis where used to support my care.</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={a.consents?.documentGeneration ?? false}
+                  onChange={(e) => setAboutYou({ consents: { ...a.consents, documentGeneration: e.target.checked } })}
+                  className="rounded border-white/20"
+                />
+                <span className="text-sm text-white/80">I consent to document generation (e.g. summaries or letters) where part of my pathway.</span>
+              </label>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Button variant="secondary" onClick={() => setStep("identify")}>Back</Button>
+        <Button onClick={() => goNext("mainConcern")} disabled={saving || !canContinue}>Save & continue</Button>
+      </div>
+    </Card>
+  );
+}
+
 export function LongevityStartFlow() {
   const [step, setStep] = useState<StepId>("welcome");
   const [intakeId, setIntakeId] = useState<string | null>(null);
@@ -393,6 +561,8 @@ export function LongevityStartFlow() {
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
+  const uploadSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [stepDocuments, setStepDocuments] = useState<Array<{ id: string; doc_type: string; filename: string | null; size_bytes: number | null; created_at: string }>>([]);
 
   const progress = useMemo(() => {
@@ -524,39 +694,54 @@ export function LongevityStartFlow() {
     [saveProgress]
   );
 
-  const fetchStepDocuments = useCallback(async () => {
-    if (!intakeId) return;
+  const fetchStepDocuments = useCallback(async (): Promise<Array<{ id: string; doc_type: string; filename: string | null; size_bytes: number | null; created_at: string }>> => {
+    if (!intakeId) return [];
     try {
       const res = await fetch(`/api/longevity/documents?intakeId=${intakeId}`);
       const json = await res.json();
       if (res.ok && json.ok && Array.isArray(json.documents)) {
         setStepDocuments(json.documents);
+        return json.documents;
       }
     } catch {
       // ignore
     }
+    return [];
   }, [intakeId]);
 
   const handleDocumentUpload = useCallback(
-    async (docType: string, file: File) => {
-      if (!intakeId) return;
+    async (docType: string, files: File[]) => {
+      if (!intakeId || files.length === 0) return;
+      if (uploadSuccessTimeoutRef.current) {
+        clearTimeout(uploadSuccessTimeoutRef.current);
+        uploadSuccessTimeoutRef.current = null;
+      }
       setUploading(true);
       setUploadError(null);
+      setUploadSuccessMessage(null);
       try {
-        const formData = new FormData();
-        formData.set("intakeId", intakeId);
-        formData.set("docType", docType);
-        formData.set("file", file);
-        const res = await fetch("/api/longevity/documents/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const json = await res.json();
-        if (!res.ok || !json.ok) {
-          setUploadError(json.error ?? "Upload failed.");
-          return;
+        for (const file of files) {
+          const formData = new FormData();
+          formData.set("intakeId", intakeId);
+          formData.set("docType", docType);
+          formData.set("file", file);
+          const res = await fetch("/api/longevity/documents/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const json = await res.json();
+          if (!res.ok || !json.ok) {
+            setUploadError(json.error ?? "Upload failed.");
+            return;
+          }
         }
-        await fetchStepDocuments();
+        const updated = await fetchStepDocuments();
+        const count = updated.length;
+        setUploadSuccessMessage(`${count} document(s) uploaded successfully.`);
+        uploadSuccessTimeoutRef.current = setTimeout(() => {
+          setUploadSuccessMessage(null);
+          uploadSuccessTimeoutRef.current = null;
+        }, 5000);
       } catch (e) {
         setUploadError(e instanceof Error ? e.message : "Upload failed.");
       } finally {
@@ -567,8 +752,17 @@ export function LongevityStartFlow() {
   );
 
   useEffect(() => {
-    if (step === "uploadsNextSteps" && intakeId) fetchStepDocuments();
+    if ((step === "uploadsNextSteps" || step === "review") && intakeId) fetchStepDocuments();
   }, [step, intakeId, fetchStepDocuments]);
+
+  useEffect(() => {
+    return () => {
+      if (uploadSuccessTimeoutRef.current) {
+        clearTimeout(uploadSuccessTimeoutRef.current);
+        uploadSuccessTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const submitIntake = useCallback(async () => {
     if (!intakeId) return;
@@ -710,60 +904,14 @@ export function LongevityStartFlow() {
           )}
 
           {step === "aboutYou" && (
-            <Card>
-              <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 1</div>
-              <h2 className="mt-2 text-2xl font-semibold">About you</h2>
-              <p className="mt-2 text-white/70">Basic details and how we can contact you.</p>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <Input label="First name" value={a.firstName ?? ""} onChange={(v) => setAboutYou({ firstName: v })} placeholder="First name" />
-                <Input label="Last name" value={a.lastName ?? ""} onChange={(v) => setAboutYou({ lastName: v })} placeholder="Last name" />
-                <Input label="Email" value={a.email ?? identifyEmail} onChange={(v) => setAboutYou({ email: v })} type="email" required />
-                <Input label="Mobile" value={a.mobile ?? ""} onChange={(v) => setAboutYou({ mobile: v })} placeholder="+61 400 000 000" />
-                <Input label="Date of birth" value={a.dateOfBirth ?? ""} onChange={(v) => setAboutYou({ dateOfBirth: v })} type="date" />
-                <SingleSelect<SexAtBirth>
-                  label="Sex at birth"
-                  value={a.sexAtBirth}
-                  options={[
-                    { key: "female", label: "Female" },
-                    { key: "male", label: "Male" },
-                    { key: "intersex", label: "Intersex" },
-                    { key: "prefer_not_to_say", label: "Prefer not to say" },
-                  ]}
-                  onChange={(k) => setAboutYou({ sexAtBirth: k })}
-                />
-                <Input label="Country" value={a.country ?? ""} onChange={(v) => setAboutYou({ country: v })} placeholder="e.g. Australia" />
-                <Input label="State / Region" value={a.stateRegion ?? ""} onChange={(v) => setAboutYou({ stateRegion: v })} placeholder="e.g. NSW" />
-                <Input label="City" value={a.city ?? ""} onChange={(v) => setAboutYou({ city: v })} placeholder="City" />
-                <Input label="Postcode" value={a.postcode ?? ""} onChange={(v) => setAboutYou({ postcode: v })} placeholder="Postcode" />
-              </div>
-              <div className="mt-6 border-t border-white/10 pt-6">
-                <div className="text-sm font-medium text-white/90">GP (optional)</div>
-                <div className="mt-3 grid gap-4 md:grid-cols-2">
-                  <Input label="GP name" value={a.gp?.name ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, name: v } })} />
-                  <Input label="Clinic" value={a.gp?.clinic ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, clinic: v } })} />
-                  <Input label="GP email" value={a.gp?.email ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, email: v } })} type="email" />
-                  <Input label="GP phone" value={a.gp?.phone ?? ""} onChange={(v) => setAboutYou({ gp: { ...a.gp, phone: v } })} />
-                </div>
-              </div>
-              <div className="mt-6 border-t border-white/10 pt-6 space-y-3">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={a.consents?.healthData ?? false} onChange={(e) => setAboutYou({ consents: { ...a.consents, healthData: e.target.checked } })} className="rounded border-white/20" />
-                  <span className="text-sm text-white/80">I consent to my health data being used for this intake and care pathway.</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={a.consents?.aiAssist ?? false} onChange={(e) => setAboutYou({ consents: { ...a.consents, aiAssist: e.target.checked } })} className="rounded border-white/20" />
-                  <span className="text-sm text-white/80">I consent to AI-assisted analysis where used to support my care.</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" checked={a.consents?.documentGeneration ?? false} onChange={(e) => setAboutYou({ consents: { ...a.consents, documentGeneration: e.target.checked } })} className="rounded border-white/20" />
-                  <span className="text-sm text-white/80">I consent to document generation (e.g. summaries or letters) where part of my pathway.</span>
-                </label>
-              </div>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="secondary" onClick={() => setStep("identify")}>Back</Button>
-                <Button onClick={() => goNext("mainConcern")} disabled={saving}>Save & continue</Button>
-              </div>
-            </Card>
+            <AboutYouStep
+              a={a}
+              identifyEmail={identifyEmail}
+              setAboutYou={setAboutYou}
+              setStep={setStep}
+              goNext={goNext}
+              saving={saving}
+            />
           )}
 
           {step === "mainConcern" && (
@@ -795,6 +943,27 @@ export function LongevityStartFlow() {
               <h2 className="mt-2 text-2xl font-semibold">Timeline and triggers</h2>
               <p className="mt-2 text-white/70">Events that may relate to changes in your hair.</p>
               <div className="mt-6 space-y-6">
+                <div>
+                  <p className="mb-3 rounded-xl border border-[rgb(198,167,94)]/20 bg-[rgb(198,167,94)]/5 px-4 py-3 text-sm text-white/85">
+                    If you use TRT, we will tailor your androgen and DHT interpretation to your therapy.
+                  </p>
+                  <SingleSelect
+                    label="Are you currently using testosterone therapy (TRT)?"
+                    value={tt.trtStatus}
+                    options={TRT_STATUS_OPTIONS}
+                    onChange={(k) => setTimelineTriggers({ trtStatus: k as TimelineTriggers["trtStatus"], trtStartedWhen: k === "no" ? undefined : tt.trtStartedWhen })}
+                  />
+                  {(tt.trtStatus === "yes_prescribed" || tt.trtStatus === "yes_non_prescribed" || tt.trtStatus === "previously_used") && (
+                    <div className="mt-4">
+                      <SingleSelect
+                        label="When did you start TRT? (optional)"
+                        value={tt.trtStartedWhen}
+                        options={TRT_STARTED_WHEN_OPTIONS}
+                        onChange={(k) => setTimelineTriggers({ trtStartedWhen: k as TimelineTriggers["trtStartedWhen"] })}
+                      />
+                    </div>
+                  )}
+                </div>
                 <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
                 <MultiSelect label="Past year events" options={PAST_YEAR_EVENTS} value={tt.pastYearEvents ?? []} onChange={(v) => setTimelineTriggers({ pastYearEvents: v })} />
                 <SingleSelect label="Shedding trend" value={tt.sheddingTrend} options={[{ key: "stable", label: "Stable" }, { key: "improved", label: "Improved" }, { key: "worsened", label: "Worsened" }, { key: "comes_and_goes", label: "Comes and goes" }]} onChange={(k) => setTimelineTriggers({ sheddingTrend: k })} />
@@ -928,57 +1097,77 @@ export function LongevityStartFlow() {
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 7</div>
               <h2 className="mt-2 text-2xl font-semibold">Uploads and next steps</h2>
               <p className="mt-2 text-white/70">
-                Upload blood test results, scalp photos, or medical letters. PDF or image, max 10 MB per file.
+                Optional: You can upload blood tests or hair photos now, or add them later in the patient portal.
+              </p>
+              <p className="mt-1 text-sm text-white/60">
+                PDF or image, max 10 MB per file. You can select multiple files at once.
               </p>
               {!intakeId ? (
                 <p className="mt-4 text-sm text-amber-200">Save your intake first to upload documents.</p>
               ) : (
                 <>
-                  <div className="mt-6 space-y-4">
+                  <div className="mt-6 space-y-5">
                     <div>
                       <label className="text-sm font-medium text-white/90">Blood test results (PDF or image)</label>
+                      <p className="mt-1 text-xs text-white/60">
+                        Common helpful tests include: Ferritin, Iron studies, Thyroid (TSH), Vitamin D, Testosterone.
+                      </p>
                       <input
                         type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="mt-2 block w-full text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
+                        multiple
+                        className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
                         onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleDocumentUpload("blood_test_upload", f);
+                          const fileList = e.target.files;
+                          if (fileList?.length) handleDocumentUpload("blood_test_upload", Array.from(fileList));
                           e.target.value = "";
                         }}
                         disabled={uploading}
+                        aria-label="Choose blood test files"
                       />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-white/90">Scalp photographs (image)</label>
+                      <p className="mt-1 text-xs text-white/60">
+                        You may upload hairline, crown, or part-line photos. Photos are optional.
+                      </p>
                       <input
                         type="file"
-                        accept=".jpg,.jpeg,.png,.webp"
-                        className="mt-2 block w-full text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                        accept=".jpg,.jpeg,.png,.webp,image/*"
+                        multiple
+                        className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
                         onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleDocumentUpload("scalp_photo", f);
+                          const fileList = e.target.files;
+                          if (fileList?.length) handleDocumentUpload("scalp_photo", Array.from(fileList));
                           e.target.value = "";
                         }}
                         disabled={uploading}
+                        aria-label="Choose scalp photo files"
                       />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-white/90">Medical / specialist letters (PDF or image)</label>
                       <input
                         type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="mt-2 block w-full text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
+                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
+                        multiple
+                        className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
                         onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleDocumentUpload("medical_letter", f);
+                          const fileList = e.target.files;
+                          if (fileList?.length) handleDocumentUpload("medical_letter", Array.from(fileList));
                           e.target.value = "";
                         }}
                         disabled={uploading}
+                        aria-label="Choose medical letter files"
                       />
                     </div>
                   </div>
                   {uploading && <p className="mt-2 text-sm text-[rgb(198,167,94)]">Uploading…</p>}
+                  {uploadSuccessMessage && (
+                    <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200" role="status">
+                      {uploadSuccessMessage}
+                    </div>
+                  )}
                   {uploadError && (
                     <div className="mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
                       {uploadError}
@@ -1033,6 +1222,7 @@ export function LongevityStartFlow() {
                 <div><span className="text-white/60">Primary concerns:</span> {(mc.primaryConcerns?.length) ? mc.primaryConcerns.join(", ") : "—"}</div>
                 <div><span className="text-white/60">Prior blood tests:</span> {mh.priorBloodTests ?? "—"}</div>
                 <div><span className="text-white/60">Current blood status:</span> {un.currentBloodStatus ?? "—"}</div>
+                <div><span className="text-white/60">Documents:</span> {stepDocuments.length === 0 ? "None uploaded (you can add them later in the portal)" : `${stepDocuments.length} document(s) uploaded`}</div>
               </dl>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("uploadsNextSteps")}>Back</Button>
@@ -1045,14 +1235,18 @@ export function LongevityStartFlow() {
 
           {step === "done" && (
             <Card>
-              <h2 className="text-2xl font-semibold">Submitted</h2>
-              <p className="mt-3 text-white/70">
-                Your longevity intake has been submitted. You can view status on your dashboard. If
-                blood work or further steps are part of your pathway, we’ll guide you through those
-                next.
+              <h2 className="text-2xl font-semibold">Your assessment has been received.</h2>
+              <p className="mt-4 text-white/70">
+                A specialist will review your information and prepare your Hair Longevity Summary.
               </p>
-              <Link href="/longevity/dashboard" className="mt-6 inline-block">
-                <Button>Go to dashboard</Button>
+              <p className="mt-2 text-white/70">
+                You will receive an email when your summary is ready.
+              </p>
+              <Link
+                href="/portal/login?redirect=/portal/dashboard"
+                className="mt-6 inline-block"
+              >
+                <Button>Sign in to portal</Button>
               </Link>
             </Card>
           )}

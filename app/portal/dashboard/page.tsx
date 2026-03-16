@@ -370,6 +370,16 @@ export default async function PortalDashboardPage({
                 <div className="mt-3 whitespace-pre-wrap text-sm text-white/90">
                   {intake.patient_visible_summary ?? ""}
                 </div>
+                {intake.review_outcome === "follow_up_recommended" && (
+                  <p className="mt-3 text-sm text-[rgb(var(--gold))]/90">
+                    Your clinician has recommended a follow-up assessment.
+                  </p>
+                )}
+                {intake.review_outcome === "awaiting_patient_documents" && (
+                  <p className="mt-3 text-sm text-white/70">
+                    Your clinician is waiting for documents from you. Please upload any requested items in your documents section.
+                  </p>
+                )}
               </div>
             ))}
           </div>

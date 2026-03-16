@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
 
 const GOLD = "rgb(198,167,94)";
+
+const RESEND_COOLDOWN_SECONDS = 60;
+const MAGIC_LINK_EXPIRY_MINUTES = 10;
 
 /** Build callback URL for magic link; optional redirect param is preserved so auth callback can send user there after login. */
 function getRedirectUrl(redirectPath?: string | null): string {
@@ -39,36 +42,63 @@ export default function PortalLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [linkSentTo, setLinkSentTo] = useState<string | null>(null);
+  const [resendCooldownUntil, setResendCooldownUntil] = useState(0);
+  const [resendCooldownSeconds, setResendCooldownSeconds] = useState(0);
+
+  const requestMagicLink = useCallback(
+    async (emailToUse: string) => {
+      const supabase = createLongevitySupabaseBrowserClient();
+      const { error } = await supabase.auth.signInWithOtp({
+        email: emailToUse.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: getRedirectUrl(afterLoginRedirect),
+          shouldCreateUser: true,
+        },
+      });
+      return { error };
+    },
+    [afterLoginRedirect]
+  );
+
+  useEffect(() => {
+    if (resendCooldownUntil <= 0) {
+      setResendCooldownSeconds(0);
+      return;
+    }
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((resendCooldownUntil - Date.now()) / 1000));
+      setResendCooldownSeconds(remaining);
+      if (remaining <= 0) setResendCooldownUntil(0);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [resendCooldownUntil]);
 
   const sendMagicLink = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setMessage(null);
-      if (!email.trim()) {
+      const emailTrimmed = email.trim();
+      if (!emailTrimmed) {
         setMessage({ type: "error", text: "Please enter your email address." });
         return;
       }
       setLoading(true);
       try {
-        const supabase = createLongevitySupabaseBrowserClient();
-        const { error } = await supabase.auth.signInWithOtp({
-          email: email.trim().toLowerCase(),
-          options: {
-            emailRedirectTo: getRedirectUrl(afterLoginRedirect),
-            shouldCreateUser: true,
-          },
-        });
+        const { error } = await requestMagicLink(emailTrimmed);
         if (error) {
           setMessage({ type: "error", text: error.message });
           setLoading(false);
           return;
         }
-        setMessage({
-          type: "success",
-          text: "Check your email for a sign-in link. Click the link to open your dashboard.",
-        });
+        setLinkSentTo(emailTrimmed.toLowerCase());
+        setResendCooldownUntil(Date.now() + RESEND_COOLDOWN_SECONDS * 1000);
+        setMessage(null);
       } catch (err) {
         setMessage({
           type: "error",
@@ -78,8 +108,30 @@ export default function PortalLoginPage() {
         setLoading(false);
       }
     },
-    [email, afterLoginRedirect]
+    [email, requestMagicLink]
   );
+
+  const resendMagicLink = useCallback(async () => {
+    if (!linkSentTo || resendCooldownSeconds > 0) return;
+    setMessage(null);
+    setResendLoading(true);
+    try {
+      const { error } = await requestMagicLink(linkSentTo);
+      if (error) {
+        setMessage({ type: "error", text: error.message });
+        setResendLoading(false);
+        return;
+      }
+      setResendCooldownUntil(Date.now() + RESEND_COOLDOWN_SECONDS * 1000);
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Something went wrong.",
+      });
+    } finally {
+      setResendLoading(false);
+    }
+  }, [linkSentTo, resendCooldownSeconds, requestMagicLink]);
 
   const signInWithPassword = useCallback(
     async (e: React.FormEvent) => {
@@ -141,78 +193,144 @@ export default function PortalLoginPage() {
         </div>
       )}
 
-      {/* Magic link (primary) */}
-      <form onSubmit={sendMagicLink} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="portal-email" className="block text-sm font-medium text-white/90">
-            Email
-          </label>
-          <input
-            id="portal-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            className="mt-1 w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--gold))]"
-            placeholder="you@example.com"
-          />
-        </div>
-        {message && (
-          <div
-            className={`rounded-xl px-3 py-2 text-sm ${
-              message.type === "error"
-                ? "border border-red-500/30 bg-red-500/10 text-red-200"
-                : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-            }`}
-          >
-            {message.text}
+      {/* Magic link sent: show feedback and resend */}
+      {linkSentTo ? (
+        <div className="mt-6 space-y-4">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            <p className="font-medium">We&apos;ve sent a secure login link to your email.</p>
+            <p className="mt-1 text-emerald-200/90">The link expires in {MAGIC_LINK_EXPIRY_MINUTES} minutes.</p>
+            <p className="mt-2 text-emerald-200/80">If you don&apos;t see the email, check your spam folder.</p>
           </div>
-        )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex w-full justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] disabled:opacity-50"
-          style={{ backgroundColor: GOLD }}
-        >
-          {loading ? "Sending…" : "Send sign-in link"}
-        </button>
-      </form>
-
-      {/* Password fallback */}
-      <div className="mt-6 border-t border-white/10 pt-6">
-        <button
-          type="button"
-          onClick={() => setShowPassword((p) => !p)}
-          className="text-sm text-white/60 hover:text-white"
-        >
-          {showPassword ? "Hide password sign in" : "Sign in with password instead"}
-        </button>
-        {showPassword && (
-          <form onSubmit={signInWithPassword} className="mt-4 space-y-4">
+          {message && message.type === "error" && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              {message.text}
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={resendMagicLink}
+              disabled={resendLoading || resendCooldownSeconds > 0}
+              className="inline-flex rounded-2xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {resendLoading
+                ? "Sending…"
+                : resendCooldownSeconds > 0
+                  ? `Resend link (in ${resendCooldownSeconds}s)`
+                  : "Resend link"}
+            </button>
+          </div>
+          <div className="border-t border-white/10 pt-4">
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="text-sm text-white/60 hover:text-white"
+            >
+              {showPassword ? "Hide password sign in" : "Or sign in with password"}
+            </button>
+            {showPassword && (
+              <form onSubmit={signInWithPassword} className="mt-4 space-y-4">
+                <div>
+                  <label htmlFor="portal-password-sent" className="block text-sm font-medium text-white/90">
+                    Password
+                  </label>
+                  <input
+                    id="portal-password-sent"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    className="mt-1 w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--gold))]"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex rounded-2xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 disabled:opacity-50"
+                >
+                  Sign in with password
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Magic link (primary) form */}
+          <form onSubmit={sendMagicLink} className="mt-6 space-y-4">
             <div>
-              <label htmlFor="portal-password" className="block text-sm font-medium text-white/90">
-                Password
+              <label htmlFor="portal-email" className="block text-sm font-medium text-white/90">
+                Email
               </label>
               <input
-                id="portal-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
+                id="portal-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 className="mt-1 w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--gold))]"
-                placeholder="••••••••"
+                placeholder="you@example.com"
               />
             </div>
+            {message && (
+              <div
+                className={`rounded-xl px-3 py-2 text-sm ${
+                  message.type === "error"
+                    ? "border border-red-500/30 bg-red-500/10 text-red-200"
+                    : "border border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex rounded-2xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 disabled:opacity-50"
+              className="inline-flex w-full justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] disabled:opacity-50"
+              style={{ backgroundColor: GOLD }}
             >
-              Sign in with password
+              {loading ? "Sending…" : "Send sign-in link"}
             </button>
           </form>
-        )}
-      </div>
+
+          {/* Password alternative */}
+          <div className="mt-6 border-t border-white/10 pt-6">
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="text-sm text-white/60 hover:text-white"
+            >
+              {showPassword ? "Hide password sign in" : "Or sign in with password"}
+            </button>
+            {showPassword && (
+              <form onSubmit={signInWithPassword} className="mt-4 space-y-4">
+                <div>
+                  <label htmlFor="portal-password" className="block text-sm font-medium text-white/90">
+                    Password
+                  </label>
+                  <input
+                    id="portal-password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    className="mt-1 w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--gold))]"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex rounded-2xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 hover:bg-white/10 disabled:opacity-50"
+                >
+                  Sign in with password
+                </button>
+              </form>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Future OAuth placeholder */}
       <p className="mt-6 text-xs text-white/40">

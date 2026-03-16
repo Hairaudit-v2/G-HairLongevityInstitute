@@ -46,10 +46,23 @@ export type MainConcern = {
   freeText?: string;
 };
 
+export type TrtStatus = "no" | "yes_prescribed" | "yes_non_prescribed" | "previously_used";
+
+export type TrtStartedWhen =
+  | "less_than_6_months"
+  | "six_to_twelve_months"
+  | "one_to_two_years"
+  | "more_than_two_years"
+  | "prefer_not_to_say";
+
 export type TimelineTriggers = {
   triggers?: string[];
   pastYearEvents?: string[];
   sheddingTrend?: "stable" | "improved" | "worsened" | "comes_and_goes";
+  /** Testosterone replacement therapy (TRT) use. */
+  trtStatus?: TrtStatus;
+  /** When TRT was started; only relevant when trtStatus indicates current or previous use. */
+  trtStartedWhen?: TrtStartedWhen;
 };
 
 export type MedicalHistory = {

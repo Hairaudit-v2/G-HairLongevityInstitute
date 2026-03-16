@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     await auditLongevityEvent(supabase, {
       profile_id: intake.profile_id,
       intake_id: intake_id,
-      event_type: "review_claimed",
+      event_type: "case_assigned",
       payload: { trichologist_id: trichologist.id },
       actor_type: "trichologist",
     });

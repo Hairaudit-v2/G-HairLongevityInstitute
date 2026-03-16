@@ -32,6 +32,9 @@ import {
 import type { FollowUpCadenceOutput } from "@/lib/longevity/followUpCadence";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
+  [REVIEW_OUTCOME.REVIEW_COMPLETE]: "Review complete",
+  [REVIEW_OUTCOME.AWAITING_PATIENT_DOCUMENTS]: "Awaiting patient documents",
+  [REVIEW_OUTCOME.FOLLOW_UP_RECOMMENDED]: "Follow-up recommended",
   [REVIEW_OUTCOME.STANDARD_PATHWAY]: "Standard pathway",
   [REVIEW_OUTCOME.BLOODS_RECOMMENDED]: "Bloods recommended",
   [REVIEW_OUTCOME.REFERRAL_RECOMMENDED]: "Referral recommended",
@@ -946,6 +949,33 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
       setActionLoading(false);
     }
   }, [selectedId, summaryText, outcomeSelect, fetchQueue]);
+
+  const saveSummaryDraft = useCallback(async () => {
+    if (!selectedId) return;
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const res = await fetch("/api/longevity/review/summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          intake_id: selectedId,
+          patient_visible_summary: summaryText.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setActionError(data.error ?? "Save failed");
+        return;
+      }
+      if (selectedId) fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setActionLoading(false);
+    }
+  }, [selectedId, summaryText, fetchCase]);
 
   const filteredItems = useMemo(() => {
     let list = items;
@@ -2492,14 +2522,24 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                     rows={4}
                     className="mt-1 w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-[rgb(var(--gold))] focus:outline-none"
                   />
-                  <button
-                    type="button"
-                    onClick={releaseSummary}
-                    disabled={actionLoading || !summaryText.trim()}
-                    className="mt-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500/20 disabled:opacity-50"
-                  >
-                    Release patient summary
-                  </button>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={saveSummaryDraft}
+                      disabled={actionLoading}
+                      className="rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50"
+                    >
+                      Save draft
+                    </button>
+                    <button
+                      type="button"
+                      onClick={releaseSummary}
+                      disabled={actionLoading || !summaryText.trim()}
+                      className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500/20 disabled:opacity-50"
+                    >
+                      Release patient summary
+                    </button>
+                  </div>
                 </div>
               </div>
             </>

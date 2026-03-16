@@ -1,13 +1,14 @@
 /**
- * POST /api/longevity/review/unassign — Trichologist unassigns an intake (clears assignment).
+ * POST /api/longevity/review/summary — Trichologist saves patient_visible_summary as draft (no release).
  * Internal, longevity-scoped. Requires Trichologist auth.
+ * Does not set patient_visible_released_at. Use /api/longevity/review/release to release.
  */
 
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
-import { REVIEW_STATUS, REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
+import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { auditLongevityEvent } from "@/lib/longevity/documents";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => ({}));
     const intake_id = typeof body.intake_id === "string" ? body.intake_id.trim() : null;
+    const patient_visible_summary = typeof body.patient_visible_summary === "string" ? body.patient_visible_summary : "";
     if (!intake_id) {
       return NextResponse.json({ ok: false, error: "intake_id is required." }, { status: 400 });
     }
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
     const supabase = supabaseAdmin();
     const { data: intake, error: fetchErr } = await supabase
       .from("hli_longevity_intakes")
-      .select("id, profile_id, review_status, assigned_trichologist_id")
+      .select("id, profile_id, review_status")
       .eq("id", intake_id)
       .single();
     if (fetchErr || !intake) {
@@ -43,29 +45,17 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (intake.assigned_trichologist_id !== trichologist.id) {
-      return NextResponse.json(
-        { ok: false, error: "Only the assigned Trichologist can unassign this case." },
-        { status: 403 }
-      );
-    }
 
     const now = new Date().toISOString();
-    const newStatus =
-      intake.review_status === REVIEW_STATUS.UNDER_TRICHOLOGIST_REVIEW
-        ? REVIEW_STATUS.HUMAN_REVIEW_REQUIRED
-        : intake.review_status;
-
     const { data: updated, error: updateErr } = await supabase
       .from("hli_longevity_intakes")
       .update({
-        assigned_trichologist_id: null,
-        assigned_at: null,
-        review_status: newStatus,
+        patient_visible_summary,
+        last_reviewed_at: now,
         updated_at: now,
       })
       .eq("id", intake_id)
-      .select("id, review_status, assigned_trichologist_id, assigned_at, created_at")
+      .select("id, patient_visible_summary, last_reviewed_at")
       .single();
     if (updateErr) {
       return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
@@ -74,7 +64,7 @@ export async function POST(req: Request) {
     await auditLongevityEvent(supabase, {
       profile_id: intake.profile_id,
       intake_id,
-      event_type: "case_unassigned",
+      event_type: "patient_summary_saved",
       payload: { trichologist_id: trichologist.id },
       actor_type: "trichologist",
     });
@@ -83,10 +73,8 @@ export async function POST(req: Request) {
       ok: true,
       intake: {
         id: updated.id,
-        review_status: updated.review_status,
-        assigned_trichologist_id: updated.assigned_trichologist_id,
-        assigned_at: updated.assigned_at,
-        created_at: updated.created_at,
+        patient_visible_summary: updated.patient_visible_summary ?? null,
+        last_reviewed_at: updated.last_reviewed_at ?? null,
       },
     });
   } catch (e: unknown) {
