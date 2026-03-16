@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { CaseTimeline } from "@/components/longevity/CaseTimeline";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 import { REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
@@ -35,6 +36,7 @@ import {
   SCALP_SEVERITY_ESTIMATE,
 } from "@/lib/longevity/scalpImageAnalysis";
 import type { FollowUpCadenceOutput } from "@/lib/longevity/followUpCadence";
+import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.REVIEW_COMPLETE]: "Review complete",
@@ -118,6 +120,7 @@ export type CaseDetail = {
     last_reviewed_at: string | null;
     patient_visible_released_at: string | null;
     assigned_trichologist_id: string | null;
+    assigned_at: string | null;
     patient_visible_summary: string | null;
     review_outcome: string | null;
   };
@@ -135,6 +138,8 @@ export type CaseDetail = {
     released_at: string;
     released_by_trichologist_id: string | null;
   } | null;
+  /** Reminder emails sent for this intake (for case timeline). */
+  reminder_sents?: { sent_at: string; reminder_type: string }[];
   complexity?: ReviewComplexityResult;
   blood_results?: (InterpretedMarker & { id: string })[];
   blood_markers?: BloodMarkerRaw[];
@@ -517,6 +522,27 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
   const [bloodRequestSaving, setBloodRequestSaving] = useState(false);
 
   const [includeReleased, setIncludeReleased] = useState(false);
+  const [documentTypeFilter, setDocumentTypeFilter] = useState<string>("all");
+  const [queueMetrics, setQueueMetrics] = useState<{
+    total_submitted: number;
+    in_queue: number;
+    assigned: number;
+    completed: number;
+    waiting_over_24h: number;
+    waiting_over_48h: number;
+    avg_hours_to_release: number | null;
+  } | null>(null);
+
+  const fetchMetrics = useCallback(async () => {
+    try {
+      const res = await fetch("/api/longevity/review/metrics", { credentials: "include" });
+      const data = await res.json();
+      if (data.ok && data.metrics) setQueueMetrics(data.metrics);
+    } catch {
+      // Non-blocking; leave previous metrics or null
+    }
+  }, []);
+
   const buildQueueParams = useCallback(() => {
     const params = new URLSearchParams();
     params.set("limit", "50");
@@ -553,6 +579,7 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
           setItems((prev) => [...prev, ...next]);
         } else {
           setItems(next);
+          fetchMetrics();
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load queue");
@@ -562,12 +589,16 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         setLoadingMore(false);
       }
     },
-    [buildQueueParams]
+    [buildQueueParams, fetchMetrics]
   );
 
   useEffect(() => {
     fetchQueue();
   }, [fetchQueue]);
+
+  useEffect(() => {
+    setDocumentTypeFilter("all");
+  }, [selectedId]);
 
   const fetchCase = useCallback(async (id: string) => {
     setCaseLoading(true);
@@ -1090,15 +1121,6 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
 
   const displayList = sortBy === "complexity" ? sortedByComplexity : sortedByPriority;
 
-  const metrics = useMemo(() => {
-    const awaiting = items.filter((i) => i.review_status === "human_review_required").length;
-    const underReview = items.filter((i) => i.review_status === "under_trichologist_review").length;
-    const now = Date.now();
-    const ages = items.map((i) => (now - new Date(i.created_at).getTime()) / (1000 * 60 * 60 * 24));
-    const avgDays = ages.length ? ages.reduce((a, b) => a + b, 0) / ages.length : 0;
-    return { awaiting, underReview, avgDays };
-  }, [items]);
-
   const renderCard = (item: ReviewQueueItem) => {
     const isAssignedToMe = item.assigned_trichologist_id === trichologistId;
     const isAwaitingDocs = item.review_status === "awaiting_patient_documents";
@@ -1185,23 +1207,62 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
         </div>
       )}
 
-      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-6 text-sm">
-          <span className="text-white/60">Cases awaiting review:</span>
-          <span className="font-medium text-white">{metrics.awaiting}</span>
-          <span className="text-white/40">|</span>
-          <span className="text-white/60">Under review:</span>
-          <span className="font-medium text-white">{metrics.underReview}</span>
-          <span className="text-white/40">|</span>
-          <span className="text-white/60">Avg. age in queue:</span>
-          <span className="font-medium text-white">
-            {metrics.avgDays < 1
-              ? "< 1 day"
-              : metrics.avgDays < 2
-                ? "1 day"
-                : `${metrics.avgDays.toFixed(1)} days`}
-          </span>
-        </div>
+      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4">
+        <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">Queue health</h3>
+        {queueMetrics == null ? (
+          <p className="text-sm text-white/50">Loading metrics…</p>
+        ) : (
+          <div className="flex flex-wrap gap-4">
+            <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 min-w-[6rem]">
+              <div className="text-xs text-white/50">Submitted</div>
+              <div className="text-lg font-semibold text-white">{queueMetrics.total_submitted}</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 min-w-[6rem]">
+              <div className="text-xs text-white/50">In queue</div>
+              <div className="text-lg font-semibold text-white">{queueMetrics.in_queue}</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 min-w-[6rem]">
+              <div className="text-xs text-white/50">Assigned</div>
+              <div className="text-lg font-semibold text-white">{queueMetrics.assigned}</div>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 min-w-[6rem]">
+              <div className="text-xs text-white/50">Completed</div>
+              <div className="text-lg font-semibold text-white">{queueMetrics.completed}</div>
+            </div>
+            {queueMetrics.avg_hours_to_release != null && (
+              <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 min-w-[6rem]">
+                <div className="text-xs text-white/50">Avg. time to release</div>
+                <div className="text-lg font-semibold text-white">
+                  {queueMetrics.avg_hours_to_release < 24
+                    ? `${queueMetrics.avg_hours_to_release}h`
+                    : `${(queueMetrics.avg_hours_to_release / 24).toFixed(1)}d`}
+                </div>
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-3 ml-auto">
+              {queueMetrics.waiting_over_24h > 0 && (
+                <span
+                  className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
+                    queueMetrics.waiting_over_48h > 0
+                      ? "border-amber-500/50 bg-amber-500/15 text-amber-200"
+                      : "border-white/20 bg-white/10 text-white/80"
+                  }`}
+                  title="Cases in queue for more than 24 hours"
+                >
+                  {queueMetrics.waiting_over_24h} waiting &gt; 24h
+                </span>
+              )}
+              {queueMetrics.waiting_over_48h > 0 && (
+                <span
+                  className="rounded-md border border-amber-500/50 bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-200"
+                  title="Cases in queue for more than 48 hours"
+                >
+                  {queueMetrics.waiting_over_48h} waiting &gt; 48h
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
@@ -1354,6 +1415,21 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                   </div>
                 )}
 
+                <h3 className="mt-6 text-sm font-medium text-white/90">Case timeline</h3>
+                <div className="mt-2 rounded-lg border border-white/10 bg-white/5 p-4">
+                  <CaseTimeline
+                    intake={{
+                      created_at: caseDetail.intake.created_at,
+                      assigned_at: caseDetail.intake.assigned_at ?? null,
+                    }}
+                    questionnaire={caseDetail.questionnaire}
+                    documents={caseDetail.documents}
+                    notes={caseDetail.notes}
+                    released_summary_snapshot={caseDetail.released_summary_snapshot ?? null}
+                    reminder_sents={caseDetail.reminder_sents}
+                  />
+                </div>
+
                 <h3 className="mt-6 text-sm font-medium text-white/90">Questionnaire snapshot</h3>
                 <pre className="mt-2 max-h-48 overflow-auto rounded-lg border border-white/10 bg-black/20 p-3 text-xs text-white/80 whitespace-pre-wrap">
                   {JSON.stringify(caseDetail.questionnaire.responses, null, 2)}
@@ -1363,13 +1439,89 @@ export function TrichologistReviewWorkspace({ trichologistId }: { trichologistId
                 {caseDetail.documents.length === 0 ? (
                   <p className="mt-2 text-sm text-white/50">None</p>
                 ) : (
-                  <ul className="mt-2 space-y-1 text-sm text-white/80">
-                    {caseDetail.documents.map((d) => (
-                      <li key={d.id}>
-                        {d.filename ?? d.doc_type} · {new Date(d.created_at).toLocaleDateString()}
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-white/50">Filter by type:</span>
+                      <select
+                        value={documentTypeFilter}
+                        onChange={(e) => setDocumentTypeFilter(e.target.value)}
+                        className="rounded border border-white/20 bg-white/5 px-2 py-1 text-xs text-white focus:border-[rgb(var(--gold))] focus:outline-none"
+                        aria-label="Filter documents by type"
+                      >
+                        <option value="all">All</option>
+                        <option value={LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD}>{getPatientDocTypeLabel(LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD)}</option>
+                        <option value={LONGEVITY_DOC_TYPE.SCALP_PHOTO}>{getPatientDocTypeLabel(LONGEVITY_DOC_TYPE.SCALP_PHOTO)}</option>
+                        <option value={LONGEVITY_DOC_TYPE.MEDICAL_LETTER}>{getPatientDocTypeLabel(LONGEVITY_DOC_TYPE.MEDICAL_LETTER)}</option>
+                        <option value={LONGEVITY_DOC_TYPE.PRESCRIPTIONS}>{getPatientDocTypeLabel(LONGEVITY_DOC_TYPE.PRESCRIPTIONS)}</option>
+                        <option value={LONGEVITY_DOC_TYPE.OTHER}>{getPatientDocTypeLabel(LONGEVITY_DOC_TYPE.OTHER)}</option>
+                      </select>
+                    </div>
+                    <div className="mt-3 space-y-3">
+                      {(() => {
+                        const MAIN_TYPES = [
+                          LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD,
+                          LONGEVITY_DOC_TYPE.SCALP_PHOTO,
+                          LONGEVITY_DOC_TYPE.MEDICAL_LETTER,
+                          LONGEVITY_DOC_TYPE.PRESCRIPTIONS,
+                        ] as const;
+                        const isOther = (docType: string) => !MAIN_TYPES.includes(docType as (typeof MAIN_TYPES)[number]);
+                        const filteredDocs =
+                          documentTypeFilter === "all"
+                            ? caseDetail.documents
+                            : documentTypeFilter === LONGEVITY_DOC_TYPE.OTHER
+                              ? caseDetail.documents.filter((d) => isOther(d.doc_type))
+                              : caseDetail.documents.filter((d) => d.doc_type === documentTypeFilter);
+                        if (documentTypeFilter !== "all") {
+                          if (filteredDocs.length === 0) return <p className="text-sm text-white/50">No documents in this category.</p>;
+                          return (
+                            <ul className="space-y-1 text-sm text-white/80">
+                              {filteredDocs.map((d) => (
+                                <li key={d.id}>
+                                  {d.filename ?? getPatientDocTypeLabel(d.doc_type)} · {new Date(d.created_at).toLocaleDateString()}
+                                </li>
+                              ))}
+                            </ul>
+                          );
+                        }
+                        return (
+                          <>
+                            {MAIN_TYPES.map((type) => {
+                              const list = caseDetail.documents.filter((d) => d.doc_type === type);
+                              if (list.length === 0) return null;
+                              return (
+                                <div key={type}>
+                                  <p className="text-xs font-medium text-white/60">{getPatientDocTypeLabel(type)}</p>
+                                  <ul className="mt-1 space-y-1 text-sm text-white/80">
+                                    {list.map((d) => (
+                                      <li key={d.id}>
+                                        {d.filename ?? getPatientDocTypeLabel(type)} · {new Date(d.created_at).toLocaleDateString()}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            })}
+                            {(() => {
+                              const otherDocs = caseDetail.documents.filter((d) => isOther(d.doc_type));
+                              if (otherDocs.length === 0) return null;
+                              return (
+                                <div>
+                                  <p className="text-xs font-medium text-white/60">{getPatientDocTypeLabel(LONGEVITY_DOC_TYPE.OTHER)}</p>
+                                  <ul className="mt-1 space-y-1 text-sm text-white/80">
+                                    {otherDocs.map((d) => (
+                                      <li key={d.id}>
+                                        {d.filename ?? getPatientDocTypeLabel(d.doc_type)} · {new Date(d.created_at).toLocaleDateString()}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            })()}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </>
                 )}
 
                 <h3 className="mt-6 text-sm font-medium text-white/90">Extracted blood marker drafts</h3>

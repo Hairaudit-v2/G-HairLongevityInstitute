@@ -2,9 +2,56 @@
  * Phase V: Analytics consumption layer — outbox consumer and cohort aggregation.
  * Longevity namespace only. Read-only; HLI remains source of truth.
  * Reuses derivedReportingStates and adherenceStates; no duplicate rule logic.
+ *
+ * Beta instrumentation: lightweight event capture for usage visibility during beta.
+ * Events are stored in hli_longevity_audit_events (same as audit trail). Not full BI.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+/** Canonical beta event names for usage analysis. */
+export const BETA_EVENT = {
+  INTAKE_STARTED: "intake_started",
+  INTAKE_SUBMITTED: "intake_submitted",
+  DOCUMENT_UPLOADED: "document_uploaded",
+  PORTAL_VIEWED: "portal_viewed",
+  SUMMARY_VIEWED: "summary_viewed",
+  CASE_ASSIGNED: "case_assigned",
+  NOTE_ADDED: "note_added",
+  SUMMARY_RELEASED: "summary_released",
+} as const;
+
+export type BetaEventName = (typeof BETA_EVENT)[keyof typeof BETA_EVENT];
+
+export type TrackBetaEventParams = {
+  event: BetaEventName | string;
+  profile_id?: string | null;
+  intake_id?: string | null;
+  /** For clinician events: trichologist_id, document_id, etc. */
+  payload?: Record<string, unknown>;
+  actor_type?: "user" | "system" | "admin" | "trichologist";
+};
+
+/**
+ * Record a beta instrumentation event. Uses existing hli_longevity_audit_events table.
+ * Fire-and-forget; does not throw. Call from API routes or server components.
+ */
+export async function trackLongevityBetaEvent(
+  supabase: SupabaseClient,
+  params: TrackBetaEventParams
+): Promise<void> {
+  try {
+    await supabase.from("hli_longevity_audit_events").insert({
+      profile_id: params.profile_id ?? null,
+      intake_id: params.intake_id ?? null,
+      event_type: params.event,
+      payload: params.payload ?? {},
+      actor_type: params.actor_type ?? "user",
+    });
+  } catch {
+    // Non-blocking; do not fail the request
+  }
+}
 import { LONGEVITY_SIGNAL_KEY } from "./integrationContracts";
 import { computeAdherenceStates } from "./adherenceStates";
 import type { AdherenceContextResult } from "./adherenceContext";

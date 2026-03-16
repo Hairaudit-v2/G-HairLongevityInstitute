@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
 
 export type LongevityDocumentMeta = {
   id: string;
@@ -20,9 +21,6 @@ function formatSize(bytes: number | null): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function formatDocType(docType: string): string {
-  return docType.replace(/_/g, " ");
-}
 
 export function LongevityDocumentsSection({
   documents: initialDocuments,
@@ -96,7 +94,7 @@ export function LongevityDocumentsSection({
                   {doc.filename || "Unnamed file"}
                 </p>
                 <p className="text-xs text-white/50 mt-0.5">
-                  {formatDocType(doc.doc_type)} · {formatSize(doc.size_bytes)} ·{" "}
+                  {getPatientDocTypeLabel(doc.doc_type)} · {formatSize(doc.size_bytes)} ·{" "}
                   {new Date(doc.created_at).toLocaleDateString()}
                 </p>
               </div>

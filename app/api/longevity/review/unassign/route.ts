@@ -62,6 +62,7 @@ export async function POST(req: Request) {
         assigned_trichologist_id: null,
         assigned_at: null,
         review_status: newStatus,
+        status: "submitted",
         updated_at: now,
       })
       .eq("id", intake_id)

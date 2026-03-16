@@ -8,10 +8,8 @@ import {
   buildLongevityStoragePath,
   uploadLongevityFile,
 } from "@/lib/longevity/storage";
-import {
-  createDocumentRecord,
-  auditLongevityEvent,
-} from "@/lib/longevity/documents";
+import { createDocumentRecord } from "@/lib/longevity/documents";
+import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationOutbox";
 import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
 import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
@@ -24,6 +22,7 @@ const ALLOWED_DOC_TYPES: LongevityDocType[] = [
   LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD,
   LONGEVITY_DOC_TYPE.SCALP_PHOTO,
   LONGEVITY_DOC_TYPE.MEDICAL_LETTER,
+  LONGEVITY_DOC_TYPE.PRESCRIPTIONS,
   LONGEVITY_DOC_TYPE.OTHER,
 ];
 
@@ -153,10 +152,10 @@ export async function POST(req: Request) {
         .eq("id", bloodRequestId);
     }
 
-    await auditLongevityEvent(supabase, {
+    await trackLongevityBetaEvent(supabase, {
+      event: BETA_EVENT.DOCUMENT_UPLOADED,
       profile_id: profileId,
       intake_id: intakeId,
-      event_type: bloodRequestId ? "returned_blood_results_uploaded" : "document_uploaded",
       payload: {
         document_id: recordResult.id,
         doc_type: docType,

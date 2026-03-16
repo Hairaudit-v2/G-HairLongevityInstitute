@@ -8,7 +8,7 @@ import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { REVIEW_STATUS, REVIEW_STATUS_IN_QUEUE, REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
-import { auditLongevityEvent } from "@/lib/longevity/documents";
+import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 import { getEligibility } from "@/lib/longevity/bloodRequestEligibility";
 import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
 import { stageLongevityIntegrationArtifacts } from "@/lib/longevity/integrationOutbox";
@@ -16,6 +16,7 @@ import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
 import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
 import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import { stageLongevityRemindersForIntake } from "@/lib/longevity/reminders";
+import { sendLongevitySummaryReleasedEmail } from "@/lib/longevity/notifications/summaryReleasedEmail";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { getLongevityWorkflowSnapshotForIntake } from "@/lib/longevity/workflowSnapshot";
 
@@ -72,6 +73,7 @@ export async function POST(req: Request) {
       patient_visible_released_at: now,
       last_reviewed_at: now,
       review_status: REVIEW_STATUS.REVIEW_COMPLETE,
+      status: "complete",
       updated_at: now,
     };
     if (review_outcome !== undefined) {
@@ -88,11 +90,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
     }
 
-    await auditLongevityEvent(supabase, {
+    const { data: snapshotRow, error: snapshotErr } = await supabase
+      .from("hli_longevity_summary_releases")
+      .insert({
+        intake_id,
+        summary_text_snapshot: patient_visible_summary,
+        released_at: now,
+        released_by_trichologist_id: trichologist.id,
+      })
+      .select("id")
+      .single();
+    if (snapshotErr) {
+      console.warn("[longevity-release] snapshot insert failed", { intake_id, error: snapshotErr.message });
+    }
+
+    await trackLongevityBetaEvent(supabase, {
+      event: BETA_EVENT.SUMMARY_RELEASED,
       profile_id: intake.profile_id,
       intake_id,
-      event_type: "patient_summary_released",
-      payload: { trichologist_id: trichologist.id },
+      payload: {
+        trichologist_id: trichologist.id,
+        ...(snapshotRow?.id ? { release_snapshot_id: snapshotRow.id } : {}),
+      },
       actor_type: "trichologist",
     });
 
@@ -284,6 +303,42 @@ export async function POST(req: Request) {
         });
       } catch {
         // Reminder staging is additive; do not fail release if it fails.
+      }
+
+      try {
+        const { data: profile } = await supabase
+          .from("hli_longevity_profiles")
+          .select("email, full_name")
+          .eq("id", intake.profile_id)
+          .single();
+        if (profile?.email) {
+          const result = await sendLongevitySummaryReleasedEmail({
+            to: profile.email,
+            fullName: profile.full_name ?? undefined,
+            appBaseUrl: process.env.HLI_APP_URL?.trim() || undefined,
+          });
+          if (result.ok) {
+            console.info("[longevity-summary-released] notification sent", {
+              intake_id,
+              profile_id: intake.profile_id,
+              provider: result.provider,
+            });
+          } else {
+            console.warn("[longevity-summary-released] notification failed", {
+              intake_id,
+              profile_id: intake.profile_id,
+              provider: result.provider,
+              error: result.error,
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("[longevity-summary-released] notification error", {
+          intake_id,
+          profile_id: intake.profile_id,
+          error: e instanceof Error ? e.message : String(e),
+        });
+        // Do not fail release; email is best-effort.
       }
     }
 

@@ -65,7 +65,7 @@ export async function getPatientProgressForProfile(
   }
 
   const intakeId = latestIntake.id;
-  const followUpCompleted = latestIntake.status === "submitted";
+  const followUpCompleted = latestIntake.status !== "draft";
   const clinicianSummaryReleased = !!latestIntake.patient_visible_released_at;
 
   const [{ data: docs }, bloodRequest, caseComparison] = await Promise.all([

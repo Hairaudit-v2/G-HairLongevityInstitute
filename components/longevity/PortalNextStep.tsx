@@ -5,18 +5,22 @@ type Intake = { id: string; status: string; created_at: string };
 /**
  * Shows current case status and suggested next step for the portal dashboard.
  * Preserves longitudinal model: does not overwrite; suggests resume (existing draft) or new intake (creates a new row).
- * When hasResultsUploaded, reinforces follow-up reassessment CTA (Phase F).
+ * When hasReleasedSummary, shows clear "Your review is ready" state with CTA to view summary.
+ * When waiting (submitted, no release yet), shows reassuring waiting state.
  */
 export function PortalNextStep({
   intakes,
   hasResultsUploaded = false,
+  hasReleasedSummary = false,
 }: {
   intakes: Intake[];
   hasResultsUploaded?: boolean;
+  /** True when at least one intake has a released patient-visible summary (patient_visible_released_at + summary). */
+  hasReleasedSummary?: boolean;
 }) {
   const latest = intakes[0] ?? null;
   const hasDraft = intakes.some((i) => i.status === "draft");
-  const submittedCount = intakes.filter((i) => i.status === "submitted").length;
+  const nonDraftCount = intakes.filter((i) => i.status !== "draft").length;
 
   if (intakes.length === 0) {
     return (
@@ -64,23 +68,62 @@ export function PortalNextStep({
     );
   }
 
+  if (hasReleasedSummary) {
+    return (
+      <section id="next-step-heading" className="rounded-2xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">
+          Your review is ready
+        </h2>
+        <p className="mt-2 text-white/90">
+          Your clinician has completed your assessment and released a summary with recommendations. Review it below and follow any next steps they have outlined.
+        </p>
+        <Link
+          href="#clinician-summary-heading"
+          className="mt-4 inline-flex rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--bg))]"
+        >
+          View my summary
+        </Link>
+      </section>
+    );
+  }
+
+  if (nonDraftCount > 0 && !hasDraft) {
+    return (
+      <section id="next-step-heading" className="rounded-2xl border border-white/10 bg-white/5 p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">
+          Current status
+        </h2>
+        <p className="mt-2 text-white/90">
+          Your assessment is with our specialist. We will notify you when your summary is ready. You can check back here anytime.
+        </p>
+        <p className="mt-2 text-sm text-white/60">
+          {hasResultsUploaded
+            ? "You can also start a follow-up reassessment when ready—your previous data stays safe."
+            : "You can add more documents from the intake flow or start a follow-up intake if needed."}
+        </p>
+        <Link
+          href="/longevity/start"
+          className="mt-4 inline-flex rounded-2xl border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-6 py-3 text-sm font-semibold text-white hover:bg-[rgb(var(--gold))]/20"
+        >
+          {hasResultsUploaded ? "Start follow-up reassessment" : "Start follow-up intake"}
+      </Link>
+    </section>
+    );
+  }
+
   return (
     <section id="next-step-heading" className="rounded-2xl border border-white/10 bg-white/5 p-6">
       <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">
         Current status
       </h2>
       <p className="mt-2 text-white/90">
-        {hasResultsUploaded
-          ? "Ready for a follow-up reassessment? Start a new intake—your previous data stays safe and is not overwritten."
-          : submittedCount > 0 && !hasDraft
-            ? "Your latest intake has been submitted. You can add more documents to it from the intake flow, or start a follow-up intake when ready (each follow-up is a new, separate intake)."
-            : "View your intakes below."}
+        View your intakes below.
       </p>
       <Link
         href="/longevity/start"
         className="mt-4 inline-flex rounded-2xl border border-[rgb(var(--gold))]/50 bg-[rgb(var(--gold))]/10 px-6 py-3 text-sm font-semibold text-white hover:bg-[rgb(var(--gold))]/20"
       >
-        {hasResultsUploaded ? "Start follow-up reassessment" : "Start follow-up intake"}
+        Start follow-up intake
       </Link>
     </section>
   );

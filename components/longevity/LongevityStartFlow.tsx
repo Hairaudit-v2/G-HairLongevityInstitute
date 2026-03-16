@@ -14,6 +14,7 @@ import type {
   UploadsNextSteps,
   SexAtBirth,
 } from "@/lib/longevity/schema";
+import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
 
 const GOLD = "rgb(198,167,94)";
 const BG = "rgb(15,27,45)";
@@ -619,7 +620,12 @@ export function LongevityStartFlow() {
       });
       const json = await res.json();
       if (!res.ok || !json.ok) {
-        setError(json.error ?? "Failed to create intake.");
+        const msg = json.error ?? "Failed to create intake.";
+        setError(
+          msg === "Longevity API is disabled."
+            ? "Longevity isn’t enabled on this server. If you run this site, set HLI_ENABLE_LONGEVITY_API=1 (and HLI_ENABLE_LONGEVITY=1) in your environment and restart or redeploy."
+            : msg
+        );
         return;
       }
       setIntakeId(json.intakeId);
@@ -1097,7 +1103,7 @@ export function LongevityStartFlow() {
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 7</div>
               <h2 className="mt-2 text-2xl font-semibold">Uploads and next steps</h2>
               <p className="mt-2 text-white/70">
-                Optional: You can upload blood tests or hair photos now, or add them later in the patient portal.
+                All uploads on this step are optional. You can add blood tests, scalp photos, or letters now—or skip and add them later in your secure portal. Your case will be reviewed either way.
               </p>
               <p className="mt-1 text-sm text-white/60">
                 PDF or image, max 10 MB per file. You can select multiple files at once.
@@ -1108,9 +1114,9 @@ export function LongevityStartFlow() {
                 <>
                   <div className="mt-6 space-y-5">
                     <div>
-                      <label className="text-sm font-medium text-white/90">Blood test results (PDF or image)</label>
+                      <label className="text-sm font-medium text-white/90">Blood test results (optional — now or later)</label>
                       <p className="mt-1 text-xs text-white/60">
-                        Common helpful tests include: Ferritin, Iron studies, Thyroid (TSH), Vitamin D, Testosterone.
+                        Helpful if available: Ferritin, iron studies, thyroid (TSH), vitamin D, testosterone. You can upload now or add them later in the portal.
                       </p>
                       <input
                         type="file"
@@ -1119,7 +1125,7 @@ export function LongevityStartFlow() {
                         className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
                         onChange={(e) => {
                           const fileList = e.target.files;
-                          if (fileList?.length) handleDocumentUpload("blood_test_upload", Array.from(fileList));
+                          if (fileList?.length) handleDocumentUpload(LONGEVITY_DOC_TYPE.BLOOD_TEST_UPLOAD, Array.from(fileList));
                           e.target.value = "";
                         }}
                         disabled={uploading}
@@ -1127,9 +1133,9 @@ export function LongevityStartFlow() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-white/90">Scalp photographs (image)</label>
+                      <label className="text-sm font-medium text-white/90">Scalp photographs (optional)</label>
                       <p className="mt-1 text-xs text-white/60">
-                        You may upload hairline, crown, or part-line photos. Photos are optional.
+                        Hairline, crown, or part-line photos can help your review. Optional—add now or later in the portal.
                       </p>
                       <input
                         type="file"
@@ -1138,7 +1144,7 @@ export function LongevityStartFlow() {
                         className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
                         onChange={(e) => {
                           const fileList = e.target.files;
-                          if (fileList?.length) handleDocumentUpload("scalp_photo", Array.from(fileList));
+                          if (fileList?.length) handleDocumentUpload(LONGEVITY_DOC_TYPE.SCALP_PHOTO, Array.from(fileList));
                           e.target.value = "";
                         }}
                         disabled={uploading}
@@ -1146,7 +1152,10 @@ export function LongevityStartFlow() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-white/90">Medical / specialist letters (PDF or image)</label>
+                      <label className="text-sm font-medium text-white/90">Medical reports / specialist letters (optional)</label>
+                      <p className="mt-1 text-xs text-white/60">
+                        Upload now or add later in the portal if you have them.
+                      </p>
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
@@ -1154,11 +1163,49 @@ export function LongevityStartFlow() {
                         className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
                         onChange={(e) => {
                           const fileList = e.target.files;
-                          if (fileList?.length) handleDocumentUpload("medical_letter", Array.from(fileList));
+                          if (fileList?.length) handleDocumentUpload(LONGEVITY_DOC_TYPE.MEDICAL_LETTER, Array.from(fileList));
                           e.target.value = "";
                         }}
                         disabled={uploading}
-                        aria-label="Choose medical letter files"
+                        aria-label="Choose medical report files"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white/90">Prescriptions (optional)</label>
+                      <p className="mt-1 text-xs text-white/60">
+                        Current or past hair-related or relevant prescriptions, if you’d like to share them.
+                      </p>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
+                        multiple
+                        className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
+                        onChange={(e) => {
+                          const fileList = e.target.files;
+                          if (fileList?.length) handleDocumentUpload(LONGEVITY_DOC_TYPE.PRESCRIPTIONS, Array.from(fileList));
+                          e.target.value = "";
+                        }}
+                        disabled={uploading}
+                        aria-label="Choose prescription files"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white/90">Other documents (optional)</label>
+                      <p className="mt-1 text-xs text-white/60">
+                        Any other documents you’d like to include. Choose file(s), then we’ll use “Other” as the category.
+                      </p>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/*"
+                        multiple
+                        className="mt-3 block w-full min-h-[44px] min-w-[44px] cursor-pointer text-sm text-white/80 file:mr-3 file:rounded-xl file:border-0 file:bg-[rgb(198,167,94)]/20 file:px-4 file:py-3 file:text-sm file:font-medium file:text-white file:cursor-pointer"
+                        onChange={(e) => {
+                          const fileList = e.target.files;
+                          if (fileList?.length) handleDocumentUpload(LONGEVITY_DOC_TYPE.OTHER, Array.from(fileList));
+                          e.target.value = "";
+                        }}
+                        disabled={uploading}
+                        aria-label="Choose other document files"
                       />
                     </div>
                   </div>
@@ -1179,7 +1226,7 @@ export function LongevityStartFlow() {
                       <ul className="mt-2 space-y-1 text-sm text-white/60">
                         {stepDocuments.map((d) => (
                           <li key={d.id}>
-                            {d.filename ?? "File"} ({d.doc_type.replace(/_/g, " ")})
+                            {d.filename ?? "File"} ({getPatientDocTypeLabel(d.doc_type)})
                             {d.size_bytes != null && ` · ${(d.size_bytes / 1024).toFixed(1)} KB`}
                           </li>
                         ))}
@@ -1214,7 +1261,7 @@ export function LongevityStartFlow() {
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 8</div>
               <h2 className="mt-2 text-2xl font-semibold">Review and submit</h2>
               <p className="mt-2 text-white/70">
-                Confirm your details. You can go back to edit any step before submitting.
+                Confirm your details. You can go back to edit any step before submitting. Submitting without documents is fine—you can add them later in your secure portal.
               </p>
               <dl className="mt-6 space-y-2 text-sm">
                 <div><span className="text-white/60">Name:</span> {(a.firstName || a.lastName) ? [a.firstName, a.lastName].filter(Boolean).join(" ") : "—"}</div>
@@ -1222,7 +1269,7 @@ export function LongevityStartFlow() {
                 <div><span className="text-white/60">Primary concerns:</span> {(mc.primaryConcerns?.length) ? mc.primaryConcerns.join(", ") : "—"}</div>
                 <div><span className="text-white/60">Prior blood tests:</span> {mh.priorBloodTests ?? "—"}</div>
                 <div><span className="text-white/60">Current blood status:</span> {un.currentBloodStatus ?? "—"}</div>
-                <div><span className="text-white/60">Documents:</span> {stepDocuments.length === 0 ? "None uploaded (you can add them later in the portal)" : `${stepDocuments.length} document(s) uploaded`}</div>
+                <div><span className="text-white/60">Documents:</span> {stepDocuments.length === 0 ? "None uploaded yet (optional—add anytime in the portal)" : `${stepDocuments.length} document(s) uploaded`}</div>
               </dl>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("uploadsNextSteps")}>Back</Button>
@@ -1235,19 +1282,28 @@ export function LongevityStartFlow() {
 
           {step === "done" && (
             <Card>
-              <h2 className="text-2xl font-semibold">Your assessment has been received.</h2>
-              <p className="mt-4 text-white/70">
-                A specialist will review your information and prepare your Hair Longevity Summary.
+              <h2 className="text-2xl font-semibold">Your assessment has been received</h2>
+              <p className="mt-3 text-white/80">
+                Thank you for submitting. Your case is now with our team.
               </p>
-              <p className="mt-2 text-white/70">
-                You will receive an email when your summary is ready.
+              <h3 className="mt-6 text-base font-semibold text-white/90">What happens next</h3>
+              <ul className="mt-2 space-y-2 text-sm text-white/80">
+                <li>Your case has been submitted and will be reviewed by a trichologist.</li>
+                <li>They will prepare your Hair Longevity Summary and recommendations.</li>
+                <li>You can check progress anytime in your secure portal.</li>
+                <li>You may upload more documents later in the portal if needed.</li>
+              </ul>
+              <p className="mt-4 text-sm text-white/70">
+                You will receive an email when your summary is ready. Your secure portal is the main place to view your review and documents.
               </p>
-              <Link
-                href="/portal/login?redirect=/portal/dashboard"
-                className="mt-6 inline-block"
-              >
-                <Button>Sign in to portal</Button>
-              </Link>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/portal/login?redirect=/portal/dashboard" className="inline-block">
+                  <Button>Open secure portal</Button>
+                </Link>
+                <p className="self-center text-sm text-white/60">
+                  You can return to the portal anytime to check status or add documents.
+                </p>
+              </div>
             </Card>
           )}
         </div>

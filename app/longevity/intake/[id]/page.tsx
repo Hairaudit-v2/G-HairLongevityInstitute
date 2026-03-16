@@ -62,8 +62,8 @@ export default async function LongevityIntakeResumePage({
             Start a new assessment
           </Link>
           <span className="mx-2 text-white/40">·</span>
-          <Link href="/portal/dashboard" className="text-sm text-white/60 hover:text-white/90">
-            Go to dashboard
+          <Link href="/portal/login?redirect=/portal/dashboard" className="text-sm text-white/60 hover:text-white/90">
+            Open secure portal
           </Link>
         </div>
       </main>

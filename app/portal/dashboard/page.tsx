@@ -14,9 +14,12 @@ import { generateCarePlan } from "@/lib/longevity/carePlan";
 import { generateFollowUpCadence } from "@/lib/longevity/followUpCadence";
 import { getBloodRequestByIntake } from "@/lib/longevity/bloodRequests";
 import { getPatientProgressForProfile } from "@/lib/longevity/patientProgress";
+import { getPatientIntakeStatusLabel } from "@/lib/longevity/patientIntakeStatus";
+import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 import { LONGEVITY_DOC_TYPE } from "@/lib/longevity/documentTypes";
 import { BloodRequestLetterCard } from "@/components/longevity/BloodRequestLetterCard";
 import { CareJourneyTimeline } from "@/components/longevity/CareJourneyTimeline";
+import { PatientProgressTimeline } from "@/components/longevity/PatientProgressTimeline";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
@@ -91,6 +94,20 @@ export default async function PortalDashboardPage({
     (i) => i.patient_visible_released_at != null && (i.patient_visible_summary ?? "").trim() !== ""
   );
   const latestSubmittedIntake = list.find((intake) => intake.status !== "draft") ?? null;
+
+  await trackLongevityBetaEvent(supabase, {
+    event: BETA_EVENT.PORTAL_VIEWED,
+    profile_id: profileId,
+    actor_type: "user",
+  });
+  if (intakesWithReleasedSummary.length > 0) {
+    await trackLongevityBetaEvent(supabase, {
+      event: BETA_EVENT.SUMMARY_VIEWED,
+      profile_id: profileId,
+      intake_id: intakesWithReleasedSummary[0].id,
+      actor_type: "user",
+    });
+  }
   const latestIntakeId = latestSubmittedIntake?.id ?? null;
   let patientSafeInsights: string[] = [];
   let caseComparison = null;
@@ -180,7 +197,22 @@ export default async function PortalDashboardPage({
       </div>
 
       <div className="mt-8" aria-labelledby="next-step-heading">
-        <PortalNextStep intakes={list} hasResultsUploaded={hasResultsUploaded} />
+        <PortalNextStep
+          intakes={list}
+          hasResultsUploaded={hasResultsUploaded}
+          hasReleasedSummary={intakesWithReleasedSummary.length > 0}
+        />
+      </div>
+
+      <div className="mt-6">
+        <PatientProgressTimeline
+          submitted={!!latestSubmittedIntake}
+          released={!!latestSubmittedIntake?.patient_visible_released_at}
+          summaryAvailable={
+            !!latestSubmittedIntake?.patient_visible_released_at &&
+            ((latestSubmittedIntake?.patient_visible_summary ?? "").trim() !== "")
+          }
+        />
       </div>
 
       {followUpCadence && (
@@ -424,12 +456,14 @@ export default async function PortalDashboardPage({
                         className={
                           intake.status === "draft"
                             ? "text-amber-300"
-                            : intake.status === "submitted"
+                            : intake.status === "submitted" || intake.status === "in_review"
                               ? "text-emerald-300"
-                              : "text-white/80"
+                              : intake.status === "complete"
+                                ? "text-[rgb(var(--gold))]"
+                                : "text-white/80"
                         }
                       >
-                        {intake.status}
+                        {getPatientIntakeStatusLabel(intake.status)}
                       </span>
                     </p>
                   </div>
@@ -444,7 +478,7 @@ export default async function PortalDashboardPage({
                     )}
                     {intake.status !== "draft" && (
                       <span className="rounded-2xl border border-white/10 px-4 py-2 text-sm text-white/70">
-                        {intake.status}
+                        {getPatientIntakeStatusLabel(intake.status)}
                       </span>
                     )}
                   </div>

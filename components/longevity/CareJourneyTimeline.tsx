@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getPatientIntakeStatusLabel } from "@/lib/longevity/patientIntakeStatus";
 
 type IntakeForTimeline = {
   id: string;
@@ -112,7 +113,7 @@ export function CareJourneyTimeline({
               <p className="mt-1 font-medium text-white/95">
                 {evt.label}
                 {evt.type === "intake" && (
-                  <span className="ml-2 text-xs font-normal text-white/60">({evt.status})</span>
+                  <span className="ml-2 text-xs font-normal text-white/60">({getPatientIntakeStatusLabel(evt.status)})</span>
                 )}
               </p>
               {evt.type === "intake" && evt.status === "draft" && (

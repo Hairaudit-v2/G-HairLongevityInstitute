@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
+import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { computeTriage } from "@/lib/longevity/triage";
 import { ruleBasedEligible, recommendedTestsFromFlags, reasonFromFlags } from "@/lib/longevity/bloodRequestEligibility";
 import { ensureBloodRequest } from "@/lib/longevity/bloodRequests";
@@ -10,6 +11,7 @@ import { LONGEVITY_EVENT_TYPE } from "@/lib/longevity/integrationContracts";
 import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
 import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
+import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -58,11 +60,10 @@ export async function POST(
       return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
     }
 
-    await supabase.from("hli_longevity_audit_events").insert({
-      intake_id: id,
+    await trackLongevityBetaEvent(supabase, {
+      event: BETA_EVENT.INTAKE_SUBMITTED,
       profile_id: profileId,
-      event_type: "intake_submitted",
-      payload: {},
+      intake_id: id,
       actor_type: "user",
     });
 
@@ -87,6 +88,9 @@ export async function POST(
         triageFlags = triage.flags;
         reviewStatus = triage.review_status;
         reviewPriority = triage.review_priority;
+        const inQueue = REVIEW_STATUS_IN_QUEUE.includes(
+          triage.review_status as (typeof REVIEW_STATUS_IN_QUEUE)[number]
+        );
         await supabase
           .from("hli_longevity_intakes")
           .update({
@@ -95,6 +99,7 @@ export async function POST(
             review_decision_source: triage.review_decision_source,
             triaged_at: triage.triaged_at,
             triage_version: triage.triage_version,
+            ...(inQueue ? { status: "in_review" as const } : {}),
             updated_at: new Date().toISOString(),
           })
           .eq("id", id);

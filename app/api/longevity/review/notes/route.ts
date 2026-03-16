@@ -8,7 +8,7 @@ import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
-import { auditLongevityEvent } from "@/lib/longevity/documents";
+import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -61,10 +61,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: insertErr.message }, { status: 500 });
     }
 
-    await auditLongevityEvent(supabase, {
+    await trackLongevityBetaEvent(supabase, {
+      event: BETA_EVENT.NOTE_ADDED,
       profile_id: intake.profile_id,
       intake_id,
-      event_type: "review_note_added",
       payload: { trichologist_id: trichologist.id, note_id: note.id },
       actor_type: "trichologist",
     });

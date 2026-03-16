@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { normalizeEmail } from "@/lib/longevity/email";
 import { getLongevitySessionFromRequest, setLongevitySession } from "@/lib/longevityAuth";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
+import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +126,13 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    await trackLongevityBetaEvent(supabase, {
+      event: BETA_EVENT.INTAKE_STARTED,
+      profile_id: profileId,
+      intake_id: intake.id,
+      actor_type: "user",
+    });
 
     return NextResponse.json({
       ok: true,

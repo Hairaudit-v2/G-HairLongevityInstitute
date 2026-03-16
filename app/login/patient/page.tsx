@@ -7,7 +7,7 @@ import { isLongevityEnabled } from "@/lib/features";
 
 export const metadata: Metadata = {
   title: "Patient Login | Hair Longevity Institute™",
-  description: "Sign in to your patient dashboard. View your care journey, uploads, progress, summary, and next steps.",
+  description: "Sign in to your secure portal. View your care journey, uploads, progress, summary, and next steps.",
 };
 
 export default function PatientLoginPage() {
@@ -28,7 +28,7 @@ export default function PatientLoginPage() {
               Patient portal
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              Access your dashboard
+              Access your secure portal
             </h1>
             <p className="mt-3 text-base leading-relaxed text-white/75">
               Sign in to view your care journey, upload blood tests or scalp photos,
@@ -38,7 +38,7 @@ export default function PatientLoginPage() {
             <ul className="mt-6 space-y-2 text-sm text-white/80">
               <li className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />
-                View your dashboard and care timeline
+                View your secure portal, care timeline and summaries
               </li>
               <li className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />

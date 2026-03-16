@@ -1,20 +1,40 @@
 /**
  * Internal API: list intakes in the Trichologist review queue (Phase B).
- * Requires Trichologist auth. Filter by review_status; includes priority and key derived flags.
- * Longevity-scoped only. No UI in Phase B; Phase C dashboard will consume this.
+ * Requires Trichologist auth. Filter by review_status, priority, assigned_to_me; paginated.
+ * Default ordering: highest priority first, then oldest (created_at asc). Longevity-scoped only.
  */
 
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
-import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
+import { REVIEW_STATUS_IN_QUEUE, REVIEW_STATUS, REVIEW_PRIORITY } from "@/lib/longevity/reviewConstants";
 import { computeTriage } from "@/lib/longevity/triage";
 import { computeReviewComplexity } from "@/lib/longevity/reviewComplexity";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import type { ReviewComplexityResult } from "@/lib/longevity/reviewComplexity";
 
 export const dynamic = "force-dynamic";
+
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 100;
+const MAX_FETCH = 2000;
+
+/** Operational order: urgent first, then high, normal, low; then oldest first. */
+function priorityRank(p: string | null): number {
+  switch (p) {
+    case REVIEW_PRIORITY.URGENT:
+      return 1;
+    case REVIEW_PRIORITY.HIGH:
+      return 2;
+    case REVIEW_PRIORITY.NORMAL:
+      return 3;
+    case REVIEW_PRIORITY.LOW:
+      return 4;
+    default:
+      return 3;
+  }
+}
 
 export type ReviewQueueItem = {
   id: string;
@@ -39,8 +59,8 @@ export type ReviewQueueItem = {
 };
 
 /**
- * GET ?review_status=human_review_required|under_trichologist_review|awaiting_patient_documents
- * Optional filter; if omitted, returns all intakes in queue statuses (REVIEW_STATUS_IN_QUEUE).
+ * GET ?review_status=...&priority=...&assigned_to_me=1&limit=50&offset=0
+ * Order: highest priority first, then oldest (created_at). Paginated.
  */
 export async function GET(req: Request) {
   if (!isLongevityApiEnabled()) {
@@ -54,25 +74,60 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const filterStatus = searchParams.get("review_status");
-    const statusList =
+    const includeReleased = searchParams.get("include_released") === "1" || searchParams.get("include_released") === "true";
+    const baseStatusList =
       filterStatus && REVIEW_STATUS_IN_QUEUE.includes(filterStatus as (typeof REVIEW_STATUS_IN_QUEUE)[number])
         ? [filterStatus]
         : REVIEW_STATUS_IN_QUEUE;
+    const statusList =
+      includeReleased && !baseStatusList.includes(REVIEW_STATUS.REVIEW_COMPLETE)
+        ? [...baseStatusList, REVIEW_STATUS.REVIEW_COMPLETE]
+        : baseStatusList;
+
+    const priorityFilter = searchParams.get("priority");
+    const validPriorities = [REVIEW_PRIORITY.URGENT, REVIEW_PRIORITY.HIGH, REVIEW_PRIORITY.NORMAL, REVIEW_PRIORITY.LOW];
+    const priority = validPriorities.includes(priorityFilter as (typeof validPriorities)[number]) ? priorityFilter : null;
+
+    const assignedToMe = searchParams.get("assigned_to_me") === "1" || searchParams.get("assigned_to_me") === "true";
+    const limit = Math.min(
+      Math.max(1, parseInt(searchParams.get("limit") ?? String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE),
+      MAX_PAGE_SIZE
+    );
+    const offset = Math.max(0, parseInt(searchParams.get("offset") ?? "0", 10) || 0);
 
     const supabase = supabaseAdmin();
-    const { data: intakes, error: intakesErr } = await supabase
+    let query = supabase
       .from("hli_longevity_intakes")
       .select("id, review_status, review_priority, created_at, assigned_trichologist_id, triaged_at, triage_version")
       .in("review_status", statusList)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(MAX_FETCH);
+
+    if (priority) {
+      query = query.eq("review_priority", priority);
+    }
+    if (assignedToMe) {
+      query = query.eq("assigned_trichologist_id", trichologist.id);
+    }
+
+    const { data: intakes, error: intakesErr } = await query;
     if (intakesErr) {
       return NextResponse.json({ ok: false, error: intakesErr.message }, { status: 500 });
     }
     if (!intakes?.length) {
-      return NextResponse.json({ ok: true, items: [] });
+      return NextResponse.json({ ok: true, items: [], hasMore: false });
     }
 
-    const intakeIds = intakes.map((i) => i.id);
+    const sorted = [...intakes].sort((a, b) => {
+      const ra = priorityRank(a.review_priority ?? null);
+      const rb = priorityRank(b.review_priority ?? null);
+      if (ra !== rb) return ra - rb;
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
+    const page = sorted.slice(offset, offset + limit);
+    const hasMore = offset + page.length < sorted.length;
+
+    const intakeIds = page.map((i) => i.id);
     const { data: questionnaires } = await supabase
       .from("hli_longevity_questionnaires")
       .select("intake_id, responses")
@@ -85,7 +140,7 @@ export async function GET(req: Request) {
       }
     }
 
-    const items: ReviewQueueItem[] = intakes.map((intake) => {
+    const items: ReviewQueueItem[] = page.map((intake) => {
       const responses = latestByIntake.get(intake.id) as LongevityQuestionnaireResponses | undefined;
       const triage = responses && typeof responses === "object" ? computeTriage(responses) : null;
       const flags = triage?.flags ?? {
@@ -117,7 +172,7 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json({ ok: true, items });
+    return NextResponse.json({ ok: true, items, hasMore });
   } catch (e: unknown) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Unexpected error." },

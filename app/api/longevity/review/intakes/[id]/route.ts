@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
-import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
+import { REVIEW_STATUS, REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { computeTriage } from "@/lib/longevity/triage";
@@ -52,17 +52,25 @@ export async function GET(
     const supabase = supabaseAdmin();
     const { data: intake, error: intakeErr } = await supabase
       .from("hli_longevity_intakes")
-      .select("id, profile_id, status, review_status, review_priority, created_at, updated_at, last_reviewed_at, patient_visible_released_at, assigned_trichologist_id, patient_visible_summary, review_outcome")
+      .select("id, profile_id, status, review_status, review_priority, created_at, updated_at, last_reviewed_at, patient_visible_released_at, assigned_trichologist_id, assigned_at, patient_visible_summary, review_outcome")
       .eq("id", id)
       .single();
     if (intakeErr || !intake) {
       return NextResponse.json({ ok: false, error: "Intake not found." }, { status: 404 });
     }
-    if (!REVIEW_STATUS_IN_QUEUE.includes(intake.review_status as (typeof REVIEW_STATUS_IN_QUEUE)[number])) {
-      return NextResponse.json({ ok: false, error: "Intake is not in the review queue." }, { status: 403 });
+    const inQueue = REVIEW_STATUS_IN_QUEUE.includes(intake.review_status as (typeof REVIEW_STATUS_IN_QUEUE)[number]);
+    const isReleased = intake.review_status === REVIEW_STATUS.REVIEW_COMPLETE;
+    if (!inQueue && !isReleased) {
+      return NextResponse.json({ ok: false, error: "Intake is not in the review queue or released." }, { status: 403 });
     }
 
-    const [{ data: questionnaire }, { data: documents }, { data: notes }] = await Promise.all([
+    const [
+      { data: questionnaire },
+      { data: documents },
+      { data: notes },
+      { data: releaseRows },
+      { data: reminderRows },
+    ] = await Promise.all([
       supabase
         .from("hli_longevity_questionnaires")
         .select("schema_version, responses, updated_at")
@@ -80,7 +88,25 @@ export async function GET(
         .select("id, body, created_at")
         .eq("intake_id", id)
         .order("created_at", { ascending: true }),
+      supabase
+        .from("hli_longevity_summary_releases")
+        .select("id, summary_text_snapshot, released_at, released_by_trichologist_id")
+        .eq("intake_id", id)
+        .order("released_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("hli_longevity_reminders")
+        .select("sent_at, reminder_type")
+        .eq("intake_id", id)
+        .eq("status", "sent")
+        .not("sent_at", "is", null)
+        .order("sent_at", { ascending: true }),
     ]);
+    const latestRelease = (releaseRows ?? [])[0] ?? null;
+    const reminderSents = (reminderRows ?? []).map((r) => ({
+      sent_at: r.sent_at as string,
+      reminder_type: (r.reminder_type as string) ?? "email",
+    }));
 
     const rawResponses = (questionnaire?.responses ?? {}) as Record<string, unknown>;
     const responses: LongevityQuestionnaireResponses & { schemaVersion?: string } = {
@@ -288,6 +314,7 @@ export async function GET(
         last_reviewed_at: intake.last_reviewed_at ?? null,
         patient_visible_released_at: intake.patient_visible_released_at ?? null,
         assigned_trichologist_id: intake.assigned_trichologist_id,
+        assigned_at: (intake as { assigned_at?: string | null }).assigned_at ?? null,
         patient_visible_summary: intake.patient_visible_summary,
         review_outcome: intake.review_outcome,
       },
@@ -308,6 +335,15 @@ export async function GET(
         body: n.body,
         created_at: n.created_at,
       })),
+      released_summary_snapshot: latestRelease
+        ? {
+            id: latestRelease.id,
+            summary_text: latestRelease.summary_text_snapshot,
+            released_at: latestRelease.released_at,
+            released_by_trichologist_id: latestRelease.released_by_trichologist_id ?? null,
+          }
+        : null,
+      reminder_sents: reminderSents,
     });
   } catch (e: unknown) {
     return NextResponse.json(
