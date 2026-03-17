@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 /**
  * Results Preview — dashboard-style preview of analysis output.
  * Static/mock data by default; pass `data` prop to show real data when wired up.
@@ -126,12 +128,13 @@ export function ResultsPreviewCard({ data, className = "" }: ResultsPreviewCardP
     >
       <div className="border-b border-[rgb(var(--border-soft))] bg-subtle/50 px-5 py-4 sm:px-6 sm:py-4">
         <div className="flex items-center gap-3">
-          <img
+          <Image
             src="/brand/hli-mark.png"
-            alt=""
+            alt="Hair Longevity Institute"
             width={40}
             height={40}
             className="h-12 w-12 object-contain opacity-90"
+            sizes="3rem"
           />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">

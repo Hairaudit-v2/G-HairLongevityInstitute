@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
@@ -8,6 +9,12 @@ import {
   SecondaryButton,
   UtilityLink,
 } from "@/components/public/PublicCTA";
+
+export const metadata: Metadata = {
+  title: "Hair Longevity | Your Care Journey | Hair Longevity Institute™",
+  description:
+    "Structured patient platform: guided assessment, secure uploads, specialist review, and your summary — with continuity built in so you can return for follow-up anytime.",
+};
 
 const PATHWAY_STEPS = [
   "Assessment",

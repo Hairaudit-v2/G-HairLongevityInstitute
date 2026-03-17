@@ -1,4 +1,5 @@
 // app/page.tsx — Patient-first, light homepage (audited: redundant content relocated to /science, /how-it-works, /for-professionals)
+import type { Metadata } from "next";
 import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
@@ -7,6 +8,12 @@ import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHairIntelligenceSection";
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
 import { ResultsPreviewCard } from "@/components/public/ResultsPreviewCard";
+
+export const metadata: Metadata = {
+  title: "Hair Longevity Institute™ | Biology First. Hair for Life.",
+  description:
+    "Personalised hair loss analysis backed by biology, not guesswork. Understand your pattern, hormones, and options. No referral required — typically 48 hours to your plan.",
+};
 
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
 

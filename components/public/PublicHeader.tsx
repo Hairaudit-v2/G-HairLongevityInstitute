@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 const PRIMARY_CTA_HREF = "/start";
@@ -68,13 +69,14 @@ export default function PublicHeader({
             className={`flex shrink-0 items-center py-1 pr-2 rounded-lg sm:pr-3 md:py-1.5 md:pr-4 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] ${isLight ? "focus:ring-offset-2 focus:ring-offset-white" : "focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg))]"}`}
             aria-label="Hair Longevity Institute — Home"
           >
-            <img
+            <Image
               src="/brand/hli-logo.png"
-              alt=""
+              alt="Hair Longevity Institute"
               width={480}
               height={96}
               className="h-[4.2rem] w-auto object-contain object-left sm:h-[5.1rem] md:h-[6.3rem]"
-              style={{ imageRendering: "auto" }}
+              priority
+              sizes="(max-width: 640px) 4.2rem, (max-width: 768px) 5.1rem, 6.3rem"
             />
           </Link>
 
