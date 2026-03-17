@@ -29,7 +29,7 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
               alt=""
               width={64}
               height={64}
-              className="h-14 w-14 shrink-0 object-contain opacity-95 sm:h-16 sm:w-16"
+              className="h-[4.2rem] w-[4.2rem] shrink-0 object-contain opacity-95 sm:h-[4.8rem] sm:w-[4.8rem]"
               style={{ imageRendering: "auto" }}
             />
             <span className={copyrightClass}>

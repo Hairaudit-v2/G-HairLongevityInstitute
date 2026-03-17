@@ -131,7 +131,7 @@ export function ResultsPreviewCard({ data, className = "" }: ResultsPreviewCardP
             alt=""
             width={40}
             height={40}
-            className="h-10 w-10 object-contain opacity-90"
+            className="h-12 w-12 object-contain opacity-90"
           />
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">

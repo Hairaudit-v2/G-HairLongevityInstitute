@@ -73,7 +73,7 @@ export default function PublicHeader({
               alt=""
               width={480}
               height={96}
-              className="h-[3.5rem] w-auto object-contain object-left sm:h-[4.25rem] md:h-[5.25rem]"
+              className="h-[4.2rem] w-auto object-contain object-left sm:h-[5.1rem] md:h-[6.3rem]"
               style={{ imageRendering: "auto" }}
             />
           </Link>
