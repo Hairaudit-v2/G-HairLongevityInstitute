@@ -19,7 +19,7 @@ export default function TrichologistLoginPage() {
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}
-        ctaLabel="Start assessment"
+        ctaLabel="Start My Hair Analysis"
       />
       <section className="py-14 md:py-20">
         <Container>

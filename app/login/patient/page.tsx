@@ -19,7 +19,7 @@ export default function PatientLoginPage() {
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}
-        ctaLabel="Start assessment"
+        ctaLabel="Start My Hair Analysis"
       />
       <section className="py-14 md:py-20">
         <Container>
@@ -70,7 +70,7 @@ export default function PatientLoginPage() {
             <p className="mt-6 text-center text-sm text-white/60">
               New here?{" "}
               <Link href={startHref} className="font-medium text-[rgb(var(--gold))] hover:underline">
-                Start your assessment
+                Start My Hair Analysis
               </Link>
             </p>
             <p className="mt-4 text-center">

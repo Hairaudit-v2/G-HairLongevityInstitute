@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, minHeight: "100vh", background: "#0F1B2D", color: "#D9D9D6" }}>
+      <body style={{ margin: 0 }}>
         <HairEcosystemNav currentSite="hli" currentSiteInternalHref="/" />
         {children}
         <Analytics />

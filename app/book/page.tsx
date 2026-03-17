@@ -17,7 +17,7 @@ export default function BookPage() {
 
   return (
     <main className="min-h-screen">
-      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" />
 
       <section className="py-14 md:py-16">
         <Container>
@@ -98,7 +98,7 @@ export default function BookPage() {
           </section>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <PrimaryButton href={startHref}>Start with diagnostic review first</PrimaryButton>
+            <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
             <Link
               href="/"
               className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/10"

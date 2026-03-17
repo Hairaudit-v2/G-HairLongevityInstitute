@@ -1,23 +1,56 @@
-/* app/globals.css */
+/* app/globals.css — Medical-grade design system */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg: 15 27 45;        /* #0F1B2D */
-  --panel: 28 42 58;     /* #1C2A3A */
-  --gold: 198 167 94;    /* #C6A75E */
-  --platinum: 217 217 214; /* #D9D9D6 */
-  --sage: 79 107 99;     /* #4F6B63 */
-  /* Section rhythm */
+  /* Backgrounds */
+  --bg-page: 247 247 245;       /* off-white #F7F7F5 */
+  --bg-card: 255 255 255;      /* white */
+  --bg-subtle: 242 242 240;    /* light grey for sections */
+  
+  /* Accent: premium gold */
+  --gold: 198 167 94;          /* #C6A75E */
+  --gold-dark: 166 139 75;     /* #A68B4B */
+  
+  /* Secondary: medical trust (muted blue-green / sage) */
+  --medical: 91 122 116;       /* #5B7A74 */
+  --medical-muted: 115 140 135; /* #738C87 */
+  
+  /* Legacy dark (for pages that still use dark theme) */
+  --bg-dark: 15 27 45;
+  --panel-dark: 28 42 58;
+  --platinum: 217 217 214;
+  
+  /* Text */
+  --text-primary: 28 28 27;    /* #1C1C1B */
+  --text-secondary: 82 82 80;  /* #525250 */
+  --text-muted: 115 115 111;   /* #73736F */
+  
+  /* Borders & surfaces */
+  --border-soft: 232 231 228; /* #E8E7E4 */
+  --border-subtle: 242 242 240;
+  
+  /* Shadows (subtle, medical) */
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 0 rgba(0, 0, 0, 0.02);
+  
+  /* Radius: calm, not excessive */
+  --radius-sm: 0.5rem;   /* 8px */
+  --radius-md: 0.75rem;  /* 12px */
+  --radius-lg: 1rem;     /* 16px */
+  
+  /* Section rhythm — consistent spacing */
   --section-py: 4rem;
   --section-py-lg: 5rem;
+  --content-gap: 1.5rem;
+  --line-height-relaxed: 1.65;
 }
 
 @media (min-width: 768px) {
   :root {
     --section-py: 5rem;
-    --section-py-lg: 6.25rem;
+    --section-py-lg: 6rem;
   }
 }
 
@@ -25,17 +58,29 @@ html {
   scroll-behavior: smooth;
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 body {
-  background: rgb(var(--bg));
-  color: rgb(var(--platinum));
+  background: rgb(var(--bg-page));
+  color: rgb(var(--text-primary));
   font-feature-settings: "kern" 1, "liga" 1;
+  line-height: var(--line-height-relaxed);
 }
 
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography: large readable headings, relaxed body */
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.prose-relaxed {
+  line-height: var(--line-height-relaxed);
 }

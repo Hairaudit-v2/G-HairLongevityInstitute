@@ -20,7 +20,7 @@ export default function AboutPage() {
 
   return (
     <main className="min-h-screen">
-      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" />
 
       {/* Hero */}
       <section className="relative overflow-hidden py-14 md:py-24">
@@ -374,7 +374,7 @@ export default function AboutPage() {
               Take the next step
             </h2>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <PrimaryButton href={startHref}>Start your assessment</PrimaryButton>
+              <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
               <SecondaryButton href="/book">Book specialist consultation</SecondaryButton>
             </div>
           </div>

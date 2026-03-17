@@ -98,7 +98,7 @@ export function HairIntelligenceEcosystemIntro({
 
         {/* CTAs below diagram on mobile; below content on desktop when side-by-side */}
         <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-5">
-          <PrimaryButton href={startHref}>Start Your Assessment</PrimaryButton>
+          <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
           <SecondaryButton
             href={exploreHref}
             className="border-[#2C2A26]/20 bg-white/90 text-[#2C2A26] hover:bg-white focus:ring-[#2C2A26]/30 focus:ring-offset-[#F9F9F7]"

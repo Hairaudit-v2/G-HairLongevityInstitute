@@ -17,7 +17,7 @@ export default function MembershipPage() {
 
   return (
     <main className="min-h-screen">
-      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" />
 
       <section className="py-14 md:py-16">
         <Container>
@@ -46,7 +46,7 @@ export default function MembershipPage() {
               We recommend starting with a full assessment so we have baseline data to optimise from.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <PrimaryButton href={startHref}>Start with diagnostic review</PrimaryButton>
+              <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
               <SecondaryButton href="/book">Book specialist consultation</SecondaryButton>
             </div>
           </div>

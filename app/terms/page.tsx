@@ -16,7 +16,7 @@ export default function TermsPage() {
 
   return (
     <main className="min-h-screen">
-      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start assessment" />
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" />
 
       <section className="py-12">
         <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">

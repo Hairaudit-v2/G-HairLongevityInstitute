@@ -40,11 +40,11 @@ export function HairEcosystemNav({
 }: HairEcosystemNavProps) {
   return (
     <nav
-      className={`border-b border-white/[0.06] bg-black/20 backdrop-blur-sm ${className}`}
+      className={`border-b border-[rgb(var(--border-soft))] bg-card/80 backdrop-blur-sm ${className}`}
       aria-label="Hair Intelligence Ecosystem"
     >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-3">
-        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.18em] text-white/45 sm:text-xs">
+        <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.18em] text-[rgb(var(--text-muted))] sm:text-xs">
           Part of the Hair Intelligence Ecosystem
         </span>
         <div className="flex min-w-0 items-center gap-1 sm:gap-2">
@@ -57,8 +57,8 @@ export function HairEcosystemNav({
                 const linkClass =
                   "whitespace-nowrap rounded-md px-2.5 py-1.5 text-[11px] font-medium transition sm:px-3 sm:py-2 sm:text-xs " +
                   (isCurrent
-                    ? "text-white/95 underline decoration-[rgb(var(--gold))]/40 underline-offset-2 decoration-2"
-                    : "text-white/55 hover:text-white/80");
+                    ? "text-[rgb(var(--text-primary))] underline decoration-[rgb(var(--gold))]/50 underline-offset-2 decoration-2"
+                    : "text-[rgb(var(--text-muted))] hover:text-[rgb(var(--medical))]");
 
                 if (useInternalHref) {
                   return (

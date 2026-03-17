@@ -25,7 +25,7 @@ export default function LongevityPage() {
         <PublicHeader
           showLongevityLinks={false}
           ctaHref="/start"
-          ctaLabel="Start assessment"
+          ctaLabel="Start My Hair Analysis"
         />
         <div className="mx-auto max-w-lg px-6 py-16 text-center">
           <h1 className="text-xl font-semibold text-white">
@@ -50,7 +50,7 @@ export default function LongevityPage() {
       <PublicHeader
         showLongevityLinks
         ctaHref="/longevity/start"
-        ctaLabel="Start assessment"
+        ctaLabel="Start My Hair Analysis"
       />
 
       {/* Hero — product front door */}
@@ -84,7 +84,7 @@ export default function LongevityPage() {
               </p>
               <div className="mt-10 flex flex-col items-center gap-4 sm:mt-12 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
                 <PrimaryButton href="/longevity/start">
-                  Start assessment
+                  Start My Hair Analysis
                 </PrimaryButton>
                 <SecondaryButton href="/#how-it-works">
                   See how it works
@@ -215,7 +215,7 @@ export default function LongevityPage() {
               </p>
               <div className="mt-6">
                 <PrimaryButton href="/longevity/start">
-                  Start assessment
+                  Start My Hair Analysis
                 </PrimaryButton>
               </div>
             </div>
