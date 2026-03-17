@@ -83,7 +83,7 @@ const CARDS: Array<{
       "AI-assisted clinical interpretation",
     ],
     buttonLabel: "Explore Follicle Intelligence",
-    href: "https://follicleintelligence.com",
+    href: "https://follicleintelligence.ai",
   },
 ] as const;
 

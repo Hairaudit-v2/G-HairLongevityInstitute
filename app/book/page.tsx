@@ -4,6 +4,7 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
+import { EcosystemCrossLinks } from "@/components/public/EcosystemCrossLinks";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 
 export const metadata: Metadata = {
@@ -72,30 +73,13 @@ export default function BookPage() {
             </div>
           </div>
 
-          {/* Considering surgery — bridge to HairAudit */}
-          <section className="mt-14 rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-white">
-              Considering hair transplant surgery?
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/75">
-              HLI helps you understand why hair loss is happening and how to optimise your biology.
-              When surgery becomes relevant, HairAudit helps you evaluate surgeons, outcomes, and
-              surgical standards with independent analysis and transparency.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-white/65">
-              HairAudit provides structured evaluation of hair transplant procedures. If you are
-              exploring or have had a transplant, you can use HairAudit to understand procedural
-              outcomes and reporting standards.
-            </p>
-            <a
-              href="https://hairaudit.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/10"
-            >
-              Explore HairAudit
-            </a>
-          </section>
+          <EcosystemCrossLinks
+            currentSite="hli"
+            showSurgeryLink={true}
+            theme="dark"
+            heading="Considering hair transplant surgery?"
+            className="mt-14"
+          />
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
             <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>

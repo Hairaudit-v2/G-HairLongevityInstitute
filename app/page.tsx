@@ -4,8 +4,9 @@ import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
-import { GlobalHairIntelligenceNetwork } from "@/components/GlobalHairIntelligenceNetwork";
+import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHairIntelligenceSection";
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
+import { ResultsPreviewCard } from "@/components/public/ResultsPreviewCard";
 
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
 
@@ -115,28 +116,16 @@ function HowItWorksSection() {
   );
 }
 
-// —— 3. GLOBAL HAIR INTELLIGENCE NETWORK ——
-function GlobalHairIntelligenceSection() {
+// —— 3. GLOBAL HAIR INTELLIGENCE NETWORK (shared section, one per page) ——
+function GlobalHairIntelligenceNetworkBlock() {
   return (
-    <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16 md:py-20" aria-labelledby="network-heading">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-        <h2 id="network-heading" className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
-          Global Hair Intelligence Network
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-          A connected system for biology, treatment, and surgical transparency.
-        </p>
-        <div className="mx-auto mt-8 max-w-[min(1000px,100%)]">
-          <GlobalHairIntelligenceNetwork
-            variant="hli"
-            highlightNode="hli"
-            interactive
-            theme="light"
-            title="Global Hair Intelligence Network: Hair Longevity (biology), HairAudit (surgery), Follicle Intelligence (AI engine)"
-          />
-        </div>
-      </div>
-    </section>
+    <GlobalHairIntelligenceSection
+      variant="hli"
+      heading="Global Hair Intelligence Network"
+      description="A connected system for biology, treatment, and surgical transparency."
+      size="hero"
+      theme="light"
+    />
   );
 }
 
@@ -192,7 +181,7 @@ function WhatWeAnalyseSection() {
   );
 }
 
-// —— 5. RESULTS PREVIEW (single primary CTA: Hero + Final only; no duplicate CTA here) ——
+// —— 5. RESULTS PREVIEW (show value before signup; mock data, easily replaceable with real) ——
 function ResultsPreviewSection() {
   return (
     <section id="results" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-labelledby="results-heading">
@@ -203,37 +192,12 @@ function ResultsPreviewSection() {
         <p className="mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
           A clear snapshot and a path forward — usually within 48 hours.
         </p>
-        <div className="mx-auto mt-12 max-w-lg">
-          <div className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-6 shadow-card sm:p-8">
-            <div className="flex items-center gap-3 border-b border-[rgb(var(--border-soft))] pb-4">
-              <img src="/brand/hli-mark.png" alt="" width={48} height={48} className="h-12 w-12 object-contain opacity-90" />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--gold))]">Example output</p>
-                <p className="font-semibold text-[rgb(var(--text-primary))]">Hair Longevity Score™ & plan</p>
-              </div>
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-md bg-subtle/80 p-4">
-                <p className="text-xs font-medium text-[rgb(var(--text-muted))]">Hair risk score</p>
-                <p className="mt-1 text-2xl font-semibold text-[rgb(var(--text-primary))]">72</p>
-                <p className="text-xs text-[rgb(var(--text-secondary))]">Stable range</p>
-              </div>
-              <div className="rounded-md bg-subtle/80 p-4">
-                <p className="text-xs font-medium text-[rgb(var(--text-muted))]">Progression</p>
-                <p className="mt-1 text-lg font-semibold text-[rgb(var(--text-primary))]">Low–moderate</p>
-                <p className="text-xs text-[rgb(var(--text-secondary))]">Curve over time</p>
-              </div>
-              <div className="rounded-md bg-subtle/80 p-4">
-                <p className="text-xs font-medium text-[rgb(var(--text-muted))]">Next steps</p>
-                <p className="mt-1 text-sm font-medium text-[rgb(var(--text-primary))]">Personalised plan</p>
-                <p className="text-xs text-[rgb(var(--text-secondary))]">Clear actions</p>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-center">
-              <ExpandableDetailPanel variant="clinical" label="What the score means">
-                <p className="text-neutral-700">The Hair Longevity Score™ and related indices (e.g. DHT Risk Index™, Follicle Stability Rating™) are derived from your biology and history. They are interpretive tools to guide strategy — not diagnostic labels. Your report includes written interpretation and next-step recommendations.</p>
-              </ExpandableDetailPanel>
-            </div>
+        <div className="mx-auto mt-12 max-w-xl">
+          <ResultsPreviewCard />
+          <div className="mt-6 flex justify-center">
+            <ExpandableDetailPanel variant="clinical" label="What the score means">
+              <p className="text-neutral-700">The Hair Risk Score and related indices (e.g. DHT Risk Index™, Follicle Stability Rating™) are derived from your biology and history. They are interpretive tools to guide strategy — not diagnostic labels. Your report includes written interpretation and next-step recommendations.</p>
+            </ExpandableDetailPanel>
           </div>
         </div>
       </Container>
@@ -354,7 +318,7 @@ export default function Page() {
 
       <HeroSection startHref={href} />
       <HowItWorksSection />
-      <GlobalHairIntelligenceSection />
+      <GlobalHairIntelligenceNetworkBlock />
       <WhatWeAnalyseSection />
       <ResultsPreviewSection />
       <TrustSection />

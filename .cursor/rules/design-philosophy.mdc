@@ -1,0 +1,30 @@
+---
+description: Patient-first design philosophy for HLI, HairAudit, and Follicle Intelligence
+alwaysApply: true
+---
+
+# Design Philosophy — Hair Intelligence Ecosystem
+
+Apply across **Hair Longevity Institute**, **HairAudit**, and **Follicle Intelligence** for consistent, calm, medical-grade UX.
+
+## Principles
+
+1. **Patient-first clarity** — Lead with simple, clear language. Expert-level depth lives behind expansion (e.g. FAQ, “Learn more”, collapsible sections).
+2. **Minimal, calm, medical-grade UI** — No tech-heavy or crypto aesthetic. Restrained palette, ample whitespace, readable typography. Feels clinical and trustworthy, not flashy.
+3. **Remove visual noise** — Cut redundant sections, duplicate CTAs, and decorative clutter. One clear primary CTA per page.
+4. **One primary CTA everywhere** — Use the same label across all sites and pages so the next step is unambiguous.
+5. **3D Global Hair Intelligence Network as central visual anchor** — The ecosystem diagram (Follicle Intelligence at centre; HLI, HairAudit, IIOHR) is the hero visual. Use it prominently (e.g. hero or first scroll) and keep styling consistent. Use `EcosystemDiagramAnimated` when the site has React + Framer Motion; otherwise use `/diagrams/ecosystem-diagram.svg`. To add the animated diagram to HairAudit, Follicle Intelligence, or IIOHR, follow **docs/ECOSYSTEM_DIAGRAM_IMPLEMENTATION.md** (and see rule **shared-ecosystem-ui.mdc**).
+6. **Progressive disclosure** — Simple first (what we do, one CTA). Technical second (domains, methodology, ecosystem) in expandable or lower sections.
+7. **Ecosystem consistency** — Shared tone, primary CTA label, and diagram treatment across HLI, HairAudit, and Follicle Intelligence.
+
+## Primary CTA
+
+- **Label (all pages, all sites):** `Start My Hair Analysis`
+- **Use for:** Header CTA, hero button, end-of-section and final CTA, and any “begin assessment” / “start review” entry point.
+- **Secondary actions** (e.g. “See how it works”, “Book consultation”, “Patient portal”) stay as links or secondary buttons — never compete with the primary CTA.
+
+## Implementation Notes
+
+- Primary CTA href: `/longevity/start` when longevity is enabled, else `/start`.
+- In components: pass `ctaLabel="Start My Hair Analysis"` to `PublicHeader`; use `PrimaryButton` with that label for the main action.
+- Services/pricing cards that start the same flow use the same label: “Start My Hair Analysis”, not “Start Review” or “Start assessment”.

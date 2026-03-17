@@ -1,0 +1,32 @@
+---
+description: Shared ecosystem UI (animated diagram, ecosystem section, footer band) across HLI, HairAudit, Follicle Intelligence, IIOHR
+globs: **/*.{tsx,ts,jsx,js}
+---
+
+# Shared Ecosystem UI — All Sites
+
+The **Hair Intelligence ecosystem** has four sites used in Cursor: **Hair Longevity Institute (HLI)**, **HairAudit**, **Follicle Intelligence**, and **IIOHR**. Shared UI must be implemented consistently across all of them.
+
+## Global Hair Intelligence Network (wired on all sites)
+
+- **Components:** `GlobalHairIntelligenceNetwork` (diagram) and `GlobalHairIntelligenceSection` (section wrapper with heading + copy).
+- **Source of truth:** HLI repo — `components/ecosystem/GlobalHairIntelligenceNetwork.tsx`, `GlobalHairIntelligenceSection.tsx`, `constants.ts`.
+- **Site-specific props:** Use same value for `variant` and `highlightNode`: HLI `"hli"`, HairAudit `"hairaudit"`, Follicle Intelligence `"fi"`, IIOHR `"iiohr"`.
+- **Node links:** Use `GLOBAL_NETWORK_NODE_LINKS` from `components/ecosystem/constants.ts`. Section passes them by default.
+- **Placement:** Homepage = one hero section (`size="hero"`). Do not duplicate the large network on one page.
+- **Wiring guide:** See `docs/ECOSYSTEM_NETWORK_WIRING.md` for copy examples and verification for each site.
+
+## Ecosystem linking (cross-links)
+
+- **EcosystemCrossLinks** — Rules-based cross-platform cards; use for in-page ecosystem links. See `docs/ECOSYSTEM_LINKING_RULES.md`.
+  - HLI: link to Follicle Intelligence always; link to HairAudit **only when discussing surgery** (`showSurgeryLink={true}`).
+  - HairAudit: link to HLI (biology/treatment) and FI (scoring engine).
+  - Follicle Intelligence: link to HLI and HairAudit (positioned as core engine).
+  - Optional: `includeIIOHR={true}` on HLI for-professionals (IIOHR + HairAudit + FI).
+- **HairEcosystemSection** — Legacy three-platform cards; for new content prefer `EcosystemCrossLinks` with the rules above.
+- **SurgicalIntelligenceEcosystemBand** — Footer band; copy from HLI `components/public/SurgicalIntelligenceEcosystemBand.tsx`; set `currentSite` and `currentSiteInternalHref` per site.
+
+## When the user asks to “implement across all sites”
+
+1. **In HLI:** Use `GlobalHairIntelligenceSection` with `variant="hli"` and site-specific heading/description (see `app/page.tsx` and `docs/ECOSYSTEM_NETWORK_WIRING.md`).
+2. **In HairAudit, Follicle Intelligence, or IIOHR:** Copy `components/ecosystem` (network, section, constants), install `framer-motion`, then add one section per homepage with correct `variant` and copy per `docs/ECOSYSTEM_NETWORK_WIRING.md`.

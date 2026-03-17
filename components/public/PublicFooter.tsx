@@ -44,7 +44,7 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
                   Hair Longevity Institute
                 </Link>
                 <p className={captionClass}>
-                  Biological hair health optimisation and specialist review
+                  Understand biology and treatment options before or alongside any procedure
                 </p>
               </div>
               <div>
@@ -52,15 +52,15 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
                   HairAudit
                 </a>
                 <p className={captionClass}>
-                  Independent hair transplant auditing and transparency platform
+                  Surgical audit and transparency — when surgery is part of the picture
                 </p>
               </div>
               <div>
-                <a href="https://follicleintelligence.com" target="_blank" rel="noopener noreferrer" className={linkClass}>
+                <a href="https://follicleintelligence.ai" target="_blank" rel="noopener noreferrer" className={linkClass}>
                   Follicle Intelligence
                 </a>
                 <p className={captionClass}>
-                  Analysis engine for hair biology and surgical outcomes
+                  The analysis engine powering HLI and HairAudit
                 </p>
               </div>
             </nav>

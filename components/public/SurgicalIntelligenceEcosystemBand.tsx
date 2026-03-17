@@ -31,7 +31,7 @@ const PLATFORMS: Array<{
     id: "follicleintelligence",
     label: "Follicle Intelligence",
     tag: "analysis",
-    href: "https://follicleintelligence.com",
+    href: "https://follicleintelligence.ai",
   },
   {
     id: "hli",

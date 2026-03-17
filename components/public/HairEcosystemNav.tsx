@@ -20,7 +20,7 @@ const PLATFORMS: Array<{
   {
     id: "follicleintelligence",
     label: "Follicle Intelligence",
-    href: "https://follicleintelligence.com",
+    href: "https://follicleintelligence.ai",
   },
 ];
 

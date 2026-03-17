@@ -4,6 +4,7 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
+import { EcosystemCrossLinks } from "@/components/public/EcosystemCrossLinks";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 
 export const metadata: Metadata = {
@@ -16,12 +17,6 @@ const OFFERINGS = [
   { title: "Hair loss biology", desc: "Androgen sensitivity, thyroid, iron, inflammation, and follicle integrity." },
   { title: "Diagnosis", desc: "Structured case interpretation and risk indices from bloods, history, and goals." },
   { title: "Treatment pathways", desc: "Non-surgical options, optimisation, and when to consider onward referral." },
-];
-
-const ECOSYSTEM_LINKS = [
-  { name: "IIOHR", tag: "Training", href: "https://iiohr.com" },
-  { name: "HairAudit", tag: "Measurement", href: "https://hairaudit.com" },
-  { name: "Follicle Intelligence", tag: "Analysis", href: "https://follicleintelligence.com" },
 ];
 
 export default function ForProfessionalsPage() {
@@ -58,25 +53,16 @@ export default function ForProfessionalsPage() {
 
       <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-12 md:py-16">
         <Container>
-          <h2 className="text-xl font-semibold text-[rgb(var(--text-primary))]">If surgery becomes relevant</h2>
-          <p className="mt-2 text-sm text-[rgb(var(--text-secondary))]">
+          <p className="mb-4 text-sm text-[rgb(var(--text-secondary))]">
             When a patient&apos;s pathway may include surgical options, these connected resources support training, measurement, and analysis within the same ecosystem.
           </p>
-          <ul className="mt-6 flex flex-wrap gap-4">
-            {ECOSYSTEM_LINKS.map((link) => (
-              <li key={link.name}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-card border border-[rgb(var(--border-soft))] bg-card px-4 py-3 text-sm font-medium text-[rgb(var(--text-secondary))] shadow-soft transition hover:border-[rgb(var(--gold))]/30 hover:bg-subtle/80"
-                >
-                <span className="text-[rgb(var(--gold))]">{link.name}</span>
-                <span className="text-[rgb(var(--text-muted))]">— {link.tag}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+          <EcosystemCrossLinks
+            currentSite="hli"
+            includeIIOHR={true}
+            showSurgeryLink={true}
+            theme="light"
+            heading="If surgery becomes relevant"
+          />
         </Container>
       </section>
 
