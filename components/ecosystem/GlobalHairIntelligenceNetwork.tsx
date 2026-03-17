@@ -193,8 +193,10 @@ export function GlobalHairIntelligenceNetwork({
     >
       <svg
         viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
+        width="100%"
+        height="100%"
         preserveAspectRatio="xMidYMid meet"
-        className="h-full w-full select-none"
+        className="block h-full w-full select-none"
         style={{ overflow: "visible" }}
       >
         <defs>

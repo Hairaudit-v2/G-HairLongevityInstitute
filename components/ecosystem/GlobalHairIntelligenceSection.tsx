@@ -43,18 +43,19 @@ export function GlobalHairIntelligenceSection({
   return (
     <section
       id={id}
-      className={`scroll-mt-20 border-t border-border/50 bg-muted/30 py-12 sm:py-16 md:py-20 ${className}`}
+      className={`scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16 md:py-20 ${className}`}
       aria-labelledby={`${id}-heading`}
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <h2
           id={`${id}-heading`}
-          className="text-center text-2xl font-semibold tracking-tight text-foreground sm:text-3xl md:text-4xl"
+          className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl"
         >
           {heading}
         </h2>
         <p
-          className="mx-auto mt-4 max-w-xl text-center text-muted-foreground leading-relaxed"
+          className="mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))] leading-relaxed"
+          style={{ lineHeight: "var(--line-height-relaxed)" }}
         >
           {description}
         </p>
