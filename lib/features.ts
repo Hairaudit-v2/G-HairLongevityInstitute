@@ -5,8 +5,11 @@
  */
 
 function envFlag(key: string): boolean {
-  const v = process.env[key];
-  return v === "1" || v === "true" || v === "yes";
+  const v = process.env[key]?.trim();
+  if (v === undefined || v === "") return false;
+  if (v === "1") return true;
+  const lower = v.toLowerCase();
+  return lower === "true" || lower === "yes";
 }
 
 /** Enable longevity module UI and entry points (e.g. /longevity, /longevity/start). */
