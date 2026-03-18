@@ -19,8 +19,9 @@ No new tables reference `hli_intakes`, `hli_reports`, or referral tables.
 
 ## Auth and Session
 
-- **Supabase Auth**: used only for the **portal** (login at `/portal/login`). **Magic link** is the primary method (email only); password sign-in is available as a fallback. Implemented with `@supabase/ssr`: server client reads session from cookies; browser client used for sign-in/sign-out.
-- **Magic link redirect**: Add `https://your-domain.com/portal/auth/callback` (and for local dev `http://localhost:3000/portal/auth/callback`) to Supabase Auth **Redirect URLs** (Dashboard → Authentication → URL Configuration).
+- **Supabase Auth**: used only for the **portal** (login at `/portal/login`). **Sign-in options**: magic link (primary), password, and **Sign in with Google** (OAuth). **Create account**: patients can create an account with email and password (optional email confirmation per project settings). **Set or change password**: logged-in patients can set or change a password from the portal dashboard (e.g. after signing in with magic link or Google) so they can use email + password next time. Implemented with `@supabase/ssr`: server client reads session from cookies; browser client used for sign-in/sign-out.
+- **Redirect URLs**: Add `https://your-domain.com/portal/auth/callback` (and for local dev `http://localhost:3000/portal/auth/callback`) to Supabase Auth **Redirect URLs** (Dashboard → Authentication → URL Configuration). Required for magic link and Google OAuth.
+- **Google sign-in**: Enable the Google provider in Supabase Dashboard (Authentication → Providers → Google), add your Google OAuth Client ID and Client Secret, and in Google Cloud Console set the authorized redirect URI to your project’s Supabase callback (e.g. `https://<project-ref>.supabase.co/auth/v1/callback`). No extra env vars in the app.
 - **Longevity session cookie** (`hli_longevity_session`): still used for the **anonymous** flow and for **portal users** after login. When a user opens the portal dashboard, the server resolves their profile from `auth_user_id`, then calls `setLongevitySession(profileId)` so that:
   - `/longevity/start` and `/api/longevity/*` use the same profile.
   - “Resume” and “New intake” work without duplicating logic.
@@ -51,8 +52,8 @@ Future clinician (Trichologist) features should treat **profile → many intakes
 | `/longevity/start` | Cookie (or set by portal) | Start or resume intake; same as before. |
 | `/longevity/dashboard` | Cookie | Cookie-based dashboard (no login). Unchanged. |
 | `/portal` | Redirect | Redirects to `/portal/dashboard` if logged in, else `/portal/login`. |
-| `/portal/login` | None | Sign in: magic link (primary) or password. |
-| `/portal/auth/callback` | None | Handles magic link redirect; exchanges token for session, then redirects to dashboard. |
+| `/portal/login` | None | Sign in: magic link, password, or Google. |
+| `/portal/auth/callback` | None | Handles magic link, OAuth code, or hash; exchanges for session, then redirects to dashboard. |
 | `/portal/dashboard` | Supabase Auth | Portal dashboard: next step, intake history, documents, “New intake”, “Resume”, Sign out. Sets longevity cookie so start/resume use the same profile. |
 
 ## Isolation

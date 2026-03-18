@@ -23,6 +23,7 @@ import { PatientProgressTimeline } from "@/components/longevity/PatientProgressT
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocumentsSection";
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
+import { PortalSetPassword } from "@/components/longevity/PortalSetPassword";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 
 /** Allowed post-login redirect paths (same-origin paths only). */
@@ -218,6 +219,13 @@ export default async function PortalDashboardPage({
           }
         />
       </div>
+
+      <section className="mt-6" aria-labelledby="account-heading">
+        <h2 id="account-heading" className="sr-only">
+          Account
+        </h2>
+        <PortalSetPassword />
+      </section>
 
       {followUpCadence && (
         <FollowUpCadenceCard

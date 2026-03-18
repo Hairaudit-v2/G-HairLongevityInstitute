@@ -39,6 +39,20 @@ function CallbackContent() {
       const finalRedirect = allowedRedirect ? redirectTo : "/portal/dashboard";
       const destination = `/api/longevity/session/sync?redirect=${encodeURIComponent(finalRedirect)}`;
 
+      // 0) OAuth (e.g. Google): code in query — exchange for session then redirect.
+      const code = query.get("code") ?? searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setErrorMessage(error.message);
+          setStatus("error");
+          return;
+        }
+        setStatus("done");
+        window.location.href = destination;
+        return;
+      }
+
       // 1) PKCE magic link: token_hash + type (Supabase docs). Prefer this so PKCE email flow works.
       const tokenHash = query.get("token_hash") ?? searchParams.get("token_hash");
       const typeParam = query.get("type") ?? searchParams.get("type");
