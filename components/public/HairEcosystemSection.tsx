@@ -118,7 +118,7 @@ export function HairEcosystemSection({
   return (
     <section
       id={id}
-      className={`border-t border-white/[0.08] bg-black/[0.06] py-16 sm:py-20 md:py-24 ${className}`}
+      className={`border-t border-white/[0.08] bg-[rgb(var(--bg-dark))] py-16 sm:py-20 md:py-24 ${className}`}
       aria-labelledby="ecosystem-heading"
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">

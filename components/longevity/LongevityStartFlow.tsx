@@ -47,6 +47,8 @@ const CREATE_DRAFT_API_DISABLED_MESSAGE =
   "This service is temporarily unavailable. Please try again later or contact us for help.";
 const DOCUMENTS_SESSION_MESSAGE =
   "Your secure session may have expired. Sign in to the portal to continue, then return here or resume from the portal.";
+const UPLOAD_SESSION_EXPIRED_MESSAGE =
+  "We couldn't upload your document because your secure session may have expired. Please sign in to the portal, then return here and try again.";
 
 type StepId =
   | "welcome"
@@ -591,6 +593,7 @@ export function LongevityStartFlow() {
   const [error, setError] = useState<string | null>(null);
   const [submitRecoveryHref, setSubmitRecoveryHref] = useState<string | null>(null);
   const [documentsSessionRecoveryHref, setDocumentsSessionRecoveryHref] = useState<string | null>(null);
+  const [loadResumeRecoveryHref, setLoadResumeRecoveryHref] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
@@ -614,6 +617,9 @@ export function LongevityStartFlow() {
       }
       if (status === 403 || status === 404) {
         setError(LOAD_RESUME_FORBIDDEN_MESSAGE);
+        setLoadResumeRecoveryHref(
+          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
+        );
         return;
       }
       if (!res.ok || !json?.ok) {
@@ -622,12 +628,19 @@ export function LongevityStartFlow() {
             ? GENERIC_RECOVERY_MESSAGE
             : (typeof json.error === "string" ? json.error : "Failed to load intake.")
         );
+        setLoadResumeRecoveryHref(
+          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
+        );
         return;
       }
+      setLoadResumeRecoveryHref(null);
       const intake = json.intake as { id: string } | undefined;
       const questionnaire = json.questionnaire as { responses?: LongevityQuestionnaireResponses } | undefined;
       if (!intake?.id) {
         setError(LOAD_RESUME_FORBIDDEN_MESSAGE);
+        setLoadResumeRecoveryHref(
+          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
+        );
         return;
       }
       setIntakeId(intake.id);
@@ -635,8 +648,11 @@ export function LongevityStartFlow() {
       setResponses(r);
       setIdentifyEmail(r.aboutYou?.email ?? "");
       setIdentifyName([r.aboutYou?.firstName, r.aboutYou?.lastName].filter(Boolean).join(" ") || "");
-    } catch (e) {
+    } catch {
       setError(GENERIC_RECOVERY_MESSAGE);
+      setLoadResumeRecoveryHref(
+        `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
+      );
     }
   }, []);
 
@@ -679,6 +695,7 @@ export function LongevityStartFlow() {
         setError(CREATE_DRAFT_FAILURE_PRIMARY);
         return;
       }
+      setLoadResumeRecoveryHref(null);
       setIntakeId(intakeIdFromApi);
       setResponses((prev) => ({
         ...prev,
@@ -797,7 +814,7 @@ export function LongevityStartFlow() {
           });
           const { status, json } = await parseLongevityResponse(res);
           if (status === 401) {
-            setUploadError(DOCUMENTS_SESSION_MESSAGE);
+            setUploadError(UPLOAD_SESSION_EXPIRED_MESSAGE);
             setDocumentsSessionRecoveryHref(
               `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
             );
@@ -841,6 +858,8 @@ export function LongevityStartFlow() {
 
   const SUBMIT_SESSION_EXPIRED_MESSAGE =
     "We couldn't submit your assessment because your secure session may have expired. Please sign in to the portal, then return here and try again.";
+  const SUBMIT_GENERIC_RECOVERY_MESSAGE =
+    "Something went wrong while submitting your assessment. Please try again. You can also sign in to the secure portal and resume from there.";
 
   const submitIntake = useCallback(async () => {
     if (!intakeId) return;
@@ -861,7 +880,7 @@ export function LongevityStartFlow() {
       if (!res.ok || !json?.ok) {
         const message =
           status >= 500 || json == null
-            ? GENERIC_RECOVERY_MESSAGE
+            ? SUBMIT_GENERIC_RECOVERY_MESSAGE
             : typeof json.error === "string"
               ? json.error
               : "Submission failed. Please try again.";
@@ -871,7 +890,7 @@ export function LongevityStartFlow() {
       setStep("done");
       setSubmitRecoveryHref(null);
     } catch {
-      setError(GENERIC_RECOVERY_MESSAGE);
+      setError(SUBMIT_GENERIC_RECOVERY_MESSAGE);
       setSubmitRecoveryHref(null);
     } finally {
       setSubmitting(false);
@@ -944,6 +963,19 @@ export function LongevityStartFlow() {
         {error && (
           <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             {error}
+          </div>
+        )}
+        {loadResumeRecoveryHref && (
+          <div className="mt-4 rounded-2xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 px-4 py-3">
+            <p className="text-sm text-white/90">
+              Sign in to the portal with the same email to reopen your assessment, or start a new one.
+            </p>
+            <Link
+              href={loadResumeRecoveryHref}
+              className="mt-3 inline-flex items-center justify-center rounded-2xl bg-[rgb(198,167,94)] px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] transition hover:opacity-90"
+            >
+              Open secure portal
+            </Link>
           </div>
         )}
 
@@ -1212,7 +1244,7 @@ export function LongevityStartFlow() {
                         href={documentsSessionRecoveryHref}
                         className="mt-3 inline-flex items-center justify-center rounded-2xl bg-[rgb(198,167,94)] px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] transition hover:opacity-90"
                       >
-                        Sign in and continue
+                        Sign in to continue
                       </Link>
                     </div>
                   )}
@@ -1384,7 +1416,7 @@ export function LongevityStartFlow() {
                     href={submitRecoveryHref}
                     className="mt-3 inline-flex items-center justify-center rounded-2xl bg-[rgb(198,167,94)] px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] transition hover:opacity-90"
                   >
-                    Sign in and retry
+                    Sign in to continue
                   </Link>
                 </div>
               )}

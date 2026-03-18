@@ -19,8 +19,8 @@ export default function AboutPage() {
   const startHref = useLongevity ? "/longevity/start" : "/start";
 
   return (
-    <main className="min-h-screen">
-      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" />
+    <main className="min-h-screen bg-[rgb(var(--bg-dark))] text-white">
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" theme="dark" />
 
       {/* Hero */}
       <section className="relative overflow-hidden py-14 md:py-24">

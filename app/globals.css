@@ -19,6 +19,7 @@
   
   /* Legacy dark (for pages that still use dark theme) */
   --bg-dark: 15 27 45;
+  --bg: 15 27 45;           /* alias for dark main background (longevity, login, portal, etc.) */
   --panel-dark: 28 42 58;
   --platinum: 217 217 214;
   
