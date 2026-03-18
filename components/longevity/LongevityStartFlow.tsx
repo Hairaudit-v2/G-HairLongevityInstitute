@@ -19,6 +19,35 @@ import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/docu
 const GOLD = "rgb(198,167,94)";
 const BG = "rgb(15,27,45)";
 
+/** Safe parse for longevity API responses. Avoids throwing SyntaxError on HTML or malformed JSON. */
+async function parseLongevityResponse(
+  res: Response
+): Promise<{ status: number; json: Record<string, unknown> | null }> {
+  const status = res.status;
+  let json: Record<string, unknown> | null = null;
+  try {
+    const text = await res.text();
+    if (text) json = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    // Non-JSON or malformed; leave json null
+  }
+  return { status, json };
+}
+
+const GENERIC_RECOVERY_MESSAGE =
+  "Something went wrong while saving your assessment. Please try again. You can also sign in to the secure portal and resume from there.";
+const LOAD_RESUME_FORBIDDEN_MESSAGE =
+  "We couldn't reopen this assessment. Please sign in to the portal with the same email, or start a new assessment if needed.";
+const CREATE_DRAFT_RETRY_MESSAGE =
+  "We couldn't create your assessment. Please try again. You can also sign in to the secure portal if you already have an account.";
+const CREATE_DRAFT_FAILURE_PRIMARY = "We couldn't start your assessment right now.";
+const CREATE_DRAFT_FAILURE_SECONDARY =
+  "Please try again. If this keeps happening, contact us for help.";
+const CREATE_DRAFT_API_DISABLED_MESSAGE =
+  "This service is temporarily unavailable. Please try again later or contact us for help.";
+const DOCUMENTS_SESSION_MESSAGE =
+  "Your secure session may have expired. Sign in to the portal to continue, then return here or resume from the portal.";
+
 type StepId =
   | "welcome"
   | "identify"
@@ -560,6 +589,8 @@ export function LongevityStartFlow() {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitRecoveryHref, setSubmitRecoveryHref] = useState<string | null>(null);
+  const [documentsSessionRecoveryHref, setDocumentsSessionRecoveryHref] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
@@ -575,23 +606,37 @@ export function LongevityStartFlow() {
   const loadResume = useCallback(async (id: string) => {
     try {
       const res = await fetch(`/api/longevity/intakes/${id}`);
-      const json = await res.json();
-      if (res.status === 401 && json.requiresAuth === true && typeof json.redirectTo === "string") {
-        setError(json.message ?? "Please sign in to resume your assessment.");
-        window.location.href = json.redirectTo;
+      const { status, json } = await parseLongevityResponse(res);
+      if (status === 401 && json?.requiresAuth === true && typeof json.redirectTo === "string") {
+        setError((json.message as string) ?? "Please sign in to resume your assessment.");
+        window.location.href = json.redirectTo as string;
         return;
       }
-      if (!res.ok || !json.ok) {
-        setError(json.error ?? "Failed to load intake.");
+      if (status === 403 || status === 404) {
+        setError(LOAD_RESUME_FORBIDDEN_MESSAGE);
         return;
       }
-      setIntakeId(json.intake.id);
-      const r = (json.questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
+      if (!res.ok || !json?.ok) {
+        setError(
+          status >= 500 || json == null
+            ? GENERIC_RECOVERY_MESSAGE
+            : (typeof json.error === "string" ? json.error : "Failed to load intake.")
+        );
+        return;
+      }
+      const intake = json.intake as { id: string } | undefined;
+      const questionnaire = json.questionnaire as { responses?: LongevityQuestionnaireResponses } | undefined;
+      if (!intake?.id) {
+        setError(LOAD_RESUME_FORBIDDEN_MESSAGE);
+        return;
+      }
+      setIntakeId(intake.id);
+      const r = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
       setResponses(r);
       setIdentifyEmail(r.aboutYou?.email ?? "");
       setIdentifyName([r.aboutYou?.firstName, r.aboutYou?.lastName].filter(Boolean).join(" ") || "");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load.");
+      setError(GENERIC_RECOVERY_MESSAGE);
     }
   }, []);
 
@@ -618,17 +663,23 @@ export function LongevityStartFlow() {
           full_name: identifyName.trim() || undefined,
         }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        const msg = json.error ?? "Failed to create intake.";
-        setError(
-          msg === "Longevity API is disabled."
-            ? "Longevity isn’t enabled on this server. If you run this site, set HLI_ENABLE_LONGEVITY_API=1 (and HLI_ENABLE_LONGEVITY=1) in your environment and restart or redeploy."
-            : msg
-        );
+      const { status, json } = await parseLongevityResponse(res);
+      if (!res.ok || !json?.ok) {
+        const rawMsg =
+          status >= 500 || json == null ? null : (json.error as string) ?? null;
+        const isApiDisabled =
+          typeof rawMsg === "string" &&
+          (rawMsg === "Longevity API is disabled." ||
+            (rawMsg.toLowerCase().includes("longevity") && rawMsg.toLowerCase().includes("disabled")));
+        setError(isApiDisabled ? CREATE_DRAFT_API_DISABLED_MESSAGE : CREATE_DRAFT_FAILURE_PRIMARY);
         return;
       }
-      setIntakeId(json.intakeId);
+      const intakeIdFromApi = json.intakeId as string | undefined;
+      if (!intakeIdFromApi) {
+        setError(CREATE_DRAFT_FAILURE_PRIMARY);
+        return;
+      }
+      setIntakeId(intakeIdFromApi);
       setResponses((prev) => ({
         ...prev,
         aboutYou: {
@@ -639,9 +690,9 @@ export function LongevityStartFlow() {
         },
       }));
       setStep("aboutYou");
-      window.history.replaceState(null, "", `/longevity/start?intakeId=${json.intakeId}`);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create.");
+      window.history.replaceState(null, "", `/longevity/start?intakeId=${intakeIdFromApi}`);
+    } catch {
+      setError(CREATE_DRAFT_FAILURE_PRIMARY);
     } finally {
       setSaving(false);
     }
@@ -658,16 +709,21 @@ export function LongevityStartFlow() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ questionnaire: responses }),
         });
-        const json = await res.json();
-        if (!res.ok || !json.ok) {
-          const err = json.error ?? "Save failed.";
-          setError(typeof err === "string" ? err : "Save failed.");
-          return { ok: false, error: err };
+        const { status, json } = await parseLongevityResponse(res);
+        if (!res.ok || !json?.ok) {
+          const message =
+            status >= 500 || json == null
+              ? GENERIC_RECOVERY_MESSAGE
+              : typeof json.error === "string"
+                ? json.error
+                : "We couldn't save your progress. Please try again.";
+          setError(message);
+          return { ok: false, error: json?.error ?? new Error(message) };
         }
         setSavedAt(Date.now());
         return { ok: true };
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Save failed.");
+        setError(GENERIC_RECOVERY_MESSAGE);
         return { ok: false, error: e };
       } finally {
         setSaving(false);
@@ -676,8 +732,6 @@ export function LongevityStartFlow() {
     [intakeId, responses]
   );
 
-  const SAVE_FAILED_MESSAGE = "We couldn't save your progress. Please try again.";
-
   const goNext = useCallback(
     async (nextStep: StepId) => {
       try {
@@ -685,13 +739,12 @@ export function LongevityStartFlow() {
         if (result.ok) {
           setStep(nextStep);
         } else {
-          setError(SAVE_FAILED_MESSAGE);
           if (typeof console !== "undefined" && console.error) {
             console.error("[LongevityStartFlow] goNext: save failed", result.error);
           }
         }
       } catch (e) {
-        setError(SAVE_FAILED_MESSAGE);
+        setError(GENERIC_RECOVERY_MESSAGE);
         if (typeof console !== "undefined" && console.error) {
           console.error("[LongevityStartFlow] goNext: save error", e);
         }
@@ -704,13 +757,20 @@ export function LongevityStartFlow() {
     if (!intakeId) return [];
     try {
       const res = await fetch(`/api/longevity/documents?intakeId=${intakeId}`);
-      const json = await res.json();
-      if (res.ok && json.ok && Array.isArray(json.documents)) {
-        setStepDocuments(json.documents);
-        return json.documents;
+      const { status, json } = await parseLongevityResponse(res);
+      if (status === 401) {
+        setDocumentsSessionRecoveryHref(
+          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
+        );
+        return [];
+      }
+      if (res.ok && json?.ok && Array.isArray(json.documents)) {
+        setDocumentsSessionRecoveryHref(null);
+        setStepDocuments(json.documents as Array<{ id: string; doc_type: string; filename: string | null; size_bytes: number | null; created_at: string }>);
+        return json.documents as Array<{ id: string; doc_type: string; filename: string | null; size_bytes: number | null; created_at: string }>;
       }
     } catch {
-      // ignore
+      // leave list and recovery state unchanged
     }
     return [];
   }, [intakeId]);
@@ -735,19 +795,28 @@ export function LongevityStartFlow() {
             method: "POST",
             body: formData,
           });
-          const json = await res.json();
-          if (!res.ok || !json.ok) {
-            setUploadError(json.error ?? "Upload failed.");
+          const { status, json } = await parseLongevityResponse(res);
+          if (status === 401) {
+            setUploadError(DOCUMENTS_SESSION_MESSAGE);
+            setDocumentsSessionRecoveryHref(
+              `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
+            );
+            return;
+          }
+          if (!res.ok || !json?.ok) {
+            setUploadError(typeof json?.error === "string" ? json.error : "Upload failed.");
             return;
           }
         }
         const updated = await fetchStepDocuments();
         const count = updated.length;
-        setUploadSuccessMessage(`${count} document(s) uploaded successfully.`);
-        uploadSuccessTimeoutRef.current = setTimeout(() => {
-          setUploadSuccessMessage(null);
-          uploadSuccessTimeoutRef.current = null;
-        }, 5000);
+        if (count > 0) {
+          setUploadSuccessMessage(`${count} document(s) uploaded successfully.`);
+          uploadSuccessTimeoutRef.current = setTimeout(() => {
+            setUploadSuccessMessage(null);
+            uploadSuccessTimeoutRef.current = null;
+          }, 5000);
+        }
       } catch (e) {
         setUploadError(e instanceof Error ? e.message : "Upload failed.");
       } finally {
@@ -770,21 +839,40 @@ export function LongevityStartFlow() {
     };
   }, []);
 
+  const SUBMIT_SESSION_EXPIRED_MESSAGE =
+    "We couldn't submit your assessment because your secure session may have expired. Please sign in to the portal, then return here and try again.";
+
   const submitIntake = useCallback(async () => {
     if (!intakeId) return;
     setSubmitting(true);
     setError(null);
+    setSubmitRecoveryHref(null);
     try {
       await saveProgress();
       const res = await fetch(`/api/longevity/intakes/${intakeId}/submit`, { method: "POST" });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        setError(json.error ?? "Submission failed.");
+      const { status, json } = await parseLongevityResponse(res);
+      if (status === 401 || status === 403) {
+        setError(SUBMIT_SESSION_EXPIRED_MESSAGE);
+        setSubmitRecoveryHref(
+          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
+        );
+        return;
+      }
+      if (!res.ok || !json?.ok) {
+        const message =
+          status >= 500 || json == null
+            ? GENERIC_RECOVERY_MESSAGE
+            : typeof json.error === "string"
+              ? json.error
+              : "Submission failed. Please try again.";
+        setError(message);
         return;
       }
       setStep("done");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Submission failed.");
+      setSubmitRecoveryHref(null);
+    } catch {
+      setError(GENERIC_RECOVERY_MESSAGE);
+      setSubmitRecoveryHref(null);
     } finally {
       setSubmitting(false);
     }
@@ -898,12 +986,17 @@ export function LongevityStartFlow() {
                   placeholder="e.g. Jane Smith"
                 />
               </div>
+              {error && (
+                <p className="mt-4 text-sm text-white/80">
+                  {CREATE_DRAFT_FAILURE_SECONDARY}
+                </p>
+              )}
               <div className="mt-8 flex gap-3">
                 <Button variant="secondary" onClick={() => setStep("welcome")}>
                   Back
                 </Button>
                 <Button onClick={createDraft} disabled={saving}>
-                  {saving ? "Creating…" : "Create draft & continue"}
+                  {saving ? "Creating…" : error ? "Try again" : "Create draft & continue"}
                 </Button>
               </div>
             </Card>
@@ -1112,6 +1205,17 @@ export function LongevityStartFlow() {
                 <p className="mt-4 text-sm text-amber-200">Save your intake first to upload documents.</p>
               ) : (
                 <>
+                  {documentsSessionRecoveryHref && (
+                    <div className="mt-4 rounded-2xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 px-4 py-3">
+                      <p className="text-sm text-white/90">{DOCUMENTS_SESSION_MESSAGE}</p>
+                      <Link
+                        href={documentsSessionRecoveryHref}
+                        className="mt-3 inline-flex items-center justify-center rounded-2xl bg-[rgb(198,167,94)] px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] transition hover:opacity-90"
+                      >
+                        Sign in and continue
+                      </Link>
+                    </div>
+                  )}
                   <div className="mt-6 space-y-5">
                     <div>
                       <label className="text-sm font-medium text-white/90">Blood test results (optional — now or later)</label>
@@ -1271,6 +1375,19 @@ export function LongevityStartFlow() {
                 <div><span className="text-white/60">Current blood status:</span> {un.currentBloodStatus ?? "—"}</div>
                 <div><span className="text-white/60">Documents:</span> {stepDocuments.length === 0 ? "None uploaded yet (optional—add anytime in the portal)" : `${stepDocuments.length} document(s) uploaded`}</div>
               </dl>
+              {submitRecoveryHref && (
+                <div className="mt-4 rounded-2xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 px-4 py-3">
+                  <p className="text-sm text-white/90">
+                    Sign in to the portal, then return to this page and click Submit again.
+                  </p>
+                  <Link
+                    href={submitRecoveryHref}
+                    className="mt-3 inline-flex items-center justify-center rounded-2xl bg-[rgb(198,167,94)] px-6 py-3 text-sm font-semibold text-[rgb(15,27,45)] transition hover:opacity-90"
+                  >
+                    Sign in and retry
+                  </Link>
+                </div>
+              )}
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("uploadsNextSteps")}>Back</Button>
                 <Button onClick={submitIntake} disabled={submitting}>

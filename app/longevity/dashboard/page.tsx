@@ -28,15 +28,40 @@ export default async function LongevityDashboardPage() {
   if (!profileId) {
     return (
       <main className="min-h-screen bg-[rgb(var(--bg))] px-6 py-16">
-        <div className="mx-auto max-w-lg text-center">
-          <h1 className="text-xl font-semibold text-white">Longevity</h1>
-          <p className="mt-2 text-white/70">Start an intake to see your submissions here.</p>
-          <Link
-            href="/longevity/start"
-            className="mt-6 inline-flex rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--bg))]"
-          >
-            Start intake
-          </Link>
+        <div className="mx-auto max-w-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
+                Hair Longevity Institute™ — Longevity
+              </div>
+              <h1 className="mt-2 text-2xl font-semibold text-white">Next steps</h1>
+            </div>
+            <Link href="/longevity" className="text-sm text-white/70 hover:text-white">
+              ← Back
+            </Link>
+          </div>
+          <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-6">
+            <p className="text-base font-medium text-white/90">
+              If you started an assessment on another device or earlier session, sign in with the same email to see your saved assessment.
+            </p>
+            <p className="mt-2 text-sm text-white/70">
+              Your secure portal shows your intakes, drafts, and review status. Sign in to continue or start a new assessment.
+            </p>
+            <Link
+              href="/portal/login?redirect=/portal/dashboard"
+              className="mt-6 inline-flex rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--bg))]"
+            >
+              Open secure portal
+            </Link>
+          </div>
+          <div className="mt-6">
+            <Link
+              href="/longevity/start"
+              className="inline-flex rounded-2xl border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/10"
+            >
+              Start new assessment
+            </Link>
+          </div>
         </div>
       </main>
     );
