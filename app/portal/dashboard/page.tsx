@@ -387,6 +387,9 @@ export default async function PortalDashboardPage({
           <p className="mt-1 text-sm text-white/60">
             Summaries released to you by your clinician. One per intake when available.
           </p>
+          <p className="mt-2 text-sm text-white/80">
+            Review your summary below and follow any next steps your clinician has recommended.
+          </p>
           <div className="mt-4 space-y-4">
             {intakesWithReleasedSummary.map((intake) => (
               <div
