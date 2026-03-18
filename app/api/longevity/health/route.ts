@@ -3,6 +3,7 @@ import { isLongevityApiEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
+/** GET /api/longevity/health — ok + raw env for deployment verification. */
 export async function GET() {
   const ok = isLongevityApiEnabled();
   const raw = process.env.HLI_ENABLE_LONGEVITY_API ?? null;
