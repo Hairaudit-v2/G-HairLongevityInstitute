@@ -2,12 +2,16 @@
  * Phase R: Longevity-only email delivery adapter for reminder emails.
  * Small provider abstraction; easy to swap (Resend, console stub, or none).
  * Do not use for non-longevity flows.
+ * Uses HLI unified email layout when html is provided or built from bodyText.
  */
 
 export type SendReminderEmailParams = {
   to: string;
   subject: string;
+  /** Plain-text body (required). When html is not provided, adapter may wrap bodyText in HLI layout. */
   bodyText: string;
+  /** Optional HTML body. When provided, Resend sends multipart (html + text). */
+  html?: string;
   reminderId?: string;
 };
 
@@ -72,12 +76,14 @@ function createResendAdapter(): LongevityEmailAdapter | null {
         const { Resend } = await import("resend");
         const resend = new Resend(apiKey);
         const from = getFromAddress();
-        const { data, error } = await resend.emails.send({
+        const payload: Parameters<typeof resend.emails.send>[0] = {
           from,
           to: [params.to],
           subject: params.subject,
           text: params.bodyText,
-        });
+        };
+        if (params.html) payload.html = params.html;
+        const { data, error } = await resend.emails.send(payload);
         if (error) {
           return { ok: false, error: error.message, provider: "resend" };
         }
@@ -119,12 +125,9 @@ export function getLongevityReminderEmailAdapter(): LongevityEmailAdapter | null
   return null;
 }
 
-const REMINDER_EMAIL_FOOTER =
-  "\n\n—\nThis is an automated reminder from Hair Longevity Institute. If you have questions, please contact your clinician.";
-
 /**
  * Send one reminder email using the configured adapter.
- * Appends a standard footer to body text. If no adapter is configured, returns ok: false.
+ * Appends HLI footer to body text and wraps in branded HTML when possible.
  */
 export async function sendLongevityReminderEmail(
   params: SendReminderEmailParams
@@ -144,7 +147,13 @@ export async function sendLongevityReminderEmail(
       provider: adapter.name,
     };
   }
+  const { getHliEmailFooterPlain, buildHliEmailHtmlFromPlainBody } = await import(
+    "@/lib/email/hliEmailLayout"
+  );
   const bodyText =
-    (params.bodyText?.trim() ?? "") + REMINDER_EMAIL_FOOTER;
-  return adapter.send({ ...params, bodyText });
+    (params.bodyText?.trim() ?? "") + getHliEmailFooterPlain();
+  const html =
+    params.html ??
+    buildHliEmailHtmlFromPlainBody(params.bodyText?.trim() ?? "");
+  return adapter.send({ ...params, bodyText, html });
 }
