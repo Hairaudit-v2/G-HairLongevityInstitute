@@ -153,11 +153,9 @@ function PortalLoginContent() {
           setLoading(false);
           return;
         }
-        // Send via dashboard when resuming so longevity cookie is set, then dashboard redirects.
-        const dest = afterLoginRedirect
-          ? `/portal/dashboard?redirect=${encodeURIComponent(afterLoginRedirect)}`
-          : "/portal/dashboard";
-        window.location.href = dest;
+        // Sync route sets longevity cookie (Route Handler), then redirects.
+        const redirectTo = afterLoginRedirect ?? "/portal/dashboard";
+        window.location.href = `/api/longevity/session/sync?redirect=${encodeURIComponent(redirectTo)}`;
       } catch (err) {
         setMessage({
           type: "error",

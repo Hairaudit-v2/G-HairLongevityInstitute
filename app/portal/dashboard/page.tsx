@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { setLongevitySession } from "@/lib/longevityAuth";
+import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
@@ -59,14 +59,18 @@ export default async function PortalDashboardPage({
     redirect("/portal/login?error=profile");
   }
 
-  await setLongevitySession(profileResult.profileId);
-
+  const profileId = profileResult.profileId;
   const { redirect: redirectTo } = await searchParams;
-  if (isAllowedRedirect(redirectTo)) {
-    redirect(redirectTo);
+
+  // Cookie must be set in a Route Handler, not during render. Redirect to sync so it sets the cookie and redirects back.
+  const existingSession = await getLongevitySessionFromRequest();
+  const needsSync = existingSession !== profileId;
+  if (needsSync || isAllowedRedirect(redirectTo)) {
+    const syncRedirect = isAllowedRedirect(redirectTo) ? redirectTo : "/portal/dashboard";
+    redirect(`/api/longevity/session/sync?redirect=${encodeURIComponent(syncRedirect)}`);
   }
 
-  const profileId = profileResult.profileId;
+  // Cookie already in sync; render dashboard.
   const { data: intakes, error } = await supabase
     .from("hli_longevity_intakes")
     .select("id, status, created_at, updated_at, last_reviewed_at, patient_visible_summary, patient_visible_released_at, review_outcome")
