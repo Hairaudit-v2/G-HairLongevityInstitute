@@ -33,6 +33,7 @@ import {
   compareAdaptiveTriageWithCurrentEngine,
   type AdaptiveRescoreComparison,
 } from "@/lib/longevity/intake";
+import { buildReassessmentSummary } from "@/lib/longevity/reassessmentSummary";
 
 export const dynamic = "force-dynamic";
 
@@ -305,6 +306,30 @@ export async function GET(
       adherenceContext: adherence_states,
       derivedFlags: triage.flags,
     });
+    const firstReviewNoteAt =
+      (notes ?? []).length > 0
+        ? ((notes ?? [])[0]?.created_at as string | undefined) ?? null
+        : null;
+    const reassessment_summary = buildReassessmentSummary({
+      adaptive_triage: adaptiveView.triage,
+      adaptive_rescore_comparison: adaptiveView.rescoreComparison,
+      documents: (documents ?? []).map((d) => ({
+        doc_type: d.doc_type,
+        created_at: d.created_at,
+      })),
+      review_outcome: intake.review_outcome,
+      first_review_note_at: firstReviewNoteAt,
+      intake_created_at: intake.created_at,
+      scalp_image_comparison: case_comparison?.scalpImageComparison
+        ? {
+            comparisonLimitedByImageQuality:
+              case_comparison.scalpImageComparison.comparisonLimitedByImageQuality,
+            canCompare: case_comparison.scalpImageComparison.canCompare,
+            currentPhotoCount: case_comparison.scalpImageComparison.currentPhotoCount,
+            previousPhotoCount: case_comparison.scalpImageComparison.previousPhotoCount,
+          }
+        : null,
+    });
 
     return NextResponse.json({
       ok: true,
@@ -396,6 +421,7 @@ export async function GET(
       adaptive_clinician_attention_flags: adaptiveView.clinicianAttentionFlags,
       adaptive_red_flags: adaptiveView.redFlags,
       adaptive_rescore_comparison: adaptiveView.rescoreComparison,
+      reassessment_summary,
       documents: (documents ?? []).map((d) => ({
         id: d.id,
         doc_type: d.doc_type,

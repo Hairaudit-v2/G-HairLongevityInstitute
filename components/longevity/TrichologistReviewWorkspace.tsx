@@ -6,6 +6,7 @@ import { CaseTimeline } from "@/components/longevity/CaseTimeline";
 import { AdaptiveBloodworkEligibilityPanel } from "@/components/longevity/AdaptiveBloodworkEligibilityPanel";
 import { AdaptiveRescoreComparisonPanel } from "@/components/longevity/AdaptiveRescoreComparisonPanel";
 import { AdaptiveSuggestedChecksPanel } from "@/components/longevity/AdaptiveSuggestedChecksPanel";
+import { ReassessmentStatusPanel } from "@/components/longevity/ReassessmentStatusPanel";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { AdaptiveTriagePanel } from "@/components/longevity/AdaptiveTriagePanel";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
@@ -48,6 +49,7 @@ import {
   type AdaptiveRescoreComparison,
 } from "@/lib/longevity/intake";
 import { buildGpLetterAdaptivePrefillPayload } from "@/lib/longevity/gpLetterAdaptiveAdapter";
+import type { ReassessmentSummary } from "@/lib/longevity/reassessmentSummary";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.REVIEW_COMPLETE]: "Review complete",
@@ -218,6 +220,7 @@ export type CaseDetail = {
   adaptive_clinician_attention_flags?: string[];
   adaptive_red_flags?: string[];
   adaptive_rescore_comparison?: AdaptiveRescoreComparison | null;
+  reassessment_summary?: ReassessmentSummary | null;
 };
 
 export type BloodMarkerRaw = {
@@ -662,6 +665,7 @@ export function TrichologistReviewWorkspace({
         adaptive_clinician_attention_flags: data.adaptive_clinician_attention_flags ?? [],
         adaptive_red_flags: data.adaptive_red_flags ?? [],
         adaptive_rescore_comparison: data.adaptive_rescore_comparison ?? null,
+        reassessment_summary: data.reassessment_summary ?? null,
       });
       setBloodRequestEditing(false);
       if (data.intake.patient_visible_summary) {
@@ -1829,6 +1833,12 @@ export function TrichologistReviewWorkspace({
                       />
                     )}
                   </>
+                )}
+                {caseDetail.reassessment_summary && (
+                  <ReassessmentStatusPanel
+                    summary={caseDetail.reassessment_summary}
+                    onSelectOutcome={setOutcomeSelect}
+                  />
                 )}
 
                 {(caseDetail.adherence_context || caseDetail.adherence_states) && (
