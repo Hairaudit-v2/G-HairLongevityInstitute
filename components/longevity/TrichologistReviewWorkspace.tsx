@@ -47,6 +47,7 @@ import {
   deriveAdaptiveBloodworkEligibilitySupport,
   type AdaptiveRescoreComparison,
 } from "@/lib/longevity/intake";
+import { buildGpLetterAdaptivePrefillPayload } from "@/lib/longevity/gpLetterAdaptiveAdapter";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.REVIEW_COMPLETE]: "Review complete",
@@ -870,6 +871,44 @@ export function TrichologistReviewWorkspace({
   }, [selectedId, scalpComparisonForm, fetchCase]);
 
   const markerOptionsByCategory = useMemo(() => getBloodMarkerOptionsByCategory(), []);
+
+  const adaptiveSuggestionResult = useMemo(() => {
+    if (!caseDetail?.adaptive_triage) return null;
+    return deriveAdaptiveClinicianSuggestions({
+      adaptive_triage_output: caseDetail.adaptive_triage,
+      adaptive_rescore_comparison: caseDetail.adaptive_rescore_comparison ?? null,
+      context: {
+        has_scalp_photo_documents: caseDetail.documents.some(
+          (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO
+        ),
+      },
+    });
+  }, [caseDetail]);
+
+  const adaptiveBloodworkSupport = useMemo(() => {
+    if (!caseDetail?.adaptive_triage) return null;
+    return deriveAdaptiveBloodworkEligibilitySupport({
+      adaptive_triage_output: caseDetail.adaptive_triage,
+      adaptive_rescore_comparison: caseDetail.adaptive_rescore_comparison ?? null,
+      clinician_suggestions: adaptiveSuggestionResult?.suggestions ?? [],
+    });
+  }, [caseDetail, adaptiveSuggestionResult]);
+
+  const prefillBloodRequestFromAdaptive = useCallback(() => {
+    if (!caseDetail?.blood_request || !caseDetail.adaptive_triage) return;
+    const prefill = buildGpLetterAdaptivePrefillPayload({
+      adaptive_triage_output: caseDetail.adaptive_triage,
+      adaptive_bloodwork_eligibility: adaptiveBloodworkSupport,
+      clinician_approved_bloodwork_domains:
+        adaptiveBloodworkSupport?.suggested_bloodwork_domains ?? [],
+      clinician_patient_safe_summary: summaryText,
+    });
+    setBloodRequestForm({
+      recommended_tests: prefill.recommended_tests,
+      reason: prefill.reason,
+    });
+    setBloodRequestEditing(true);
+  }, [caseDetail, adaptiveBloodworkSupport, summaryText]);
 
   const addBloodMarker = useCallback(async () => {
     if (!selectedId || !caseDetail) return;
@@ -1781,35 +1820,14 @@ export function TrichologistReviewWorkspace({
                       />
                     )}
                     <AdaptiveSuggestedChecksPanel
-                      suggestions={deriveAdaptiveClinicianSuggestions({
-                        adaptive_triage_output: caseDetail.adaptive_triage,
-                        adaptive_rescore_comparison:
-                          caseDetail.adaptive_rescore_comparison ?? null,
-                        context: {
-                          has_scalp_photo_documents: caseDetail.documents.some(
-                            (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO
-                          ),
-                        },
-                      }).suggestions}
+                      suggestions={adaptiveSuggestionResult?.suggestions ?? []}
                     />
-                    <AdaptiveBloodworkEligibilityPanel
-                      eligibility={deriveAdaptiveBloodworkEligibilitySupport({
-                        adaptive_triage_output: caseDetail.adaptive_triage,
-                        adaptive_rescore_comparison:
-                          caseDetail.adaptive_rescore_comparison ?? null,
-                        clinician_suggestions: deriveAdaptiveClinicianSuggestions({
-                          adaptive_triage_output: caseDetail.adaptive_triage,
-                          adaptive_rescore_comparison:
-                            caseDetail.adaptive_rescore_comparison ?? null,
-                          context: {
-                            has_scalp_photo_documents: caseDetail.documents.some(
-                              (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO
-                            ),
-                          },
-                        }).suggestions,
-                      })}
-                      onSelectOutcome={setOutcomeSelect}
-                    />
+                    {adaptiveBloodworkSupport && (
+                      <AdaptiveBloodworkEligibilityPanel
+                        eligibility={adaptiveBloodworkSupport}
+                        onSelectOutcome={setOutcomeSelect}
+                      />
+                    )}
                   </>
                 )}
 
@@ -2471,6 +2489,15 @@ export function TrichologistReviewWorkspace({
                         >
                           Refine tests &amp; reason
                         </button>
+                        {caseDetail.adaptive_triage && (
+                          <button
+                            type="button"
+                            onClick={prefillBloodRequestFromAdaptive}
+                            className="ml-2 mt-3 rounded border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+                          >
+                            Prefill from adaptive signals
+                          </button>
+                        )}
                       </>
                     ) : (
                       <div className="mt-3 space-y-3">
