@@ -4,11 +4,27 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
+import {
+  getAdaptiveDerivedOutputs,
+  normalizeAdaptiveResponses,
+} from "@/lib/longevity/adaptiveIntakeEngine";
+import { buildLongevityAdaptivePayload } from "@/lib/longevity/intake";
 
 export const dynamic = "force-dynamic";
 
 function ownedBySession(profileId: string | null, intake: { profile_id: string } | null): boolean {
   return !!profileId && !!intake && intake.profile_id === profileId;
+}
+
+function ageFromDob(dob?: string): number | null {
+  if (!dob) return null;
+  const parsed = new Date(dob);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - parsed.getFullYear();
+  const m = now.getMonth() - parsed.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < parsed.getDate())) age -= 1;
+  return age >= 0 ? age : null;
 }
 
 /**
@@ -198,13 +214,30 @@ export async function PATCH(
           merged[key] = pv;
         }
       }
+      const normalized = normalizeAdaptiveResponses(
+        merged as LongevityQuestionnaireResponses
+      ) as Record<string, unknown>;
+      const derived = getAdaptiveDerivedOutputs(
+        normalized as LongevityQuestionnaireResponses
+      );
+      normalized.adaptiveDerivedSummary = derived;
+      const adaptivePayload = buildLongevityAdaptivePayload(
+        ((normalized as LongevityQuestionnaireResponses).adaptiveEngine?.answers ??
+          (normalized as LongevityQuestionnaireResponses).adaptiveEngine?.adaptive_answers ??
+          {}) as Record<string, string | string[] | boolean | null>
+      );
+      normalized.adaptiveEngine = {
+        ...((normalized as LongevityQuestionnaireResponses).adaptiveEngine ?? {}),
+        ...adaptivePayload,
+      };
       // Always persist schemaVersion inside the payload so responses are self-describing.
+      normalized.schemaVersion = QUESTIONNAIRE_SCHEMA_VERSION;
       merged.schemaVersion = QUESTIONNAIRE_SCHEMA_VERSION;
       if (existing?.id) {
         const { error: updateErr } = await supabase
           .from("hli_longevity_questionnaires")
           .update({
-            responses: merged,
+            responses: normalized,
             updated_at: new Date().toISOString(),
           })
           .eq("id", existing.id);
@@ -215,7 +248,7 @@ export async function PATCH(
         const { error: insertErr } = await supabase.from("hli_longevity_questionnaires").insert({
           intake_id: id,
           schema_version: QUESTIONNAIRE_SCHEMA_VERSION,
-          responses: merged,
+          responses: normalized,
         });
         if (insertErr) {
           return NextResponse.json({ ok: false, error: insertErr.message }, { status: 500 });

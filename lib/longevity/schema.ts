@@ -104,6 +104,86 @@ export type UploadsNextSteps = {
     | "unsure";
 };
 
+export type AdaptiveIntake = {
+  presentationPattern?:
+    | "acute_shedding"
+    | "chronic_shedding"
+    | "patterned_thinning"
+    | "frontal_temporal_recession"
+    | "crown_loss"
+    | "diffuse_thinning"
+    | "broken_hairs"
+    | "scalp_symptoms"
+    | "mixed_or_unsure";
+  pathwayHints?: string[];
+  acuteWindow?:
+    | "less_than_6_weeks"
+    | "6_to_12_weeks"
+    | "3_to_6_months"
+    | "more_than_6_months"
+    | "unsure";
+  chronicWindow?:
+    | "3_to_6_months"
+    | "6_to_12_months"
+    | "more_than_12_months"
+    | "unsure";
+  reportsBrokenHairs?: boolean | null;
+  rapidProgressionWeeks?: boolean | null;
+  tractionSignals?: string[];
+  cosmeticSignals?: string[];
+  sleepShiftWork?: "yes" | "no" | "unsure";
+  majorStressEvent?: "yes" | "no" | "unsure";
+  recentRapidWeightLoss?: boolean | null;
+  restrictiveEating?: "yes" | "no" | "unsure";
+  highIntensitySportBodybuilding?: "yes" | "no" | "unsure";
+  androgenExposureSignals?: string[];
+  stressSignals?: string[];
+  femaleContext?: {
+    cycleRegularity?: "regular" | "irregular" | "not_occurring" | "prefer_not_to_say";
+    postpartumRecent?: "yes" | "no" | "unsure";
+    hyperandrogenSigns?: string[];
+    menopauseContext?: "none" | "perimenopause" | "menopause" | "unsure";
+    fertilityHormonalContext?: "yes" | "no" | "prefer_not_to_say";
+  };
+  maleContext?: {
+    androgenExposure?: string[];
+    rapidRecessionProgression?: "yes" | "no" | "unsure";
+    crownProgression?: "yes" | "no" | "unsure";
+    medicationHistory?: string[];
+  };
+  neutralContext?: {
+    endocrineHistoryKnown?: "yes" | "no" | "unsure";
+    hormonalContextFreeText?: string;
+  };
+};
+
+export type AdaptiveDerivedSummary = {
+  likely_pattern?: string;
+  possible_drivers?: string[];
+  red_flags?: string[];
+  bloodwork_considerations?: string[];
+  document_requests?: string[];
+  upload_guidance?: string[];
+  clinician_attention_flags?: string[];
+  confidence_summary?: string;
+  primary_pathway?: string;
+  secondary_pathways?: string[];
+  pathway_confidence?: Array<{
+    pathway: string;
+    score: number;
+    confidence: "high" | "medium" | "low";
+  }>;
+};
+
+export type AdaptiveEnginePayload = {
+  schemaVersion?: string;
+  answers?: Record<string, string | string[] | boolean | null>;
+  triage?: AdaptiveDerivedSummary;
+  adaptive_answers?: Record<string, string | string[] | boolean | null>;
+  adaptive_schema_version?: string;
+  adaptive_triage_output?: AdaptiveDerivedSummary;
+};
+
 export type LongevityQuestionnaireResponses = {
   aboutYou?: AboutYou;
   mainConcern?: MainConcern;
@@ -113,4 +193,7 @@ export type LongevityQuestionnaireResponses = {
   maleHistory?: MaleHistory;
   lifestyleTreatments?: LifestyleTreatments;
   uploadsNextSteps?: UploadsNextSteps;
+  adaptiveIntake?: AdaptiveIntake;
+  adaptiveDerivedSummary?: AdaptiveDerivedSummary;
+  adaptiveEngine?: AdaptiveEnginePayload;
 };

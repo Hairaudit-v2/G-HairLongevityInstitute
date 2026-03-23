@@ -13,8 +13,13 @@ import type {
   LifestyleTreatments,
   UploadsNextSteps,
   SexAtBirth,
+  AdaptiveIntake,
+  AdaptiveEnginePayload,
 } from "@/lib/longevity/schema";
 import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
+import { detectPathways } from "@/lib/longevity/adaptiveIntakeEngine";
+import { AdaptiveIntakeOrchestrator } from "@/components/longevity/AdaptiveIntakeOrchestrator";
+import { buildIntakeTriageOutput } from "@/lib/longevity/intake";
 
 const GOLD = "rgb(198,167,94)";
 const BG = "rgb(15,27,45)";
@@ -428,6 +433,39 @@ const AVAILABLE_UPLOADS = [
   { key: "prior_treatment_plans", label: "Prior treatment plans" },
 ];
 
+const PRESENTATION_PATTERN_OPTIONS = [
+  { key: "acute_shedding", label: "Acute shedding" },
+  { key: "chronic_shedding", label: "Chronic shedding" },
+  { key: "patterned_thinning", label: "Patterned thinning" },
+  { key: "frontal_temporal_recession", label: "Frontal/temporal recession" },
+  { key: "crown_loss", label: "Crown loss" },
+  { key: "diffuse_thinning", label: "Diffuse thinning" },
+  { key: "broken_hairs", label: "Broken hairs / fragility" },
+  { key: "scalp_symptoms", label: "Scalp symptoms dominant" },
+  { key: "mixed_or_unsure", label: "Mixed / unsure" },
+] as const;
+
+const TRACTION_SIGNALS = [
+  { key: "tight_braids_or_extensions", label: "Tight braids/extensions" },
+  { key: "tight_ponytails_or_buns", label: "Tight ponytails/buns" },
+  { key: "helmet_or_headgear_friction", label: "Helmet/headgear friction" },
+  { key: "frequent_tension_styling", label: "Frequent tension styling" },
+];
+
+const COSMETIC_SIGNALS = [
+  { key: "frequent_bleach", label: "Frequent bleach" },
+  { key: "high_heat_styling", label: "High-heat styling" },
+  { key: "chemical_straightening", label: "Chemical straightening/relaxing" },
+  { key: "recent_major_hair_process", label: "Recent major chemical process" },
+];
+
+const ANDROGEN_EXPOSURE_SIGNALS = [
+  { key: "trt", label: "TRT/testosterone optimisation" },
+  { key: "anabolic_agents", label: "Anabolic agents/SARMs" },
+  { key: "new_hormonal_medication", label: "New hormonal medication" },
+  { key: "stopped_hormonal_medication", label: "Stopped hormonal medication" },
+];
+
 function AboutYouStep({
   a,
   identifyEmail,
@@ -603,8 +641,23 @@ export function LongevityStartFlow() {
   const progress = useMemo(() => {
     const idx = STEP_ORDER.indexOf(step);
     if (idx <= 0 || step === "done") return step === "done" ? 100 : 0;
-    return Math.round((idx / (STEP_ORDER.length - 1)) * 100);
-  }, [step]);
+    const base = idx / (STEP_ORDER.length - 1);
+    const adaptive = responses.adaptiveIntake ?? {};
+    const adaptiveChecks = [
+      adaptive.presentationPattern,
+      adaptive.acuteWindow,
+      adaptive.chronicWindow,
+      adaptive.tractionSignals?.length ? "yes" : "",
+      adaptive.cosmeticSignals?.length ? "yes" : "",
+      adaptive.androgenExposureSignals?.length ? "yes" : "",
+      adaptive.sleepShiftWork,
+      adaptive.majorStressEvent,
+      adaptive.restrictiveEating,
+    ];
+    const answered = adaptiveChecks.filter(Boolean).length;
+    const adaptiveFactor = Math.min(1, answered / adaptiveChecks.length);
+    return Math.round((base * 0.8 + adaptiveFactor * 0.2) * 100);
+  }, [step, responses.adaptiveIntake]);
 
   const loadResume = useCallback(async (id: string) => {
     try {
@@ -848,6 +901,27 @@ export function LongevityStartFlow() {
   }, [step, intakeId, fetchStepDocuments]);
 
   useEffect(() => {
+    if (step !== "review") return;
+    const answers = (responses.adaptiveEngine?.answers ?? {}) as Record<
+      string,
+      string | string[] | boolean | null
+    >;
+    const triage = buildIntakeTriageOutput(answers, {
+      sexAtBirth: responses.aboutYou?.sexAtBirth,
+      ageYears: responses.aboutYou?.dateOfBirth
+        ? Math.max(0, new Date().getFullYear() - new Date(responses.aboutYou.dateOfBirth).getFullYear())
+        : null,
+    });
+    setResponses((r) => ({
+      ...r,
+      adaptiveEngine: {
+        ...r.adaptiveEngine,
+        triage,
+      },
+    }));
+  }, [step, responses.aboutYou?.sexAtBirth, responses.aboutYou?.dateOfBirth, responses.adaptiveEngine?.answers]);
+
+  useEffect(() => {
     return () => {
       if (uploadSuccessTimeoutRef.current) {
         clearTimeout(uploadSuccessTimeoutRef.current);
@@ -905,6 +979,8 @@ export function LongevityStartFlow() {
   const mhMale = responses.maleHistory ?? {};
   const lt = responses.lifestyleTreatments ?? {};
   const un = responses.uploadsNextSteps ?? {};
+  const ai = responses.adaptiveIntake ?? {};
+  const adaptiveEngine = responses.adaptiveEngine ?? {};
 
   const setAboutYou = (next: Partial<AboutYou>) =>
     setResponses((r) => ({ ...r, aboutYou: { ...r.aboutYou, ...next } }));
@@ -922,10 +998,29 @@ export function LongevityStartFlow() {
     setResponses((r) => ({ ...r, lifestyleTreatments: { ...r.lifestyleTreatments, ...next } }));
   const setUploadsNextSteps = (next: Partial<UploadsNextSteps>) =>
     setResponses((r) => ({ ...r, uploadsNextSteps: { ...r.uploadsNextSteps, ...next } }));
+  const setAdaptiveIntake = (next: Partial<AdaptiveIntake>) =>
+    setResponses((r) => ({ ...r, adaptiveIntake: { ...r.adaptiveIntake, ...next } }));
+  const setAdaptiveEngine = (next: Partial<AdaptiveEnginePayload>) =>
+    setResponses((r) => ({ ...r, adaptiveEngine: { ...r.adaptiveEngine, ...next } }));
 
   const sexAtBirth = a.sexAtBirth;
   const showFemale = sexAtBirth === "female";
   const showMale = sexAtBirth === "male";
+  const pathwayDetection = useMemo(() => detectPathways(responses), [responses]);
+  const activePathways = useMemo(
+    () => [
+      pathwayDetection.primary_pathway,
+      ...pathwayDetection.secondary_pathways,
+    ],
+    [pathwayDetection]
+  );
+  const adaptiveContext = useMemo(
+    () => ({
+      sexAtBirth: a.sexAtBirth,
+      ageYears: a.dateOfBirth ? Math.max(0, new Date().getFullYear() - new Date(a.dateOfBirth).getFullYear()) : null,
+    }),
+    [a.sexAtBirth, a.dateOfBirth]
+  );
 
   return (
     <main className="min-h-screen text-white" style={{ background: BG }}>
@@ -1051,7 +1146,26 @@ export function LongevityStartFlow() {
               <h2 className="mt-2 text-2xl font-semibold">Main concern</h2>
               <p className="mt-2 text-white/70">What brings you in? Select all that apply.</p>
               <div className="mt-6 space-y-6">
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-sm text-white/80">
+                    We adapt follow-up questions based on your pattern so we only ask high-yield questions.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="text-xs text-white/60">Current pathway focus:</span>
+                    {activePathways.slice(0, 3).map((pathway) => (
+                      <span key={pathway} className="rounded-full border border-[rgb(198,167,94)]/30 bg-[rgb(198,167,94)]/10 px-2 py-1 text-xs text-white/90">
+                        {pathway.replaceAll("_", " ")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
                 <MultiSelect label="Primary concerns" options={PRIMARY_CONCERNS} value={mc.primaryConcerns ?? []} onChange={(v) => setMainConcern({ primaryConcerns: v })} />
+                <SingleSelect<NonNullable<AdaptiveIntake["presentationPattern"]>>
+                  label="Which presentation best matches your current pattern?"
+                  value={ai.presentationPattern}
+                  options={PRESENTATION_PATTERN_OPTIONS.map((o) => ({ key: o.key, label: o.label }))}
+                  onChange={(k) => setAdaptiveIntake({ presentationPattern: k as AdaptiveIntake["presentationPattern"] })}
+                />
                 <SingleSelect label="When did you first notice?" value={mc.firstNoticed} options={FIRST_NOTICED} onChange={(k) => setMainConcern({ firstNoticed: k as MainConcern["firstNoticed"] })} />
                 <SingleSelect label="Onset pattern" value={mc.onsetPattern} options={ONSET_PATTERN} onChange={(k) => setMainConcern({ onsetPattern: k as MainConcern["onsetPattern"] })} />
                 <MultiSelect label="Affected areas" options={AFFECTED_AREAS} value={mc.affectedAreas ?? []} onChange={(v) => setMainConcern({ affectedAreas: v })} />
@@ -1060,6 +1174,20 @@ export function LongevityStartFlow() {
                   <label className="text-sm text-white/75">Anything else? (optional)</label>
                   <textarea className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]" rows={3} value={mc.freeText ?? ""} onChange={(e) => setMainConcern({ freeText: e.target.value })} placeholder="Free text…" />
                 </div>
+                <AdaptiveIntakeOrchestrator
+                  mode="intake"
+                  answers={(adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>}
+                  context={adaptiveContext}
+                  onChange={(questionId, value) => {
+                    const answers = {
+                      ...((adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>),
+                      [questionId]: value,
+                    };
+                    setAdaptiveEngine({ answers });
+                    const triage = buildIntakeTriageOutput(answers, adaptiveContext);
+                    setAdaptiveEngine({ triage });
+                  }}
+                />
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("aboutYou")}>Back</Button>
@@ -1098,6 +1226,47 @@ export function LongevityStartFlow() {
                 <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
                 <MultiSelect label="Past year events" options={PAST_YEAR_EVENTS} value={tt.pastYearEvents ?? []} onChange={(v) => setTimelineTriggers({ pastYearEvents: v })} />
                 <SingleSelect label="Shedding trend" value={tt.sheddingTrend} options={[{ key: "stable", label: "Stable" }, { key: "improved", label: "Improved" }, { key: "worsened", label: "Worsened" }, { key: "comes_and_goes", label: "Comes and goes" }]} onChange={(k) => setTimelineTriggers({ sheddingTrend: k })} />
+                {(ai.presentationPattern === "acute_shedding" || ai.presentationPattern === "diffuse_thinning") && (
+                  <SingleSelect
+                    label="If shedding is active, what best matches the timeline?"
+                    value={ai.acuteWindow}
+                    options={[
+                      { key: "less_than_6_weeks", label: "Less than 6 weeks" },
+                      { key: "6_to_12_weeks", label: "6-12 weeks" },
+                      { key: "3_to_6_months", label: "3-6 months" },
+                      { key: "more_than_6_months", label: "More than 6 months" },
+                      { key: "unsure", label: "Unsure" },
+                    ]}
+                    onChange={(k) => setAdaptiveIntake({ acuteWindow: k })}
+                  />
+                )}
+                {(ai.presentationPattern === "chronic_shedding" || ai.presentationPattern === "mixed_or_unsure") && (
+                  <SingleSelect
+                    label="If this has persisted, what duration is most accurate?"
+                    value={ai.chronicWindow}
+                    options={[
+                      { key: "3_to_6_months", label: "3-6 months" },
+                      { key: "6_to_12_months", label: "6-12 months" },
+                      { key: "more_than_12_months", label: "More than 12 months" },
+                      { key: "unsure", label: "Unsure" },
+                    ]}
+                    onChange={(k) => setAdaptiveIntake({ chronicWindow: k })}
+                  />
+                )}
+                <SingleSelect
+                  label="Has progression felt unusually rapid (weeks rather than months)?"
+                  value={ai.rapidProgressionWeeks === true ? "yes" : ai.rapidProgressionWeeks === false ? "no" : "unsure"}
+                  options={[
+                    { key: "yes", label: "Yes" },
+                    { key: "no", label: "No" },
+                    { key: "unsure", label: "Unsure" },
+                  ]}
+                  onChange={(k) =>
+                    setAdaptiveIntake({
+                      rapidProgressionWeeks: k === "yes" ? true : k === "no" ? false : null,
+                    })
+                  }
+                />
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("mainConcern")}>Back</Button>
@@ -1166,16 +1335,110 @@ export function LongevityStartFlow() {
                   />
                   <MultiSelect label="Features" options={FEMALE_FEATURES} value={fh.features ?? []} onChange={(v) => setFemaleHistory({ features: v })} />
                   <MultiSelect label="Life stage" options={FEMALE_LIFE_STAGE} value={fh.lifeStage ?? []} onChange={(v) => setFemaleHistory({ lifeStage: v })} />
+                  <SingleSelect
+                    label="Recent postpartum period?"
+                    value={ai.femaleContext?.postpartumRecent}
+                    options={[
+                      { key: "yes", label: "Yes" },
+                      { key: "no", label: "No" },
+                      { key: "unsure", label: "Unsure" },
+                    ]}
+                    onChange={(k) =>
+                      setAdaptiveIntake({
+                        femaleContext: { ...ai.femaleContext, postpartumRecent: k },
+                      })
+                    }
+                  />
+                  <MultiSelect
+                    label="Hyperandrogen signs (optional, skip if preferred)"
+                    options={[
+                      { key: "acne", label: "Acne" },
+                      { key: "hirsutism", label: "Increased facial/body hair" },
+                      { key: "cycle_irregularity", label: "Cycle irregularity" },
+                      { key: "none", label: "None" },
+                    ]}
+                    value={ai.femaleContext?.hyperandrogenSigns ?? []}
+                    onChange={(v) =>
+                      setAdaptiveIntake({
+                        femaleContext: { ...ai.femaleContext, hyperandrogenSigns: v },
+                      })
+                    }
+                  />
                 </div>
               )}
               {showMale && (
                 <div className="mt-6 space-y-6">
                   <MultiSelect label="Therapies or medications" options={MALE_THERAPIES} value={mhMale.therapies ?? []} onChange={(v) => setMaleHistory({ therapies: v })} />
                   <MultiSelect label="Associated changes" options={MALE_ASSOCIATED_CHANGES} value={mhMale.associatedChanges ?? []} onChange={(v) => setMaleHistory({ associatedChanges: v })} />
+                  <SingleSelect
+                    label="Rapid recession progression?"
+                    value={ai.maleContext?.rapidRecessionProgression}
+                    options={[
+                      { key: "yes", label: "Yes" },
+                      { key: "no", label: "No" },
+                      { key: "unsure", label: "Unsure" },
+                    ]}
+                    onChange={(k) =>
+                      setAdaptiveIntake({
+                        maleContext: { ...ai.maleContext, rapidRecessionProgression: k },
+                      })
+                    }
+                  />
+                  <SingleSelect
+                    label="Rapid crown progression?"
+                    value={ai.maleContext?.crownProgression}
+                    options={[
+                      { key: "yes", label: "Yes" },
+                      { key: "no", label: "No" },
+                      { key: "unsure", label: "Unsure" },
+                    ]}
+                    onChange={(k) =>
+                      setAdaptiveIntake({
+                        maleContext: { ...ai.maleContext, crownProgression: k },
+                      })
+                    }
+                  />
+                  <MultiSelect
+                    label="Androgen exposure context (optional)"
+                    options={ANDROGEN_EXPOSURE_SIGNALS}
+                    value={ai.androgenExposureSignals ?? []}
+                    onChange={(v) => setAdaptiveIntake({ androgenExposureSignals: v })}
+                  />
                 </div>
               )}
               {(sexAtBirth === "intersex" || sexAtBirth === "prefer_not_to_say" || !sexAtBirth) && (
-                <p className="mt-6 text-white/60">You can skip this step.</p>
+                <div className="mt-6 space-y-4">
+                  <p className="text-white/70">
+                    We will keep follow-up neutral and only ask context that helps us understand possible contributors.
+                  </p>
+                  <SingleSelect
+                    label="Any endocrine or hormonal context relevant to your hair changes?"
+                    value={ai.neutralContext?.endocrineHistoryKnown}
+                    options={[
+                      { key: "yes", label: "Yes" },
+                      { key: "no", label: "No" },
+                      { key: "unsure", label: "Unsure" },
+                    ]}
+                    onChange={(k) =>
+                      setAdaptiveIntake({
+                        neutralContext: { ...ai.neutralContext, endocrineHistoryKnown: k },
+                      })
+                    }
+                  />
+                  <div>
+                    <label className="text-sm text-white/75">Anything else you want to add? (optional)</label>
+                    <textarea
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]"
+                      rows={2}
+                      value={ai.neutralContext?.hormonalContextFreeText ?? ""}
+                      onChange={(e) =>
+                        setAdaptiveIntake({
+                          neutralContext: { ...ai.neutralContext, hormonalContextFreeText: e.target.value },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
               )}
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("medicalHistory")}>Back</Button>
@@ -1198,6 +1461,96 @@ export function LongevityStartFlow() {
                   <span className="ml-2 text-sm text-white/70">{lt.stressScore ?? 5}</span>
                 </div>
                 <SingleSelect label="Sleep quality" value={lt.sleepQuality} options={[{ key: "good", label: "Good" }, { key: "average", label: "Average" }, { key: "poor", label: "Poor" }]} onChange={(k) => setLifestyleTreatments({ sleepQuality: k })} />
+                {(activePathways.includes("traction_mechanical_damage") || ai.presentationPattern === "broken_hairs") && (
+                  <>
+                    <MultiSelect
+                      label="Mechanical/traction exposures (only if relevant)"
+                      options={TRACTION_SIGNALS}
+                      value={ai.tractionSignals ?? []}
+                      onChange={(v) => setAdaptiveIntake({ tractionSignals: v })}
+                    />
+                    <MultiSelect
+                      label="Harsh cosmetic practices (only if relevant)"
+                      options={COSMETIC_SIGNALS}
+                      value={ai.cosmeticSignals ?? []}
+                      onChange={(v) => setAdaptiveIntake({ cosmeticSignals: v })}
+                    />
+                    <SingleSelect
+                      label="Do you notice broken hairs rather than root shedding?"
+                      value={ai.reportsBrokenHairs === true ? "yes" : ai.reportsBrokenHairs === false ? "no" : "unsure"}
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                      ]}
+                      onChange={(k) =>
+                        setAdaptiveIntake({
+                          reportsBrokenHairs: k === "yes" ? true : k === "no" ? false : null,
+                        })
+                      }
+                    />
+                  </>
+                )}
+                {(activePathways.includes("telogen_effluvium_diffuse_shedding") ||
+                  activePathways.includes("nutritional_deficiency") ||
+                  activePathways.includes("medication_androgen_exposure")) && (
+                  <>
+                    <SingleSelect
+                      label="Shift work or irregular sleep schedule?"
+                      value={ai.sleepShiftWork}
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                      ]}
+                      onChange={(k) => setAdaptiveIntake({ sleepShiftWork: k })}
+                    />
+                    <SingleSelect
+                      label="Major stress event around onset?"
+                      value={ai.majorStressEvent}
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                      ]}
+                      onChange={(k) => setAdaptiveIntake({ majorStressEvent: k })}
+                    />
+                    <SingleSelect
+                      label="Rapid weight loss in the lead-up?"
+                      value={ai.recentRapidWeightLoss === true ? "yes" : ai.recentRapidWeightLoss === false ? "no" : "unsure"}
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                      ]}
+                      onChange={(k) =>
+                        setAdaptiveIntake({
+                          recentRapidWeightLoss: k === "yes" ? true : k === "no" ? false : null,
+                        })
+                      }
+                    />
+                    <SingleSelect
+                      label="Restrictive eating pattern?"
+                      value={ai.restrictiveEating}
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                      ]}
+                      onChange={(k) => setAdaptiveIntake({ restrictiveEating: k })}
+                    />
+                    <SingleSelect
+                      label="High-intensity sport/bodybuilding context?"
+                      value={ai.highIntensitySportBodybuilding}
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                      ]}
+                      onChange={(k) => setAdaptiveIntake({ highIntensitySportBodybuilding: k })}
+                    />
+                  </>
+                )}
                 <MultiSelect label="Current treatments or supplements" options={CURRENT_TREATMENTS} value={lt.currentTreatments ?? []} onChange={(v) => setLifestyleTreatments({ currentTreatments: v })} />
                 <SingleSelect label="Have current treatments been helpful?" value={lt.treatmentHelpfulness} options={[{ key: "yes", label: "Yes" }, { key: "no", label: "No" }, { key: "unsure", label: "Unsure" }]} onChange={(k) => setLifestyleTreatments({ treatmentHelpfulness: k })} />
                 <SingleSelect

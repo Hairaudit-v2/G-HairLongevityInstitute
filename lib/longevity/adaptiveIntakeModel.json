@@ -1,0 +1,86 @@
+{
+  "version": "adaptive_v1",
+  "questions": [
+    {
+      "id": "presentation_pattern",
+      "label": "Presentation pattern",
+      "type": "single_select",
+      "requiredWhen": "always",
+      "options": [
+        "acute_shedding",
+        "chronic_shedding",
+        "patterned_thinning",
+        "frontal_temporal_recession",
+        "crown_loss",
+        "diffuse_thinning",
+        "broken_hairs",
+        "scalp_symptoms",
+        "mixed_or_unsure"
+      ]
+    },
+    {
+      "id": "acute_shedding_window",
+      "label": "Acute shedding timeline",
+      "type": "single_select",
+      "requiredWhen": "pathway_active",
+      "pathway": "telogen_effluvium_diffuse_shedding"
+    },
+    {
+      "id": "traction_exposure",
+      "label": "Traction/mechanical exposure",
+      "type": "multi_select",
+      "requiredWhen": "pathway_active",
+      "pathway": "traction_mechanical_damage"
+    }
+  ],
+  "branches": [
+    {
+      "id": "branch_androgenic",
+      "pathway": "androgenic_pattern",
+      "entryCriteria": [
+        "androgenic concern selected",
+        "or gradual pattern with family history"
+      ],
+      "exitCriteria": [
+        "patterned progression captured"
+      ],
+      "requiredQuestionIds": [
+        "presentation_pattern"
+      ]
+    },
+    {
+      "id": "branch_te_diffuse",
+      "pathway": "telogen_effluvium_diffuse_shedding",
+      "entryCriteria": [
+        "diffuse thinning or shedding selected",
+        "trigger history present"
+      ],
+      "exitCriteria": [
+        "acute/chronic shedding timing captured"
+      ],
+      "requiredQuestionIds": [
+        "acute_shedding_window"
+      ]
+    }
+  ],
+  "validationRules": [
+    {
+      "id": "dedupe_arrays",
+      "description": "Deduplicate adaptive array answers before persistence"
+    },
+    {
+      "id": "presentation_pattern_normalization",
+      "description": "Trim and lowercase presentation pattern values"
+    }
+  ],
+  "derivedSignalRules": [
+    {
+      "id": "pathway_detection_scoring",
+      "description": "Scores each pathway from baseline and branch-specific signals"
+    },
+    {
+      "id": "triage_summary_generation",
+      "description": "Produces likely_pattern, drivers, red flags and clinician attention flags"
+    }
+  ]
+}

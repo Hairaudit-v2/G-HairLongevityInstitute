@@ -323,6 +323,20 @@ export async function GET(
         responses,
         updated_at: questionnaire?.updated_at ?? null,
       },
+      adaptive_triage:
+        responses.adaptiveEngine?.triage ?? responses.adaptiveDerivedSummary ?? null,
+      adaptive_upload_guidance:
+        responses.adaptiveEngine?.triage?.upload_guidance ??
+        responses.adaptiveDerivedSummary?.upload_guidance ??
+        [],
+      adaptive_clinician_attention_flags:
+        responses.adaptiveEngine?.triage?.clinician_attention_flags ??
+        responses.adaptiveDerivedSummary?.clinician_attention_flags ??
+        [],
+      adaptive_red_flags:
+        responses.adaptiveEngine?.triage?.red_flags ??
+        responses.adaptiveDerivedSummary?.red_flags ??
+        [],
       documents: (documents ?? []).map((d) => ({
         id: d.id,
         doc_type: d.doc_type,
