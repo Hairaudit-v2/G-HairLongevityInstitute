@@ -12,6 +12,7 @@ import { buildLongevityEventEnvelope } from "@/lib/longevity/normalizedEvents";
 import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
+import { buildLongevityAdaptivePayload } from "@/lib/longevity/intake";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,11 @@ export async function POST(
         .maybeSingle();
       const responses = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
       if (responses && typeof responses === "object") {
+        const adaptivePayload = buildLongevityAdaptivePayload(
+          (responses.adaptiveEngine?.adaptive_answers ??
+            responses.adaptiveEngine?.answers ??
+            {}) as Record<string, string | string[] | boolean | null>
+        );
         const triage = computeTriage(responses);
         triageFlags = triage.flags;
         reviewStatus = triage.review_status;
@@ -99,6 +105,9 @@ export async function POST(
             review_decision_source: triage.review_decision_source,
             triaged_at: triage.triaged_at,
             triage_version: triage.triage_version,
+            adaptive_answers: adaptivePayload.adaptive_answers,
+            adaptive_schema_version: adaptivePayload.adaptive_schema_version,
+            adaptive_triage_output: adaptivePayload.adaptive_triage_output,
             ...(inQueue ? { status: "in_review" as const } : {}),
             updated_at: new Date().toISOString(),
           })

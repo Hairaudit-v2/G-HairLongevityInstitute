@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CaseTimeline } from "@/components/longevity/CaseTimeline";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
+import { AdaptiveTriagePanel } from "@/components/longevity/AdaptiveTriagePanel";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 import { REVIEW_OUTCOME } from "@/lib/longevity/reviewConstants";
 import {
@@ -37,6 +38,7 @@ import {
 } from "@/lib/longevity/scalpImageAnalysis";
 import type { FollowUpCadenceOutput } from "@/lib/longevity/followUpCadence";
 import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
+import type { AdaptiveDerivedSummary } from "@/lib/longevity/schema";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.REVIEW_COMPLETE]: "Review complete",
@@ -202,6 +204,10 @@ export type CaseDetail = {
     protocol_assessment_version?: string;
     score_breakdown?: Record<string, number>;
   } | null;
+  adaptive_triage?: AdaptiveDerivedSummary | null;
+  adaptive_upload_guidance?: string[];
+  adaptive_clinician_attention_flags?: string[];
+  adaptive_red_flags?: string[];
 };
 
 export type BloodMarkerRaw = {
@@ -641,6 +647,10 @@ export function TrichologistReviewWorkspace({
         treatment_continuity: data.treatment_continuity ?? null,
         outcome_correlation: data.outcome_correlation ?? null,
         protocol_assessment: data.protocol_assessment ?? null,
+        adaptive_triage: data.adaptive_triage ?? null,
+        adaptive_upload_guidance: data.adaptive_upload_guidance ?? [],
+        adaptive_clinician_attention_flags: data.adaptive_clinician_attention_flags ?? [],
+        adaptive_red_flags: data.adaptive_red_flags ?? [],
       });
       setBloodRequestEditing(false);
       if (data.intake.patient_visible_summary) {
@@ -1725,6 +1735,17 @@ export function TrichologistReviewWorkspace({
                     title="Follow-up cadence"
                     description="Compact reminder context for whether follow-up looks upcoming, due, overdue, complete, or not yet set."
                     className="mt-6"
+                  />
+                )}
+
+                {caseDetail.adaptive_triage && (
+                  <AdaptiveTriagePanel
+                    triage={caseDetail.adaptive_triage}
+                    uploadGuidance={caseDetail.adaptive_upload_guidance ?? []}
+                    clinicianAttentionFlags={
+                      caseDetail.adaptive_clinician_attention_flags ?? []
+                    }
+                    redFlags={caseDetail.adaptive_red_flags ?? []}
                   />
                 )}
 

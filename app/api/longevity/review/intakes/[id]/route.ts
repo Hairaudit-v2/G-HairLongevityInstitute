@@ -28,8 +28,42 @@ import { computeAdherenceStates } from "@/lib/longevity/adherenceStates";
 import { getTreatmentAdherenceForIntake } from "@/lib/longevity/treatmentAdherence";
 import { computeTreatmentOutcomeCorrelation } from "@/lib/longevity/treatmentOutcomeCorrelation";
 import { assessTreatmentProtocol } from "@/lib/longevity/treatmentProtocol";
+import type { AdaptiveDerivedSummary } from "@/lib/longevity/schema";
 
 export const dynamic = "force-dynamic";
+
+type AdaptiveTriageView = {
+  triage: AdaptiveDerivedSummary | null;
+  uploadGuidance: string[];
+  clinicianAttentionFlags: string[];
+  redFlags: string[];
+};
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function pickAdaptiveTriageView(
+  responses: LongevityQuestionnaireResponses,
+  intakeAdaptiveTriageOutput: unknown
+): AdaptiveTriageView {
+  const fromEngine = responses.adaptiveEngine?.triage;
+  const fromEngineLegacy = responses.adaptiveEngine?.adaptive_triage_output;
+  const fromDerived = responses.adaptiveDerivedSummary;
+  const fromIntake =
+    intakeAdaptiveTriageOutput && typeof intakeAdaptiveTriageOutput === "object"
+      ? (intakeAdaptiveTriageOutput as AdaptiveDerivedSummary)
+      : null;
+  const triage = fromEngine ?? fromEngineLegacy ?? fromDerived ?? fromIntake ?? null;
+
+  return {
+    triage,
+    uploadGuidance: toStringArray(triage?.upload_guidance),
+    clinicianAttentionFlags: toStringArray(triage?.clinician_attention_flags),
+    redFlags: toStringArray(triage?.red_flags),
+  };
+}
 
 export async function GET(
   _req: Request,
@@ -52,7 +86,7 @@ export async function GET(
     const supabase = supabaseAdmin();
     const { data: intake, error: intakeErr } = await supabase
       .from("hli_longevity_intakes")
-      .select("id, profile_id, status, review_status, review_priority, created_at, updated_at, last_reviewed_at, patient_visible_released_at, assigned_trichologist_id, assigned_at, patient_visible_summary, review_outcome")
+      .select("id, profile_id, status, review_status, review_priority, created_at, updated_at, last_reviewed_at, patient_visible_released_at, assigned_trichologist_id, assigned_at, patient_visible_summary, review_outcome, adaptive_answers, adaptive_schema_version, adaptive_triage_output")
       .eq("id", id)
       .single();
     if (intakeErr || !intake) {
@@ -113,6 +147,10 @@ export async function GET(
       ...rawResponses,
       schemaVersion: (rawResponses.schemaVersion as string) ?? questionnaire?.schema_version ?? QUESTIONNAIRE_SCHEMA_VERSION,
     };
+    const adaptiveView = pickAdaptiveTriageView(
+      responses,
+      intake.adaptive_triage_output
+    );
 
     const triage = computeTriage(responses);
     const complexity = computeReviewComplexity({
@@ -323,20 +361,10 @@ export async function GET(
         responses,
         updated_at: questionnaire?.updated_at ?? null,
       },
-      adaptive_triage:
-        responses.adaptiveEngine?.triage ?? responses.adaptiveDerivedSummary ?? null,
-      adaptive_upload_guidance:
-        responses.adaptiveEngine?.triage?.upload_guidance ??
-        responses.adaptiveDerivedSummary?.upload_guidance ??
-        [],
-      adaptive_clinician_attention_flags:
-        responses.adaptiveEngine?.triage?.clinician_attention_flags ??
-        responses.adaptiveDerivedSummary?.clinician_attention_flags ??
-        [],
-      adaptive_red_flags:
-        responses.adaptiveEngine?.triage?.red_flags ??
-        responses.adaptiveDerivedSummary?.red_flags ??
-        [],
+      adaptive_triage: adaptiveView.triage,
+      adaptive_upload_guidance: adaptiveView.uploadGuidance,
+      adaptive_clinician_attention_flags: adaptiveView.clinicianAttentionFlags,
+      adaptive_red_flags: adaptiveView.redFlags,
       documents: (documents ?? []).map((d) => ({
         id: d.id,
         doc_type: d.doc_type,

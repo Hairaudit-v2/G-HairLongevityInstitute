@@ -230,6 +230,11 @@ export async function PATCH(
         ...((normalized as LongevityQuestionnaireResponses).adaptiveEngine ?? {}),
         ...adaptivePayload,
       };
+      const intakeAdaptiveUpdate = {
+        adaptive_answers: adaptivePayload.adaptive_answers,
+        adaptive_schema_version: adaptivePayload.adaptive_schema_version,
+        adaptive_triage_output: adaptivePayload.adaptive_triage_output,
+      };
       // Always persist schemaVersion inside the payload so responses are self-describing.
       normalized.schemaVersion = QUESTIONNAIRE_SCHEMA_VERSION;
       merged.schemaVersion = QUESTIONNAIRE_SCHEMA_VERSION;
@@ -256,7 +261,10 @@ export async function PATCH(
       }
       await supabase
         .from("hli_longevity_intakes")
-        .update({ updated_at: new Date().toISOString() })
+        .update({
+          ...intakeAdaptiveUpdate,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id);
     }
 
