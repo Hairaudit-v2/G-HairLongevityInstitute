@@ -6,5 +6,9 @@ export * from "./triageEngine";
 export * from "./orchestrator";
 export * from "./buildLongevityAdaptivePayload";
 export * from "./buildLongevityAdaptivePayload.smoke-test";
+export * from "./adaptiveRescoreComparison";
+export * from "./adaptiveRescoreComparison.smoke-test";
+export * from "./adaptiveClinicianSuggestions";
+export * from "./adaptiveClinicianSuggestions.smoke-test";
 export * from "@/src/lib/longevity/intake";
 

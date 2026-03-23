@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CaseTimeline } from "@/components/longevity/CaseTimeline";
+import { AdaptiveRescoreComparisonPanel } from "@/components/longevity/AdaptiveRescoreComparisonPanel";
+import { AdaptiveSuggestedChecksPanel } from "@/components/longevity/AdaptiveSuggestedChecksPanel";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
 import { AdaptiveTriagePanel } from "@/components/longevity/AdaptiveTriagePanel";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
@@ -39,6 +41,10 @@ import {
 import type { FollowUpCadenceOutput } from "@/lib/longevity/followUpCadence";
 import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
 import type { AdaptiveDerivedSummary } from "@/lib/longevity/schema";
+import {
+  deriveAdaptiveClinicianSuggestions,
+  type AdaptiveRescoreComparison,
+} from "@/lib/longevity/intake";
 
 const REVIEW_OUTCOME_LABELS: Record<string, string> = {
   [REVIEW_OUTCOME.REVIEW_COMPLETE]: "Review complete",
@@ -208,6 +214,7 @@ export type CaseDetail = {
   adaptive_upload_guidance?: string[];
   adaptive_clinician_attention_flags?: string[];
   adaptive_red_flags?: string[];
+  adaptive_rescore_comparison?: AdaptiveRescoreComparison | null;
 };
 
 export type BloodMarkerRaw = {
@@ -651,6 +658,7 @@ export function TrichologistReviewWorkspace({
         adaptive_upload_guidance: data.adaptive_upload_guidance ?? [],
         adaptive_clinician_attention_flags: data.adaptive_clinician_attention_flags ?? [],
         adaptive_red_flags: data.adaptive_red_flags ?? [],
+        adaptive_rescore_comparison: data.adaptive_rescore_comparison ?? null,
       });
       setBloodRequestEditing(false);
       if (data.intake.patient_visible_summary) {
@@ -1419,6 +1427,23 @@ export function TrichologistReviewWorkspace({
                   {caseDetail.complexity && (
                     <ComplexityBadge complexity={caseDetail.complexity} />
                   )}
+                  {caseDetail.adaptive_rescore_comparison?.changed && (
+                    <span
+                      className="inline-flex rounded-md border border-amber-500/40 bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-100"
+                      title={
+                        caseDetail.adaptive_rescore_comparison.changed_fields.length > 0
+                          ? `${caseDetail.adaptive_rescore_comparison.changed_fields.length} changed field(s)`
+                          : "Adaptive interpretation changed"
+                      }
+                    >
+                      Adaptive delta detected
+                      {caseDetail.adaptive_rescore_comparison.changed_fields.length > 0 && (
+                        <span className="ml-1 text-amber-200/80">
+                          ({caseDetail.adaptive_rescore_comparison.changed_fields.length})
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-xs text-white/50">
                   {caseDetail.intake.review_status.replace(/_/g, " ")} ·{" "}
@@ -1739,14 +1764,33 @@ export function TrichologistReviewWorkspace({
                 )}
 
                 {caseDetail.adaptive_triage && (
-                  <AdaptiveTriagePanel
-                    triage={caseDetail.adaptive_triage}
-                    uploadGuidance={caseDetail.adaptive_upload_guidance ?? []}
-                    clinicianAttentionFlags={
-                      caseDetail.adaptive_clinician_attention_flags ?? []
-                    }
-                    redFlags={caseDetail.adaptive_red_flags ?? []}
-                  />
+                  <>
+                    <AdaptiveTriagePanel
+                      triage={caseDetail.adaptive_triage}
+                      uploadGuidance={caseDetail.adaptive_upload_guidance ?? []}
+                      clinicianAttentionFlags={
+                        caseDetail.adaptive_clinician_attention_flags ?? []
+                      }
+                      redFlags={caseDetail.adaptive_red_flags ?? []}
+                    />
+                    {caseDetail.adaptive_rescore_comparison && (
+                      <AdaptiveRescoreComparisonPanel
+                        comparison={caseDetail.adaptive_rescore_comparison}
+                      />
+                    )}
+                    <AdaptiveSuggestedChecksPanel
+                      suggestions={deriveAdaptiveClinicianSuggestions({
+                        adaptive_triage_output: caseDetail.adaptive_triage,
+                        adaptive_rescore_comparison:
+                          caseDetail.adaptive_rescore_comparison ?? null,
+                        context: {
+                          has_scalp_photo_documents: caseDetail.documents.some(
+                            (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO
+                          ),
+                        },
+                      }).suggestions}
+                    />
+                  </>
                 )}
 
                 {(caseDetail.adherence_context || caseDetail.adherence_states) && (

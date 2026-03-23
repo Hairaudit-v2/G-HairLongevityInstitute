@@ -29,6 +29,10 @@ import { getTreatmentAdherenceForIntake } from "@/lib/longevity/treatmentAdheren
 import { computeTreatmentOutcomeCorrelation } from "@/lib/longevity/treatmentOutcomeCorrelation";
 import { assessTreatmentProtocol } from "@/lib/longevity/treatmentProtocol";
 import type { AdaptiveDerivedSummary } from "@/lib/longevity/schema";
+import {
+  compareAdaptiveTriageWithCurrentEngine,
+  type AdaptiveRescoreComparison,
+} from "@/lib/longevity/intake";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +41,7 @@ type AdaptiveTriageView = {
   uploadGuidance: string[];
   clinicianAttentionFlags: string[];
   redFlags: string[];
+  rescoreComparison: AdaptiveRescoreComparison | null;
 };
 
 function toStringArray(value: unknown): string[] {
@@ -46,7 +51,9 @@ function toStringArray(value: unknown): string[] {
 
 function pickAdaptiveTriageView(
   responses: LongevityQuestionnaireResponses,
-  intakeAdaptiveTriageOutput: unknown
+  intakeAdaptiveTriageOutput: unknown,
+  intakeAdaptiveAnswers: unknown,
+  intakeAdaptiveSchemaVersion: unknown
 ): AdaptiveTriageView {
   const fromEngine = responses.adaptiveEngine?.triage;
   const fromEngineLegacy = responses.adaptiveEngine?.adaptive_triage_output;
@@ -56,12 +63,33 @@ function pickAdaptiveTriageView(
       ? (intakeAdaptiveTriageOutput as AdaptiveDerivedSummary)
       : null;
   const triage = fromEngine ?? fromEngineLegacy ?? fromDerived ?? fromIntake ?? null;
+  const answersFromResponses =
+    responses.adaptiveEngine?.adaptive_answers ?? responses.adaptiveEngine?.answers ?? null;
+  const answersFromIntake =
+    intakeAdaptiveAnswers && typeof intakeAdaptiveAnswers === "object"
+      ? (intakeAdaptiveAnswers as Record<string, string | string[] | boolean | null>)
+      : null;
+  const answers = (answersFromResponses ??
+    answersFromIntake ??
+    {}) as Record<string, string | string[] | boolean | null>;
+  const storedSchemaVersion =
+    typeof intakeAdaptiveSchemaVersion === "string"
+      ? intakeAdaptiveSchemaVersion
+      : typeof responses.adaptiveEngine?.adaptive_schema_version === "string"
+      ? responses.adaptiveEngine?.adaptive_schema_version
+      : null;
+  const rescoreComparison = compareAdaptiveTriageWithCurrentEngine({
+    adaptive_answers: answers,
+    stored_adaptive_schema_version: storedSchemaVersion,
+    stored_adaptive_triage_output: triage,
+  });
 
   return {
     triage,
     uploadGuidance: toStringArray(triage?.upload_guidance),
     clinicianAttentionFlags: toStringArray(triage?.clinician_attention_flags),
     redFlags: toStringArray(triage?.red_flags),
+    rescoreComparison,
   };
 }
 
@@ -149,7 +177,9 @@ export async function GET(
     };
     const adaptiveView = pickAdaptiveTriageView(
       responses,
-      intake.adaptive_triage_output
+      intake.adaptive_triage_output,
+      intake.adaptive_answers,
+      intake.adaptive_schema_version
     );
 
     const triage = computeTriage(responses);
@@ -365,6 +395,7 @@ export async function GET(
       adaptive_upload_guidance: adaptiveView.uploadGuidance,
       adaptive_clinician_attention_flags: adaptiveView.clinicianAttentionFlags,
       adaptive_red_flags: adaptiveView.redFlags,
+      adaptive_rescore_comparison: adaptiveView.rescoreComparison,
       documents: (documents ?? []).map((d) => ({
         id: d.id,
         doc_type: d.doc_type,
