@@ -10,5 +10,7 @@ export * from "./adaptiveRescoreComparison";
 export * from "./adaptiveRescoreComparison.smoke-test";
 export * from "./adaptiveClinicianSuggestions";
 export * from "./adaptiveClinicianSuggestions.smoke-test";
+export * from "./adaptiveBloodworkEligibility";
+export * from "./adaptiveBloodworkEligibility.smoke-test";
 export * from "@/src/lib/longevity/intake";
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CaseTimeline } from "@/components/longevity/CaseTimeline";
+import { AdaptiveBloodworkEligibilityPanel } from "@/components/longevity/AdaptiveBloodworkEligibilityPanel";
 import { AdaptiveRescoreComparisonPanel } from "@/components/longevity/AdaptiveRescoreComparisonPanel";
 import { AdaptiveSuggestedChecksPanel } from "@/components/longevity/AdaptiveSuggestedChecksPanel";
 import { FollowUpCadenceCard } from "@/components/longevity/FollowUpCadenceCard";
@@ -43,6 +44,7 @@ import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/docu
 import type { AdaptiveDerivedSummary } from "@/lib/longevity/schema";
 import {
   deriveAdaptiveClinicianSuggestions,
+  deriveAdaptiveBloodworkEligibilitySupport,
   type AdaptiveRescoreComparison,
 } from "@/lib/longevity/intake";
 
@@ -1789,6 +1791,24 @@ export function TrichologistReviewWorkspace({
                           ),
                         },
                       }).suggestions}
+                    />
+                    <AdaptiveBloodworkEligibilityPanel
+                      eligibility={deriveAdaptiveBloodworkEligibilitySupport({
+                        adaptive_triage_output: caseDetail.adaptive_triage,
+                        adaptive_rescore_comparison:
+                          caseDetail.adaptive_rescore_comparison ?? null,
+                        clinician_suggestions: deriveAdaptiveClinicianSuggestions({
+                          adaptive_triage_output: caseDetail.adaptive_triage,
+                          adaptive_rescore_comparison:
+                            caseDetail.adaptive_rescore_comparison ?? null,
+                          context: {
+                            has_scalp_photo_documents: caseDetail.documents.some(
+                              (doc) => doc.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO
+                            ),
+                          },
+                        }).suggestions,
+                      })}
+                      onSelectOutcome={setOutcomeSelect}
                     />
                   </>
                 )}
