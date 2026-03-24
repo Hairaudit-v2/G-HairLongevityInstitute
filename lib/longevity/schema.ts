@@ -41,6 +41,10 @@ export type MainConcern = {
     | "more_than_two_years"
     | "unsure";
   onsetPattern?: "sudden" | "gradual" | "fluctuating" | "unsure";
+  /** How noticeable or bothersome the change feels to you (not a clinical grade). */
+  perceivedSeverity?: "mild" | "moderate" | "severe" | "unsure";
+  /** How well the pattern you described fits what you see (optional). */
+  patternConfidence?: "confident" | "somewhat" | "mixed_or_unsure" | "prefer_not_to_say";
   affectedAreas?: string[];
   symptoms?: string[];
   freeText?: string;
@@ -69,6 +73,15 @@ export type MedicalHistory = {
   diagnoses?: string[];
   currentSymptoms?: string[];
   familyHistory?: string[];
+  /**
+   * Which side of the family hair thinning/loss runs on, when male- or female-pattern family history is selected.
+   * Canonical with `familyHistory`; does not replace the multiselect.
+   */
+  familyHistorySide?: "mothers_side" | "fathers_side" | "both_sides" | "unsure" | "prefer_not_to_say";
+  /** How similar affected relatives’ hair change is to yours; only relevant when pattern hair loss is selected. */
+  familyHairPatternMatch?: "similar_to_mine" | "different_or_unclear" | "unsure" | "prefer_not_to_say";
+  /** Approximate age when relatives’ hair changes began, if you know. */
+  familyHairOnsetAgeBand?: "before_30" | "30s" | "40s" | "50_or_older" | "unsure" | "prefer_not_to_say";
   priorBloodTests?: "last_3_months" | "older_than_3_months" | "no" | "unsure";
   wantsToUploadBloodsNow?: boolean | null;
 };

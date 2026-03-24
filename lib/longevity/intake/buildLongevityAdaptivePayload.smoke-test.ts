@@ -153,6 +153,35 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "treatments preserved"
       );
     }),
+    run("structured family history maps side and similarity", () => {
+      const payload = buildLongevityAdaptivePayload({
+        medicalHistory: {
+          familyHistory: ["female_pattern_thinning"],
+          familyHistorySide: "mothers_side",
+          familyHairPatternMatch: "similar_to_mine",
+          familyHairOnsetAgeBand: "40s",
+        },
+      });
+      assert(payload.adaptive_answers.family_history === "mothers_side", "explicit side wins");
+      assert(payload.adaptive_answers.family_hair_pattern_match === "similar_to_mine", "pattern match");
+      assert(payload.adaptive_answers.family_hair_onset_age_band === "40s", "onset band");
+      assert(typeof payload.adaptive_triage_output.primary_pathway === "string", "triage primary pathway set");
+    }),
+    run("perceived severity and pattern confidence map", () => {
+      const payload = buildLongevityAdaptivePayload({
+        mainConcern: { perceivedSeverity: "moderate", patternConfidence: "mixed_or_unsure" },
+      });
+      assert(payload.adaptive_answers.perceived_severity === "moderate", "severity");
+      assert(payload.adaptive_answers.pattern_confidence === "mixed_or_unsure", "pattern confidence");
+    }),
+    run("shedding trend maps to recent_hair_trend and can influence progression", () => {
+      const payload = buildLongevityAdaptivePayload({
+        timelineTriggers: { sheddingTrend: "comes_and_goes" },
+        mainConcern: {},
+      });
+      assert(payload.adaptive_answers.recent_hair_trend === "fluctuating", "comes_and_goes normalised");
+      assert(payload.adaptive_answers.progression_speed === "fluctuating", "progression filled from trend when onset unset");
+    }),
   ];
 }
 

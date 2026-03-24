@@ -189,10 +189,17 @@ function mapOnsetTiming(
   return undefined;
 }
 
-function mapProgressionSpeed(mc: MainConcern | undefined, ai: AdaptiveIntake | undefined): ProgressionSpeedV2 | undefined {
+function mapProgressionSpeed(
+  mc: MainConcern | undefined,
+  ai: AdaptiveIntake | undefined,
+  tt: TimelineTriggers | undefined
+): ProgressionSpeedV2 | undefined {
   if (ai?.rapidProgressionWeeks === true) return "rapidly_worsening";
   const o = mc?.onsetPattern;
   if (o === "sudden" || o === "gradual" || o === "fluctuating") return o;
+  const trend = mapRecentHairTrend(tt);
+  if (trend === "fluctuating") return "fluctuating";
+  if (trend === "worsened") return "gradual";
   return undefined;
 }
 
@@ -222,16 +229,39 @@ function mapScalpClusterFromEngine(cluster: string[] | undefined): string[] {
   return dedupeStrings(out);
 }
 
+function hasFamilialPatternHairLoss(fh: string[] | undefined): boolean {
+  return has(fh, "male_pattern_hair_loss", "female_pattern_thinning");
+}
+
 function mapFamilyHistory(mh: MedicalHistory | undefined): FamilyHistoryV2 | undefined {
   const fh = mh?.familyHistory;
   if (!fh?.length) return undefined;
   if (fh.includes("none_known")) return "none_known";
+
+  const hairLoss = hasFamilialPatternHairLoss(fh);
+  const side = mh?.familyHistorySide;
+  if (hairLoss && side) {
+    if (side === "prefer_not_to_say") return "unsure";
+    if (side === "mothers_side" || side === "fathers_side" || side === "both_sides" || side === "unsure") {
+      return side;
+    }
+  }
+
   const hasMale = fh.includes("male_pattern_hair_loss");
   const hasFemale = fh.includes("female_pattern_thinning");
   if (hasMale && hasFemale) return "both_sides";
   if (hasMale) return "fathers_side";
   if (hasFemale) return "mothers_side";
   return "unsure";
+}
+
+function mapRecentHairTrend(tt: TimelineTriggers | undefined): "stable" | "improved" | "worsened" | "fluctuating" | undefined {
+  const s = tt?.sheddingTrend;
+  if (s === "stable") return "stable";
+  if (s === "improved") return "improved";
+  if (s === "worsened") return "worsened";
+  if (s === "comes_and_goes") return "fluctuating";
+  return undefined;
 }
 
 function mapTimelineBooleans(tt: TimelineTriggers | undefined, ai: AdaptiveIntake | undefined) {
@@ -485,7 +515,7 @@ export function mapResponsesToAdaptiveAnswers(
 
   const pattern_distribution = mapPatternDistribution(mc, presentationCanon);
   const onset_timing = mapOnsetTiming(mc, ai);
-  const progression_speed = mapProgressionSpeed(mc, ai);
+  const progression_speed = mapProgressionSpeed(mc, ai, tt);
 
   const scalp_symptoms = dedupeStrings([
     ...mapScalpSymptomsFromMain(mc?.symptoms),
@@ -513,6 +543,8 @@ export function mapResponsesToAdaptiveAnswers(
   }
 
   const familyHistoryV2 = mapFamilyHistory(mh);
+  const recent_hair_trend = mapRecentHairTrend(tt);
+  const familialHair = hasFamilialPatternHairLoss(mh?.familyHistory);
 
   const active_shedding_now =
     chief_concern === "shedding" ||
@@ -530,6 +562,11 @@ export function mapResponsesToAdaptiveAnswers(
     ...(pattern_distribution.length ? { pattern_distribution } : {}),
     ...(onset_timing ? { onset_timing } : {}),
     ...(progression_speed ? { progression_speed } : {}),
+    ...(recent_hair_trend ? { recent_hair_trend } : {}),
+    ...(mc?.perceivedSeverity ? { perceived_severity: mc.perceivedSeverity } : {}),
+    ...(mc?.patternConfidence && mc.patternConfidence !== "prefer_not_to_say"
+      ? { pattern_confidence: mc.patternConfidence }
+      : {}),
     ...(scalp_symptoms.length ? { scalp_symptoms } : {}),
     ...(active_shedding_now ? { active_shedding_now: true } : {}),
     ...(breakage_over_shedding ? { breakage_over_shedding: true } : {}),
@@ -544,6 +581,12 @@ export function mapResponsesToAdaptiveAnswers(
       ? { medication_change_recently: true }
       : {}),
     ...(familyHistoryV2 ? { family_history: familyHistoryV2 } : {}),
+    ...(familialHair && mh?.familyHairPatternMatch && mh.familyHairPatternMatch !== "prefer_not_to_say"
+      ? { family_hair_pattern_match: mh.familyHairPatternMatch }
+      : {}),
+    ...(familialHair && mh?.familyHairOnsetAgeBand && mh.familyHairOnsetAgeBand !== "prefer_not_to_say"
+      ? { family_hair_onset_age_band: mh.familyHairOnsetAgeBand }
+      : {}),
     ...(maleA.current_or_past_trt ? { current_or_past_trt: true } : {}),
     ...(maleA.testosterone_boosters ? { testosterone_boosters: true } : {}),
     ...(maleA.sarms_or_anabolics ? { sarms_or_anabolics: true } : {}),
@@ -612,6 +655,11 @@ const V2_ENGINE_KEYS = new Set([
   "rapid_weight_loss",
   "medication_change_recently",
   "family_history",
+  "family_hair_pattern_match",
+  "family_hair_onset_age_band",
+  "perceived_severity",
+  "pattern_confidence",
+  "recent_hair_trend",
   "current_or_past_trt",
   "trt_start_context",
   "testosterone_boosters",

@@ -42,6 +42,110 @@ function normalizeConfidence(score: number, maxScore: number): number {
   return Number((score / maxScore).toFixed(2));
 }
 
+const SHELL_PATHWAY_IDS = new Set<PathwayId>(["mixed_pattern", "unclear_pattern"]);
+
+/** When scores tie, prefer more specific contextual pathways over generic TE. */
+function pathwayTiePriority(id: PathwayId, facts: Record<string, unknown>): number {
+  if (facts.possible_postpartum_context && id === "postpartum_pattern") return 0;
+  if (id === "medication_induced_pattern") return 1;
+  if (id === "traction_mechanical_pattern") return 2;
+  if (id === "inflammatory_scalp_pattern") return 3;
+  if (id === "telogen_effluvium_acute" || id === "telogen_effluvium_chronic") return 5;
+  if (id === "nutritional_deficiency_pattern") return 6;
+  return 4;
+}
+
+/**
+ * Calibrates primary/secondary pathways: widens secondaries when pattern fit is uncertain,
+ * promotes mixed_pattern when scores cluster, and adds overlap secondaries for common co-patterns.
+ */
+function selectCalibratedPathways(
+  pathwayScores: PathwayScore[],
+  facts: Record<string, unknown>
+): { primaryPathway: PathwayId; secondaryPathways: PathwayId[] } {
+  const concreteSorted = pathwayScores
+    .filter((s) => !SHELL_PATHWAY_IDS.has(s.pathwayId))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return pathwayTiePriority(a.pathwayId, facts) - pathwayTiePriority(b.pathwayId, facts);
+    });
+
+  const highestScore = concreteSorted[0]?.score ?? 0;
+  if (concreteSorted.length === 0 || highestScore <= 0) {
+    return { primaryPathway: "unclear_pattern", secondaryPathways: [] };
+  }
+
+  const top = concreteSorted[0]!;
+  const second = concreteSorted[1];
+  const gap = second ? top.score - second.score : 999;
+
+  const uncertain = facts.pattern_confidence_uncertain === true;
+  const secondaryFloor = uncertain ? Math.max(1, highestScore - 3) : Math.max(2, highestScore - 2);
+
+  let primaryPathway: PathwayId = top.pathwayId;
+  let secondaryPathways = concreteSorted
+    .slice(1)
+    .filter((e) => e.score >= secondaryFloor)
+    .map((e) => e.pathwayId);
+
+  const competitive = concreteSorted.filter((s) => s.score >= top.score - 2);
+  if (uncertain && gap <= 2 && top.score >= 6 && competitive.length >= 2) {
+    primaryPathway = "mixed_pattern";
+    secondaryPathways = concreteSorted
+      .filter((s) => s.score >= 3)
+      .slice(0, 4)
+      .map((s) => s.pathwayId);
+  }
+
+  const appendSecondary = (id: PathwayId) => {
+    if (id !== primaryPathway && !secondaryPathways.includes(id)) {
+      secondaryPathways.push(id);
+    }
+  };
+
+  if (
+    facts.possible_postpartum_context &&
+    facts.suspected_shedding &&
+    primaryPathway === "postpartum_pattern"
+  ) {
+    const andr = pathwayScores.find((s) => s.pathwayId === "androgenic_pattern");
+    if (andr && andr.score >= 3) appendSecondary("androgenic_pattern");
+  }
+
+  if (primaryPathway === "inflammatory_scalp_pattern" && facts.suspected_shedding) {
+    const teA = pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_acute");
+    const teC = pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_chronic");
+    const te =
+      teA && teC ? (teA.score >= teC.score ? teA : teC) : teA ?? teC;
+    if (te && te.score >= 2) appendSecondary(te.pathwayId);
+  }
+
+  if (
+    primaryPathway === "traction_mechanical_pattern" &&
+    facts.suspected_shedding &&
+    facts.has_diffuse_loss
+  ) {
+    const teA = pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_acute");
+    const teC = pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_chronic");
+    const te =
+      teA && teC ? (teA.score >= teC.score ? teA : teC) : teA ?? teC;
+    if (te && te.score >= 3) appendSecondary(te.pathwayId);
+  }
+
+  if (
+    (primaryPathway === "telogen_effluvium_acute" ||
+      primaryPathway === "telogen_effluvium_chronic") &&
+    facts.breakage_predominant_without_diffuse_top
+  ) {
+    const tr = pathwayScores.find((s) => s.pathwayId === "traction_mechanical_pattern");
+    if (tr && tr.score >= 2) appendSecondary("traction_mechanical_pattern");
+  }
+
+  secondaryPathways = dedupeStrings(secondaryPathways.filter((id) => id !== primaryPathway));
+
+  return { primaryPathway, secondaryPathways };
+}
+
 function deriveRedFlags(facts: Record<string, unknown>): RedFlag[] {
   const redFlags: RedFlag[] = [];
 
@@ -177,18 +281,16 @@ export function evaluateAdaptiveIntake(answers: AdaptiveAnswers): AdaptiveEngine
     .filter((x): x is PathwayScore => Boolean(x))
     .sort((a, b) => b.score - a.score);
 
-  const highestScore = pathwayScores[0]?.score ?? 0;
+  const highestScore =
+    pathwayScores.filter((s) => !SHELL_PATHWAY_IDS.has(s.pathwayId)).sort((a, b) => b.score - a.score)[0]?.score ?? 0;
 
-  let primaryPathway: PathwayId = "unclear_pattern";
-  let secondaryPathways: PathwayId[] = [];
+  const calibrated =
+    pathwayScores.some((s) => !SHELL_PATHWAY_IDS.has(s.pathwayId) && s.score > 0)
+      ? selectCalibratedPathways(pathwayScores, facts)
+      : { primaryPathway: "unclear_pattern" as PathwayId, secondaryPathways: [] as PathwayId[] };
 
-  if (pathwayScores.length > 0 && highestScore > 0) {
-    primaryPathway = pathwayScores[0].pathwayId;
-    secondaryPathways = pathwayScores
-      .slice(1)
-      .filter((entry) => entry.score >= Math.max(2, highestScore - 2))
-      .map((entry) => entry.pathwayId);
-  }
+  let primaryPathway = calibrated.primaryPathway;
+  let secondaryPathways = calibrated.secondaryPathways;
 
   const redFlags = deriveRedFlags(facts);
 

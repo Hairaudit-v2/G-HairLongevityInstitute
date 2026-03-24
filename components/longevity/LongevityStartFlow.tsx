@@ -288,6 +288,52 @@ const ONSET_PATTERN = [
   { key: "unsure", label: "Unsure" },
 ];
 
+const PERCEIVED_SEVERITY = [
+  { key: "mild", label: "Mild" },
+  { key: "moderate", label: "Moderate" },
+  { key: "severe", label: "Strong / severe" },
+  { key: "unsure", label: "Unsure" },
+] as const;
+
+const PATTERN_CONFIDENCE = [
+  { key: "confident", label: "Fits well" },
+  { key: "somewhat", label: "Somewhat" },
+  { key: "mixed_or_unsure", label: "Mixed or unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+const FAMILY_SIDE = [
+  { key: "mothers_side", label: "Mother’s side" },
+  { key: "fathers_side", label: "Father’s side" },
+  { key: "both_sides", label: "Both sides" },
+  { key: "unsure", label: "Unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+const FAMILY_PATTERN_MATCH = [
+  {
+    key: "similar_to_mine",
+    label: "Similar to mine",
+    description: "Their hair change looked like what you are noticing now",
+  },
+  {
+    key: "different_or_unclear",
+    label: "Different or unclear",
+    description: "Hard to compare, or a different pattern",
+  },
+  { key: "unsure", label: "Unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+const FAMILY_ONSET_AGE_BAND = [
+  { key: "before_30", label: "Mostly before age 30" },
+  { key: "30s", label: "30s" },
+  { key: "40s", label: "40s" },
+  { key: "50_or_older", label: "50 or older" },
+  { key: "unsure", label: "Unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
 const AFFECTED_AREAS = [
   { key: "frontal_hairline", label: "Frontal hairline" },
   { key: "temples", label: "Temples" },
@@ -1252,6 +1298,21 @@ export function LongevityStartFlow() {
                 </div>
                 <SingleSelect label="When did you first notice?" value={mc.firstNoticed} options={FIRST_NOTICED} onChange={(k) => setMainConcern({ firstNoticed: k as MainConcern["firstNoticed"] })} />
                 <SingleSelect label="Onset pattern" value={mc.onsetPattern} options={ONSET_PATTERN} onChange={(k) => setMainConcern({ onsetPattern: k as MainConcern["onsetPattern"] })} />
+                <SingleSelect
+                  label="How much is this affecting you day to day?"
+                  helpText="Your own sense of impact—not a medical score."
+                  explanation="This helps your team understand urgency and support needs. It does not replace clinical examination."
+                  value={mc.perceivedSeverity}
+                  options={[...PERCEIVED_SEVERITY]}
+                  onChange={(k) => setMainConcern({ perceivedSeverity: k as MainConcern["perceivedSeverity"] })}
+                />
+                <SingleSelect
+                  label="How well does the pattern you picked above fit what you see?"
+                  helpText="Optional. Skip with “Prefer not to say” if you like."
+                  value={mc.patternConfidence}
+                  options={[...PATTERN_CONFIDENCE]}
+                  onChange={(k) => setMainConcern({ patternConfidence: k as MainConcern["patternConfidence"] })}
+                />
                 <MultiSelect label="Affected areas" options={AFFECTED_AREAS} value={mc.affectedAreas ?? []} onChange={(v) => setMainConcern({ affectedAreas: v })} />
                 <MultiSelect
                   label="Symptoms"
@@ -1369,6 +1430,38 @@ export function LongevityStartFlow() {
                 <MultiSelect label="Diagnoses (select any that apply)" options={DIAGNOSES} value={mh.diagnoses ?? []} onChange={(v) => setMedicalHistory({ diagnoses: v })} />
                 <MultiSelect label="Current symptoms" options={CURRENT_SYMPTOMS} value={mh.currentSymptoms ?? []} onChange={(v) => setMedicalHistory({ currentSymptoms: v })} />
                 <MultiSelect label="Family history" options={FAMILY_HISTORY} value={mh.familyHistory ?? []} onChange={(v) => setMedicalHistory({ familyHistory: v })} />
+                {((mh.familyHistory ?? []).includes("male_pattern_hair_loss") ||
+                  (mh.familyHistory ?? []).includes("female_pattern_thinning")) && (
+                  <div className="space-y-5 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                    <p className="text-xs text-white/55">
+                      A few details on family pattern hair loss—only because you selected it above. Stays in this section
+                      only.
+                    </p>
+                    <SingleSelect
+                      label="Which side of the family?"
+                      value={mh.familyHistorySide}
+                      options={[...FAMILY_SIDE]}
+                      onChange={(k) => setMedicalHistory({ familyHistorySide: k as MedicalHistory["familyHistorySide"] })}
+                    />
+                    <SingleSelect
+                      label="Was their hair change similar to yours?"
+                      value={mh.familyHairPatternMatch}
+                      options={[...FAMILY_PATTERN_MATCH]}
+                      onChange={(k) =>
+                        setMedicalHistory({ familyHairPatternMatch: k as MedicalHistory["familyHairPatternMatch"] })
+                      }
+                    />
+                    <SingleSelect
+                      label="Roughly when did their hair changes start? (if you know)"
+                      helpText="Approximate decade or age band is enough."
+                      value={mh.familyHairOnsetAgeBand}
+                      options={[...FAMILY_ONSET_AGE_BAND]}
+                      onChange={(k) =>
+                        setMedicalHistory({ familyHairOnsetAgeBand: k as MedicalHistory["familyHairOnsetAgeBand"] })
+                      }
+                    />
+                  </div>
+                )}
                 <SingleSelect
                   label="Prior blood tests"
                   value={mh.priorBloodTests}

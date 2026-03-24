@@ -138,6 +138,85 @@ export function runAdaptiveTriageSmokeTests(): SmokeTestResult[] {
         );
       }
     ),
+    runCase(
+      "pattern confidence uncertain promotes mixed_pattern when scores cluster",
+      {
+        chief_concern: "shedding",
+        active_shedding_now: true,
+        pattern_distribution: ["diffuse_top"],
+        onset_timing: "6_to_12_months",
+        scalp_symptoms: ["itch", "burning", "white_flakes"],
+        poor_sleep_quality: true,
+        high_stress_load: true,
+        pattern_confidence: "mixed_or_unsure",
+      },
+      (result) => {
+        assert(
+          result.triage.primary_pathway === "mixed_pattern",
+          "Expected mixed_pattern primary when uncertain and TE vs inflammatory cluster"
+        );
+        assert(result.triage.secondary_pathways.length >= 2, "Expected multiple concrete secondaries");
+      }
+    ),
+    runCase(
+      "postpartum shedding keeps androgenic as secondary when patterned loss scores",
+      {
+        sex_at_birth: "female",
+        chief_concern: "shedding",
+        active_shedding_now: true,
+        postpartum_recent: true,
+        pattern_distribution: ["diffuse_top", "temples"],
+        family_history: "mothers_side",
+        onset_timing: "3_to_6_months",
+      },
+      (result) => {
+        assert(result.triage.primary_pathway === "postpartum_pattern", "Expected postpartum primary");
+        assert(
+          result.triage.secondary_pathways.includes("androgenic_pattern"),
+          "Expected androgenic secondary overlap when temple pattern scores"
+        );
+      }
+    ),
+    runCase(
+      "worsening trend applies to acute TE in acute window only",
+      {
+        chief_concern: "shedding",
+        active_shedding_now: true,
+        pattern_distribution: ["diffuse_top"],
+        onset_timing: "6_weeks_to_3_months",
+        recent_hair_trend: "worsened",
+      },
+      (result) => {
+        const acute = result.pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_acute");
+        const chronic = result.pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_chronic");
+        assert(
+          acute?.reasons.some((r) => r.includes("worsening")) === true,
+          "Acute TE should include worsening reason"
+        );
+        assert(
+          chronic?.reasons.some((r) => r.includes("worsening")) !== true,
+          "Chronic TE should not get chronic worsening bonus in acute window"
+        );
+      }
+    ),
+    runCase(
+      "inflammatory primary with shedding includes TE secondary",
+      {
+        chief_concern: "scalp_symptoms",
+        scalp_symptoms: ["itch", "pustules"],
+        pattern_distribution: ["diffuse_top"],
+        active_shedding_now: true,
+      },
+      (result) => {
+        assert(result.triage.primary_pathway === "inflammatory_scalp_pattern", "Inflammatory primary");
+        assert(
+          result.triage.secondary_pathways.some(
+            (p) => p === "telogen_effluvium_acute" || p === "telogen_effluvium_chronic"
+          ),
+          "TE secondary when shedding co-reported"
+        );
+      }
+    ),
   ];
 }
 

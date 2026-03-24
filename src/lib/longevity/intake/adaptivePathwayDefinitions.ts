@@ -22,6 +22,11 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
         reason: "positive family history",
       },
       {
+        when: [{ fact: "family_similarity_with_objective_pattern", operator: "eq", value: true }],
+        score: 1,
+        reason: "family pattern similar with visible patterned distribution",
+      },
+      {
         when: [{ fact: "onset_timing", operator: "in", value: ["6_to_12_months", "more_than_12_months"] }],
         score: 1,
         reason: "gradual timeline",
@@ -50,6 +55,11 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
         when: [{ fact: "recent_trigger_burden", operator: "gte", value: 1 }],
         score: 2,
         reason: "recent trigger burden",
+      },
+      {
+        when: [{ fact: "te_worsening_for_acute", operator: "eq", value: true }],
+        score: 1,
+        reason: "recent course worsening within an acute/subacute window",
       },
     ],
     followupQuestionIds: [
@@ -88,6 +98,11 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
         when: [{ fact: "nutritional_risk_cluster", operator: "eq", value: true }],
         score: 2,
         reason: "nutritional risk burden",
+      },
+      {
+        when: [{ fact: "te_worsening_for_chronic", operator: "eq", value: true }],
+        score: 1,
+        reason: "worsening trend with a longer course timeframe",
       },
     ],
     followupQuestionIds: [
@@ -261,6 +276,14 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
         score: 1,
         reason: "scalp symptoms are chief concern",
       },
+      {
+        when: [
+          { fact: "suspected_shedding", operator: "eq", value: true },
+          { fact: "has_inflammatory_scalp_symptoms", operator: "eq", value: true },
+        ],
+        score: 1,
+        reason: "shedding with inflammatory scalp features",
+      },
     ],
     followupQuestionIds: ["scalp_symptoms"],
     derivedSignals: ["inflammatory_scalp_signal"],
@@ -287,6 +310,11 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
         when: [{ fact: "breakage_over_shedding", operator: "eq", value: true }],
         score: 2,
         reason: "breakage dominant pattern",
+      },
+      {
+        when: [{ fact: "breakage_predominant_without_diffuse_top", operator: "eq", value: true }],
+        score: 1,
+        reason: "breakage-weighted pattern without diffuse top loss",
       },
     ],
     followupQuestionIds: [
@@ -325,7 +353,7 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
     scoringRules: [
       {
         when: [{ fact: "possible_postpartum_context", operator: "eq", value: true }],
-        score: 4,
+        score: 3,
         reason: "postpartum context",
       },
       {

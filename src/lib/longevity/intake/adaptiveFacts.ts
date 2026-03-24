@@ -156,5 +156,49 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
 
     possible_neutral_hormonal_context:
       asBoolean(answers.neutral_hormonal_context),
+
+    family_pattern_similar_to_self: answers.family_hair_pattern_match === "similar_to_mine",
+
+    recent_hair_trend_worsening: answers.recent_hair_trend === "worsened",
+
+    perceived_severity_moderate_or_high:
+      answers.perceived_severity === "moderate" ||
+      answers.perceived_severity === "severe",
+
+    pattern_confidence_uncertain: answers.pattern_confidence === "mixed_or_unsure",
+
+    /** Family similarity nudges androgenic only when objective patterned distribution exists. */
+    family_similarity_with_objective_pattern:
+      answers.family_hair_pattern_match === "similar_to_mine" &&
+      (patternDistribution.includes("temples") ||
+        patternDistribution.includes("frontal_hairline") ||
+        patternDistribution.includes("crown") ||
+        patternDistribution.includes("center_part")),
+
+    /** Worsening trend + acute/subacute onset → acute TE layer (mutually exclusive with chronic worsening). */
+    te_worsening_for_acute:
+      answers.recent_hair_trend === "worsened" &&
+      (answers.onset_timing === "less_than_6_weeks" ||
+        answers.onset_timing === "6_weeks_to_3_months" ||
+        answers.onset_timing === "3_to_6_months" ||
+        (answers.onset_timing === undefined &&
+          (answers.chief_concern === "shedding" || asBoolean(answers.active_shedding_now)))),
+
+    /** Worsening trend + longer course → chronic TE layer only. */
+    te_worsening_for_chronic:
+      answers.recent_hair_trend === "worsened" &&
+      (answers.onset_timing === "6_to_12_months" || answers.onset_timing === "more_than_12_months"),
+
+    /** Co-occurrence flag for overlap handling in triage (not a patient-facing label). */
+    shedding_with_inflammatory_scalp:
+      (answers.chief_concern === "shedding" || asBoolean(answers.active_shedding_now)) &&
+      (scalpSymptoms.includes("itch") ||
+        scalpSymptoms.includes("burning") ||
+        scalpSymptoms.includes("pain") ||
+        scalpSymptoms.includes("pustules")),
+
+    /** Breakage-weighted presentation without diffuse top (helps traction vs diffuse TE). */
+    breakage_predominant_without_diffuse_top:
+      asBoolean(answers.breakage_over_shedding) && !hasDiffuseLoss,
   };
 }
