@@ -6,7 +6,8 @@
     "dev:clean": "npx rimraf .next && next dev",
     "dev:3002": "next dev -p 3002",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "smoke:scalp-intelligence": "npx tsx scripts/run-scalp-image-intelligence-smoke.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.93",

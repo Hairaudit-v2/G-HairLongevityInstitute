@@ -3,8 +3,44 @@ import { getDefaultVisionProvider } from "@/lib/ai/openaiVisionProvider";
 import { LONGEVITY_DOC_TYPE } from "./documentTypes";
 import { downloadLongevityFile } from "./storage";
 import { getPreviousSubmittedIntakeId } from "./scalpImageComparisons";
-import { analyzeScalpImageSetDraft, SCALP_IMAGE_ANALYSIS_VERSION } from "./scalpImageAnalysis";
+import {
+  analyzeScalpImageSetDraft,
+  SCALP_IMAGE_ANALYSIS_VERSION,
+  type ScalpPerDocumentMetadata,
+} from "./scalpImageAnalysis";
 import { replacePendingScalpImageAnalysisDraftsForIntake } from "./scalpImageAnalysisDrafts";
+import { mergeScalpImageIntoDocumentMetadata } from "./scalpImageDocumentMetadata";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+async function patchScalpPhotoDocumentMetadata(
+  supabase: SupabaseClient,
+  entries: ScalpPerDocumentMetadata[],
+  analysisVersion: string
+): Promise<void> {
+  if (entries.length === 0) return;
+  const ids = entries.map((e) => e.document_id);
+  const { data: rows } = await supabase
+    .from("hli_longevity_documents")
+    .select("id, metadata")
+    .in("id", ids);
+  const byId = new Map(
+    (rows ?? []).map((r) => [r.id as string, r.metadata as unknown])
+  );
+  const now = new Date().toISOString();
+  for (const e of entries) {
+    const prev = byId.get(e.document_id);
+    const nextMeta = mergeScalpImageIntoDocumentMetadata(
+      prev,
+      e,
+      analysisVersion,
+      now
+    );
+    await supabase
+      .from("hli_longevity_documents")
+      .update({ metadata: nextMeta })
+      .eq("id", e.document_id);
+  }
+}
 
 export type LongevityScalpImageAnalysisJobResult = {
   ok: boolean;
@@ -172,6 +208,12 @@ export async function runLongevityScalpImageAnalysisJob(params: {
     );
     if (!replaceResult.ok) {
       throw new Error(replaceResult.error);
+    }
+
+    const perMeta = (draft.raw_payload as { per_document_meta?: ScalpPerDocumentMetadata[] })
+      .per_document_meta;
+    if (Array.isArray(perMeta) && perMeta.length > 0) {
+      await patchScalpPhotoDocumentMetadata(supabase, perMeta, SCALP_IMAGE_ANALYSIS_VERSION);
     }
 
     await supabase

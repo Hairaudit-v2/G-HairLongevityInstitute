@@ -8,7 +8,10 @@ export type ReassessmentSignalId =
   | "image_quality_improved"
   | "pattern_needs_rereview"
   | "original_uncertainty_reduced"
-  | "follow_up_still_incomplete";
+  | "follow_up_still_incomplete"
+  | "new_scalp_ai_analysis_available"
+  | "scalp_metadata_quality_improved"
+  | "intake_image_alignment_review_recommended";
 
 export type ReassessmentSignal = {
   id: ReassessmentSignalId;
@@ -31,6 +34,16 @@ export type ReassessmentDocument = {
   created_at: string;
 };
 
+/** Optional scalp image intelligence context (additive; never changes triage scoring). */
+export type ReassessmentScalpIntelligenceInput = {
+  /** Pending AI draft exists with structured payload, created after reassessment anchor. */
+  pending_scalp_analysis_after_anchor: boolean;
+  /** At least one new scalp photo after anchor has usable metadata from analysis. */
+  new_scalp_metadata_usable: boolean;
+  /** Fusion alignment is partial or conflicting while adaptive rescore changed (review alignment). */
+  alignment_review_recommended: boolean;
+};
+
 type ReassessmentInput = {
   adaptive_triage: AdaptiveDerivedSummary | null | undefined;
   adaptive_rescore_comparison: AdaptiveRescoreComparison | null | undefined;
@@ -44,14 +57,23 @@ type ReassessmentInput = {
     currentPhotoCount?: number;
     previousPhotoCount?: number;
   } | null | undefined;
+  scalp_intelligence?: ReassessmentScalpIntelligenceInput | null | undefined;
 };
 
-function isAfterAnchor(isoDate: string, anchor: string | null): boolean {
+/** Exported for review routes and tests that share the same reassessment anchor logic. */
+export function isIsoAfterAnchor(
+  isoDate: string,
+  anchor: string | null | undefined
+): boolean {
   if (!anchor) return true;
   const d = Date.parse(isoDate);
   const a = Date.parse(anchor);
   if (Number.isNaN(d) || Number.isNaN(a)) return false;
   return d > a;
+}
+
+function isAfterAnchor(isoDate: string, anchor: string | null): boolean {
+  return isIsoAfterAnchor(isoDate, anchor);
 }
 
 function includesAny(values: string[], keys: string[]): boolean {
@@ -105,6 +127,11 @@ export function buildReassessmentSummary(input: ReassessmentInput): Reassessment
     input.review_outcome === "awaiting_patient_documents" ||
     (newDocs.length === 0 && includesAny(uploadGuidance, ["center_part", "top_down"]));
 
+  const si = input.scalp_intelligence;
+  const newScalpAiAnalysis: boolean = si?.pending_scalp_analysis_after_anchor === true;
+  const scalpMetaQualityImproved: boolean = si?.new_scalp_metadata_usable === true;
+  const alignmentReviewRecommended: boolean = si?.alignment_review_recommended === true;
+
   const signals: ReassessmentSignal[] = [
     {
       id: "new_documents_received",
@@ -156,12 +183,47 @@ export function buildReassessmentSummary(input: ReassessmentInput): Reassessment
         ? "Additional context may still be needed before final reassessment closure."
         : "Current context appears sufficient for reassessment completion.",
     },
+    {
+      id: "new_scalp_ai_analysis_available",
+      active: newScalpAiAnalysis,
+      label: "New scalp image analysis available",
+      detail: newScalpAiAnalysis
+        ? "A new AI scalp-image draft (structured synthesis) is available for clinician review."
+        : "No new pending scalp-image analysis detected after the reassessment anchor.",
+    },
+    {
+      id: "scalp_metadata_quality_improved",
+      active: scalpMetaQualityImproved,
+      label: "Scalp photo metadata suggests improved usability",
+      detail: scalpMetaQualityImproved
+        ? "Recent scalp upload(s) carry analysis metadata indicating better usability for review."
+        : "No clear scalp metadata usability improvement on new uploads yet.",
+    },
+    {
+      id: "intake_image_alignment_review_recommended",
+      active: alignmentReviewRecommended,
+      label: "Intake vs image alignment review",
+      detail: alignmentReviewRecommended
+        ? "Adaptive interpretation shifted and image–intake alignment should be re-checked."
+        : "No combined adaptive-and-image alignment flag at this time.",
+    },
   ];
 
   const hasNewInformation: boolean =
-    newDocs.length > 0 || deltaChanged || imageQualityImproved || uncertaintyReduced;
+    newDocs.length > 0 ||
+    deltaChanged ||
+    imageQualityImproved ||
+    uncertaintyReduced ||
+    newScalpAiAnalysis ||
+    scalpMetaQualityImproved ||
+    alignmentReviewRecommended;
   const readyForReassessment: boolean =
-    hasNewInformation && (newBloodworkDocs.length > 0 || imageQualityImproved || deltaChanged);
+    hasNewInformation &&
+    (newBloodworkDocs.length > 0 ||
+      imageQualityImproved ||
+      deltaChanged ||
+      newScalpAiAnalysis ||
+      alignmentReviewRecommended);
 
   return {
     ready_for_reassessment: readyForReassessment,

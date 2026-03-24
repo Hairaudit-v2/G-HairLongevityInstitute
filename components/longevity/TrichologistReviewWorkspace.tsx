@@ -39,7 +39,13 @@ import type { TreatmentResponseComparison } from "@/lib/longevity/treatmentRespo
 import {
   SCALP_IMAGE_QUALITY,
   SCALP_SEVERITY_ESTIMATE,
+  type ScalpImageCaseSynthesis,
+  type ScalpImageEvidenceSummaryRow,
 } from "@/lib/longevity/scalpImageAnalysis";
+import {
+  INTAKE_IMAGE_ALIGNMENT,
+  type IntakeImageFusionResult,
+} from "@/lib/longevity/intakeImageFusion";
 import type { FollowUpCadenceOutput } from "@/lib/longevity/followUpCadence";
 import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
 import type { AdaptiveDerivedSummary } from "@/lib/longevity/schema";
@@ -142,7 +148,14 @@ export type CaseDetail = {
     responses: Record<string, unknown>;
     updated_at: string | null;
   };
-  documents: { id: string; doc_type: string; filename: string | null; created_at: string }[];
+  documents: {
+    id: string;
+    doc_type: string;
+    filename: string | null;
+    mime_type?: string | null;
+    created_at: string;
+    metadata?: Record<string, unknown> | null;
+  }[];
   notes: { id: string; body: string; created_at: string }[];
   /** Snapshot of what was released to the patient (for traceability and review). */
   released_summary_snapshot?: {
@@ -221,6 +234,30 @@ export type CaseDetail = {
   adaptive_red_flags?: string[];
   adaptive_rescore_comparison?: AdaptiveRescoreComparison | null;
   reassessment_summary?: ReassessmentSummary | null;
+  /** Case-level image synthesis (from latest pending scalp draft payload). */
+  scalp_image_case_synthesis?: ScalpImageCaseSynthesis | null;
+  /** Per-document structured evidence (from draft analysis). */
+  scalp_image_evidence_summary?: ScalpImageEvidenceSummaryRow[];
+  /** Intake adaptive triage vs image synthesis (heuristic). */
+  scalp_intake_image_fusion?: IntakeImageFusionResult | null;
+  /** Source and version hints for synthesis (clinician debugging). */
+  scalp_image_intelligence_meta?: {
+    synthesis_source: "pending_draft" | "none";
+    pending_draft_analysis_version: string | null;
+    pending_draft_id: string | null;
+    pending_draft_created_at: string | null;
+    raw_payload_analysis_version: string | null;
+    scalp_comparison_record_present: boolean;
+  } | null;
+  /** Latest append-only AI feedback from this trichologist for this intake. */
+  clinician_ai_feedback_latest?: {
+    id: string;
+    adaptive_triage_usefulness: string | null;
+    scalp_image_intelligence_usefulness: string | null;
+    intake_image_fusion_usefulness: string | null;
+    note: string | null;
+    created_at: string;
+  } | null;
 };
 
 export type BloodMarkerRaw = {
@@ -261,6 +298,7 @@ export type ScalpImageAnalysisDraft = {
   manual_review_recommended: boolean;
   draft_summary: string;
   created_at: string;
+  analysis_version?: string;
 };
 
 export type CaseComparisonResult = {
@@ -326,6 +364,30 @@ const SCALP_COMPARISON_REGIONS = [
   { key: "mid_scalp", label: "Mid scalp" },
   { key: "part_line", label: "Part line" },
   { key: "whole_scalp", label: "Whole scalp" },
+] as const;
+
+const SCALP_EVIDENCE_FEATURE_LABELS: Record<string, string> = {
+  temple_recession: "Temple recession",
+  crown_thinning: "Crown thinning",
+  part_widening: "Part widening",
+  diffuse_density: "Diffuse density",
+  edge_thinning: "Edge thinning",
+  redness_scale: "Redness / scale",
+  patchy_loss: "Patchy loss",
+};
+
+const INTAKE_IMAGE_ALIGNMENT_LABELS: Record<string, string> = {
+  [INTAKE_IMAGE_ALIGNMENT.STRONG]: "Strong",
+  [INTAKE_IMAGE_ALIGNMENT.PARTIAL]: "Partial",
+  [INTAKE_IMAGE_ALIGNMENT.CONFLICTING]: "Conflicting",
+  [INTAKE_IMAGE_ALIGNMENT.INSUFFICIENT]: "Insufficient",
+};
+
+const CLINICIAN_AI_FEEDBACK_SELECT = [
+  { value: "", label: "Not set" },
+  { value: "useful", label: "Useful" },
+  { value: "unclear", label: "Unclear" },
+  { value: "misleading", label: "Misleading" },
 ] as const;
 
 function VisualFindingCard({
@@ -548,6 +610,14 @@ export function TrichologistReviewWorkspace({
 
   const [includeReleased, setIncludeReleased] = useState(false);
   const [documentTypeFilter, setDocumentTypeFilter] = useState<string>("all");
+  const [scalpPreviewByDocId, setScalpPreviewByDocId] = useState<Record<string, string>>({});
+  const [scalpPreviewLoading, setScalpPreviewLoading] = useState<string | null>(null);
+  const [scalpPreviewError, setScalpPreviewError] = useState<string | null>(null);
+  const [aiFeedbackAdaptive, setAiFeedbackAdaptive] = useState("");
+  const [aiFeedbackScalp, setAiFeedbackScalp] = useState("");
+  const [aiFeedbackFusion, setAiFeedbackFusion] = useState("");
+  const [aiFeedbackNote, setAiFeedbackNote] = useState("");
+  const [aiFeedbackSaving, setAiFeedbackSaving] = useState(false);
   const [queueMetrics, setQueueMetrics] = useState<{
     total_submitted: number;
     in_queue: number;
@@ -625,6 +695,53 @@ export function TrichologistReviewWorkspace({
     setDocumentTypeFilter("all");
   }, [selectedId]);
 
+  useEffect(() => {
+    setScalpPreviewByDocId({});
+    setScalpPreviewError(null);
+  }, [selectedId]);
+
+  useEffect(() => {
+    const f = caseDetail?.clinician_ai_feedback_latest;
+    if (f) {
+      setAiFeedbackAdaptive(f.adaptive_triage_usefulness ?? "");
+      setAiFeedbackScalp(f.scalp_image_intelligence_usefulness ?? "");
+      setAiFeedbackFusion(f.intake_image_fusion_usefulness ?? "");
+      setAiFeedbackNote(f.note ?? "");
+    } else {
+      setAiFeedbackAdaptive("");
+      setAiFeedbackScalp("");
+      setAiFeedbackFusion("");
+      setAiFeedbackNote("");
+    }
+  }, [
+    caseDetail?.intake.id,
+    caseDetail?.clinician_ai_feedback_latest?.id,
+    caseDetail?.clinician_ai_feedback_latest?.created_at,
+  ]);
+
+  const loadScalpDocumentPreview = useCallback(async (documentId: string) => {
+    setScalpPreviewLoading(documentId);
+    setScalpPreviewError(null);
+    try {
+      const res = await fetch(`/api/longevity/review/documents/${documentId}/signed-url`, {
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setScalpPreviewError(json.error ?? "Could not load preview.");
+        return;
+      }
+      setScalpPreviewByDocId((prev) => ({
+        ...prev,
+        [documentId]: json.signedUrl as string,
+      }));
+    } catch (e) {
+      setScalpPreviewError(e instanceof Error ? e.message : "Preview failed.");
+    } finally {
+      setScalpPreviewLoading(null);
+    }
+  }, []);
+
   const fetchCase = useCallback(async (id: string) => {
     setCaseLoading(true);
     setCaseDetail(null);
@@ -642,6 +759,11 @@ export function TrichologistReviewWorkspace({
         intake: data.intake,
         questionnaire: data.questionnaire,
         documents: data.documents ?? [],
+        scalp_image_case_synthesis: data.scalp_image_case_synthesis ?? null,
+        scalp_image_evidence_summary: data.scalp_image_evidence_summary ?? [],
+        scalp_intake_image_fusion: data.scalp_intake_image_fusion ?? null,
+        scalp_image_intelligence_meta: data.scalp_image_intelligence_meta ?? null,
+        clinician_ai_feedback_latest: data.clinician_ai_feedback_latest ?? null,
         notes: data.notes ?? [],
         released_summary_snapshot: data.released_summary_snapshot ?? null,
         complexity: data.complexity ?? undefined,
@@ -712,6 +834,42 @@ export function TrichologistReviewWorkspace({
     if (selectedId) fetchCase(selectedId);
     else setCaseDetail(null);
   }, [selectedId, fetchCase]);
+
+  const submitClinicianAiFeedback = useCallback(async () => {
+    if (!selectedId) return;
+    setAiFeedbackSaving(true);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/longevity/review/intakes/${selectedId}/ai-feedback`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adaptive_triage_usefulness: aiFeedbackAdaptive || null,
+          scalp_image_intelligence_usefulness: aiFeedbackScalp || null,
+          intake_image_fusion_usefulness: aiFeedbackFusion || null,
+          note: aiFeedbackNote.trim() || null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        setActionError(json.error ?? "Could not save feedback.");
+        return;
+      }
+      await fetchCase(selectedId);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Feedback failed.");
+    } finally {
+      setAiFeedbackSaving(false);
+    }
+  }, [
+    selectedId,
+    aiFeedbackAdaptive,
+    aiFeedbackScalp,
+    aiFeedbackFusion,
+    aiFeedbackNote,
+    fetchCase,
+  ]);
 
   const claim = useCallback(async () => {
     if (!selectedId) return;
@@ -1841,6 +1999,88 @@ export function TrichologistReviewWorkspace({
                   />
                 )}
 
+                <div className="mt-6 rounded-lg border border-slate-500/35 bg-slate-950/40 p-4">
+                  <h3 className="text-sm font-medium text-white/90">AI outputs — quick feedback</h3>
+                  <p className="mt-1 text-xs text-white/50">
+                    Internal calibration only. Does not change scoring. Each save adds a timestamped record.
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <label className="block text-xs text-white/60">
+                      Adaptive triage
+                      <select
+                        value={aiFeedbackAdaptive}
+                        onChange={(e) => setAiFeedbackAdaptive(e.target.value)}
+                        className="mt-1 w-full rounded border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white"
+                        aria-label="Adaptive triage usefulness"
+                      >
+                        {CLINICIAN_AI_FEEDBACK_SELECT.map((o) => (
+                          <option key={`a-${o.value}`} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-xs text-white/60">
+                      Scalp image intelligence
+                      <select
+                        value={aiFeedbackScalp}
+                        onChange={(e) => setAiFeedbackScalp(e.target.value)}
+                        className="mt-1 w-full rounded border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white"
+                        aria-label="Scalp image intelligence usefulness"
+                      >
+                        {CLINICIAN_AI_FEEDBACK_SELECT.map((o) => (
+                          <option key={`s-${o.value}`} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-xs text-white/60">
+                      Intake–image fusion
+                      <select
+                        value={aiFeedbackFusion}
+                        onChange={(e) => setAiFeedbackFusion(e.target.value)}
+                        className="mt-1 w-full rounded border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white"
+                        aria-label="Intake image fusion usefulness"
+                      >
+                        {CLINICIAN_AI_FEEDBACK_SELECT.map((o) => (
+                          <option key={`f-${o.value}`} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <label className="mt-3 block text-xs text-white/60">
+                    Optional note (max 2000 chars)
+                    <textarea
+                      value={aiFeedbackNote}
+                      onChange={(e) => setAiFeedbackNote(e.target.value.slice(0, 2000))}
+                      rows={2}
+                      placeholder="e.g. which part was confusing…"
+                      className="mt-1 w-full rounded border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white placeholder-white/35"
+                    />
+                  </label>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={submitClinicianAiFeedback}
+                      disabled={aiFeedbackSaving}
+                      className="rounded border border-slate-400/40 bg-slate-500/15 px-3 py-1.5 text-sm text-white hover:bg-slate-500/25 disabled:opacity-50"
+                    >
+                      {aiFeedbackSaving ? "Saving…" : "Save feedback"}
+                    </button>
+                    {caseDetail.clinician_ai_feedback_latest && (
+                      <span className="text-[11px] text-white/45">
+                        Last saved:{" "}
+                        {new Date(
+                          caseDetail.clinician_ai_feedback_latest.created_at
+                        ).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {(caseDetail.adherence_context || caseDetail.adherence_states) && (
                   <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
                     <h3 className="text-sm font-medium text-white/90">Adherence context</h3>
@@ -2384,6 +2624,230 @@ export function TrichologistReviewWorkspace({
                   </div>
                 )}
 
+                {hasScalpPhotoDocument && (
+                  <div className="mt-6 rounded-lg border border-emerald-500/20 bg-emerald-950/20 p-4">
+                    <h3 className="text-sm font-medium text-white/90">
+                      Scalp image intelligence (clinician)
+                    </h3>
+                    <p className="mt-1 text-xs text-white/55">
+                      Structured signals from the same Vision pipeline as draft analysis. Not a separate system.
+                    </p>
+                    {caseDetail.scalp_image_intelligence_meta && (
+                      <div className="mt-2 rounded border border-white/10 bg-black/30 px-3 py-2 text-[11px] text-white/60">
+                        <div>
+                          Synthesis source:{" "}
+                          <span className="text-white/85">
+                            {caseDetail.scalp_image_intelligence_meta.synthesis_source === "pending_draft"
+                              ? "Latest pending draft"
+                              : "None (run analysis or apply/dismiss draft to refresh)"}
+                          </span>
+                        </div>
+                        <div className="mt-0.5">
+                          Draft row version:{" "}
+                          {caseDetail.scalp_image_intelligence_meta.pending_draft_analysis_version ?? "—"}
+                          {" · "}
+                          Payload version:{" "}
+                          {caseDetail.scalp_image_intelligence_meta.raw_payload_analysis_version ?? "—"}
+                        </div>
+                        <div className="mt-0.5">
+                          Saved scalp comparison:{" "}
+                          {caseDetail.scalp_image_intelligence_meta.scalp_comparison_record_present
+                            ? "yes"
+                            : "no"}
+                        </div>
+                      </div>
+                    )}
+                    {scalpPreviewError && (
+                      <p className="mt-2 text-xs text-amber-200/90">{scalpPreviewError}</p>
+                    )}
+                    <div className="mt-4 grid gap-4 lg:grid-cols-3">
+                      <div className="rounded-lg border border-white/10 bg-black/25 p-3">
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">
+                          Image quality summary
+                        </h4>
+                        {caseDetail.documents.filter((d) => d.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO)
+                          .length === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">No scalp photos on file.</p>
+                        ) : (
+                          <ul className="mt-2 space-y-2 text-sm text-white/80">
+                            {caseDetail.documents
+                              .filter((d) => d.doc_type === LONGEVITY_DOC_TYPE.SCALP_PHOTO)
+                              .map((d) => {
+                                const si = d.metadata?.scalp_image as
+                                  | {
+                                      detected_view?: string;
+                                      usability?: string;
+                                      quality_flags?: string[];
+                                      analyzed_at?: string;
+                                      analysis_version?: string;
+                                    }
+                                  | undefined;
+                                const previewUrl = scalpPreviewByDocId[d.id];
+                                const isRasterImage =
+                                  typeof d.mime_type === "string" &&
+                                  d.mime_type.toLowerCase().startsWith("image/");
+                                return (
+                                  <li key={d.id} className="border-b border-white/5 pb-2 last:border-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="text-white/60">
+                                        {d.filename ?? d.id.slice(0, 8)}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => loadScalpDocumentPreview(d.id)}
+                                        disabled={scalpPreviewLoading === d.id}
+                                        className="rounded border border-white/20 bg-white/5 px-2 py-0.5 text-[11px] text-white/85 hover:bg-white/10 disabled:opacity-50"
+                                      >
+                                        {scalpPreviewLoading === d.id ? "Loading…" : "Preview (clinician)"}
+                                      </button>
+                                    </div>
+                                    {previewUrl &&
+                                      (isRasterImage ? (
+                                        <img
+                                          src={previewUrl}
+                                          alt=""
+                                          className="mt-2 max-h-40 max-w-full rounded border border-white/15 object-contain"
+                                        />
+                                      ) : (
+                                        <a
+                                          href={previewUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="mt-2 inline-block text-xs text-[rgb(var(--gold))] hover:underline"
+                                        >
+                                          Open file in new tab
+                                        </a>
+                                      ))}
+                                    {si ? (
+                                      <div className="mt-1 text-xs text-white/70">
+                                        <div>View: {si.detected_view ?? "—"}</div>
+                                        <div>Usability: {si.usability ?? "—"}</div>
+                                        {si.analysis_version && (
+                                          <div>Analysis version: {si.analysis_version}</div>
+                                        )}
+                                        {si.quality_flags && si.quality_flags.length > 0 && (
+                                          <div>Flags: {si.quality_flags.join(", ")}</div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <p className="mt-1 text-xs text-white/45">
+                                        No analysis metadata yet. Run AI draft analysis.
+                                      </p>
+                                    )}
+                                  </li>
+                                );
+                              })}
+                          </ul>
+                        )}
+                      </div>
+                      <div className="rounded-lg border border-white/10 bg-black/25 p-3">
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">
+                          Image evidence summary
+                        </h4>
+                        {(caseDetail.scalp_image_evidence_summary?.length ?? 0) === 0 ? (
+                          <p className="mt-2 text-sm text-white/50">
+                            No structured evidence rows yet. Run AI draft analysis after upload.
+                          </p>
+                        ) : (
+                          <ul className="mt-2 space-y-3 text-xs text-white/80">
+                            {(caseDetail.scalp_image_evidence_summary ?? []).map((row) => (
+                              <li key={row.document_id} className="rounded border border-white/10 bg-white/5 p-2">
+                                <div className="font-mono text-[10px] text-white/45">{row.document_id}</div>
+                                <div className="mt-1 space-y-0.5">
+                                  {Object.entries(row.evidence_features).map(([k, v]) => (
+                                    <div key={k} className="flex justify-between gap-2">
+                                      <span>{SCALP_EVIDENCE_FEATURE_LABELS[k] ?? k}</span>
+                                      <span className="text-white/60">{v}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="mt-1 text-white/55">
+                                  Evidence confidence: {Math.round(row.evidence_confidence * 100)}%
+                                </div>
+                                {row.limitations.length > 0 && (
+                                  <ul className="mt-1 list-inside list-disc text-white/50">
+                                    {row.limitations.map((L) => (
+                                      <li key={L}>{L}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <div className="rounded-lg border border-white/10 bg-black/25 p-3">
+                        <h4 className="text-xs font-medium uppercase tracking-wide text-white/50">
+                          Intake vs image alignment
+                        </h4>
+                        {!caseDetail.scalp_intake_image_fusion ? (
+                          <p className="mt-2 text-sm text-white/50">No fusion output.</p>
+                        ) : (
+                          <div className="mt-2 space-y-2 text-sm text-white/80">
+                            <div>
+                              Alignment:{" "}
+                              {INTAKE_IMAGE_ALIGNMENT_LABELS[
+                                caseDetail.scalp_intake_image_fusion.alignment
+                              ] ?? caseDetail.scalp_intake_image_fusion.alignment}
+                            </div>
+                            <div>
+                              Supports primary pathway:{" "}
+                              {caseDetail.scalp_intake_image_fusion.supports_primary_pathway}
+                            </div>
+                            {caseDetail.scalp_intake_image_fusion.suggested_next_images.length >
+                              0 && (
+                              <div>
+                                <span className="text-white/55">Suggested views: </span>
+                                {caseDetail.scalp_intake_image_fusion.suggested_next_images
+                                  .map((v) => v.replace(/_/g, " "))
+                                  .join(", ")}
+                              </div>
+                            )}
+                            {caseDetail.scalp_intake_image_fusion.clinician_notes.length > 0 && (
+                              <ul className="list-inside list-disc text-xs text-white/65">
+                                {caseDetail.scalp_intake_image_fusion.clinician_notes.map((n) => (
+                                  <li key={n}>{n}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                        {caseDetail.scalp_image_case_synthesis && (
+                          <div className="mt-3 border-t border-white/10 pt-3 text-xs text-white/60">
+                            <div>
+                              Case synthesis: sufficient for pattern review —{" "}
+                              {caseDetail.scalp_image_case_synthesis.sufficient_for_pattern_review
+                                ? "yes"
+                                : "no"}
+                            </div>
+                            <div>
+                              Image confidence:{" "}
+                              {Math.round(caseDetail.scalp_image_case_synthesis.image_confidence * 100)}%
+                            </div>
+                            {caseDetail.scalp_image_case_synthesis.missing_views.length > 0 && (
+                              <div className="mt-1">
+                                Missing views:{" "}
+                                {caseDetail.scalp_image_case_synthesis.missing_views
+                                  .map((v) => v.replace(/_/g, " "))
+                                  .join(", ")}
+                              </div>
+                            )}
+                            {caseDetail.scalp_image_case_synthesis.visual_pattern_candidates.length >
+                              0 && (
+                              <div className="mt-1">
+                                Visual candidates:{" "}
+                                {caseDetail.scalp_image_case_synthesis.visual_pattern_candidates.join(
+                                  ", "
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -2416,6 +2880,9 @@ export function TrichologistReviewWorkspace({
                             <span>
                               Confidence: {draft.confidence != null ? `${Math.round(draft.confidence * 100)}%` : "—"}
                             </span>
+                            {draft.analysis_version && (
+                              <span title="Stored on draft row">Row version: {draft.analysis_version}</span>
+                            )}
                           </div>
                           <p className="mt-2 text-sm text-white/85">{draft.draft_summary}</p>
                           {(draft.thinning_distribution.length > 0 || draft.visible_findings.length > 0) && (

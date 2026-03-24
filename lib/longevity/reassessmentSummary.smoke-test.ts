@@ -89,6 +89,34 @@ export function runReassessmentSummarySmokeTests(): SmokeResult[] {
         "Expected follow_up_still_incomplete signal to be active"
       );
     }),
+    run("scalp intelligence signals optional", () => {
+      const output = buildReassessmentSummary({
+        adaptive_triage: null,
+        adaptive_rescore_comparison: null,
+        documents: [],
+        review_outcome: "follow_up_recommended",
+        first_review_note_at: "2026-03-19T10:00:00.000Z",
+        intake_created_at: "2026-03-18T10:00:00.000Z",
+        scalp_image_comparison: null,
+        scalp_intelligence: {
+          pending_scalp_analysis_after_anchor: true,
+          new_scalp_metadata_usable: false,
+          alignment_review_recommended: true,
+        },
+      });
+      assert(
+        output.signals.some(
+          (s) => s.id === "new_scalp_ai_analysis_available" && s.active
+        ),
+        "new scalp AI analysis signal"
+      );
+      assert(
+        output.signals.some(
+          (s) => s.id === "intake_image_alignment_review_recommended" && s.active
+        ),
+        "alignment review signal"
+      );
+    }),
     run("uncertain-to-clearer progression", () => {
       const output = buildReassessmentSummary({
         adaptive_triage: null,

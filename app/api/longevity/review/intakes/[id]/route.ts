@@ -33,7 +33,19 @@ import {
   compareAdaptiveTriageWithCurrentEngine,
   type AdaptiveRescoreComparison,
 } from "@/lib/longevity/intake";
-import { buildReassessmentSummary } from "@/lib/longevity/reassessmentSummary";
+import {
+  buildReassessmentSummary,
+  isIsoAfterAnchor,
+} from "@/lib/longevity/reassessmentSummary";
+import {
+  fuseIntakeTriageWithScalpSynthesis,
+  INTAKE_IMAGE_ALIGNMENT,
+} from "@/lib/longevity/intakeImageFusion";
+import {
+  extractCaseSynthesisFromRawPayload,
+  extractPerImageEvidenceFromRawPayload,
+} from "@/lib/longevity/scalpImageAnalysis";
+import { getLatestClinicianAiFeedbackForIntake } from "@/lib/longevity/clinicianAiFeedback";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +145,7 @@ export async function GET(
       { data: notes },
       { data: releaseRows },
       { data: reminderRows },
+      clinician_ai_feedback_latest,
     ] = await Promise.all([
       supabase
         .from("hli_longevity_questionnaires")
@@ -143,7 +156,7 @@ export async function GET(
         .maybeSingle(),
       supabase
         .from("hli_longevity_documents")
-        .select("id, doc_type, filename, mime_type, created_at")
+        .select("id, doc_type, filename, mime_type, created_at, metadata")
         .eq("intake_id", id)
         .order("created_at", { ascending: false }),
       supabase
@@ -164,6 +177,7 @@ export async function GET(
         .eq("status", "sent")
         .not("sent_at", "is", null)
         .order("sent_at", { ascending: true }),
+      getLatestClinicianAiFeedbackForIntake(supabase, id, trichologist.id),
     ]);
     const latestRelease = (releaseRows ?? [])[0] ?? null;
     const reminderSents = (reminderRows ?? []).map((r) => ({
@@ -310,6 +324,55 @@ export async function GET(
       (notes ?? []).length > 0
         ? ((notes ?? [])[0]?.created_at as string | undefined) ?? null
         : null;
+    const pendingScalpDraft = scalp_image_analysis_drafts[0] ?? null;
+    const scalpDraftRaw =
+      pendingScalpDraft?.raw_payload &&
+      typeof pendingScalpDraft.raw_payload === "object"
+        ? (pendingScalpDraft.raw_payload as Record<string, unknown>)
+        : null;
+    const scalp_image_case_synthesis = extractCaseSynthesisFromRawPayload(
+      scalpDraftRaw
+    );
+    const scalp_image_evidence_summary = extractPerImageEvidenceFromRawPayload(
+      scalpDraftRaw
+    );
+    const scalp_intake_image_fusion = fuseIntakeTriageWithScalpSynthesis(
+      adaptiveView.triage,
+      scalp_image_case_synthesis
+    );
+
+    const reassessmentAnchor = firstReviewNoteAt ?? intake.created_at ?? null;
+    const pendingScalpAnalysisAfterAnchor =
+      !!pendingScalpDraft?.created_at &&
+      !!scalp_image_case_synthesis &&
+      isIsoAfterAnchor(pendingScalpDraft.created_at, reassessmentAnchor);
+    const newScalpMetadataUsable = (documents ?? []).some((d) => {
+      if (d.doc_type !== LONGEVITY_DOC_TYPE.SCALP_PHOTO) return false;
+      if (!reassessmentAnchor) return false;
+      if (!isIsoAfterAnchor(d.created_at, reassessmentAnchor)) return false;
+      const si = d.metadata as Record<string, unknown> | null | undefined;
+      const scalp = si?.scalp_image as { usability?: string } | undefined;
+      return scalp?.usability === "usable";
+    });
+    const alignmentReviewRecommended =
+      adaptiveView.rescoreComparison?.changed === true &&
+      scalp_image_case_synthesis != null &&
+      scalp_intake_image_fusion != null &&
+      (scalp_intake_image_fusion.alignment === INTAKE_IMAGE_ALIGNMENT.PARTIAL ||
+        scalp_intake_image_fusion.alignment === INTAKE_IMAGE_ALIGNMENT.CONFLICTING ||
+        scalp_intake_image_fusion.alignment === INTAKE_IMAGE_ALIGNMENT.INSUFFICIENT);
+
+    const scalp_image_intelligence_meta = {
+      synthesis_source: pendingScalpDraft ? ("pending_draft" as const) : ("none" as const),
+      pending_draft_analysis_version: pendingScalpDraft?.analysis_version ?? null,
+      pending_draft_id: pendingScalpDraft?.id ?? null,
+      pending_draft_created_at: pendingScalpDraft?.created_at ?? null,
+      raw_payload_analysis_version:
+        typeof scalpDraftRaw?.version === "string" ? scalpDraftRaw.version : null,
+      scalp_comparison_record_present:
+        !!case_comparison?.scalpImageComparison?.recordId,
+    };
+
     const reassessment_summary = buildReassessmentSummary({
       adaptive_triage: adaptiveView.triage,
       adaptive_rescore_comparison: adaptiveView.rescoreComparison,
@@ -329,6 +392,11 @@ export async function GET(
             previousPhotoCount: case_comparison.scalpImageComparison.previousPhotoCount,
           }
         : null,
+      scalp_intelligence: {
+        pending_scalp_analysis_after_anchor: pendingScalpAnalysisAfterAnchor,
+        new_scalp_metadata_usable: newScalpMetadataUsable,
+        alignment_review_recommended: alignmentReviewRecommended,
+      },
     });
 
     return NextResponse.json({
@@ -381,7 +449,12 @@ export async function GET(
         manual_review_recommended: draft.manual_review_recommended,
         draft_summary: draft.draft_summary,
         created_at: draft.created_at,
+        analysis_version: draft.analysis_version,
       })),
+      scalp_image_case_synthesis,
+      scalp_image_evidence_summary,
+      scalp_intake_image_fusion,
+      scalp_image_intelligence_meta,
       blood_request: blood_request
         ? {
             id: blood_request.id,
@@ -422,12 +495,29 @@ export async function GET(
       adaptive_red_flags: adaptiveView.redFlags,
       adaptive_rescore_comparison: adaptiveView.rescoreComparison,
       reassessment_summary,
+      clinician_ai_feedback_latest: clinician_ai_feedback_latest
+        ? {
+            id: clinician_ai_feedback_latest.id,
+            adaptive_triage_usefulness:
+              clinician_ai_feedback_latest.adaptive_triage_usefulness,
+            scalp_image_intelligence_usefulness:
+              clinician_ai_feedback_latest.scalp_image_intelligence_usefulness,
+            intake_image_fusion_usefulness:
+              clinician_ai_feedback_latest.intake_image_fusion_usefulness,
+            note: clinician_ai_feedback_latest.note,
+            created_at: clinician_ai_feedback_latest.created_at,
+          }
+        : null,
       documents: (documents ?? []).map((d) => ({
         id: d.id,
         doc_type: d.doc_type,
         filename: d.filename,
         mime_type: d.mime_type,
         created_at: d.created_at,
+        metadata:
+          d.metadata && typeof d.metadata === "object"
+            ? (d.metadata as Record<string, unknown>)
+            : null,
       })),
       notes: (notes ?? []).map((n) => ({
         id: n.id,
