@@ -16,13 +16,25 @@ export type IntakeAnswerValue = string | string[] | boolean | null;
 
 export type IntakeAnswerMap = Record<string, IntakeAnswerValue>;
 
+/** One answer choice; optional plain-language hint for tooltips / screen readers. */
+export type IntakeQuestionOption = {
+  value: string;
+  label: string;
+  description?: string;
+};
+
 export type IntakeQuestionDefinition = {
   id: string;
   label: string;
   type: IntakeQuestionType;
   section: "base" | "sex_specific" | "trigger" | "lifestyle" | "mechanical";
+  /** @deprecated Prefer `helpText`; kept for backward compatibility. */
   safeHelperText?: string;
-  options?: Array<{ value: string; label: string }>;
+  /** Short line shown by default when set (else `safeHelperText` is used). */
+  helpText?: string;
+  /** Longer plain-language text; shown only under “What does this mean?”. */
+  explanation?: string;
+  options?: IntakeQuestionOption[];
   allowSkip?: boolean;
   pathwayHints?: IntakePathwayId[];
   visibleWhen?: (answers: IntakeAnswerMap) => boolean;

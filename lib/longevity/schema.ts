@@ -105,6 +105,7 @@ export type UploadsNextSteps = {
 };
 
 export type AdaptiveIntake = {
+  /** @deprecated Prefer `adaptiveEngine.answers.presentation_pattern`; kept for backward compatibility with saved drafts. */
   presentationPattern?:
     | "acute_shedding"
     | "chronic_shedding"

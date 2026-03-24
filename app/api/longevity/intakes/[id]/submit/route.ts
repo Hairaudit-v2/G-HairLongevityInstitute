@@ -85,11 +85,7 @@ export async function POST(
         .maybeSingle();
       const responses = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
       if (responses && typeof responses === "object") {
-        const adaptivePayload = buildLongevityAdaptivePayload(
-          (responses.adaptiveEngine?.adaptive_answers ??
-            responses.adaptiveEngine?.answers ??
-            {}) as Record<string, string | string[] | boolean | null>
-        );
+        const adaptivePayload = buildLongevityAdaptivePayload(responses);
         const triage = computeTriage(responses);
         triageFlags = triage.flags;
         reviewStatus = triage.review_status;

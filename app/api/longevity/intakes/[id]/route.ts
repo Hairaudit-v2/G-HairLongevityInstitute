@@ -222,9 +222,7 @@ export async function PATCH(
       );
       normalized.adaptiveDerivedSummary = derived;
       const adaptivePayload = buildLongevityAdaptivePayload(
-        ((normalized as LongevityQuestionnaireResponses).adaptiveEngine?.answers ??
-          (normalized as LongevityQuestionnaireResponses).adaptiveEngine?.adaptive_answers ??
-          {}) as Record<string, string | string[] | boolean | null>
+        normalized as LongevityQuestionnaireResponses
       );
       normalized.adaptiveEngine = {
         ...((normalized as LongevityQuestionnaireResponses).adaptiveEngine ?? {}),

@@ -9,6 +9,8 @@ import {
   type IntakeEngineContext,
 } from "@/lib/longevity/intake";
 
+import { IntakeHelpBlock } from "./IntakeHelpBlock";
+
 type Props = {
   answers: IntakeAnswerMap;
   context: IntakeEngineContext;
@@ -18,6 +20,10 @@ type Props = {
 
 function asArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+}
+
+function optionAriaLabel(label: string, description?: string): string {
+  return description ? `${label}. ${description}` : label;
 }
 
 export function AdaptiveIntakeOrchestrator({ answers, context, onChange, mode }: Props) {
@@ -52,58 +58,65 @@ export function AdaptiveIntakeOrchestrator({ answers, context, onChange, mode }:
         </div>
       </div>
 
-      {questions.map((q) => (
-        <div key={q.id} className="space-y-2">
-          <label className="text-sm font-medium text-white/90">{q.label}</label>
-          {q.safeHelperText && <p className="text-xs text-white/60">{q.safeHelperText}</p>}
+      {questions.map((q) => {
+        const shortHelp = q.helpText ?? q.safeHelperText;
+        return (
+          <div key={q.id} className="space-y-2">
+            <div className="text-sm font-medium text-white/90">{q.label}</div>
+            <IntakeHelpBlock helpText={shortHelp} explanation={q.explanation} />
 
-          {q.type === "single_select" && q.options && (
-            <div className="flex flex-wrap gap-2">
-              {q.options.map((opt) => (
-                <button
-                  type="button"
-                  key={opt.value}
-                  onClick={() => onChange(q.id, opt.value)}
-                  className={`rounded-xl border px-3 py-2 text-sm ${
-                    answers[q.id] === opt.value
-                      ? "border-[rgb(198,167,94)] bg-[rgb(198,167,94)]/10 text-white"
-                      : "border-white/10 bg-white/5 text-white/80"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {q.type === "multi_select" && q.options && (
-            <div className="flex flex-wrap gap-2">
-              {q.options.map((opt) => {
-                const selected = asArray(answers[q.id]).includes(opt.value);
-                return (
+            {q.type === "single_select" && q.options && (
+              <div className="flex flex-wrap gap-2">
+                {q.options.map((opt) => (
                   <button
                     type="button"
                     key={opt.value}
-                    onClick={() => {
-                      const arr = asArray(answers[q.id]);
-                      const next = selected ? arr.filter((v) => v !== opt.value) : [...arr, opt.value];
-                      onChange(q.id, next);
-                    }}
-                    className={`rounded-xl border px-3 py-2 text-sm ${
-                      selected
+                    onClick={() => onChange(q.id, opt.value)}
+                    title={opt.description}
+                    aria-label={optionAriaLabel(opt.label, opt.description)}
+                    className={`max-w-full rounded-xl border px-3 py-2 text-left text-sm ${
+                      answers[q.id] === opt.value
                         ? "border-[rgb(198,167,94)] bg-[rgb(198,167,94)]/10 text-white"
                         : "border-white/10 bg-white/5 text-white/80"
                     }`}
                   >
                     {opt.label}
                   </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      ))}
+                ))}
+              </div>
+            )}
+
+            {q.type === "multi_select" && q.options && (
+              <div className="flex flex-wrap gap-2">
+                {q.options.map((opt) => {
+                  const selected = asArray(answers[q.id]).includes(opt.value);
+                  return (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      title={opt.description}
+                      aria-label={optionAriaLabel(opt.label, opt.description)}
+                      aria-pressed={selected}
+                      onClick={() => {
+                        const arr = asArray(answers[q.id]);
+                        const next = selected ? arr.filter((v) => v !== opt.value) : [...arr, opt.value];
+                        onChange(q.id, next);
+                      }}
+                      className={`max-w-full rounded-xl border px-3 py-2 text-left text-sm ${
+                        selected
+                          ? "border-[rgb(198,167,94)] bg-[rgb(198,167,94)]/10 text-white"
+                          : "border-white/10 bg-white/5 text-white/80"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
-

@@ -54,6 +54,105 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "Expected triage output to include primary pathway"
       );
     }),
+    run("adaptive engine female postpartum chronology maps to v2 answers", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "female" },
+        adaptiveEngine: {
+          answers: {
+            presentation_pattern: "patterned_thinning",
+            female_hormonal_context: "yes",
+            postpartum_recent_gate: "yes",
+            months_since_delivery: "3_to_6_months",
+            breastfeeding_status: "currently_breastfeeding",
+            hormonal_contraception_change_gate: "yes",
+            hormonal_change_vs_hair_timing: "around_same_time",
+          },
+        },
+      });
+      assert(payload.adaptive_answers.postpartum_recent === true, "postpartum_recent from adaptive chronology");
+      assert(payload.adaptive_answers.months_since_delivery === "3_to_6_months", "months_since_delivery preserved");
+      assert(
+        payload.adaptive_answers.breastfeeding_status === "currently_breastfeeding",
+        "breastfeeding_status preserved"
+      );
+      assert(
+        payload.adaptive_answers.hormonal_change_vs_hair_timing === "around_same_time",
+        "hormonal vs hair timing preserved"
+      );
+    }),
+    run("adaptive engine male androgen detail maps to exposure flags", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "male" },
+        adaptiveEngine: {
+          answers: {
+            presentation_pattern: "crown_loss",
+            male_androgen_exposure_context: "yes",
+            male_androgen_exposure_detail: ["trt", "sarms_or_anabolics"],
+            exogenous_androgen_timing_vs_hair: "before_hair_change",
+          },
+        },
+      });
+      assert(payload.adaptive_answers.current_or_past_trt === true, "TRT detail sets current_or_past_trt");
+      assert(payload.adaptive_answers.sarms_or_anabolics === true, "SARMs detail preserved as flag");
+      assert(
+        payload.adaptive_answers.exogenous_androgen_timing_vs_hair === "before_hair_change",
+        "androgen timing vs hair preserved"
+      );
+    }),
+    run("adaptive medication chronology sets medication_change_recently", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "female" },
+        adaptiveEngine: {
+          answers: {
+            presentation_pattern: "acute_shedding",
+            medication_hormone_change_recent: "yes",
+            med_change_timing_vs_hair: "around_same_time",
+          },
+        },
+      });
+      assert(payload.adaptive_answers.medication_change_recently === true, "med change maps to boolean");
+      assert(
+        payload.adaptive_answers.med_change_timing_vs_hair === "around_same_time",
+        "med vs hair timing preserved"
+      );
+    }),
+    run("protein and diet_pattern_intake adjust nutritional flags", () => {
+      const payload = buildLongevityAdaptivePayload({
+        adaptiveEngine: {
+          answers: {
+            presentation_pattern: "acute_shedding",
+            lifestyle_load: ["major_stress"],
+            protein_intake_level: "low",
+            diet_pattern_intake: ["vegan"],
+          },
+        },
+      });
+      assert(payload.adaptive_answers.low_protein_intake === true, "low protein level maps");
+      assert(payload.adaptive_answers.vegetarian_or_vegan === true, "vegan diet pattern maps");
+    }),
+    run("scalp symptom detail fields pass through to adaptive_answers", () => {
+      const payload = buildLongevityAdaptivePayload({
+        adaptiveEngine: {
+          answers: {
+            presentation_pattern: "scalp_symptoms",
+            scalp_symptom_cluster: ["itch", "scale"],
+            scalp_symptom_duration: "6_weeks_to_6_months",
+            scalp_symptom_flare_pattern: "flares_then_calm",
+            scalp_symptom_treatments_tried: ["medicated_shampoo"],
+          },
+        },
+      });
+      assert(payload.adaptive_answers.scalp_symptom_duration === "6_weeks_to_6_months", "duration preserved");
+      assert(
+        payload.adaptive_answers.scalp_symptom_flare_pattern === "flares_then_calm",
+        "flare pattern preserved"
+      );
+      assert(
+        Array.isArray(payload.adaptive_answers.scalp_symptom_treatments_tried) &&
+          (payload.adaptive_answers.scalp_symptom_treatments_tried as string[]).includes("medicated_shampoo"),
+        "treatments preserved"
+      );
+    }),
   ];
 }
 

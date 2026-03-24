@@ -43,14 +43,18 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
   const hasCrownPattern = patternDistribution.includes("crown");
   const hasEdgesPattern = patternDistribution.includes("edges");
 
+  const medicationChangeSignal =
+    asBoolean(answers.medication_change_recently) || answers.medication_hormone_change_recent === "yes";
+
   const recentTriggerBurden = [
     asBoolean(answers.recent_illness),
     asBoolean(answers.recent_surgery),
     asBoolean(answers.recent_stress_event),
     asBoolean(answers.rapid_weight_loss),
-    asBoolean(answers.medication_change_recently),
+    medicationChangeSignal,
     asBoolean(answers.covid_or_high_fever),
     asBoolean(answers.postpartum_recent),
+    answers.hormonal_contraception_change_gate === "yes",
   ].filter(Boolean).length;
 
   return {
@@ -133,7 +137,11 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
 
     possible_postpartum_context:
       asBoolean(answers.postpartum_recent) ||
-      answers.reproductive_stage === "postpartum",
+      answers.reproductive_stage === "postpartum" ||
+      answers.postpartum_recent_gate === "yes" ||
+      ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(
+        typeof answers.months_since_delivery === "string" ? answers.months_since_delivery : ""
+      ),
 
     possible_cycle_irregularity:
       answers.cycle_regularity === "irregular" ||

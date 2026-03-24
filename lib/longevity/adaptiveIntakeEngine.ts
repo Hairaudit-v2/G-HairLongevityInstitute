@@ -1,3 +1,4 @@
+import { getPathwayStateFromQuestionnaire } from "@/lib/longevity/intake/orchestrator";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 
 export type PathwayKey =
@@ -182,6 +183,19 @@ export function normalizeAdaptiveResponses(
   responses: LongevityQuestionnaireResponses
 ): LongevityQuestionnaireResponses {
   const normalized = structuredClone(responses);
+  const engineAns = normalized.adaptiveEngine?.answers as Record<string, unknown> | undefined;
+  const fromEngine =
+    typeof engineAns?.presentation_pattern === "string" ? engineAns.presentation_pattern.trim().toLowerCase() : null;
+
+  if (fromEngine && !normalized.adaptiveIntake?.presentationPattern) {
+    normalized.adaptiveIntake = {
+      ...(normalized.adaptiveIntake ?? {}),
+      presentationPattern: fromEngine as NonNullable<
+        LongevityQuestionnaireResponses["adaptiveIntake"]
+      >["presentationPattern"],
+    };
+  }
+
   const adaptive = normalized.adaptiveIntake;
   if (!adaptive) return normalized;
 
@@ -311,7 +325,7 @@ export function detectPathways(
 export function getAdaptiveDerivedOutputs(
   responses: LongevityQuestionnaireResponses
 ): AdaptiveDerivedOutputs {
-  const pathway = detectPathways(responses);
+  const pathway = getPathwayStateFromQuestionnaire(responses);
   const top = pathway.pathway_confidence.slice(0, 3);
   const topPathway = pathway.primary_pathway;
 

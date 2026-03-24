@@ -17,9 +17,15 @@ import type {
   AdaptiveEnginePayload,
 } from "@/lib/longevity/schema";
 import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
-import { detectPathways } from "@/lib/longevity/adaptiveIntakeEngine";
 import { AdaptiveIntakeOrchestrator } from "@/components/longevity/AdaptiveIntakeOrchestrator";
-import { buildIntakeTriageOutput } from "@/lib/longevity/intake";
+import {
+  buildIntakeTriageOutput,
+  getCanonicalPresentationPattern,
+  getPatientUploadGuidance,
+  getPathwayStateFromQuestionnaire,
+} from "@/lib/longevity/intake";
+
+import { IntakeHelpBlock } from "@/components/longevity/IntakeHelpBlock";
 
 const GOLD = "rgb(198,167,94)";
 const BG = "rgb(15,27,45)";
@@ -152,16 +158,26 @@ function Input({
   );
 }
 
+type SelectOption = { key: string; label: string; description?: string };
+
+function optionAria(label: string, description?: string): string {
+  return description ? `${label}. ${description}` : label;
+}
+
 function MultiSelect({
   label,
   subtitle,
+  helpText,
+  explanation,
   options,
   value,
   onChange,
 }: {
   label: string;
   subtitle?: string;
-  options: { key: string; label: string }[];
+  helpText?: string;
+  explanation?: string;
+  options: SelectOption[];
   value: string[];
   onChange: (keys: string[]) => void;
 }) {
@@ -173,13 +189,19 @@ function MultiSelect({
     <div>
       <div className="text-sm font-medium text-white/90">{label}</div>
       {subtitle && <p className="mt-1 text-sm text-white/60">{subtitle}</p>}
+      <div className="mt-1.5">
+        <IntakeHelpBlock helpText={helpText} explanation={explanation} />
+      </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {options.map((opt) => (
           <button
             key={opt.key}
             type="button"
+            title={opt.description}
+            aria-label={optionAria(opt.label, opt.description)}
+            aria-pressed={value.includes(opt.key)}
             onClick={() => toggle(opt.key)}
-            className={`rounded-xl border px-3 py-2 text-sm transition ${
+            className={`max-w-full rounded-xl border px-3 py-2 text-left text-sm transition ${
               value.includes(opt.key)
                 ? "border-[rgb(198,167,94)] bg-[rgb(198,167,94)]/10 text-white"
                 : "border-white/10 bg-white/5 text-white/80 hover:border-white/20"
@@ -195,25 +217,34 @@ function MultiSelect({
 
 function SingleSelect<T extends string>({
   label,
+  helpText,
+  explanation,
   options,
   value,
   onChange,
 }: {
   label: string;
-  options: { key: T; label: string }[];
+  helpText?: string;
+  explanation?: string;
+  options: { key: T; label: string; description?: string }[];
   value?: T;
   onChange: (k: T) => void;
 }) {
   return (
     <div>
       <div className="text-sm font-medium text-white/90">{label}</div>
+      <div className="mt-1.5">
+        <IntakeHelpBlock helpText={helpText} explanation={explanation} />
+      </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((opt) => (
           <button
             key={opt.key}
             type="button"
+            title={opt.description}
+            aria-label={optionAria(opt.label, opt.description)}
             onClick={() => onChange(opt.key)}
-            className={`rounded-xl border px-3 py-2 text-sm transition ${
+            className={`max-w-full rounded-xl border px-3 py-2 text-left text-sm transition ${
               value === opt.key
                 ? "border-[rgb(198,167,94)] bg-[rgb(198,167,94)]/10 text-white"
                 : "border-white/10 bg-white/5 text-white/80 hover:border-white/20"
@@ -270,16 +301,28 @@ const AFFECTED_AREAS = [
   { key: "body_hair", label: "Body hair" },
 ];
 
-const SYMPTOMS = [
-  { key: "increased_daily_shedding", label: "Increased daily shedding" },
-  { key: "reduced_ponytail_thickness", label: "Reduced ponytail thickness" },
-  { key: "hair_becoming_finer", label: "Hair becoming finer" },
-  { key: "hair_not_growing_as_long", label: "Hair not growing as long" },
-  { key: "itch", label: "Itch" },
-  { key: "burning", label: "Burning" },
-  { key: "tenderness", label: "Tenderness" },
-  { key: "flaking", label: "Flaking" },
-  { key: "greasiness", label: "Greasiness" },
+const SYMPTOMS: SelectOption[] = [
+  {
+    key: "increased_daily_shedding",
+    label: "Increased daily shedding",
+    description: "More hairs than usual on the brush, shower, or pillow—often full-length strands",
+  },
+  {
+    key: "reduced_ponytail_thickness",
+    label: "Reduced ponytail thickness",
+    description: "A ponytail or bun feels thinner than before",
+  },
+  { key: "hair_becoming_finer", label: "Hair becoming finer", description: "Strands feel softer or thinner" },
+  {
+    key: "hair_not_growing_as_long",
+    label: "Hair not growing as long",
+    description: "Hair seems to stop at a shorter length than it used to",
+  },
+  { key: "itch", label: "Itch", description: "Scalp feels itchy" },
+  { key: "burning", label: "Burning", description: "Burning or stinging on the scalp" },
+  { key: "tenderness", label: "Tenderness", description: "Scalp sore or sensitive to touch" },
+  { key: "flaking", label: "Flaking", description: "Visible flakes in the hair or on clothes" },
+  { key: "greasiness", label: "Greasiness", description: "Scalp or hair feels oily soon after washing" },
   { key: "none", label: "None" },
 ];
 
@@ -433,37 +476,57 @@ const AVAILABLE_UPLOADS = [
   { key: "prior_treatment_plans", label: "Prior treatment plans" },
 ];
 
-const PRESENTATION_PATTERN_OPTIONS = [
-  { key: "acute_shedding", label: "Acute shedding" },
-  { key: "chronic_shedding", label: "Chronic shedding" },
-  { key: "patterned_thinning", label: "Patterned thinning" },
-  { key: "frontal_temporal_recession", label: "Frontal/temporal recession" },
-  { key: "crown_loss", label: "Crown loss" },
-  { key: "diffuse_thinning", label: "Diffuse thinning" },
-  { key: "broken_hairs", label: "Broken hairs / fragility" },
-  { key: "scalp_symptoms", label: "Scalp symptoms dominant" },
-  { key: "mixed_or_unsure", label: "Mixed / unsure" },
-] as const;
-
-const TRACTION_SIGNALS = [
-  { key: "tight_braids_or_extensions", label: "Tight braids/extensions" },
-  { key: "tight_ponytails_or_buns", label: "Tight ponytails/buns" },
-  { key: "helmet_or_headgear_friction", label: "Helmet/headgear friction" },
-  { key: "frequent_tension_styling", label: "Frequent tension styling" },
+const TRACTION_SIGNALS: SelectOption[] = [
+  {
+    key: "tight_braids_or_extensions",
+    label: "Tight braids/extensions",
+    description: "Styles that pull firmly on the hairline or scalp",
+  },
+  { key: "tight_ponytails_or_buns", label: "Tight ponytails/buns", description: "Hair pulled back tightly often" },
+  {
+    key: "helmet_or_headgear_friction",
+    label: "Helmet/headgear friction",
+    description: "Rubbing or pressure in the same area most days",
+  },
+  { key: "frequent_tension_styling", label: "Frequent tension styling", description: "Often wearing styles that pull on the hair" },
 ];
 
-const COSMETIC_SIGNALS = [
-  { key: "frequent_bleach", label: "Frequent bleach" },
-  { key: "high_heat_styling", label: "High-heat styling" },
-  { key: "chemical_straightening", label: "Chemical straightening/relaxing" },
-  { key: "recent_major_hair_process", label: "Recent major chemical process" },
+const COSMETIC_SIGNALS: SelectOption[] = [
+  { key: "frequent_bleach", label: "Frequent bleach", description: "Bleaching or lightening often" },
+  { key: "high_heat_styling", label: "High-heat styling", description: "Very hot tools (straighteners, tongs) most days" },
+  {
+    key: "chemical_straightening",
+    label: "Chemical straightening/relaxing",
+    description: "Strong salon chemicals that change hair texture",
+  },
+  {
+    key: "recent_major_hair_process",
+    label: "Recent major chemical process",
+    description: "A big colour or treatment in the last few weeks",
+  },
 ];
 
-const ANDROGEN_EXPOSURE_SIGNALS = [
-  { key: "trt", label: "TRT/testosterone optimisation" },
-  { key: "anabolic_agents", label: "Anabolic agents/SARMs" },
-  { key: "new_hormonal_medication", label: "New hormonal medication" },
-  { key: "stopped_hormonal_medication", label: "Stopped hormonal medication" },
+const ANDROGEN_EXPOSURE_SIGNALS: SelectOption[] = [
+  {
+    key: "trt",
+    label: "TRT/testosterone optimisation",
+    description: "Prescribed or other testosterone treatment to raise hormone levels",
+  },
+  {
+    key: "anabolic_agents",
+    label: "Anabolic agents/SARMs",
+    description: "Muscle-building or performance products that can affect hormones",
+  },
+  {
+    key: "new_hormonal_medication",
+    label: "New hormonal medication",
+    description: "Started a hormone-related medicine before or around hair changes",
+  },
+  {
+    key: "stopped_hormonal_medication",
+    label: "Stopped hormonal medication",
+    description: "Recently stopped a hormone-related medicine",
+  },
 ];
 
 function AboutYouStep({
@@ -643,21 +706,19 @@ export function LongevityStartFlow() {
     if (idx <= 0 || step === "done") return step === "done" ? 100 : 0;
     const base = idx / (STEP_ORDER.length - 1);
     const adaptive = responses.adaptiveIntake ?? {};
+    const pp = getCanonicalPresentationPattern(responses);
     const adaptiveChecks = [
-      adaptive.presentationPattern,
+      pp,
       adaptive.acuteWindow,
       adaptive.chronicWindow,
       adaptive.tractionSignals?.length ? "yes" : "",
       adaptive.cosmeticSignals?.length ? "yes" : "",
       adaptive.androgenExposureSignals?.length ? "yes" : "",
-      adaptive.sleepShiftWork,
-      adaptive.majorStressEvent,
-      adaptive.restrictiveEating,
     ];
     const answered = adaptiveChecks.filter(Boolean).length;
     const adaptiveFactor = Math.min(1, answered / adaptiveChecks.length);
     return Math.round((base * 0.8 + adaptiveFactor * 0.2) * 100);
-  }, [step, responses.adaptiveIntake]);
+  }, [step, responses]);
 
   const loadResume = useCallback(async (id: string) => {
     try {
@@ -1006,14 +1067,16 @@ export function LongevityStartFlow() {
   const sexAtBirth = a.sexAtBirth;
   const showFemale = sexAtBirth === "female";
   const showMale = sexAtBirth === "male";
-  const pathwayDetection = useMemo(() => detectPathways(responses), [responses]);
+  const pathwayState = useMemo(() => getPathwayStateFromQuestionnaire(responses), [responses]);
   const activePathways = useMemo(
-    () => [
-      pathwayDetection.primary_pathway,
-      ...pathwayDetection.secondary_pathways,
-    ],
-    [pathwayDetection]
+    () => [pathwayState.primary_pathway, ...pathwayState.secondary_pathways],
+    [pathwayState]
   );
+  const presentationCanon = useMemo(
+    () => getCanonicalPresentationPattern(responses),
+    [responses]
+  );
+  const patientUploadGuidance = useMemo(() => getPatientUploadGuidance(responses), [responses]);
   const adaptiveContext = useMemo(
     () => ({
       sexAtBirth: a.sexAtBirth,
@@ -1160,34 +1223,49 @@ export function LongevityStartFlow() {
                   </div>
                 </div>
                 <MultiSelect label="Primary concerns" options={PRIMARY_CONCERNS} value={mc.primaryConcerns ?? []} onChange={(v) => setMainConcern({ primaryConcerns: v })} />
-                <SingleSelect<NonNullable<AdaptiveIntake["presentationPattern"]>>
-                  label="Which presentation best matches your current pattern?"
-                  value={ai.presentationPattern}
-                  options={PRESENTATION_PATTERN_OPTIONS.map((o) => ({ key: o.key, label: o.label }))}
-                  onChange={(k) => setAdaptiveIntake({ presentationPattern: k as AdaptiveIntake["presentationPattern"] })}
-                />
+                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-sm font-medium text-white/90">Pattern and focused follow-ups</p>
+                  <p className="mt-1 text-xs text-white/55">
+                    Your presentation pattern and related questions live here — one place, aligned with the pathway focus above.
+                  </p>
+                  <div className="mt-4">
+                    <AdaptiveIntakeOrchestrator
+                      mode="intake"
+                      answers={(adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>}
+                      context={adaptiveContext}
+                      onChange={(questionId, value) => {
+                        const answers = {
+                          ...((adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>),
+                          [questionId]: value,
+                        };
+                        setAdaptiveEngine({ answers });
+                        if (questionId === "presentation_pattern" && typeof value === "string") {
+                          setAdaptiveIntake({
+                            presentationPattern: value as NonNullable<AdaptiveIntake["presentationPattern"]>,
+                          });
+                        }
+                        const triage = buildIntakeTriageOutput(answers, adaptiveContext);
+                        setAdaptiveEngine({ triage });
+                      }}
+                    />
+                  </div>
+                </div>
                 <SingleSelect label="When did you first notice?" value={mc.firstNoticed} options={FIRST_NOTICED} onChange={(k) => setMainConcern({ firstNoticed: k as MainConcern["firstNoticed"] })} />
                 <SingleSelect label="Onset pattern" value={mc.onsetPattern} options={ONSET_PATTERN} onChange={(k) => setMainConcern({ onsetPattern: k as MainConcern["onsetPattern"] })} />
                 <MultiSelect label="Affected areas" options={AFFECTED_AREAS} value={mc.affectedAreas ?? []} onChange={(v) => setMainConcern({ affectedAreas: v })} />
-                <MultiSelect label="Symptoms" options={SYMPTOMS} value={mc.symptoms ?? []} onChange={(v) => setMainConcern({ symptoms: v })} />
+                <MultiSelect
+                  label="Symptoms"
+                  subtitle="Scalp-focused detail is captured in the adaptive checklist above when you select a scalp-related presentation."
+                  helpText="“Shedding” here means hairs falling out with the root. Itch, burning, and flakes describe the scalp itself."
+                  explanation="Broken or snapped hairs (short pieces) are different from shedding: breakage is about damage along the hair strand; shedding is the whole hair coming out. If you notice both, you can select more than one option."
+                  options={SYMPTOMS}
+                  value={mc.symptoms ?? []}
+                  onChange={(v) => setMainConcern({ symptoms: v })}
+                />
                 <div>
                   <label className="text-sm text-white/75">Anything else? (optional)</label>
                   <textarea className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]" rows={3} value={mc.freeText ?? ""} onChange={(e) => setMainConcern({ freeText: e.target.value })} placeholder="Free text…" />
                 </div>
-                <AdaptiveIntakeOrchestrator
-                  mode="intake"
-                  answers={(adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>}
-                  context={adaptiveContext}
-                  onChange={(questionId, value) => {
-                    const answers = {
-                      ...((adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>),
-                      [questionId]: value,
-                    };
-                    setAdaptiveEngine({ answers });
-                    const triage = buildIntakeTriageOutput(answers, adaptiveContext);
-                    setAdaptiveEngine({ triage });
-                  }}
-                />
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button variant="secondary" onClick={() => setStep("aboutYou")}>Back</Button>
@@ -1206,18 +1284,25 @@ export function LongevityStartFlow() {
                   <p className="mb-3 rounded-xl border border-[rgb(198,167,94)]/20 bg-[rgb(198,167,94)]/5 px-4 py-3 text-sm text-white/85">
                     If you use TRT, we will tailor your androgen and DHT interpretation to your therapy.
                   </p>
+                  <div className="mb-3">
+                    <IntakeHelpBlock
+                      explanation="TRT means treatment with testosterone (often prescribed when levels are low). It can change how hair behaves; telling us helps your review stay accurate. This is not a test—only context for care."
+                    />
+                  </div>
                   <SingleSelect
                     label="Are you currently using testosterone therapy (TRT)?"
+                    helpText="Include prescribed treatment and any non-prescribed use if it applies."
                     value={tt.trtStatus}
                     options={TRT_STATUS_OPTIONS}
                     onChange={(k) => setTimelineTriggers({ trtStatus: k as TimelineTriggers["trtStatus"], trtStartedWhen: k === "no" ? undefined : tt.trtStartedWhen })}
                   />
                   {(tt.trtStatus === "yes_prescribed" || tt.trtStatus === "yes_non_prescribed" || tt.trtStatus === "previously_used") && (
                     <div className="mt-4">
-                      <SingleSelect
-                        label="When did you start TRT? (optional)"
-                        value={tt.trtStartedWhen}
-                        options={TRT_STARTED_WHEN_OPTIONS}
+                  <SingleSelect
+                    label="When did you start TRT? (optional)"
+                    helpText="Approximate timing is enough."
+                    value={tt.trtStartedWhen}
+                    options={TRT_STARTED_WHEN_OPTIONS}
                         onChange={(k) => setTimelineTriggers({ trtStartedWhen: k as TimelineTriggers["trtStartedWhen"] })}
                       />
                     </div>
@@ -1226,7 +1311,7 @@ export function LongevityStartFlow() {
                 <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
                 <MultiSelect label="Past year events" options={PAST_YEAR_EVENTS} value={tt.pastYearEvents ?? []} onChange={(v) => setTimelineTriggers({ pastYearEvents: v })} />
                 <SingleSelect label="Shedding trend" value={tt.sheddingTrend} options={[{ key: "stable", label: "Stable" }, { key: "improved", label: "Improved" }, { key: "worsened", label: "Worsened" }, { key: "comes_and_goes", label: "Comes and goes" }]} onChange={(k) => setTimelineTriggers({ sheddingTrend: k })} />
-                {(ai.presentationPattern === "acute_shedding" || ai.presentationPattern === "diffuse_thinning") && (
+                {(presentationCanon === "acute_shedding" || presentationCanon === "diffuse_thinning") && (
                   <SingleSelect
                     label="If shedding is active, what best matches the timeline?"
                     value={ai.acuteWindow}
@@ -1240,7 +1325,7 @@ export function LongevityStartFlow() {
                     onChange={(k) => setAdaptiveIntake({ acuteWindow: k })}
                   />
                 )}
-                {(ai.presentationPattern === "chronic_shedding" || ai.presentationPattern === "mixed_or_unsure") && (
+                {(presentationCanon === "chronic_shedding" || presentationCanon === "mixed_or_unsure") && (
                   <SingleSelect
                     label="If this has persisted, what duration is most accurate?"
                     value={ai.chronicWindow}
@@ -1318,12 +1403,14 @@ export function LongevityStartFlow() {
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 5</div>
               <h2 className="mt-2 text-2xl font-semibold">Sex-specific history</h2>
               <p className="mt-2 text-white/70">
-                Optional. This helps tailor interpretation where relevant.
+                Optional. This helps tailor interpretation where relevant. High-level hormonal context may also appear in the pattern step when relevant.
               </p>
               {showFemale && (
                 <div className="mt-6 space-y-6">
                   <SingleSelect
                     label="Cycles"
+                    helpText="Your period pattern, if it applies."
+                    explanation="Regular means a fairly predictable monthly pattern. Irregular means gaps or timing change a lot. This helps relate hair changes to hormones—skip or choose “prefer not to say” anytime."
                     value={fh.cycles}
                     options={[
                       { key: "regular", label: "Regular" },
@@ -1351,10 +1438,16 @@ export function LongevityStartFlow() {
                   />
                   <MultiSelect
                     label="Hyperandrogen signs (optional, skip if preferred)"
+                    helpText="“Hyperandrogen” only means signs that can go with higher male-type hormone effect—not a diagnosis."
+                    explanation="Some people notice more facial or body hair, jawline spots, or uneven periods. These clues can overlap with common skin or cycle issues; your team uses them only to guide questions, not to label you."
                     options={[
-                      { key: "acne", label: "Acne" },
-                      { key: "hirsutism", label: "Increased facial/body hair" },
-                      { key: "cycle_irregularity", label: "Cycle irregularity" },
+                      { key: "acne", label: "Acne", description: "Ongoing spots, often around the jaw or chin" },
+                      {
+                        key: "hirsutism",
+                        label: "Increased facial/body hair",
+                        description: "Noticeably more coarse hair in areas typical for male growth",
+                      },
+                      { key: "cycle_irregularity", label: "Cycle irregularity", description: "Periods uneven or unpredictable" },
                       { key: "none", label: "None" },
                     ]}
                     value={ai.femaleContext?.hyperandrogenSigns ?? []}
@@ -1400,6 +1493,8 @@ export function LongevityStartFlow() {
                   />
                   <MultiSelect
                     label="Androgen exposure context (optional)"
+                    helpText="“Androgen” here means things that affect male-type hormones (including testosterone products)."
+                    explanation="This can include prescribed testosterone, some gym or performance products, or changes to hormone medicines. We only use this to understand your hair story."
                     options={ANDROGEN_EXPOSURE_SIGNALS}
                     value={ai.androgenExposureSignals ?? []}
                     onChange={(v) => setAdaptiveIntake({ androgenExposureSignals: v })}
@@ -1413,6 +1508,8 @@ export function LongevityStartFlow() {
                   </p>
                   <SingleSelect
                     label="Any endocrine or hormonal context relevant to your hair changes?"
+                    helpText="“Endocrine” means hormone-related health (thyroid, hormones, etc.)."
+                    explanation="If you have hormone conditions or treatments you think matter for your hair, answer yes. You can add detail in the box below if you like."
                     value={ai.neutralContext?.endocrineHistoryKnown}
                     options={[
                       { key: "yes", label: "Yes" },
@@ -1453,34 +1550,56 @@ export function LongevityStartFlow() {
               <h2 className="mt-2 text-2xl font-semibold">Lifestyle and treatments</h2>
               <p className="mt-2 text-white/70">Diet, sleep, stress and current treatments.</p>
               <div className="mt-6 space-y-6">
-                <MultiSelect label="Diet pattern" options={DIET_PATTERN} value={lt.dietPattern ?? []} onChange={(v) => setLifestyleTreatments({ dietPattern: v })} />
-                <SingleSelect label="Enough protein?" value={lt.enoughProtein} options={[{ key: "yes", label: "Yes" }, { key: "no", label: "No" }, { key: "unsure", label: "Unsure" }]} onChange={(k) => setLifestyleTreatments({ enoughProtein: k })} />
+                <MultiSelect
+                  label="Diet pattern"
+                  helpText="Choose what fits most days—not a perfect diet score."
+                  options={DIET_PATTERN}
+                  value={lt.dietPattern ?? []}
+                  onChange={(v) => setLifestyleTreatments({ dietPattern: v })}
+                />
+                <SingleSelect
+                  label="Enough protein?"
+                  helpText="A rough guess is fine (meat, fish, eggs, dairy, beans, tofu, etc.)."
+                  explanation="Hair needs protein like the rest of the body. Very low protein for a long time can contribute to hair changes. “Unsure” is a normal answer."
+                  value={lt.enoughProtein}
+                  options={[
+                    { key: "yes", label: "Yes", description: "You usually include protein-rich foods most days" },
+                    { key: "no", label: "No", description: "Most days you eat little protein" },
+                    { key: "unsure", label: "Unsure" },
+                  ]}
+                  onChange={(k) => setLifestyleTreatments({ enoughProtein: k })}
+                />
                 <div>
                   <label className="text-sm text-white/75">Stress level (1–10)</label>
                   <input type="range" min={1} max={10} value={lt.stressScore ?? 5} onChange={(e) => setLifestyleTreatments({ stressScore: parseInt(e.target.value, 10) })} className="mt-2 w-full" />
                   <span className="ml-2 text-sm text-white/70">{lt.stressScore ?? 5}</span>
                 </div>
                 <SingleSelect label="Sleep quality" value={lt.sleepQuality} options={[{ key: "good", label: "Good" }, { key: "average", label: "Average" }, { key: "poor", label: "Poor" }]} onChange={(k) => setLifestyleTreatments({ sleepQuality: k })} />
-                {(activePathways.includes("traction_mechanical_damage") || ai.presentationPattern === "broken_hairs") && (
+                {(activePathways.includes("traction_mechanical_damage") || presentationCanon === "broken_hairs") && (
                   <>
                     <MultiSelect
                       label="Mechanical/traction exposures (only if relevant)"
+                      helpText="Traction means steady pulling on the hair or hairline."
+                      explanation="Repeated tight styles or friction can cause breakage or thinning along the hairline. Hover a choice (or use screen reader) for short hints."
                       options={TRACTION_SIGNALS}
                       value={ai.tractionSignals ?? []}
                       onChange={(v) => setAdaptiveIntake({ tractionSignals: v })}
                     />
                     <MultiSelect
                       label="Harsh cosmetic practices (only if relevant)"
+                      helpText="Strong chemicals or very high heat can weaken hair."
                       options={COSMETIC_SIGNALS}
                       value={ai.cosmeticSignals ?? []}
                       onChange={(v) => setAdaptiveIntake({ cosmeticSignals: v })}
                     />
                     <SingleSelect
                       label="Do you notice broken hairs rather than root shedding?"
+                      helpText="Shedding usually shows full-length hairs; breakage shows shorter pieces."
+                      explanation="With shedding, you may see the tiny white bulb at one end of the hair. Broken hairs are often different lengths and feel snapped. If you are not sure, choose “unsure.”"
                       value={ai.reportsBrokenHairs === true ? "yes" : ai.reportsBrokenHairs === false ? "no" : "unsure"}
                       options={[
-                        { key: "yes", label: "Yes" },
-                        { key: "no", label: "No" },
+                        { key: "yes", label: "Yes", description: "Mostly short snapped pieces, not full-length fall-out" },
+                        { key: "no", label: "No", description: "Mainly full-length hairs coming out" },
                         { key: "unsure", label: "Unsure" },
                       ]}
                       onChange={(k) =>
@@ -1491,66 +1610,9 @@ export function LongevityStartFlow() {
                     />
                   </>
                 )}
-                {(activePathways.includes("telogen_effluvium_diffuse_shedding") ||
-                  activePathways.includes("nutritional_deficiency") ||
-                  activePathways.includes("medication_androgen_exposure")) && (
-                  <>
-                    <SingleSelect
-                      label="Shift work or irregular sleep schedule?"
-                      value={ai.sleepShiftWork}
-                      options={[
-                        { key: "yes", label: "Yes" },
-                        { key: "no", label: "No" },
-                        { key: "unsure", label: "Unsure" },
-                      ]}
-                      onChange={(k) => setAdaptiveIntake({ sleepShiftWork: k })}
-                    />
-                    <SingleSelect
-                      label="Major stress event around onset?"
-                      value={ai.majorStressEvent}
-                      options={[
-                        { key: "yes", label: "Yes" },
-                        { key: "no", label: "No" },
-                        { key: "unsure", label: "Unsure" },
-                      ]}
-                      onChange={(k) => setAdaptiveIntake({ majorStressEvent: k })}
-                    />
-                    <SingleSelect
-                      label="Rapid weight loss in the lead-up?"
-                      value={ai.recentRapidWeightLoss === true ? "yes" : ai.recentRapidWeightLoss === false ? "no" : "unsure"}
-                      options={[
-                        { key: "yes", label: "Yes" },
-                        { key: "no", label: "No" },
-                        { key: "unsure", label: "Unsure" },
-                      ]}
-                      onChange={(k) =>
-                        setAdaptiveIntake({
-                          recentRapidWeightLoss: k === "yes" ? true : k === "no" ? false : null,
-                        })
-                      }
-                    />
-                    <SingleSelect
-                      label="Restrictive eating pattern?"
-                      value={ai.restrictiveEating}
-                      options={[
-                        { key: "yes", label: "Yes" },
-                        { key: "no", label: "No" },
-                        { key: "unsure", label: "Unsure" },
-                      ]}
-                      onChange={(k) => setAdaptiveIntake({ restrictiveEating: k })}
-                    />
-                    <SingleSelect
-                      label="High-intensity sport/bodybuilding context?"
-                      value={ai.highIntensitySportBodybuilding}
-                      options={[
-                        { key: "yes", label: "Yes" },
-                        { key: "no", label: "No" },
-                        { key: "unsure", label: "Unsure" },
-                      ]}
-                      onChange={(k) => setAdaptiveIntake({ highIntensitySportBodybuilding: k })}
-                    />
-                  </>
-                )}
+                <p className="text-xs text-white/50">
+                  Stress, sleep timing, nutrition strain, and sport load are captured in the pattern step (lifestyle load) and in diet/sleep/stress above — we no longer ask the same items twice here.
+                </p>
                 <MultiSelect label="Current treatments or supplements" options={CURRENT_TREATMENTS} value={lt.currentTreatments ?? []} onChange={(v) => setLifestyleTreatments({ currentTreatments: v })} />
                 <SingleSelect label="Have current treatments been helpful?" value={lt.treatmentHelpfulness} options={[{ key: "yes", label: "Yes" }, { key: "no", label: "No" }, { key: "unsure", label: "Unsure" }]} onChange={(k) => setLifestyleTreatments({ treatmentHelpfulness: k })} />
                 <SingleSelect
@@ -1586,6 +1648,38 @@ export function LongevityStartFlow() {
               <p className="mt-1 text-sm text-white/60">
                 PDF or image, max 10 MB per file. You can select multiple files at once.
               </p>
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-sm font-medium text-white/90">Suggestions from your answers (all optional)</p>
+                <p className="mt-1 text-xs text-white/55">
+                  Your review team can use clear photos and documents when you have them. Nothing here is required for
+                  your assessment to proceed.
+                </p>
+                {patientUploadGuidance.photoHints.length > 0 ? (
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-white/65">Photos that often help</p>
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-white/75">
+                      {patientUploadGuidance.photoHints.map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-white/65">
+                    Clear scalp photos in natural light from a few angles are usually enough if you choose to upload
+                    images.
+                  </p>
+                )}
+                {patientUploadGuidance.documentHints.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-white/65">Documents</p>
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-white/75">
+                      {patientUploadGuidance.documentHints.map((line, i) => (
+                        <li key={i}>{line}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
               {!intakeId ? (
                 <p className="mt-4 text-sm text-amber-200">Save your intake first to upload documents.</p>
               ) : (
@@ -1604,9 +1698,7 @@ export function LongevityStartFlow() {
                   <div className="mt-6 space-y-5">
                     <div>
                       <label className="text-sm font-medium text-white/90">Blood test results (optional — now or later)</label>
-                      <p className="mt-1 text-xs text-white/60">
-                        Helpful if available: Ferritin, iron studies, thyroid (TSH), vitamin D, testosterone. You can upload now or add them later in the portal.
-                      </p>
+                      <p className="mt-1 text-xs text-white/60">{patientUploadGuidance.bloodHelperText}</p>
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
@@ -1624,7 +1716,8 @@ export function LongevityStartFlow() {
                     <div>
                       <label className="text-sm font-medium text-white/90">Scalp photographs (optional)</label>
                       <p className="mt-1 text-xs text-white/60">
-                        Hairline, crown, or part-line photos can help your review. Optional—add now or later in the portal.
+                        Use the photo ideas above if they help, or share any clear angles you have. You can add these now
+                        or later in the portal.
                       </p>
                       <input
                         type="file"
@@ -1662,7 +1755,9 @@ export function LongevityStartFlow() {
                     <div>
                       <label className="text-sm font-medium text-white/90">Prescriptions (optional)</label>
                       <p className="mt-1 text-xs text-white/60">
-                        Current or past hair-related or relevant prescriptions, if you’d like to share them.
+                        {patientUploadGuidance.highlightMedicationUploads
+                          ? "Label photos or a simple list are welcome if you have them—now or later in the portal."
+                          : "Current or past hair-related or relevant prescriptions, if you’d like to share them."}
                       </p>
                       <input
                         type="file"

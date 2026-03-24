@@ -1,10 +1,13 @@
+import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { INTAKE_QUESTION_BANK } from "./questionBank";
 import { INTAKE_PATHWAYS } from "./pathways";
-import { scorePathways } from "./rules";
+import { scorePathways, selectPathways } from "./rules";
+import { normalizeAdaptiveAnswers } from "./triageEngine";
 import type {
   IntakeAnswerMap,
   IntakeEngineContext,
   IntakePathwayId,
+  IntakePathwayScore,
   IntakeQuestionDefinition,
 } from "./types";
 
@@ -12,6 +15,44 @@ const BASE_QUESTION_IDS = ["presentation_pattern"];
 
 function questionById(id: string): IntakeQuestionDefinition | undefined {
   return INTAKE_QUESTION_BANK.find((q) => q.id === id);
+}
+
+function intakeContextFromAbout(
+  responses: LongevityQuestionnaireResponses
+): IntakeEngineContext {
+  const sex = responses.aboutYou?.sexAtBirth;
+  const sexAtBirth =
+    sex === "female" || sex === "male" || sex === "intersex" || sex === "prefer_not_to_say"
+      ? sex
+      : undefined;
+  const dob = responses.aboutYou?.dateOfBirth;
+  const ageYears =
+    dob && !Number.isNaN(new Date(dob).getTime())
+      ? Math.max(0, new Date().getFullYear() - new Date(dob).getFullYear())
+      : null;
+  return { sexAtBirth, ageYears };
+}
+
+/**
+ * Pathway chips, adaptive follow-ups, and buildIntakeTriageOutput all use this scoring model.
+ */
+export function getPathwayStateFromQuestionnaire(responses: LongevityQuestionnaireResponses): {
+  primary_pathway: IntakePathwayId;
+  secondary_pathways: IntakePathwayId[];
+  pathway_confidence: IntakePathwayScore[];
+} {
+  const raw = (responses.adaptiveEngine?.answers ??
+    responses.adaptiveEngine?.adaptive_answers ??
+    {}) as IntakeAnswerMap;
+  const answers = normalizeAdaptiveAnswers(raw);
+  const context = intakeContextFromAbout(responses);
+  const scored = scorePathways(answers, context);
+  const selected = selectPathways(scored);
+  return {
+    primary_pathway: selected.primary,
+    secondary_pathways: selected.secondary,
+    pathway_confidence: scored,
+  };
 }
 
 export function getActivePathwayIds(

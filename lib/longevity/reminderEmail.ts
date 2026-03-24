@@ -3,6 +3,9 @@
  * Small provider abstraction; easy to swap (Resend, console stub, or none).
  * Do not use for non-longevity flows.
  * Uses HLI unified email layout when html is provided or built from bodyText.
+ *
+ * Sender domain: the `from` address must use a domain verified in Resend (or sends will fail).
+ * Reply-To: defaults route patient replies to the Evolved Hair trichologist inbox until HLI has a dedicated inbound address.
  */
 
 export type SendReminderEmailParams = {
@@ -13,6 +16,11 @@ export type SendReminderEmailParams = {
   /** Optional HTML body. When provided, Resend sends multipart (html + text). */
   html?: string;
   reminderId?: string;
+  /**
+   * Optional Reply-To header for this send only.
+   * Overrides LONGEVITY_EMAIL_REPLY_TO and the default Evolved Hair address.
+   */
+  replyTo?: string;
 };
 
 export type SendReminderEmailResult =
@@ -37,12 +45,24 @@ function getProvider(): "resend" | "console" | "none" {
   return "none";
 }
 
+const DEFAULT_FROM = "Hair Longevity Institute <noreply@hairlongevityinstitute.com>";
+const DEFAULT_REPLY_TO = "trichologist@evolvedhair.com.au";
+
 function getFromAddress(): string {
   return (
     process.env.LONGEVITY_EMAIL_FROM?.trim() ||
     process.env.RESEND_FROM?.trim() ||
-    "Hair Longevity Institute <onboarding@resend.dev>"
+    DEFAULT_FROM
   );
+}
+
+/** Resend SDK (v4) uses camelCase `replyTo` on the send payload. */
+function getReplyToAddress(params: Pick<SendReminderEmailParams, "replyTo">): string {
+  const perSend = params.replyTo?.trim();
+  if (perSend) return perSend;
+  const fromEnv = process.env.LONGEVITY_EMAIL_REPLY_TO?.trim();
+  if (fromEnv) return fromEnv;
+  return DEFAULT_REPLY_TO;
 }
 
 /**
@@ -56,6 +76,7 @@ const consoleAdapter: LongevityEmailAdapter = {
       to: params.to,
       subject: params.subject,
       reminderId: params.reminderId,
+      replyTo: getReplyToAddress(params),
       bodyLength: params.bodyText?.length ?? 0,
     });
     return { ok: true, provider: "console" };
@@ -63,7 +84,7 @@ const consoleAdapter: LongevityEmailAdapter = {
 };
 
 /**
- * Resend adapter: sends via Resend API. Requires RESEND_API_KEY and optional LONGEVITY_EMAIL_FROM.
+ * Resend adapter: sends via Resend API. Requires RESEND_API_KEY; optional LONGEVITY_EMAIL_FROM / RESEND_FROM / LONGEVITY_EMAIL_REPLY_TO.
  */
 function createResendAdapter(): LongevityEmailAdapter | null {
   const apiKey = process.env.RESEND_API_KEY?.trim();
@@ -76,11 +97,13 @@ function createResendAdapter(): LongevityEmailAdapter | null {
         const { Resend } = await import("resend");
         const resend = new Resend(apiKey);
         const from = getFromAddress();
+        const replyTo = getReplyToAddress(params);
         const payload: Parameters<typeof resend.emails.send>[0] = {
           from,
           to: [params.to],
           subject: params.subject,
           text: params.bodyText,
+          replyTo,
         };
         if (params.html) payload.html = params.html;
         const { data, error } = await resend.emails.send(payload);

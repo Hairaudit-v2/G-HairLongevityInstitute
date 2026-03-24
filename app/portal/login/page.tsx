@@ -34,14 +34,16 @@ function GoogleIcon({ className }: { className?: string }) {
 const RESEND_COOLDOWN_SECONDS = 60;
 const MAGIC_LINK_EXPIRY_MINUTES = 10;
 
-/** Build callback URL for magic link; optional redirect param is preserved so auth callback can send user there after login. */
+/** Canonical callback for OAuth + magic link so PKCE/session cookies stay on one host (not window.location.origin). */
+const CANONICAL_PORTAL_AUTH_CALLBACK_BASE =
+  "https://www.hairlongevityinstitute.com/portal/auth/callback";
+
+/** Build callback URL; optional redirect param preserved for post-login routing. */
 function getRedirectUrl(redirectPath?: string | null): string {
-  if (typeof window === "undefined") return "";
-  const base = `${window.location.origin}/portal/auth/callback`;
   if (redirectPath && redirectPath.startsWith("/")) {
-    return `${base}?redirect=${encodeURIComponent(redirectPath)}`;
+    return `${CANONICAL_PORTAL_AUTH_CALLBACK_BASE}?redirect=${encodeURIComponent(redirectPath)}`;
   }
-  return base;
+  return CANONICAL_PORTAL_AUTH_CALLBACK_BASE;
 }
 
 /** Allowed post-login redirect paths (same-origin only). */
