@@ -1,4 +1,5 @@
 import { deriveAdaptiveFacts } from "./adaptiveFacts";
+import { deriveTriageInterpretationConfidence } from "./adaptiveTriageInterpretation";
 import { ADAPTIVE_PATHWAY_DEFINITIONS } from "./adaptivePathwayDefinitions";
 import { ADAPTIVE_QUESTION_BANK } from "./adaptiveQuestionBank";
 import { matchesAll, dedupeStrings } from "./adaptiveRuleHelpers";
@@ -95,6 +96,32 @@ function selectCalibratedPathways(
       .filter((s) => s.score >= 3)
       .slice(0, 4)
       .map((s) => s.pathwayId);
+  }
+
+  /** Traction + diffuse TE: avoid brittle winner-take-all when mechanical and TE co-dominate. */
+  if (
+    facts.traction_diffuse_te_overlap === true &&
+    primaryPathway !== "mixed_pattern" &&
+    gap <= 2 &&
+    top.score >= 5
+  ) {
+    const tr = pathwayScores.find((s) => s.pathwayId === "traction_mechanical_pattern");
+    const teA = pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_acute");
+    const teC = pathwayScores.find((s) => s.pathwayId === "telogen_effluvium_chronic");
+    const te = teA && teC ? (teA.score >= teC.score ? teA : teC) : teA ?? teC;
+    if (tr && te && tr.score > 0 && te.score > 0) {
+      const topTwo = new Set<PathwayId>([top.pathwayId, second?.pathwayId].filter(Boolean) as PathwayId[]);
+      const hasTr = topTwo.has("traction_mechanical_pattern");
+      const hasTe =
+        topTwo.has("telogen_effluvium_acute") || topTwo.has("telogen_effluvium_chronic");
+      if (hasTr && hasTe) {
+        primaryPathway = "mixed_pattern";
+        secondaryPathways = dedupeStrings<PathwayId>([
+          "traction_mechanical_pattern",
+          te.pathwayId,
+        ]);
+      }
+    }
   }
 
   const appendSecondary = (id: PathwayId) => {
@@ -326,6 +353,13 @@ export function evaluateAdaptiveIntake(answers: AdaptiveAnswers): AdaptiveEngine
     {},
   );
 
+  const interpretation = deriveTriageInterpretationConfidence(
+    pathwayScores,
+    facts,
+    primaryPathway,
+    secondaryPathways
+  );
+
   const triage: AdaptiveTriageOutput = {
     schema_version: HLI_ADAPTIVE_INTAKE_SCHEMA_VERSION,
     primary_pathway: primaryPathway,
@@ -342,6 +376,8 @@ export function evaluateAdaptiveIntake(answers: AdaptiveAnswers): AdaptiveEngine
     upload_guidance: uploadGuidance,
     clinician_attention_flags: clinicianAttentionFlags,
     confidence_summary: deriveConfidenceSummary(primaryPathway, secondaryPathways),
+    confidence_level: interpretation.confidence_level,
+    confidence_reasons: interpretation.confidence_reasons,
   };
 
   const visibleQuestions = getVisibleQuestions(answers);

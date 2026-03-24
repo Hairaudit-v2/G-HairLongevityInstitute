@@ -173,7 +173,10 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
   {
     id: "male_androgen_exposure_pattern",
     label: "Male androgen exposure pattern",
-    entryCriteria: [{ fact: "is_male", operator: "eq", value: true }],
+    entryCriteria: [
+      { fact: "is_male", operator: "eq", value: true },
+      { fact: "male_androgen_exposure_pathway_eligible", operator: "eq", value: true },
+    ],
     scoringRules: [
       {
         when: [{ fact: "possible_androgen_exposure", operator: "eq", value: true }],
@@ -281,7 +284,7 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
           { fact: "suspected_shedding", operator: "eq", value: true },
           { fact: "has_inflammatory_scalp_symptoms", operator: "eq", value: true },
         ],
-        score: 1,
+        score: 2,
         reason: "shedding with inflammatory scalp features",
       },
     ],
@@ -365,6 +368,11 @@ export const ADAPTIVE_PATHWAY_DEFINITIONS: PathwayDefinition[] = [
         when: [{ fact: "has_diffuse_loss", operator: "eq", value: true }],
         score: 2,
         reason: "diffuse distribution",
+      },
+      {
+        when: [{ fact: "postpartum_diffuse_shedding_cluster", operator: "eq", value: true }],
+        score: 2,
+        reason: "postpartum diffuse shedding cluster vs generic acute TE overlap",
       },
     ],
     followupQuestionIds: ["postpartum_recent", "reproductive_stage", "low_iron_history"],

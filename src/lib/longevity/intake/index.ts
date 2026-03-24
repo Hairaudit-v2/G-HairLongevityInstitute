@@ -5,4 +5,6 @@ export * from "./adaptiveQuestionBank";
 export * from "./adaptivePathwayDefinitions";
 export * from "./adaptiveUploadGuidance";
 export * from "./adaptiveTriageEngine";
+export * from "./adaptiveTriageInterpretation";
+export * from "./adaptiveTriageInterpretation.smoke-test";
 export * from "./adaptiveTriageEngine.smoke-test";

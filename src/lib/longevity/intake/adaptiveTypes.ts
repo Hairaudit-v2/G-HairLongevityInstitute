@@ -156,6 +156,9 @@ export type PathwayScore = {
 
 export type AdaptiveFacts = Record<string, unknown>;
 
+/** Clinician-facing interpretation of how decisive the pathway scores are (not a re-score of pathways). */
+export type TriageConfidenceLevel = "high" | "moderate" | "low";
+
 export type AdaptiveTriageOutput = {
   schema_version: string;
   primary_pathway: PathwayId;
@@ -169,6 +172,10 @@ export type AdaptiveTriageOutput = {
   upload_guidance: UploadGuideId[];
   clinician_attention_flags: ClinicianAttentionFlag[];
   confidence_summary?: string;
+  /** Interpretive confidence derived from score separation, overlap, and self-reported pattern certainty. */
+  confidence_level: TriageConfidenceLevel;
+  /** Human-readable factors for `confidence_level` (stable strings for analytics/copy). */
+  confidence_reasons: string[];
 };
 
 export type AdaptiveEngineResult = {

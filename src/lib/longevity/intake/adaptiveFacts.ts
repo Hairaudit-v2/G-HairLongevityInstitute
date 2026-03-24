@@ -57,6 +57,23 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
     answers.hormonal_contraception_change_gate === "yes",
   ].filter(Boolean).length;
 
+  const suspectedShedding =
+    answers.chief_concern === "shedding" || asBoolean(answers.active_shedding_now);
+
+  const possiblePostpartumContext =
+    asBoolean(answers.postpartum_recent) ||
+    answers.reproductive_stage === "postpartum" ||
+    answers.postpartum_recent_gate === "yes" ||
+    ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(
+      typeof answers.months_since_delivery === "string" ? answers.months_since_delivery : ""
+    );
+
+  const mechanicalExposureCluster =
+    asBoolean(answers.tight_hairstyles_or_extensions) ||
+    asBoolean(answers.frequent_helmet_or_headgear) ||
+    asBoolean(answers.contact_sports_or_headgear_sport) ||
+    asBoolean(answers.heat_or_chemical_styling);
+
   return {
     ...answers,
     age_band: ageBandFromDob((answers.dob as string | undefined) ?? undefined),
@@ -88,8 +105,7 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
 
     recent_trigger_burden: recentTriggerBurden,
 
-    suspected_shedding:
-      answers.chief_concern === "shedding" || asBoolean(answers.active_shedding_now),
+    suspected_shedding: suspectedShedding,
 
     suspected_patterned_loss:
       answers.chief_concern === "receding_hairline" ||
@@ -129,19 +145,9 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
       asBoolean(answers.high_stress_load) ||
       asBoolean(answers.overtraining),
 
-    mechanical_exposure_cluster:
-      asBoolean(answers.tight_hairstyles_or_extensions) ||
-      asBoolean(answers.frequent_helmet_or_headgear) ||
-      asBoolean(answers.contact_sports_or_headgear_sport) ||
-      asBoolean(answers.heat_or_chemical_styling),
+    mechanical_exposure_cluster: mechanicalExposureCluster,
 
-    possible_postpartum_context:
-      asBoolean(answers.postpartum_recent) ||
-      answers.reproductive_stage === "postpartum" ||
-      answers.postpartum_recent_gate === "yes" ||
-      ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(
-        typeof answers.months_since_delivery === "string" ? answers.months_since_delivery : ""
-      ),
+    possible_postpartum_context: possiblePostpartumContext,
 
     possible_cycle_irregularity:
       answers.cycle_regularity === "irregular" ||
@@ -178,6 +184,8 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
     /** Worsening trend + acute/subacute onset → acute TE layer (mutually exclusive with chronic worsening). */
     te_worsening_for_acute:
       answers.recent_hair_trend === "worsened" &&
+      answers.onset_timing !== "6_to_12_months" &&
+      answers.onset_timing !== "more_than_12_months" &&
       (answers.onset_timing === "less_than_6_weeks" ||
         answers.onset_timing === "6_weeks_to_3_months" ||
         answers.onset_timing === "3_to_6_months" ||
@@ -191,7 +199,7 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
 
     /** Co-occurrence flag for overlap handling in triage (not a patient-facing label). */
     shedding_with_inflammatory_scalp:
-      (answers.chief_concern === "shedding" || asBoolean(answers.active_shedding_now)) &&
+      suspectedShedding &&
       (scalpSymptoms.includes("itch") ||
         scalpSymptoms.includes("burning") ||
         scalpSymptoms.includes("pain") ||
@@ -200,5 +208,19 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
     /** Breakage-weighted presentation without diffuse top (helps traction vs diffuse TE). */
     breakage_predominant_without_diffuse_top:
       asBoolean(answers.breakage_over_shedding) && !hasDiffuseLoss,
+
+    /** Classic postpartum diffuse shedding alignment — boosts postpartum vs generic acute TE. */
+    postpartum_diffuse_shedding_cluster: possiblePostpartumContext && suspectedShedding && hasDiffuseLoss,
+
+    /** Male androgen exposure pathway: TRT / boosters / anabolics, or rapid progression without exposure. */
+    male_androgen_exposure_pathway_eligible:
+      asBoolean(answers.current_or_past_trt) ||
+      asBoolean(answers.sarms_or_anabolics) ||
+      asBoolean(answers.testosterone_boosters) ||
+      asBoolean(answers.peptides_or_growth_agents) ||
+      answers.progression_speed === "rapidly_worsening",
+
+    /** Mechanical traction + diffuse shedding — traction and TE often co-score; triage may promote mixed_pattern. */
+    traction_diffuse_te_overlap: mechanicalExposureCluster && hasDiffuseLoss && suspectedShedding,
   };
 }

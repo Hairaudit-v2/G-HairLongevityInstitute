@@ -180,6 +180,9 @@ export type AdaptiveDerivedSummary = {
   upload_guidance?: string[];
   clinician_attention_flags?: string[];
   confidence_summary?: string;
+  /** Present on engine v2 triage output; optional on older stored rows. */
+  confidence_level?: "high" | "moderate" | "low";
+  confidence_reasons?: string[];
   primary_pathway?: string;
   secondary_pathways?: string[];
   pathway_confidence?: Array<{

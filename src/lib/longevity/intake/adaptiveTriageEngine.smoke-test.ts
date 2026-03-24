@@ -217,6 +217,23 @@ export function runAdaptiveTriageSmokeTests(): SmokeTestResult[] {
         );
       }
     ),
+    runCase(
+      "male androgen exposure pathway requires exposure signal or rapid progression",
+      {
+        sex_at_birth: "male",
+        chief_concern: "receding_hairline",
+        pattern_distribution: ["temples"],
+        onset_timing: "more_than_12_months",
+        family_history: "fathers_side",
+      },
+      (result) => {
+        assert(
+          !result.pathwayScores.some((s) => s.pathwayId === "male_androgen_exposure_pattern"),
+          "Pathway should not register without TRT/anabolics or rapid worsening"
+        );
+        assert(result.triage.primary_pathway === "androgenic_pattern", "Expected androgenic primary");
+      }
+    ),
   ];
 }
 

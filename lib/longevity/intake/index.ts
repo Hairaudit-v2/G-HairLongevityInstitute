@@ -7,6 +7,7 @@ export * from "./orchestrator";
 export * from "./buildLongevityAdaptivePayload";
 export * from "./buildLongevityAdaptivePayload.smoke-test";
 export * from "./mapResponsesToAdaptiveAnswers";
+export * from "./syntheticPatients";
 export * from "./canonicalPresentation";
 export * from "./canonicalPresentation.smoke-test";
 export * from "./pathwayState.smoke-test";

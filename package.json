@@ -1,5 +1,7 @@
 {
   "scripts": {
+    "intake:synthetic-suite": "npx tsx scripts/run-synthetic-patient-suite.ts",
+    "intake:synthetic-suite:json": "npx tsx scripts/run-synthetic-patient-suite.ts --json",
     "dev": "next dev",
     "dev:clean": "npx rimraf .next && next dev",
     "dev:3002": "next dev -p 3002",
