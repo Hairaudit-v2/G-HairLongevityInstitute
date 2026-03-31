@@ -22,7 +22,7 @@ const pathways: { title: string; blurb: string; href: string }[] = [
   {
     title: "I’ve already had treatment and still have concerns",
     blurb: "Medicines, PRP-style procedures, or a transplant — where to read next and how your care team fits in.",
-    href: "/treatments",
+    href: "/insights/hli-vs-hairaudit",
   },
 ];
 
