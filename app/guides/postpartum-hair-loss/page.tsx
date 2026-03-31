@@ -47,7 +47,7 @@ export default function PostpartumHairLossGuidePage() {
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <SecondaryButton href={POSTPARTUM_GUIDE_PDF_HREF} download={POSTPARTUM_GUIDE_PDF_DOWNLOAD_AS}>
-                Download free guide
+                Read the Guide
               </SecondaryButton>
             </div>
             <p className="mt-5 text-center text-sm text-[rgb(var(--text-muted))]">
