@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import type { EditorialArticle } from "@/lib/content/types";
 import {
   queryArticles,
   type ContentSort,
@@ -14,6 +15,26 @@ import ArticleTeaserList from "@/components/editorial/ArticleTeaserList";
 import InsightsPathways from "@/components/editorial/InsightsPathways";
 import PopularTopics from "@/components/editorial/PopularTopics";
 import { HUB_LABEL, HUB_PATH } from "@/lib/content/taxonomy";
+
+/** Shown first on the insights index when no filters — mirrors common patient entry points. */
+const INSIGHTS_FEATURED_SLUGS: readonly string[] = [
+  "telogen-effluvium-after-illness-or-stress",
+  "what-blood-tests-matter-for-hair-loss",
+  "diffuse-thinning-in-women",
+  "ferritin-and-hair-loss",
+];
+
+function partitionInsightsFeatured(
+  articles: EditorialArticle[],
+  order: readonly string[]
+): { featured: EditorialArticle[]; rest: EditorialArticle[] } {
+  const featured = order
+    .map((slug) => articles.find((a) => a.slug === slug))
+    .filter((a): a is EditorialArticle => Boolean(a));
+  const featuredSet = new Set(featured.map((a) => a.slug));
+  const rest = articles.filter((a) => !featuredSet.has(a.slug));
+  return { featured, rest };
+}
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/insights",
@@ -69,14 +90,23 @@ function InsightsContent({ searchParams }: SearchProps) {
     q ? "relevance" : sort === "relevance" ? "relevance" : "newest"
   );
 
+  const isDefaultView =
+    q === "" && hub === "all" && audience === "all" && contentType === "all" && topic === "";
+  const { featured, rest } = isDefaultView
+    ? partitionInsightsFeatured(articles, INSIGHTS_FEATURED_SLUGS)
+    : { featured: [] as EditorialArticle[], rest: articles };
+  const showFeaturedBand = isDefaultView && featured.length > 0 && rest.length > 0;
+
   return (
-    <div className="py-12 sm:py-16">
-      <header className="mx-auto max-w-3xl text-center">
-        <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">Insights</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl">
+    <div className="pb-14 pt-8 sm:pb-16 sm:pt-10">
+      <header className="mx-auto max-w-2xl px-1 text-center sm:max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[rgb(var(--gold))] sm:text-sm sm:tracking-[0.2em]">
+          Insights
+        </p>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:mt-5 sm:text-4xl sm:leading-tight">
           What might be behind your hair loss?
         </h1>
-        <p className="mt-4 text-[rgb(var(--text-secondary))] leading-relaxed">
+        <p className="mx-auto mt-5 max-w-prose text-base leading-relaxed text-[rgb(var(--text-secondary))] sm:mt-6 sm:text-[1.0625rem]">
           Worried about sudden shedding, gradual thinning, hormones, blood tests, or an irritated scalp? Start below,
           then search — we cover medicines, office procedures, and long-term hair support in plain language. This is
           education, not a substitute for an exam with your doctor.
@@ -85,18 +115,52 @@ function InsightsContent({ searchParams }: SearchProps) {
 
       <InsightsPathways />
 
-      <div className="mx-auto mt-10 max-w-3xl">
+      <div className="mx-auto mt-12 max-w-3xl sm:mt-14">
         <Suspense fallback={<div className="h-40 animate-pulse rounded-card bg-subtle" aria-hidden />}>
           <EditorialSearchPanel />
         </Suspense>
       </div>
 
-      <div className="mx-auto mt-10 grid max-w-6xl gap-10 lg:grid-cols-[1fr_280px]">
+      <div className="mx-auto mt-12 grid max-w-6xl gap-10 lg:mt-14 lg:grid-cols-[1fr_280px]">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">Results</h2>
-          <div className="mt-4">
-            <ArticleTeaserList articles={articles} />
-          </div>
+          {showFeaturedBand ? (
+            <>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
+                Common starting points
+              </h2>
+              <p className="mt-1 text-sm text-[rgb(var(--text-secondary))]">
+                Short list of guides that match how many people first look for help.
+              </p>
+              <div className="mt-4">
+                <ArticleTeaserList
+                  articles={featured}
+                  density="scan"
+                  headingLevel="h3"
+                />
+              </div>
+              <div
+                className="my-10 border-t border-[rgb(var(--border-soft))] pt-10"
+                role="separator"
+                aria-hidden
+              />
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
+                All guides
+              </h2>
+              <p className="mt-1 text-sm text-[rgb(var(--text-secondary))]">
+                Full library, newest first — or use filters in search above.
+              </p>
+              <div className="mt-4">
+                <ArticleTeaserList articles={rest} density="scan" headingLevel="h3" />
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">Results</h2>
+              <div className="mt-4">
+                <ArticleTeaserList articles={articles} density="scan" headingLevel="h3" />
+              </div>
+            </>
+          )}
         </div>
         <aside className="space-y-8 lg:pt-8">
           <PopularTopics />
