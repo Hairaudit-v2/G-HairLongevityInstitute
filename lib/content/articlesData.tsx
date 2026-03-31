@@ -354,12 +354,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "diffuse-thinning-in-women",
-    title: "Thinning hair in women: how doctors sort common causes",
-    deck: "Heavy shedding, slow thinning, or an unhappy scalp — often more than one thing is in play.",
+    title: "Thinning hair in women: common causes and how doctors sort them out",
+    deck: "Shedding, slow thinning, or scalp symptoms — often more than one cause at once.",
     description:
       "Many women notice a wider part, less volume, or more hairs in the brush. This guide walks through common patterns, overlapping causes, when blood tests help, and how to avoid jumping to one internet diagnosis.",
     excerpt:
-      "Wider part or less volume? How your clinician tells shedding, pattern thinning, and scalp problems apart — calmly.",
+      "Wider part or less volume? How clinicians separate shedding, pattern thinning, and scalp issues.",
     hub: "conditions",
     audience: "patients",
     contentType: "guide",
@@ -492,11 +492,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "prp-vs-exosomes",
     title: "PRP vs exosomes for hair: what to ask before you pay",
-    deck: "Two in-clinic injection options — what they are, safety basics, and why a clear diagnosis comes first.",
+    deck: "Two injection options — what they are, safety basics, diagnosis first.",
     description:
       "PRP uses concentrated platelets from your blood; exosome products vary by clinic and country. This article explains the difference in plain terms, what the evidence does and does not show, safety and regulation, and why established medical options still anchor most plans.",
     excerpt:
-      "Know what you are buying, which questions to ask, and how to spot oversold promises.",
+      "What to ask before you pay — and how to spot oversold promises.",
     hub: "treatments",
     audience: "both",
     contentType: "comparison",
@@ -1037,12 +1037,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "oral-anti-androgens-in-women-specialist-led-context",
-    title: "Women’s hair loss pills (e.g. spironolactone): specialist-only",
-    deck: "Sometimes used for pattern thinning — never safe to start from forums or without monitoring.",
+    title: "Prescription options for women’s hair loss: why specialist care matters",
+    deck: "Pills such as spironolactone are not DIY — monitoring and pregnancy planning are essential.",
     description:
       "Some women discuss oral anti-androgen medicines for pattern hair loss under a specialist. This article explains why these drugs need medical supervision, monitoring, pregnancy planning, and a clear diagnosis — not which tablet to take.",
     excerpt:
-      "Thinking about spironolactone or similar? Safety, pregnancy, and follow-up mean a specialist has to lead.",
+      "Not a forum or self-start topic — safety and follow-up need a specialist.",
     hub: "treatments",
     audience: "both",
     contentType: "guide",

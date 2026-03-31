@@ -95,6 +95,7 @@ function InsightsContent({ searchParams }: SearchProps) {
   const { featured, rest } = isDefaultView
     ? partitionInsightsFeatured(articles, INSIGHTS_FEATURED_SLUGS)
     : { featured: [] as EditorialArticle[], rest: articles };
+  /** True on plain /insights: curated picks plus the rest of the library (both lists non-empty). Hidden when any filter/search/topic is active — single Results list then. */
   const showFeaturedBand = isDefaultView && featured.length > 0 && rest.length > 0;
 
   return (
@@ -122,16 +123,19 @@ function InsightsContent({ searchParams }: SearchProps) {
       </div>
 
       <div className="mx-auto mt-12 grid max-w-6xl gap-10 lg:mt-14 lg:grid-cols-[1fr_280px]">
-        <div>
+        <div className={showFeaturedBand ? "pt-2" : ""}>
           {showFeaturedBand ? (
             <>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
+                Suggested first reads
+              </p>
+              <h2 className="mt-2 text-lg font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-xl">
                 Common starting points
               </h2>
-              <p className="mt-1 text-sm text-[rgb(var(--text-secondary))]">
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
                 Short list of guides that match how many people first look for help.
               </p>
-              <div className="mt-4">
+              <div className="mt-6">
                 <ArticleTeaserList
                   articles={featured}
                   density="scan"
@@ -139,17 +143,17 @@ function InsightsContent({ searchParams }: SearchProps) {
                 />
               </div>
               <div
-                className="my-10 border-t border-[rgb(var(--border-soft))] pt-10"
+                className="my-12 border-t-2 border-[rgb(var(--border-soft))] pt-12"
                 role="separator"
                 aria-hidden
               />
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
+              <h2 className="text-lg font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-xl">
                 All guides
               </h2>
-              <p className="mt-1 text-sm text-[rgb(var(--text-secondary))]">
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
                 Full library, newest first — or use filters in search above.
               </p>
-              <div className="mt-4">
+              <div className="mt-6">
                 <ArticleTeaserList articles={rest} density="scan" headingLevel="h3" />
               </div>
             </>
