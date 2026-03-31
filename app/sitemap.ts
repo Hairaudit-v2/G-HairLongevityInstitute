@@ -1,118 +1,77 @@
 import type { MetadataRoute } from "next";
+import { isLongevityEnabled } from "@/lib/features";
+import { getAllSlugs } from "@/lib/content/index";
+import { GLOSSARY, glossaryPath } from "@/lib/content/glossary";
+import { getSiteOrigin } from "@/lib/seo/site";
 
-/**
- * Production base URL for sitemap links. Prefer NEXT_PUBLIC_SITE_URL for explicit production domain.
- * Fallback: Vercel deployment URL when set; otherwise a stable production domain for SEO.
- */
-function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "https://hairlongevityinstitute.com";
-}
+const STATIC_PUBLIC_PATHS: Array<{
+  path: string;
+  changeFrequency: MetadataRoute.Sitemap[0]["changeFrequency"];
+  priority: number;
+}> = [
+  { path: "/", changeFrequency: "weekly", priority: 1 },
+  { path: "/about", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/how-it-works", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/science", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/for-professionals", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/book", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/membership", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/start", changeFrequency: "monthly", priority: 0.95 },
+  { path: "/insights", changeFrequency: "weekly", priority: 0.95 },
+  { path: "/conditions", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/blood-markers", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/treatments", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/hair-loss-causes", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.5 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.5 },
+  { path: "/disclaimer", changeFrequency: "yearly", priority: 0.5 },
+];
 
-/**
- * Public, indexable marketing and info pages. Excludes portal, admin, doctor, dashboard,
- * authenticated areas, and dynamic intake/audit routes.
- */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = getBaseUrl();
+  const base = getSiteOrigin();
+  const now = new Date();
 
-  const entries: MetadataRoute.Sitemap = [
-    {
-      url: base,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${base}/about`,
-      lastModified: new Date(),
+  const entries: MetadataRoute.Sitemap = STATIC_PUBLIC_PATHS.map((e) => ({
+    url: `${base}${e.path}`,
+    lastModified: now,
+    changeFrequency: e.changeFrequency,
+    priority: e.priority,
+  }));
+
+  if (isLongevityEnabled()) {
+    entries.push(
+      {
+        url: `${base}/longevity`,
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.9,
+      },
+      {
+        url: `${base}/longevity/start`,
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.95,
+      }
+    );
+  }
+
+  for (const slug of getAllSlugs()) {
+    entries.push({
+      url: `${base}/insights/${slug}`,
+      lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/how-it-works`,
-      lastModified: new Date(),
+      priority: 0.8,
+    });
+  }
+
+  for (const g of GLOSSARY) {
+    entries.push({
+      url: `${base}${glossaryPath(g.slug)}`,
+      lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/science`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/for-professionals`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/book`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/membership`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/start`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.95,
-    },
-    {
-      url: `${base}/longevity`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${base}/longevity/start`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.95,
-    },
-    {
-      url: `${base}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/terms`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/disclaimer`,
-      lastModified: new Date(),
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/login/patient`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/login/trichologist`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-  ];
+      priority: 0.55,
+    });
+  }
 
   return entries;
 }

@@ -6,12 +6,15 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "How It Works | Hair Longevity Institute™",
-  description:
-    "Guided intake, secure uploads, specialist review, and your personalised summary — typically within 48 hours. No referral required.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/how-it-works",
+  title: "How hair analysis works — intake, review & your plan",
+  metaDescription:
+    "Guided intake, optional photos and blood uploads, senior trichologist review, and your written summary — typically within 48 hours. No referral required.",
+  appendBrand: true,
+});
 
 const STEPS = [
   { step: 1, title: "Answer a few questions", body: "Short guided intake about your history, goals, and any medications or supplements." },

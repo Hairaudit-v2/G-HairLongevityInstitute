@@ -9,12 +9,15 @@ import {
   SecondaryButton,
   UtilityLink,
 } from "@/components/public/PublicCTA";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Hair Longevity | Your Care Journey | Hair Longevity Institute™",
-  description:
-    "Structured patient platform: guided assessment, secure uploads, specialist review, and your summary — with continuity built in so you can return for follow-up anytime.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/longevity",
+  title: "Hair Longevity care journey — assessment to follow-up",
+  metaDescription:
+    "Structured pathway: guided assessment, secure uploads, specialist review, and your written summary — with continuity so you can return for follow-up when needed.",
+  appendBrand: true,
+});
 
 const PATHWAY_STEPS = [
   "Assessment",

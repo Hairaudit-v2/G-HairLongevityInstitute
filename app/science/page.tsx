@@ -6,12 +6,15 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "The Science | Hair Longevity Institute™",
-  description:
-    "How we analyse hair loss: hormones, nutrients, scalp health, thyroid, inflammation, and follicle integrity. Biology-first, evidence-based.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/science",
+  title: "Hair science: hormones, blood markers, scalp & follicle biology",
+  metaDescription:
+    "Evidence-framed domains we assess: androgens and DHT context, nutrients and iron, thyroid, inflammation, scalp health, and follicle integrity — in plain language.",
+  appendBrand: true,
+});
 
 const DOMAINS: Array<{
   title: string;

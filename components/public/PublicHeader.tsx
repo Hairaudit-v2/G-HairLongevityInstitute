@@ -35,6 +35,7 @@ export default function PublicHeader({
 
   const navLinks = [
     { href: "/about", label: "About" },
+    { href: "/insights", label: "Insights" },
     { href: "#how-it-works", label: "How it works" },
     { href: "#what-we-analyse", label: "What we analyse" },
     { href: "#results", label: "Your results" },

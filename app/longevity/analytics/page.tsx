@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isLongevityApiEnabled } from "@/lib/features";
@@ -5,6 +6,15 @@ import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getCohortReadinessSummary } from "@/lib/longevity/predictiveReadiness";
 import type { ReadinessLevel, ReadinessDimension } from "@/lib/longevity/predictiveReadiness";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  path: "/longevity/analytics",
+  title: "Longevity analytics",
+  metaDescription: "Clinician-only longevity analytics workspace.",
+  appendBrand: true,
+  robots: { index: false, follow: false },
+});
 
 /** Readability labels for readiness dimensions (readiness layer only; not clinical). */
 const DIMENSION_LABELS: Record<ReadinessDimension, string> = {

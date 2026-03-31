@@ -4,11 +4,16 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Disclaimer | Hair Longevity Institute™",
-  description: "Medical and service disclaimer. We provide interpretation and strategy, not medical advice or prescriptions.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/disclaimer",
+  title: "Medical & service disclaimer",
+  metaDescription:
+    "HLI provides educational interpretation and strategy, not medical diagnosis or prescriptions. Read scope, limits, and how to use our materials safely.",
+  appendBrand: true,
+  robots: { index: true, follow: true },
+});
 
 export default function DisclaimerPage() {
   const useLongevity = isLongevityEnabled();

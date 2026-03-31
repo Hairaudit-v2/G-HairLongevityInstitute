@@ -8,11 +8,15 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, SectionTitle, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
 
-export const metadata: Metadata = {
-  title: "About | Hair Longevity Institute™",
-  description:
-    "30+ years clinical experience. Biology-first strategy. International trichologist, surgical hair restoration, hormone mapping, and regenerative integration.",
-};
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  path: "/about",
+  title: "About our trichology-led, biology-first hair institute",
+  metaDescription:
+    "30+ years clinical experience in trichology and hair restoration. Biology-first hormone mapping, blood interpretation, and regenerative strategy — global standards.",
+  appendBrand: true,
+});
 
 export default function AboutPage() {
   const useLongevity = isLongevityEnabled();

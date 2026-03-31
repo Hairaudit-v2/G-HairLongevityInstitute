@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import { LongevityStartFlow } from "@/components/longevity/LongevityStartFlow";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Hair Longevity Assessment | Start Your Analysis | Hair Longevity Institute™",
-  description:
-    "Start your Hair Longevity intake: guided questions, optional photos and bloods, specialist review, and your personalised summary — typically within 48 hours.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/longevity/start",
+  title: "Start Hair Longevity assessment intake",
+  metaDescription:
+    "Hair Longevity guided intake: structured questions, optional scalp photos and blood uploads, specialist review, and your personalised summary — typically within 48 hours.",
+  appendBrand: true,
+});
 
 export default function LongevityStartPage() {
   if (!isLongevityEnabled()) {

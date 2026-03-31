@@ -43,15 +43,99 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
 }
 
 /**
- * WebSite schema. No SearchAction: site does not offer a meaningful site-search feature.
+ * WebSite schema with on-site editorial search (`/insights?q=`).
  */
 export function getWebSiteSchema(baseUrl: string): Record<string, unknown> {
-  const url = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`;
+  const url = (baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`).replace(/\/$/, "");
+  const searchTemplate = `${url}/insights?q={search_term_string}`;
   return {
     "@type": "WebSite",
     name: SITE_NAME,
-    url,
+    url: `${url}/`,
     description: WEBSITE_DESCRIPTION,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: searchTemplate,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export type ArticleSchemaInput = {
+  headline: string;
+  description: string;
+  url: string;
+  datePublished?: string;
+  dateModified?: string;
+  /** ISO 8601 date only or datetime for medical content signals */
+  dateModifiedDisplay?: string;
+  imageUrls?: string[];
+  authorNames: string[];
+};
+
+export function getArticleJsonLd(input: ArticleSchemaInput): Record<string, unknown> {
+  const origin = getBaseUrl().replace(/\/$/, "");
+  const author = input.authorNames.map((name) => ({
+    "@type": "Person",
+    name,
+  }));
+  const obj: Record<string, unknown> = {
+    "@type": "Article",
+    headline: input.headline,
+    description: input.description,
+    url: input.url,
+    author,
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: `${origin}${LOGO_PATH}`,
+      },
+    },
+  };
+  if (input.datePublished) obj.datePublished = input.datePublished;
+  if (input.dateModified) obj.dateModified = input.dateModified;
+  if (input.imageUrls?.length) {
+    obj.image = input.imageUrls.map((u) => ({ "@type": "ImageObject", url: u }));
+  }
+  return obj;
+}
+
+export type FaqItem = { question: string; answer: string };
+
+export function getFaqPageJsonLd(items: FaqItem[]): Record<string, unknown> {
+  return {
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+export type BreadcrumbItem = { name: string; path: string };
+
+export function getBreadcrumbListJsonLd(
+  baseUrl: string,
+  items: BreadcrumbItem[]
+): Record<string, unknown> {
+  const origin = baseUrl.replace(/\/$/, "");
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: `${origin}${item.path.startsWith("/") ? item.path : `/${item.path}`}`,
+    })),
   };
 }
 

@@ -4,11 +4,14 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Hair Longevity Institute™",
-  description: "How we collect, use, and protect your personal data.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/privacy",
+  title: "Privacy policy",
+  metaDescription: "How Hair Longevity Institute collects, uses, stores, and protects your personal and health-related data.",
+  appendBrand: true,
+});
 
 export default function PrivacyPage() {
   const useLongevity = isLongevityEnabled();

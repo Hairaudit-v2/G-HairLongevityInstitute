@@ -2,19 +2,8 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import StructuredData from "@/components/seo/StructuredData";
+import { getMetadataBaseUrl } from "@/lib/seo/site";
 import "./globals.css";
-
-/** Base URL for metadata (OG, canonical). Prefer NEXT_PUBLIC_SITE_URL; fallback for Vercel and production. */
-function getMetadataBase(): URL {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    const u = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-    return new URL(u.startsWith("http") ? u : `https://${u}`);
-  }
-  if (process.env.VERCEL_URL) {
-    return new URL(`https://${process.env.VERCEL_URL}`);
-  }
-  return new URL("https://hairlongevityinstitute.com");
-}
 
 const defaultTitle = "Hair Longevity Institute™ | Biology First. Hair for Life.";
 const defaultDescription =
@@ -24,7 +13,7 @@ const defaultDescription =
 const defaultOgImagePath = "/brand/hli-mark.png";
 
 export const metadata: Metadata = {
-  metadataBase: getMetadataBase(),
+  metadataBase: getMetadataBaseUrl(),
   title: defaultTitle,
   description: defaultDescription,
   icons: {

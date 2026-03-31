@@ -8,12 +8,16 @@ import { Container, PrimaryButton } from "@/components/public/PublicCTA";
 import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHairIntelligenceSection";
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
 import { ResultsPreviewCard } from "@/components/public/ResultsPreviewCard";
+import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Hair Longevity Institute™ | Biology First. Hair for Life.",
-  description:
-    "Personalised hair loss analysis backed by biology, not guesswork. Understand your pattern, hormones, and options. No referral required — typically 48 hours to your plan.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/",
+  title: "Hair loss analysis & biology-first planning",
+  metaDescription:
+    "Personalised hair loss analysis backed by biology, not guesswork. Understand pattern, hormones, blood markers, and options — typically 48 hours to your plan.",
+  appendBrand: true,
+});
 
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
 
@@ -316,6 +320,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-page">
+      <HomeFaqJsonLd items={FAQ_ITEMS.map(({ q, a }) => ({ question: q, answer: a }))} />
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={href}

@@ -6,11 +6,15 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { EcosystemCrossLinks } from "@/components/public/EcosystemCrossLinks";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Book Specialist Consultation | Hair Longevity Institute™",
-  description: "45-minute Zoom consultation with a senior trichologist. Full blood interpretation, personalised roadmap, and GP guidance.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/book",
+  title: "Book a hair specialist consultation (Zoom)",
+  metaDescription:
+    "45-minute consultation with a senior trichologist: blood interpretation context, personalised roadmap, and GP-appropriate guidance — not a substitute for local prescribing.",
+  appendBrand: true,
+});
 
 export default function BookPage() {
   const useLongevity = isLongevityEnabled();

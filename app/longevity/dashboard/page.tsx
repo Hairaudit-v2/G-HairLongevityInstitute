@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getPatientProgressForProfile } from "@/lib/longevity/patientProgress";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  path: "/longevity/dashboard",
+  title: "Hair Longevity dashboard",
+  metaDescription: "Private session bridge to your Hair Longevity portal and care status.",
+  appendBrand: true,
+  robots: { index: false, follow: false },
+});
 
 /**
  * Cookie/session longevity dashboard: lightweight bridge to the secure portal.

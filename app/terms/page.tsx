@@ -4,11 +4,14 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | Hair Longevity Institute™",
-  description: "Terms governing use of Hair Longevity Institute services.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/terms",
+  title: "Terms of service",
+  metaDescription: "Terms governing use of Hair Longevity Institute websites, assessments, and related services.",
+  appendBrand: true,
+});
 
 export default function TermsPage() {
   const useLongevity = isLongevityEnabled();

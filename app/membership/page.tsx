@@ -5,11 +5,15 @@ import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Hair Longevity Membership | Hair Longevity Institute™",
-  description: "Ongoing optimisation, 6-month reassessments, and Hair Longevity Score™ tracking. $49/month.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/membership",
+  title: "Hair Longevity membership — continuity & reassessment",
+  metaDescription:
+    "Ongoing optimisation with periodic reassessment and Hair Longevity Score™ tracking. Designed for continuity after your initial analysis.",
+  appendBrand: true,
+});
 
 export default function MembershipPage() {
   const useLongevity = isLongevityEnabled();

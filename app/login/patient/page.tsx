@@ -4,11 +4,16 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container } from "@/components/public/PublicCTA";
 import { isLongevityEnabled } from "@/lib/features";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Patient Login | Hair Longevity Institute™",
-  description: "Sign in to your secure portal. View your care journey, uploads, progress, summary, and next steps.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/login/patient",
+  title: "Patient portal sign-in",
+  metaDescription:
+    "Secure sign-in for returning patients: care journey, uploads, progress, summary, and next steps.",
+  appendBrand: true,
+  robots: { index: false, follow: false },
+});
 
 export default function PatientLoginPage() {
   const useLongevity = isLongevityEnabled();

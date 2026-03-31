@@ -4,11 +4,16 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container } from "@/components/public/PublicCTA";
 import { isLongevityEnabled } from "@/lib/features";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Trichologist Login | Hair Longevity Institute™",
-  description: "Portal access for the review team. View assigned cases, intake review workspace, and manage follow-up and summary release.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/login/trichologist",
+  title: "Trichologist review portal sign-in",
+  metaDescription:
+    "Secure access for the clinical review team: assigned cases, intake workspace, and summary workflows.",
+  appendBrand: true,
+  robots: { index: false, follow: false },
+});
 
 export default function TrichologistLoginPage() {
   const useLongevity = isLongevityEnabled();

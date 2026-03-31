@@ -6,12 +6,15 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { EcosystemCrossLinks } from "@/components/public/EcosystemCrossLinks";
 import { Container, PrimaryButton } from "@/components/public/PublicCTA";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "For Professionals | Hair Longevity Institute™",
-  description:
-    "For trichologists, GPs, and dermatologists: hair loss biology, structured interpretation, treatment pathways, and ecosystem resources (IIOHR, HairAudit, Follicle Intelligence).",
-};
+export const metadata: Metadata = buildPageMetadata({
+  path: "/for-professionals",
+  title: "For clinicians: hair biology, interpretation & referrals",
+  metaDescription:
+    "Resources for trichologists, GPs, and dermatologists: biology-first hair loss interpretation, treatment planning context, and ecosystem links (IIOHR, HairAudit, Follicle Intelligence).",
+  appendBrand: true,
+});
 
 const OFFERINGS = [
   { title: "Hair loss biology", desc: "Androgen sensitivity, thyroid, iron, inflammation, and follicle integrity." },

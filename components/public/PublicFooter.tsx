@@ -43,6 +43,7 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
             <h3 className={headingClass}>Explore</h3>
             <nav className="mt-3 flex flex-col gap-2 text-sm" aria-label="Explore">
               <Link href="/about" className={linkClass}>About</Link>
+              <Link href="/insights" className={linkClass}>Insights</Link>
               <Link href="/how-it-works" className={linkClass}>How it works</Link>
               <Link href="/science" className={linkClass}>Science</Link>
               <Link href="/for-professionals" className={linkClass}>For professionals</Link>
