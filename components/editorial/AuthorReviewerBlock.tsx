@@ -32,11 +32,12 @@ export default function AuthorReviewerBlock({
   return (
     <section className="border-t border-[rgb(var(--border-soft))] pt-10" aria-labelledby="author-block-heading">
       <h2 id="author-block-heading" className="text-lg font-semibold text-[rgb(var(--text-primary))]">
-        Authors & review
+        Who wrote this and who checked it
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-[rgb(var(--text-secondary))] leading-relaxed">
-        Educational content is drafted for clarity and reviewed for clinical alignment with HLI standards. It does not
-        replace individual assessment.
+        Articles are drafted for patient clarity, then reviewed for medical accuracy under HLI editorial standards.
+        Sources are listed where they help you verify claims; this education still does not replace an exam or plan from
+        your own clinician.
       </p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {authors.map((p) => (

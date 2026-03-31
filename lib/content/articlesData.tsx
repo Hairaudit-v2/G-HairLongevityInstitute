@@ -26,12 +26,8 @@ const author: EditorialPerson = {
 const reviewer: EditorialPerson = {
   name: "HLI Clinical Review",
   role: "Medical accuracy review",
-  credentials: "Senior trichology review per internal protocol",
+  credentials: "Senior trichology sign-off before publication; same review standard across insight articles.",
 };
-
-function refPending(topic: string): EditorialReference {
-  return { label: `[Reference pending — to be replaced with peer-reviewed or authoritative source] ${topic}` };
-}
 
 /** Structured external citation (concise label + URL). */
 function cite(label: string, url: string): EditorialReference {
@@ -45,8 +41,8 @@ function faqBlock(items: EditorialFaqItem[]): EditorialFaqItem[] {
 export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "what-blood-tests-matter-for-hair-loss",
-    title: "What blood tests matter for hair loss?",
-    deck: "Which tests help, when they matter, and why you rarely need the same panel as someone else.",
+    title: "Blood tests and hair loss: what may actually help",
+    deck: "Iron, thyroid, and more — when tests are useful, and why your panel may differ from someone else’s.",
     description:
       "A plain-language guide to blood tests that often come up for shedding or thinning: iron and ferritin, thyroid, and others. Why your doctor picks certain tests for you — and why a big panel is not always the answer.",
     excerpt:
@@ -123,8 +119,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "ferritin-and-hair-loss",
-    title: "Ferritin and hair loss: what the number can and cannot tell you",
-    deck: "Storage iron in one number — useful, but not the whole hair story on its own.",
+    title: "Ferritin and hair loss: what your result can and can’t tell you",
+    deck: "One lab value for stored iron — helpful in context, not a full diagnosis of why hair is shedding.",
     description:
       "Ferritin is a common blood test when hair sheds. This article explains what it reflects, why illness or inflammation can change it, and why one number rarely tells the whole hair story.",
     excerpt:
@@ -200,8 +196,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "thyroid-hair-loss-explained",
-    title: "Thyroid and hair loss explained",
-    deck: "Under- or overactive thyroid can change hair — and “normal” TSH does not answer every worry.",
+    title: "Thyroid and hair loss: what patients should know",
+    deck: "Under- or overactive thyroid can change shedding or texture — and “normal” TSH still leaves other causes on the table.",
     description:
       "Thyroid problems can speed up shedding or change hair texture for some people. Here is how doctors usually test, what borderline results can mean, and why hair loss still needs a full look beyond one lab line.",
     excerpt:
@@ -277,8 +273,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "dht-and-androgenetic-alopecia",
-    title: "DHT and pattern hair loss: a plain-English overview",
-    deck: "How DHT ties into typical male and female pattern thinning — without one-hormone myths.",
+    title: "Pattern hair loss and DHT: a plain-English overview",
+    deck: "How DHT fits male- and female-pattern thinning — without blaming one hormone for everything.",
     description:
       "Pattern hair loss often involves genetics and how DHT affects some follicles over time. This article explains that idea in patient terms, how doctors spot pattern loss on exam, and when blood tests are — and are not — useful.",
     excerpt:
@@ -365,8 +361,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "guide",
     ctaType: "book-consult",
     publishedAt: "2026-02-08",
-    updatedAt: "2026-03-25",
-    reviewedAt: "2026-03-21",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["androgenetic-alopecia", "telogen-effluvium", "diffuse-thinning"],
       markers: ["ferritin", "tsh"],
@@ -414,9 +410,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ],
     glossarySlugs: ["telogen-effluvium", "dht"],
     references: [
-      refPending("Female hair loss classification — review"),
-      refPending("Chronic telogen effluvium vs pattern loss"),
-      refPending("Patient perspective: diffuse alopecia work-up"),
+      cite(
+        "American Academy of Dermatology. What causes hair loss in women? (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss/causes/women"
+      ),
+      cite(
+        "American Academy of Dermatology. Female pattern hair loss — overview (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss/types/female-pattern"
+      ),
+      cite(
+        "StatPearls / NCBI Bookshelf. Telogen effluvium (reversible shedding — clinical overview).",
+        "https://www.ncbi.nlm.nih.gov/books/NBK430957/"
+      ),
     ],
     Body: BodyDiffuseThinningWomen,
   },
@@ -433,8 +438,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "comparison",
     ctaType: "compare-treatments",
     publishedAt: "2026-02-15",
-    updatedAt: "2026-03-28",
-    reviewedAt: "2026-03-24",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["androgenetic-alopecia"],
       markers: ["testosterone", "dht"],
@@ -483,9 +488,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ],
     glossarySlugs: ["dht"],
     references: [
-      refPending("Finasteride male pattern hair loss — pivotal trials summary"),
-      refPending("Saw palmetto extracts — systematic review quality assessment"),
-      refPending("5α-reductase inhibitors — safety counselling themes"),
+      cite(
+        "NHS (UK). Finasteride — uses, safety, and interactions including with herbal products (medicines guide).",
+        "https://www.nhs.uk/medicines/finasteride/"
+      ),
+      cite(
+        "NCCIH (NIH). Saw palmetto — what research shows and safety basics (consumer fact sheet).",
+        "https://www.nccih.nih.gov/health/saw-palmetto"
+      ),
+      cite(
+        "American Academy of Dermatology. Androgenetic alopecia (pattern hair loss) — patient summary.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/androgenetic-alopecia"
+      ),
     ],
     Body: BodyFinasterideVsSawPalmetto,
   },
@@ -551,9 +565,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "minoxidil-mechanism-and-realistic-timelines",
     ],
     references: [
-      refPending("PRP in androgenetic alopecia — randomised trials synthesis"),
-      refPending("Extracellular vesicle therapies — regulatory commentary"),
-      refPending("Informed consent for aesthetic injectables"),
+      cite(
+        "American Academy of Dermatology. Hair loss: treatment options to discuss with a dermatologist.",
+        "https://www.aad.org/public/diseases/hair-loss/treatment"
+      ),
+      cite(
+        "U.S. FDA. Consumer update — stem cell and related products (regulatory caution for unapproved “regenerative” claims).",
+        "https://www.fda.gov/consumers/consumer-updates/fda-warns-about-stem-cell-therapies"
+      ),
+      cite(
+        "Gentile P et al. Autologous PRP in alopecia: overview with trial context (PMC open access).",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7923160/"
+      ),
     ],
     Body: BodyPrpVsExosomes,
   },
@@ -619,16 +642,25 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "scalp-inflammation-and-shedding",
     ],
     references: [
-      refPending("Hair Intelligence ecosystem — public positioning statements"),
-      refPending("Informed consent in hair restoration surgery — review"),
-      refPending("Trichology scope vs surgical audit — professional boundary commentary"),
+      cite(
+        "American Academy of Dermatology. Hair transplantation: what patients should know.",
+        "https://www.aad.org/public/diseases/hair-loss/treatment/hair-transplant"
+      ),
+      cite(
+        "ISHRS. Getting started — patient information on hair restoration.",
+        "https://ishrs.org/patients/getting-started"
+      ),
+      cite(
+        "American Academy of Dermatology. Hair loss: causes and types (patient overview).",
+        "https://www.aad.org/public/diseases/hair-loss"
+      ),
     ],
     Body: BodyHliVsHairaudit,
   },
   {
     slug: "postpartum-shedding-when-to-reassure-vs-when-to-test",
-    title: "Postpartum shedding: when to reassure vs when to test",
-    deck: "Often normal after birth — typical timing plus when iron, thyroid, or other checks help.",
+    title: "Hair shedding after pregnancy: what’s normal and when to get checked",
+    deck: "Typical timing after birth, plus when iron, thyroid, or other tests are worth discussing.",
     description:
       "Many parents lose more hair a few months after birth. This guide explains why that happens, when watchful waiting is reasonable, which symptoms should prompt a doctor visit, and how iron or thyroid sometimes overlap.",
     excerpt:
@@ -688,16 +720,25 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ],
     glossarySlugs: ["telogen-effluvium"],
     references: [
-      refPending("Postpartum telogen effluvium — clinical review"),
-      refPending("Postpartum thyroiditis — guideline summary"),
-      refPending("Iron deficiency in the postpartum period"),
+      cite(
+        "American Academy of Dermatology. Women’s hair loss (female pattern and diffuse shedding context).",
+        "https://www.aad.org/public/diseases/hair-loss/causes/womens-hair-loss-female-pattern-baldness"
+      ),
+      cite(
+        "StatPearls / NCBI Bookshelf. Postpartum thyroiditis (clinical overview).",
+        "https://www.ncbi.nlm.nih.gov/books/NBK534824/"
+      ),
+      cite(
+        "NICE CKS (UK). Anaemia — iron deficiency: investigation and management.",
+        "https://cks.nice.org.uk/topics/anaemia-iron-deficiency/"
+      ),
     ],
     Body: BodyPostpartumShedding,
   },
   {
     slug: "telogen-effluvium-after-illness-or-stress",
-    title: "Telogen effluvium after illness or stress",
-    deck: "Shedding that shows up weeks or months after illness, surgery, or major stress — why timing feels wrong.",
+    title: "Hair shedding after illness or stress: telogen effluvium explained",
+    deck: "Heavy shedding that starts weeks or months after a trigger — why the delay confuses people.",
     description:
       "Telogen effluvium is a common type of diffuse shedding that can start after you are already feeling better. This article explains typical triggers, timing, how it can overlap with pattern thinning, and when blood tests or a scalp exam matter.",
     excerpt:
@@ -757,9 +798,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ],
     glossarySlugs: ["telogen-effluvium"],
     references: [
-      refPending("Acute telogen effluvium — diagnostic approach"),
-      refPending("Hair cycle biology and effluvium — review"),
-      refPending("Diffuse hair loss evaluation in primary care"),
+      cite(
+        "StatPearls / NCBI Bookshelf. Telogen effluvium (mechanism, triggers, course).",
+        "https://www.ncbi.nlm.nih.gov/books/NBK430957/"
+      ),
+      cite(
+        "American Academy of Dermatology. Hair loss: causes and types (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss"
+      ),
+      cite(
+        "American Academy of Dermatology. Hair shedding: how much is normal?",
+        "https://www.aad.org/public/diseases/hair-loss/insider/shedding"
+      ),
     ],
     Body: BodyTelogenAfterIllnessStress,
   },
@@ -776,8 +826,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "interpretation",
     ctaType: "start-assessment",
     publishedAt: "2026-03-12",
-    updatedAt: "2026-03-29",
-    reviewedAt: "2026-03-26",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["diffuse-thinning", "telogen-effluvium"],
       markers: ["vitamin-d", "b12", "folate"],
@@ -825,9 +875,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "telogen-effluvium-after-illness-or-stress",
     ],
     references: [
-      refPending("Vitamin D deficiency — population and clinical context"),
-      refPending("B12 and folate deficiency — haematology reference"),
-      refPending("Nutritional factors in diffuse alopecia — review"),
+      cite(
+        "NHS (UK). Vitamin D — roles, deficiency risk, and sensible supplementation context.",
+        "https://www.nhs.uk/conditions/vitamins-and-minerals/vitamin-d/"
+      ),
+      cite(
+        "NHS (UK). Vitamin B12 or folate deficiency anaemia — overview for patients.",
+        "https://www.nhs.uk/conditions/vitamin-b12-or-folate-deficiency-anaemia/"
+      ),
+      cite(
+        "Guo EL, Katta R. Diet and hair loss: effects of nutrient deficiency and supplement use. Dermatol Pract Concept. 2017 — open access via PMC.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5315033/"
+      ),
     ],
     Body: BodyVitaminMicronutrientsHair,
   },
@@ -844,8 +903,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "guide",
     ctaType: "book-consult",
     publishedAt: "2026-03-15",
-    updatedAt: "2026-03-29",
-    reviewedAt: "2026-03-26",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["seborrheic-dermatitis", "inflammatory-shedding", "telogen-effluvium"],
       markers: [],
@@ -893,9 +952,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "minoxidil-mechanism-and-realistic-timelines",
     ],
     references: [
-      refPending("Seborrhoeic dermatitis — clinical management review"),
-      refPending("Scalp psoriasis vs seborrhoeic dermatitis — differential"),
-      refPending("Trichoscopy in inflammatory scalp disease — overview"),
+      cite(
+        "American Academy of Dermatology. Seborrheic dermatitis: overview (patient resource).",
+        "https://www.aad.org/public/diseases/a-z/seborrheic-dermatitis-overview"
+      ),
+      cite(
+        "American Academy of Dermatology. Scalp psoriasis: reducing hair loss (patient resource).",
+        "https://www.aad.org/public/diseases/psoriasis/treatment/genitals/scalp-hair-loss"
+      ),
+      cite(
+        "Rudnicka L et al. Trichoscopy update 2011. J Dermatol Case Rep. 2011 — open access via PMC.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3241952/"
+      ),
     ],
     Body: BodyScalpInflammationShedding,
   },
@@ -912,8 +980,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "explainer",
     ctaType: "compare-treatments",
     publishedAt: "2026-03-18",
-    updatedAt: "2026-03-29",
-    reviewedAt: "2026-03-26",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["androgenetic-alopecia", "diffuse-thinning"],
       markers: [],
@@ -961,9 +1029,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "telogen-effluvium-after-illness-or-stress",
     ],
     references: [
-      refPending("Topical minoxidil — mechanism and clinical use review"),
-      refPending("Female pattern hair loss — topical therapy trials"),
-      refPending("Early minoxidil shedding — patient counselling themes"),
+      cite(
+        "MedlinePlus (NIH). Minoxidil topical — patient drug information (uses, precautions, timelines).",
+        "https://medlineplus.gov/druginfo/meds/a689003.html"
+      ),
+      cite(
+        "American Academy of Dermatology. Hair loss: diagnosis and treatment (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss/treatment/diagnosis-treat"
+      ),
+      cite(
+        "Suchonwanit P, Thammarucha S, Leerunyakul K. Minoxidil and its use in hair disorders: a review. Drug Des Devel Ther. 2019 — open access via PMC.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6691938/"
+      ),
     ],
     Body: BodyMinoxidilMechanism,
   },
@@ -980,8 +1057,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "guide",
     ctaType: "read-more",
     publishedAt: "2026-03-22",
-    updatedAt: "2026-03-29",
-    reviewedAt: "2026-03-26",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["post-transplant-instability", "telogen-effluvium"],
       markers: ["ferritin", "tsh"],
@@ -1029,9 +1106,18 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "minoxidil-mechanism-and-realistic-timelines",
     ],
     references: [
-      refPending("Postoperative telogen effluvium after hair restoration — review"),
-      refPending("Follicular unit transplantation — patient counselling resources"),
-      refPending("Complications after hair surgery — when to seek care"),
+      cite(
+        "American Academy of Dermatology. Hair transplant surgery — patient overview.",
+        "https://www.aad.org/public/diseases/hair-loss/treatment/transplant"
+      ),
+      cite(
+        "International Society of Hair Restoration Surgery. Getting started — informed patient education on hair restoration.",
+        "https://ishrs.org/patients/getting-started"
+      ),
+      cite(
+        "Goldin J, Zito PM, Raggio BS. Hair transplantation (includes counselling on shock loss and complications). StatPearls [Internet].",
+        "https://www.ncbi.nlm.nih.gov/books/NBK547740/"
+      ),
     ],
     Body: BodyPostTransplantShockLoss,
   },

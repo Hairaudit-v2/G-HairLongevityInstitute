@@ -11,10 +11,10 @@ export function BodyWhatBloodTestsMatter() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        If you are losing hair, you may wonder which blood tests matter. Labs never diagnose hair loss by themselves —
-        they help your doctor see whether iron, thyroid, inflammation, or other whole-body factors belong in the picture
-        alongside your scalp exam, pattern of loss, and story over time. This guide lists themes doctors often discuss; it
-        is not a list to self-order.
+        If you are losing hair, you may wonder which blood tests matter. Here is the short version: labs never diagnose
+        hair loss on their own. They help your doctor see whether iron, thyroid, inflammation, or other whole-body
+        factors belong in the picture — together with your scalp exam, pattern of loss, and how symptoms changed over
+        time. This guide lists themes doctors often discuss; it is not a list to self-order online.
       </p>
       <h2 id="why-selective" className={h2}>
         Why you might not need every test
@@ -84,9 +84,9 @@ export function BodyFerritinAndHairLoss() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Ferritin is a blood test that reflects how much iron your body has stored away — a bit like a reserve tank, not
-        today’s fuel gauge in every situation. Doctors often mention it when hair is shedding, because low stores can
-        matter for some people. It is still not a single-number verdict on your hair; it is one clue among many.
+        Ferritin measures how much iron your body has in reserve — think “storage,” not a perfect read of today’s iron
+        status in every situation. It comes up often when hair sheds, because low stores can matter for some people. One
+        result is never the whole story: your symptoms, exam, and often other blood tests still decide what it means.
       </p>
       <h2 id="what-ferritin-is" className={h2}>
         What is ferritin?
@@ -155,9 +155,9 @@ export function BodyThyroidHairLoss() {
     <div className={wrap}>
       <p className={lead}>
         Wondering if your thyroid is behind your hair loss? An under- or overactive thyroid can speed up shedding or
-        change hair texture for some people. Hair can also thin when thyroid labs look fine, because diet, stress,
-        medicines, and pattern hair loss often sit alongside thyroid issues. This article explains how doctors usually
-        think it through — it does not replace your own visit.
+        change hair texture for some people. At the same time, hair can thin when thyroid labs look fine — diet, stress,
+        medicines, and pattern hair loss are common co-travellers. This article walks through how doctors usually connect
+        the dots; it does not replace your own appointment.
       </p>
       <h2 id="how-thyroid-affects-hair" className={h2}>
         How thyroid trouble can affect hair
@@ -224,13 +224,13 @@ export function BodyDhtAndAga() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Why does common male- or female-pattern thinning run in families? For many people,{" "}
+        Male- and female-pattern thinning often runs in families. For many people,{" "}
         <Link href={glossaryPath("dht")} className="font-medium text-medical underline-offset-2 hover:underline">
           DHT
         </Link>{" "}
-        — a hormone cousin of testosterone — is part of how some follicles gradually miniaturise over time. Genetics
-        decide who is more sensitive; DHT is not the only factor in every person’s story, but it helps explain a lot of
-        pattern hair loss in plain terms.
+        (dihydrotestosterone — a hormone made from testosterone) is part of why some follicles grow finer and shorter
+        over the years. Genetics decide who is more sensitive. DHT is not the only story in every case, but it explains a
+        large share of common pattern hair loss without turning it into a single-hormone myth.
       </p>
       <h2 id="pattern-recognition" className={h2}>
         What doctors look for on your scalp
@@ -369,10 +369,10 @@ export function BodyPrpVsExosomes() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Trying to decide on injections for thinning hair? Platelet-rich plasma (PRP) uses concentrated platelets from
-        your own blood; exosome products vary by clinic and what regulators allow where you live. Evidence, safety, and
-        marketing are not the same for both. This page helps you compare ideas and questions — it does not pick a product
-        or protocol for you, and a clear diagnosis still comes first.
+        Clinics often pitch injections for thinning hair. PRP usually means concentrating platelets from your own blood;
+        exosome products differ widely by source, lab, and what regulators allow where you live. Evidence and safety are
+        not the same for both, and marketing can outrun data. This page equips questions for your clinician — it does not
+        choose a product for you, and a clear diagnosis should still come first.
       </p>
       <h2 id="what-prp-is" className={h2}>
         What PRP involves
@@ -485,9 +485,10 @@ export function BodyFinasterideVsSawPalmetto() {
         What people say about saw palmetto
       </h2>
       <p className="leading-relaxed">
-        Saw palmetto extracts are marketed widely. Some small studies explore potential effects on androgen pathways; the
-        hair-loss evidence base is limited compared with approved pharmacologic options. Product standardisation varies
-        between brands, and interactions with other drugs are possible.
+        Saw palmetto extracts are marketed widely. For male-pattern hair loss specifically, only small, short trials exist,
+        and major reviews have more often focused on other indications — so hair-specific conclusions remain limited
+        compared with approved medicines. Product standardisation varies between brands, and interactions with other drugs
+        are possible.
       </p>
       <h2 id="not-substitute" className={h2}>
         Why they are not the same thing
@@ -528,9 +529,10 @@ export function BodyHliVsHairaudit() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Hair Longevity Institute (HLI) and HairAudit sit in the same Hair Intelligence network, but they answer different
-        first questions. Use this page to match your worry — ongoing thinning and health versus transplant plans or
-        surgical concerns — without mixing up what each path is for.
+        Not sure whether to start with medical hair education or a transplant-focused review? Hair Longevity Institute
+        (HLI) and HairAudit sit in the same Hair Intelligence network, but they answer different first questions. This page
+        matches your worry — ongoing thinning, labs, and planning versus surgery plans, consent, or post-op concerns —
+        so you do not pick the wrong door.
       </p>
       <h2 id="hli-focus" className={h2}>
         When Hair Longevity Institute fits
@@ -609,9 +611,10 @@ export function BodyPostpartumShedding() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Many new parents notice a lot more hair coming out a few months after birth. That often follows normal hair-cycle
-        shifts — but postpartum life can also overlap with iron or thyroid issues. This guide separates “probably normal”
-        from “worth a call,” without replacing your midwife, GP, or obstetric team.
+        Many new parents notice clumps or a thinner ponytail a few months after birth. That often follows normal hair-cycle
+        shifts — and it can still feel frightening. Postpartum life can also overlap with low iron or thyroid changes, so
+        this guide separates “probably normal for now” from “worth a call,” without replacing your midwife, GP, or
+        obstetric team.
       </p>
       <h2 id="normal-postpartum-shedding" className={h2}>
         What normal postpartum shedding looks like
@@ -695,9 +698,10 @@ export function BodyTelogenAfterIllnessStress() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Hair falling out weeks or months after a fever, surgery, crash diet, or major stress? That delayed pattern has a
-        name clinicians use — telogen effluvium — but you should not self-diagnose from shedding alone. This article
-        explains the idea in patient language so you can ask your doctor sharper questions.
+        Hair falling out weeks or months after a fever, surgery, crash diet, or major stress? That delayed shed is what
+        many clinicians call telogen effluvium — extra hairs shift into shedding phase around the same time, so the fall
+        feels sudden even though the trigger was earlier. Do not self-diagnose from shedding alone; this article explains
+        the pattern in plain language so you can ask your doctor better questions.
       </p>
       <h2 id="what-te-triggers" className={h2}>
         Common triggers (illness, stress, hormones)
