@@ -11,14 +11,15 @@ import {
 import EditorialPageShell from "@/components/editorial/EditorialPageShell";
 import EditorialSearchPanel from "@/components/editorial/EditorialSearchPanel";
 import ArticleTeaserList from "@/components/editorial/ArticleTeaserList";
+import InsightsPathways from "@/components/editorial/InsightsPathways";
 import PopularTopics from "@/components/editorial/PopularTopics";
 import { HUB_LABEL, HUB_PATH } from "@/lib/content/taxonomy";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/insights",
-  title: "Hair loss insights — biology, blood markers & treatment planning",
+  title: "Hair loss insights — understand shedding, thinning, and next steps",
   metaDescription:
-    "Evidence-framed articles on hair loss causes, blood markers, treatments, and scalp context from the Hair Longevity Institute. Search by topic, hub, or format.",
+    "Clear guides on sudden shedding, gradual thinning, hormones and blood tests, scalp health, and treatment questions — from the Hair Longevity Institute. Search or browse by topic.",
   appendBrand: true,
 });
 
@@ -73,12 +74,16 @@ function InsightsContent({ searchParams }: SearchProps) {
       <header className="mx-auto max-w-3xl text-center">
         <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">Insights</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl">
-          Biology-first hair education
+          What might be behind your hair loss?
         </h1>
         <p className="mt-4 text-[rgb(var(--text-secondary))] leading-relaxed">
-          Search across hubs for causes, blood markers, treatments, and continuity care — written in clear, clinical language.
+          Worried about sudden shedding, gradual thinning, hormones, blood tests, or an irritated scalp? Start below,
+          then search — we cover medicines, office procedures, and long-term hair support in plain language. This is
+          education, not a substitute for an exam with your doctor.
         </p>
       </header>
+
+      <InsightsPathways />
 
       <div className="mx-auto mt-10 max-w-3xl">
         <Suspense fallback={<div className="h-40 animate-pulse rounded-card bg-subtle" aria-hidden />}>

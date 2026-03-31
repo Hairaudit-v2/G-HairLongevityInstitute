@@ -46,11 +46,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "what-blood-tests-matter-for-hair-loss",
     title: "What blood tests matter for hair loss?",
-    deck: "A selective, clinician-aligned overview — not a universal lab shopping list.",
+    deck: "Which tests may help, when they matter, and why not everyone needs the same blood work.",
     description:
-      "Understand which blood tests are commonly discussed for hair shedding and thinning, why panels are tailored to the person, and how results fit with examination and history.",
+      "A plain-language guide to blood tests that often come up for shedding or thinning: iron and ferritin, thyroid, and others. Why your doctor picks certain tests for you — and why a big panel is not always the answer.",
     excerpt:
-      "Labs support hair assessment when chosen for the right reasons. Learn which themes matter, why ferritin and thyroid are often discussed, and what still requires an in-person review.",
+      "Not everyone with hair loss needs the same labs. Here is how iron, thyroid, and other tests are used when they may actually change your care.",
     hub: "blood-markers",
     audience: "both",
     contentType: "guide",
@@ -68,13 +68,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "why-selective", label: "Why testing is selective" },
-      { id: "iron-and-blood-count", label: "Full blood count and iron indices" },
-      { id: "thyroid", label: "Thyroid function" },
-      { id: "inflammation-nutrition", label: "Inflammation and nutrition" },
-      { id: "fitting-together", label: "How labs fit with pattern and exam" },
-      { id: "not-medical-advice", label: "What this is not" },
-      { id: "when-specialist", label: "When a hair-focused review helps" },
+      { id: "why-selective", label: "Why you might not need every test" },
+      { id: "iron-and-blood-count", label: "Blood count and iron" },
+      { id: "thyroid", label: "Thyroid (TSH and related tests)" },
+      { id: "inflammation-nutrition", label: "Inflammation and vitamins" },
+      { id: "fitting-together", label: "How labs fit with your scalp and pattern" },
+      { id: "not-medical-advice", label: "What this page is not" },
+      { id: "when-specialist", label: "When a hair specialist can help" },
     ],
     faq: faqBlock([
       {
@@ -90,12 +90,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       {
         question: "Is ferritin the most important test for hair?",
         answer:
-          "It is important in some contexts, especially when iron deficiency is plausible — but it is never interpreted alone. See our ferritin article for nuance.",
+          "It can matter when low iron is plausible — but it is never read alone. See our ferritin article for nuance.",
       },
       {
         question: "Who should interpret my results?",
         answer:
-          "Your GP, dermatologist, or trichology-aligned clinician. Educational services can help organise questions and context but do not replace prescribing or diagnosis.",
+          "Your GP, dermatologist, or hair specialist. Education can help you prepare questions; it does not replace prescribing or diagnosis.",
       },
     ]),
     relatedSlugs: [
@@ -124,11 +124,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "ferritin-and-hair-loss",
     title: "Ferritin and hair loss: what the number can and cannot tell you",
-    deck: "Context for iron stores, shedding, and sensible next questions for your clinician.",
+    deck: "What ferritin measures, why it is not a full answer on its own, and when to talk to your doctor.",
     description:
-      "Ferritin reflects iron storage but moves with inflammation and other factors. Learn how clinicians use it in hair shedding conversations without over-interpreting a single value.",
+      "Ferritin is a common blood test when hair sheds. This article explains what it reflects, why illness or inflammation can change it, and why one number rarely tells the whole hair story.",
     excerpt:
-      "Ferritin often comes up when hair sheds — but it is not a solo diagnosis. Here is how storage iron is read in context, and why supplements need medical oversight.",
+      "Low ferritin can matter for shedding — but it is not a stand-alone diagnosis. Learn the basics before you self-treat with iron.",
     hub: "blood-markers",
     audience: "patients",
     contentType: "interpretation",
@@ -146,12 +146,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "what-ferritin-is", label: "What ferritin represents" },
-      { id: "shedding-context", label: "Shedding and telogen effluvium" },
-      { id: "targets-and-ranges", label: "Targets and reference ranges" },
-      { id: "with-thyroid", label: "Iron alongside thyroid tests" },
-      { id: "supplements", label: "Supplements and monitoring" },
-      { id: "summary", label: "Summary" },
+      { id: "what-ferritin-is", label: "What is ferritin?" },
+      { id: "shedding-context", label: "Ferritin and shedding" },
+      { id: "targets-and-ranges", label: "“Normal” vs online targets" },
+      { id: "with-thyroid", label: "Iron and thyroid tests together" },
+      { id: "supplements", label: "Iron supplements and follow-up" },
+      { id: "summary", label: "In short" },
     ],
     faq: faqBlock([
       {
@@ -172,7 +172,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       {
         question: "Should I test ferritin repeatedly at home via kits?",
         answer:
-          "Use clinician-directed testing so results tie to a management plan. Ad hoc testing can confuse more than it helps.",
+          "It is safer to test through your doctor so results connect to a clear plan. Random home tests often add confusion.",
       },
     ]),
     relatedSlugs: [
@@ -201,11 +201,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "thyroid-hair-loss-explained",
     title: "Thyroid and hair loss explained",
-    deck: "TSH, thyroid hormones, and why normal tests do not always end the story.",
+    deck: "How an under- or overactive thyroid can affect hair — and why normal TSH does not always settle every worry.",
     description:
-      "How thyroid function relates to the hair cycle, what tests commonly appear on a work-up, and why diffuse shedding needs a wider lens than one lab line.",
+      "Thyroid problems can speed up shedding or change hair texture for some people. Here is how doctors usually test, what borderline results can mean, and why hair loss still needs a full look beyond one lab line.",
     excerpt:
-      "Thyroid disease can affect hair, but so can many other factors. This explainer covers typical tests, borderline results, and when to keep investigating shedding.",
+      "Thyroid tests are common in hair work-ups. Learn what TSH and related tests are for — and when hair keeps falling despite “normal” labs.",
     hub: "blood-markers",
     audience: "both",
     contentType: "explainer",
@@ -223,12 +223,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "how-thyroid-affects-hair", label: "Thyroid and the hair cycle" },
-      { id: "common-tests", label: "Tests commonly used" },
-      { id: "subclinical", label: "Borderline results" },
-      { id: "normal-tests-still-shedding", label: "Normal tests, ongoing shedding" },
-      { id: "iron-and-thyroid", label: "Iron and thyroid together" },
-      { id: "next-steps", label: "Constructive next steps" },
+      { id: "how-thyroid-affects-hair", label: "How thyroid trouble can affect hair" },
+      { id: "common-tests", label: "Tests your doctor may order" },
+      { id: "subclinical", label: "Borderline or “mild” results" },
+      { id: "normal-tests-still-shedding", label: "Normal thyroid labs but hair still shedding" },
+      { id: "iron-and-thyroid", label: "Iron and thyroid checks together" },
+      { id: "next-steps", label: "What to do next" },
     ],
     faq: faqBlock([
       {
@@ -277,12 +277,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "dht-and-androgenetic-alopecia",
-    title: "DHT and androgenetic alopecia: a clear, cautious overview",
-    deck: "Androgen signalling in pattern hair loss — without reducing you to a single hormone.",
+    title: "DHT and pattern hair loss: a plain-English overview",
+    deck: "How DHT fits into common male- and female-pattern thinning — without blaming one hormone for everything.",
     description:
-      "What DHT does in susceptible follicles, how pattern recognition works on examination, and where blood tests fit. Educational only; not treatment advice.",
+      "Pattern hair loss often involves genetics and how DHT affects some follicles over time. This article explains that idea in patient terms, how doctors spot pattern loss on exam, and when blood tests are — and are not — useful.",
     excerpt:
-      "DHT matters in many cases of pattern thinning, but hair loss in real life is rarely one-dimensional. Here is a balanced overview for informed conversations.",
+      "Heard of DHT? It is one piece of many pattern hair loss stories — not the whole picture. A calm overview for your next visit.",
     hub: "hair-loss-causes",
     audience: "both",
     contentType: "explainer",
@@ -300,12 +300,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "pattern-recognition", label: "Pattern recognition" },
-      { id: "dht-role", label: "DHT’s role" },
-      { id: "not-only-men", label: "Women and patterning" },
-      { id: "labs", label: "When blood tests are considered" },
-      { id: "treatment-context", label: "Treatment themes" },
-      { id: "expectations", label: "Realistic expectations" },
+      { id: "pattern-recognition", label: "What doctors look for on your scalp" },
+      { id: "dht-role", label: "How DHT ties into pattern thinning" },
+      { id: "not-only-men", label: "Women get pattern hair loss too" },
+      { id: "labs", label: "When blood tests help" },
+      { id: "treatment-context", label: "Treatment options (big picture)" },
+      { id: "expectations", label: "What results usually look like" },
     ],
     faq: faqBlock([
       {
@@ -355,11 +355,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "diffuse-thinning-in-women",
     title: "Diffuse thinning in women: causes worth discussing calmly",
-    deck: "Separating shedding, pattern thinning, scalp disease, and reversible contributors.",
+    deck: "Shedding vs slow thinning vs scalp problems — and why more than one thing can be true at once.",
     description:
-      "A structured look at why women develop diffuse thinning, how patterns differ, when labs help, and how to avoid premature self-diagnosis online.",
+      "Many women notice a wider part, less volume, or more hairs in the brush. This guide walks through common patterns, overlapping causes, when blood tests help, and how to avoid jumping to one internet diagnosis.",
     excerpt:
-      "Diffuse thinning is common and often mixed-type. This guide outlines how clinicians sort shedding, pattern loss, and scalp factors — without alarm or false certainty.",
+      "Thinning all over or at the crown is common. Here is how doctors tell shedding, pattern loss, and scalp issues apart — without the panic spiral.",
     hub: "conditions",
     audience: "patients",
     contentType: "guide",
@@ -377,12 +377,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "patterns", label: "Patterns and mechanisms" },
-      { id: "overlap", label: "Overlapping causes" },
-      { id: "labs-selective", label: "Selective laboratory review" },
-      { id: "androgenetic", label: "Androgenetic patterning" },
-      { id: "procedural", label: "Procedural options and timing" },
-      { id: "support", label: "Support without overclaiming" },
+      { id: "patterns", label: "Different ways thinning can show up" },
+      { id: "overlap", label: "When several causes overlap" },
+      { id: "labs-selective", label: "Blood tests: only when they make sense" },
+      { id: "androgenetic", label: "Female pattern hair loss" },
+      { id: "procedural", label: "Procedures (if you are considering them)" },
+      { id: "support", label: "Taking care of yourself while you sort it out" },
     ],
     faq: faqBlock([
       {
@@ -423,11 +423,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "finasteride-vs-saw-palmetto",
     title: "Finasteride vs saw palmetto for hair loss: evidence and important differences",
-    deck: "Prescription medicine versus botanical products — why they are not interchangeable.",
+    deck: "A prescription drug and a supplement are not the same — even when both get talked about for thinning hair.",
     description:
-      "A careful comparison of mechanisms, evidence, regulation, and counselling themes. Not a substitute for personalised prescribing advice.",
+      "Finasteride is a regulated medicine used for some types of pattern hair loss; saw palmetto is a plant extract sold as a supplement. This article compares how they are studied, regulated, and discussed — not which you should take.",
     excerpt:
-      "Finasteride and saw palmetto are discussed in the same conversations online, but they sit in different categories. Understand the distinction before any decision with your clinician.",
+      "Online threads often lump finasteride and saw palmetto together. Here is why that is misleading — and what to ask your prescriber instead.",
     hub: "treatments",
     audience: "both",
     contentType: "comparison",
@@ -445,13 +445,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "finasteride-mechanism", label: "Finasteride mechanism" },
-      { id: "women", label: "Use in women" },
-      { id: "saw-palmetto", label: "Saw palmetto claims" },
-      { id: "not-substitute", label: "Why natural ≠ equivalent" },
-      { id: "dht-context", label: "DHT context" },
-      { id: "monitoring", label: "Monitoring and expectations" },
-      { id: "takeaway", label: "Takeaway" },
+      { id: "finasteride-mechanism", label: "What finasteride does" },
+      { id: "women", label: "Women: different rules" },
+      { id: "saw-palmetto", label: "What people say about saw palmetto" },
+      { id: "not-substitute", label: "Why they are not the same thing" },
+      { id: "dht-context", label: "How DHT fits in (quick refresher)" },
+      { id: "monitoring", label: "Follow-up and realistic timing" },
+      { id: "takeaway", label: "Bottom line" },
     ],
     faq: faqBlock([
       {
@@ -491,12 +491,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "prp-vs-exosomes",
-    title: "PRP vs exosomes for hair: comparing concepts, evidence, and caution",
-    deck: "Office-based biologic-style therapies — questions to ask before you pay.",
+    title: "PRP vs exosomes for hair: comparing options, evidence, and caution",
+    deck: "Two injection-based options people hear about for thinning hair — what they are, what to ask, and why your diagnosis still comes first.",
     description:
-      "How PRP and exosome offerings differ in principle, why evidence and regulation vary, and how to think about safety and candidacy without hype.",
+      "PRP uses concentrated platelets from your blood; exosome products vary by clinic and country. This article explains the difference in plain terms, what the evidence does and does not show, safety and regulation, and why established medical options still anchor most plans.",
     excerpt:
-      "PRP and exosome hair treatments are marketed aggressively. This piece separates mechanism from marketing and lists the questions worth asking your clinician.",
+      "Before you pay for PRP or exosomes, know what you are actually getting — and which questions protect you from oversold promises.",
     hub: "treatments",
     audience: "both",
     contentType: "comparison",
@@ -515,12 +515,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     reviewers: [reviewer],
     toc: [
       { id: "what-prp-is", label: "What PRP involves" },
-      { id: "exosomes-claims", label: "What exosomes can mean" },
-      { id: "evidence", label: "Evidence snapshot" },
-      { id: "safety", label: "Safety and regulation" },
-      { id: "who-benefits", label: "Candidacy (conceptual)" },
-      { id: "before-procedure", label: "Before choosing a procedure" },
-      { id: "labs", label: "Laboratory context" },
+      { id: "exosomes-claims", label: "What exosome treatments involve" },
+      { id: "evidence", label: "What research actually shows" },
+      { id: "safety", label: "Safety, regulation, and red flags" },
+      { id: "who-benefits", label: "Who might even be a candidate" },
+      { id: "before-procedure", label: "Before you book injections" },
+      { id: "labs", label: "Blood tests and general health (if your team suggests them)" },
     ],
     faq: faqBlock([
       {
@@ -541,7 +541,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       {
         question: "What if my concern is past surgery quality?",
         answer:
-          "That question sits closer to surgical transparency and audit pathways. See our HLI vs HairAudit page for routing context.",
+          "That is a different kind of question — closer to surgical review and transparency. See our HLI vs HairAudit page to see where that fits.",
       },
     ]),
     relatedSlugs: [
@@ -559,12 +559,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "hli-vs-hairaudit",
-    title: "HLI vs HairAudit: same ecosystem, different jobs",
-    deck: "When biology-first interpretation fits — and when surgical audit is the right door.",
+    title: "HLI vs HairAudit: where to start",
+    deck: "Worried about thinning and health, or trying to judge a hair transplant plan? Same network — two different first steps.",
     description:
-      "Hair Longevity Institute focuses on causes, labs, and planning; HairAudit focuses on surgery transparency and procedural due diligence. A neutral map to help you choose.",
+      "Hair Longevity Institute is built around long-term hair health, labs, education, and follow-up. HairAudit focuses on hair transplant review, transparency, and surgical due diligence. This page helps you decide where to start; it does not replace advice from your own doctors.",
     excerpt:
-      "HLI helps you interpret biology and plan medically; HairAudit focuses on surgical transparency and audit. Here is how to pick the right starting point without mixing roles.",
+      "Not sure whether you need medical hair support or a transplant audit first? Here is a simple way to tell — without mixing up the two.",
     hub: "hair-loss-causes",
     audience: "both",
     contentType: "decision",
@@ -582,13 +582,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "hli-focus", label: "HLI focus" },
-      { id: "hairaudit-focus", label: "HairAudit focus" },
-      { id: "overlap", label: "Where needs overlap" },
-      { id: "same-ecosystem", label: "Same ecosystem, different roles" },
-      { id: "reading", label: "Suggested reading on HLI" },
-      { id: "when-hairaudit", label: "When HairAudit first" },
-      { id: "not-advice", label: "Not routing or medical advice" },
+      { id: "hli-focus", label: "When Hair Longevity Institute fits" },
+      { id: "hairaudit-focus", label: "When HairAudit fits" },
+      { id: "overlap", label: "When you need a bit of both" },
+      { id: "same-ecosystem", label: "Same network, different jobs" },
+      { id: "reading", label: "Good articles to read first on HLI" },
+      { id: "when-hairaudit", label: "When a transplant review comes first" },
+      { id: "not-advice", label: "This page helps you decide where to start" },
     ],
     faq: faqBlock([
       {
@@ -628,11 +628,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "postpartum-shedding-when-to-reassure-vs-when-to-test",
     title: "Postpartum shedding: when to reassure vs when to test",
-    deck: "Normal cycle shifts, red flags, and how clinicians think about iron and thyroid after birth.",
+    deck: "Heavy shedding after baby is often normal — here is the usual timing, and when iron, thyroid, or other checks are worth discussing.",
     description:
-      "Increased shedding after pregnancy is common. Learn typical timing, when reassurance fits, when blood tests or referral may help, and how this overlaps with telogen effluvium and nutrition.",
+      "Many parents lose more hair a few months after birth. This guide explains why that happens, when watchful waiting is reasonable, which symptoms should prompt a doctor visit, and how iron or thyroid sometimes overlap.",
     excerpt:
-      "Postpartum hair shedding worries many new parents. Here is a calm, clinical framing of normal patterns, warning signs, and what selective testing can — and cannot — clarify.",
+      "Clumps in the drain after pregnancy? Often part of the normal hair cycle — but not always. Know the usual course and when to get checked.",
     hub: "conditions",
     audience: "patients",
     contentType: "guide",
@@ -650,13 +650,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "normal-postpartum-shedding", label: "Normal postpartum shedding" },
-      { id: "when-reassurance-fits", label: "When reassurance fits" },
-      { id: "red-flags-testing", label: "When clinicians consider tests" },
-      { id: "overlap-thyroid-iron", label: "Thyroid, iron, nutrition" },
-      { id: "hair-cycle-timelines", label: "Timelines and expectations" },
-      { id: "partner-with-clinician", label: "Partnering with your team" },
-      { id: "what-this-is-not", label: "What this is not" },
+      { id: "normal-postpartum-shedding", label: "What normal postpartum shedding looks like" },
+      { id: "when-reassurance-fits", label: "When it is OK to wait and observe" },
+      { id: "red-flags-testing", label: "When your doctor may order tests" },
+      { id: "overlap-thyroid-iron", label: "Thyroid, iron, and diet after birth" },
+      { id: "hair-cycle-timelines", label: "How long recovery usually takes" },
+      { id: "partner-with-clinician", label: "Working with your midwife or GP" },
+      { id: "what-this-is-not", label: "What this article is not" },
     ],
     faq: faqBlock([
       {
@@ -697,11 +697,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "telogen-effluvium-after-illness-or-stress",
     title: "Telogen effluvium after illness or stress",
-    deck: "Delayed shedding, overlap with other diagnoses, and when selective labs help.",
+    deck: "Hair often falls out weeks or months after a fever, surgery, or major stress — here is why, and when to see someone.",
     description:
-      "How telogen effluvium-type shedding can follow illness, surgery, stress, or physiological shifts; why timing confuses people; and how clinicians broaden assessment when needed.",
+      "Telogen effluvium is a common type of diffuse shedding that can start after you are already feeling better. This article explains typical triggers, timing, how it can overlap with pattern thinning, and when blood tests or a scalp exam matter.",
     excerpt:
-      "Shedding that starts after you have recovered can still be telogen effluvium. Understand triggers, timelines, overlap with pattern loss, and when to seek review — without self-labelling.",
+      "Losing hair after COVID, surgery, or a rough patch? Delayed shedding is a known pattern. Learn the basics and when to stop guessing and book a review.",
     hub: "hair-loss-causes",
     audience: "both",
     contentType: "explainer",
@@ -719,13 +719,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "what-te-triggers", label: "Common trigger categories" },
-      { id: "timing-after-stressor", label: "Timing after the event" },
-      { id: "overlap-pattern-loss", label: "Overlap with pattern loss" },
-      { id: "labs-when-indicated", label: "When blood tests are considered" },
-      { id: "prognosis", label: "Prognosis and patience" },
-      { id: "emotional-load", label: "Emotional load" },
-      { id: "when-specialist", label: "When a specialist helps" },
+      { id: "what-te-triggers", label: "Common triggers (illness, stress, hormones)" },
+      { id: "timing-after-stressor", label: "Why shedding shows up late" },
+      { id: "overlap-pattern-loss", label: "When thinning is not “just stress”" },
+      { id: "labs-when-indicated", label: "When blood tests may help" },
+      { id: "prognosis", label: "Will it grow back?" },
+      { id: "emotional-load", label: "When hair loss hits your mood" },
+      { id: "when-specialist", label: "When a hair specialist helps" },
     ],
     faq: faqBlock([
       {
@@ -766,11 +766,11 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
     title: "Vitamin D, B12, and folate: what labs may mean for hair",
-    deck: "Micronutrients in context — not a substitute for whole-person interpretation.",
+    deck: "These vitamins show up on a lot of hair forums — here is how doctors actually use the numbers.",
     description:
-      "How clinicians discuss vitamin D, B12, and folate when people report hair symptoms; why abnormal or normal results both require context; and why supplements are not automatic.",
+      "Low vitamin D, B12, or folate can matter for overall health and sometimes for hair when there is a real deficiency. This article explains what the tests measure, why normal results do not prove vitamins caused your thinning, and why high-dose supplements are not automatic.",
     excerpt:
-      "Micronutrient labs are often misunderstood online. This interpretation-focused guide explains sensible framing next to iron, thyroid, and examination — without supplement hype.",
+      "Before you buy every “hair vitamin,” read how D, B12, and folate fit into a sensible work-up with your clinician.",
     hub: "blood-markers",
     audience: "both",
     contentType: "interpretation",
@@ -788,13 +788,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "why-context-matters", label: "Why context matters" },
+      { id: "why-context-matters", label: "Why one lab line rarely explains hair loss" },
       { id: "vitamin-d", label: "Vitamin D" },
       { id: "b12-folate", label: "B12 and folate" },
-      { id: "interpretation-limits", label: "Limits of interpretation" },
-      { id: "with-iron-thyroid", label: "Iron and thyroid companions" },
-      { id: "supplementation-caution", label: "Supplementation caution" },
-      { id: "constructive-next-steps", label: "Constructive next steps" },
+      { id: "interpretation-limits", label: "What these tests cannot prove" },
+      { id: "with-iron-thyroid", label: "How iron and thyroid fit in" },
+      { id: "supplementation-caution", label: "Supplements: benefits and risks" },
+      { id: "constructive-next-steps", label: "What to do next" },
     ],
     faq: faqBlock([
       {
@@ -810,7 +810,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       {
         question: "Are home finger-prick tests enough?",
         answer:
-          "Quality and follow-up vary. Clinician-directed testing usually ties results to a management plan.",
+          "Quality and follow-up vary. Testing through your doctor usually connects results to a clear plan.",
       },
       {
         question: "How do these labs relate to ferritin?",
@@ -833,12 +833,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "scalp-inflammation-and-shedding",
-    title: "Scalp inflammation and shedding: themes for discussion with your clinician",
-    deck: "Itch, scale, and overlap with diffuse loss — education only, not a treatment guide.",
+    title: "Scalp inflammation and shedding: what to discuss with your doctor",
+    deck: "Itchy, flaky, or sore scalp and hair falling out often show up together — here is why the scalp exam matters.",
     description:
-      "How inflammatory scalp conditions can intersect with shedding and pattern thinning; why examination matters; and why treatment choices belong with a prescriber.",
+      "Seborrhoeic dermatitis, psoriasis, and other scalp conditions can overlap with shedding or pattern thinning. This article explains why sorting the scalp problem comes before guessing at shampoos alone, and why prescriptions need a clinician.",
     excerpt:
-      "An angry scalp can accompany hair shedding. Learn how clinicians separate inflammation from pure telogen effluvium and why product-first approaches often skip the real question.",
+      "If your scalp burns, itches, or flakes and your hair is shedding, the scalp may be part of the story — not a separate cosmetic issue.",
     hub: "conditions",
     audience: "both",
     contentType: "guide",
@@ -856,13 +856,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "inflammation-and-cycle", label: "Inflammation and the hair cycle" },
-      { id: "common-presentations", label: "Common presentations" },
-      { id: "overlap-shedding-aga", label: "Overlap with shedding and pattern loss" },
-      { id: "examination-themes", label: "Examination themes" },
-      { id: "treatment-prescriber-led", label: "Treatment is prescriber-led" },
-      { id: "alongside-systemic-health", label: "Systemic health and labs" },
-      { id: "when-urgent-care", label: "When to seek urgent review" },
+      { id: "inflammation-and-cycle", label: "How scalp inflammation can affect shedding" },
+      { id: "common-presentations", label: "Common scalp conditions people confuse" },
+      { id: "overlap-shedding-aga", label: "When shedding and pattern thinning overlap" },
+      { id: "examination-themes", label: "What your doctor looks for" },
+      { id: "treatment-prescriber-led", label: "Treatment needs a prescriber" },
+      { id: "alongside-systemic-health", label: "Whole-body health and blood tests" },
+      { id: "when-urgent-care", label: "When to seek urgent care" },
     ],
     faq: faqBlock([
       {
@@ -901,12 +901,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "minoxidil-mechanism-and-realistic-timelines",
-    title: "Minoxidil: mechanism themes and realistic timelines",
-    deck: "A long-game topical therapy — expectations, adherence, and when to involve your prescriber.",
+    title: "Minoxidil: how it works and what to expect",
+    deck: "A topical treatment many people use for pattern thinning — timelines, early shedding, and why sticking with it matters.",
     description:
-      "High-level mechanism context for topical minoxidil in pattern hair loss, early shedding conversations, combination therapy themes, and why diagnosis still comes first.",
+      "Minoxidil is a common topical option for some types of pattern hair loss. This article explains the basic idea, why some people shed more at first, how long before you might judge results, and why your diagnosis still guides whether it is appropriate.",
     excerpt:
-      "Minoxidil is widely used but often misunderstood. This explainer covers how clinicians think about timelines, early shedding, and combination care — without replacing prescribing advice.",
+      "Using minoxidil but not sure if it is working? Here is a patient-friendly take on timing, flaking, and when to check back with your prescriber.",
     hub: "treatments",
     audience: "both",
     contentType: "explainer",
@@ -924,13 +924,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "mechanism-overview", label: "Mechanism overview" },
-      { id: "who-uses-it", label: "Who uses it (conceptually)" },
-      { id: "timelines-shedding-phase", label: "Early shedding" },
-      { id: "realistic-outcomes", label: "Realistic outcomes" },
-      { id: "adherence", label: "Adherence and scalp care" },
-      { id: "combination-context", label: "Combination therapy context" },
-      { id: "not-substitute-diagnosis", label: "Not a substitute for diagnosis" },
+      { id: "mechanism-overview", label: "What minoxidil is trying to do" },
+      { id: "who-uses-it", label: "Who might use it" },
+      { id: "timelines-shedding-phase", label: "Early shedding (and why it happens)" },
+      { id: "realistic-outcomes", label: "What results usually look like" },
+      { id: "adherence", label: "Using it consistently and caring for your scalp" },
+      { id: "combination-context", label: "Using it alongside other treatments" },
+      { id: "not-substitute-diagnosis", label: "It does not replace a proper diagnosis" },
     ],
     faq: faqBlock([
       {
@@ -969,12 +969,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "post-transplant-shock-loss-and-expectations",
-    title: "Post-transplant shock loss and expectations",
-    deck: "Temporary shedding after surgery — themes only; your clinic guides your case.",
+    title: "Post-transplant shock loss: what to expect",
+    deck: "Losing native or transplanted hairs soon after surgery can be normal — your surgical team still interprets your case.",
     description:
-      "What shock loss can mean after hair transplantation, broad timing expectations, when to alert your team, and how systemic optimisation may sit alongside surgical aftercare.",
+      "Shock loss is a term for temporary shedding around a hair transplant. This article covers broad timing patterns, when to message your clinic, how general health and labs may sit alongside aftercare, and emotional expectations — without replacing your surgeon’s instructions.",
     excerpt:
-      "Shock loss after a transplant can feel alarming. This guide explains common concepts, timelines in broad terms, and how to work with your surgical team — not replace their advice.",
+      "Panic after a transplant when hair falls? Many people go through a shedding phase. Here is the usual picture — and when to call your team urgently.",
     hub: "conditions",
     audience: "patients",
     contentType: "guide",
@@ -992,13 +992,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "shock-loss-what-it-is", label: "What shock loss can mean" },
-      { id: "typical-timing", label: "Typical timing" },
-      { id: "different-graft-concerns", label: "When to flag concerns" },
-      { id: "communication-with-team", label: "Communication with your team" },
-      { id: "labs-systemic-health", label: "Systemic health and labs" },
-      { id: "longitudinal-expectations", label: "Long-term density expectations" },
-      { id: "emotional-expectations", label: "Emotional load" },
+      { id: "shock-loss-what-it-is", label: "What “shock loss” means" },
+      { id: "typical-timing", label: "Rough timing after surgery" },
+      { id: "different-graft-concerns", label: "When something may be wrong" },
+      { id: "communication-with-team", label: "Staying in touch with your clinic" },
+      { id: "labs-systemic-health", label: "General health and blood tests" },
+      { id: "longitudinal-expectations", label: "What density might look like long term" },
+      { id: "emotional-expectations", label: "The emotional side" },
     ],
     faq: faqBlock([
       {
@@ -1037,12 +1037,12 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "oral-anti-androgens-in-women-specialist-led-context",
-    title: "Oral anti-androgens in women: specialist-led context only",
-    deck: "Why these therapies are not DIY — monitoring, fertility, and pattern-loss assessment.",
+    title: "Oral anti-androgens for women: why this is specialist-only",
+    deck: "Pills such as spironolactone are sometimes used for female pattern thinning — never something to start from a forum thread.",
     description:
-      "Educational framing for how oral anti-androgen or hormone-modulating therapies may be discussed in female pattern hair loss under specialist care. Not prescribing guidance.",
+      "Some women discuss oral anti-androgen medicines for pattern hair loss under a specialist. This article explains why these drugs need medical supervision, monitoring, pregnancy planning, and a clear diagnosis — not which tablet to take.",
     excerpt:
-      "Women’s oral anti-androgen therapy requires specialist oversight, contraception planning, and monitoring. This article explains the safety themes — not which drug to take.",
+      "Curious about spironolactone or similar for thinning hair? Read the safety picture first; prescribing always belongs to your clinician.",
     hub: "treatments",
     audience: "both",
     contentType: "guide",
@@ -1060,13 +1060,13 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     authors: [author],
     reviewers: [reviewer],
     toc: [
-      { id: "scope-specialist-led", label: "Specialist-led scope" },
-      { id: "why-not-self-start", label: "Why not self-start" },
-      { id: "drug-classes-high-level", label: "Drug classes (high level)" },
+      { id: "scope-specialist-led", label: "Why a specialist is involved" },
+      { id: "why-not-self-start", label: "Why you should not self-start" },
+      { id: "drug-classes-high-level", label: "Types of medicines (high level only)" },
       { id: "monitoring-safety", label: "Monitoring and safety" },
-      { id: "fertility-pregnancy", label: "Fertility and pregnancy" },
-      { id: "relation-pattern-hair-loss", label: "Relation to pattern assessment" },
-      { id: "constructive-questions", label: "Constructive questions" },
+      { id: "fertility-pregnancy", label: "Pregnancy and fertility" },
+      { id: "relation-pattern-hair-loss", label: "How this ties to pattern hair loss" },
+      { id: "constructive-questions", label: "Questions worth asking your doctor" },
     ],
     faq: faqBlock([
       {
