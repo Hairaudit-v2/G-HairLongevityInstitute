@@ -5,7 +5,7 @@ export * from "@/lib/content/types";
 export * from "@/lib/content/taxonomy";
 export * from "@/lib/content/glossary";
 export {
-  EDITORIAL_CONTENT_GAPS_9_15,
+  EDITORIAL_CONTENT_GAPS_NEXT_WAVE,
   EDITORIAL_PUBLISH_ORDER_V1,
   EDITORIAL_RELATED_MAP_V1,
 } from "@/lib/content/editorialPublishingPlan";

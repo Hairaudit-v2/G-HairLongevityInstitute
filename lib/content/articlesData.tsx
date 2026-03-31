@@ -5,8 +5,15 @@ import {
   BodyFerritinAndHairLoss,
   BodyFinasterideVsSawPalmetto,
   BodyHliVsHairaudit,
+  BodyMinoxidilMechanism,
+  BodyOralAntiandrogensWomen,
+  BodyPostpartumShedding,
+  BodyPostTransplantShockLoss,
   BodyPrpVsExosomes,
+  BodyScalpInflammationShedding,
+  BodyTelogenAfterIllnessStress,
   BodyThyroidHairLoss,
+  BodyVitaminMicronutrientsHair,
   BodyWhatBloodTestsMatter,
 } from "@/lib/content/seed/bodies";
 
@@ -24,6 +31,11 @@ const reviewer: EditorialPerson = {
 
 function refPending(topic: string): EditorialReference {
   return { label: `[Reference pending — to be replaced with peer-reviewed or authoritative source] ${topic}` };
+}
+
+/** Structured external citation (concise label + URL). */
+function cite(label: string, url: string): EditorialReference {
+  return { label, url };
 }
 
 function faqBlock(items: EditorialFaqItem[]): EditorialFaqItem[] {
@@ -44,8 +56,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "guide",
     ctaType: "start-assessment",
     publishedAt: "2026-01-08",
-    updatedAt: "2026-03-20",
-    reviewedAt: "2026-03-18",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["telogen-effluvium", "diffuse-thinning"],
       markers: ["ferritin", "tsh", "t4", "full-blood-count"],
@@ -89,14 +101,23 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     relatedSlugs: [
       "ferritin-and-hair-loss",
       "thyroid-hair-loss-explained",
-      "diffuse-thinning-in-women",
-      "dht-and-androgenetic-alopecia",
+      "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
+      "telogen-effluvium-after-illness-or-stress",
     ],
     glossarySlugs: ["ferritin", "telogen-effluvium"],
     references: [
-      refPending("Iron deficiency and hair shedding — clinical review"),
-      refPending("Thyroid disease and hair cycle — guideline summary"),
-      refPending("Approach to diffuse hair loss in adults"),
+      cite(
+        "NHS (UK). Iron deficiency anaemia — symptoms, diagnosis, treatment overview.",
+        "https://www.nhs.uk/conditions/iron-deficiency-anaemia/"
+      ),
+      cite(
+        "NICE CKS (UK). Thyroid disease — assessment: initial tests and when to refer.",
+        "https://cks.nice.org.uk/topics/thyroid-disease-assessing/"
+      ),
+      cite(
+        "American Academy of Dermatology. Hair loss: causes and types (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss"
+      ),
     ],
     Body: BodyWhatBloodTestsMatter,
   },
@@ -113,8 +134,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "interpretation",
     ctaType: "start-assessment",
     publishedAt: "2026-01-15",
-    updatedAt: "2026-03-22",
-    reviewedAt: "2026-03-19",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["telogen-effluvium", "diffuse-thinning"],
       markers: ["ferritin", "iron-studies", "full-blood-count"],
@@ -156,15 +177,24 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ]),
     relatedSlugs: [
       "what-blood-tests-matter-for-hair-loss",
-      "thyroid-hair-loss-explained",
-      "diffuse-thinning-in-women",
-      "dht-and-androgenetic-alopecia",
+      "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
+      "postpartum-shedding-when-to-reassure-vs-when-to-test",
+      "telogen-effluvium-after-illness-or-stress",
     ],
     glossarySlugs: ["ferritin", "telogen-effluvium"],
     references: [
-      refPending("Ferritin as acute phase reactant — mechanisms"),
-      refPending("Iron deficiency and telogen effluvium — review"),
-      refPending("Patient information: iron studies interpretation"),
+      cite(
+        "NICE CKS (UK). Anaemia — iron deficiency: investigation and management context.",
+        "https://cks.nice.org.uk/topics/anaemia-iron-deficiency/"
+      ),
+      cite(
+        "StatPearls / NCBI Bookshelf. Iron deficiency anemia (pathophysiology, ferritin, acute-phase behaviour).",
+        "https://www.ncbi.nlm.nih.gov/books/NBK459260/"
+      ),
+      cite(
+        "StatPearls / NCBI Bookshelf. Telogen effluvium (reversible shedding — clinical overview).",
+        "https://www.ncbi.nlm.nih.gov/books/NBK430957/"
+      ),
     ],
     Body: BodyFerritinAndHairLoss,
   },
@@ -181,8 +211,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "explainer",
     ctaType: "book-consult",
     publishedAt: "2026-01-22",
-    updatedAt: "2026-03-22",
-    reviewedAt: "2026-03-19",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["telogen-effluvium", "diffuse-thinning"],
       markers: ["tsh", "t4", "t3"],
@@ -225,14 +255,23 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     relatedSlugs: [
       "what-blood-tests-matter-for-hair-loss",
       "ferritin-and-hair-loss",
-      "diffuse-thinning-in-women",
-      "dht-and-androgenetic-alopecia",
+      "postpartum-shedding-when-to-reassure-vs-when-to-test",
+      "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
     ],
     glossarySlugs: ["telogen-effluvium"],
     references: [
-      refPending("Thyroid disorders and alopecia — clinical review"),
-      refPending("TSH interpretation in primary care"),
-      refPending("Diffuse hair loss — diagnostic approach"),
+      cite(
+        "NHS (UK). Underactive thyroid (hypothyroidism) — overview.",
+        "https://www.nhs.uk/conditions/underactive-thyroid-hypothyroidism/"
+      ),
+      cite(
+        "NICE CKS (UK). Thyroid disease — assessment: TSH, follow-up, referral.",
+        "https://cks.nice.org.uk/topics/thyroid-disease-assessing/"
+      ),
+      cite(
+        "American Thyroid Association. Hypothyroidism (patient-focused overview).",
+        "https://www.thyroid.org/hypothyroidism/"
+      ),
     ],
     Body: BodyThyroidHairLoss,
   },
@@ -249,8 +288,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     contentType: "explainer",
     ctaType: "compare-treatments",
     publishedAt: "2026-02-01",
-    updatedAt: "2026-03-25",
-    reviewedAt: "2026-03-21",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
     taxonomy: {
       conditions: ["androgenetic-alopecia", "diffuse-thinning"],
       markers: ["testosterone", "shbg"],
@@ -293,14 +332,23 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     relatedSlugs: [
       "diffuse-thinning-in-women",
       "finasteride-vs-saw-palmetto",
-      "thyroid-hair-loss-explained",
-      "what-blood-tests-matter-for-hair-loss",
+      "minoxidil-mechanism-and-realistic-timelines",
+      "telogen-effluvium-after-illness-or-stress",
     ],
     glossarySlugs: ["dht"],
     references: [
-      refPending("Androgenetic alopecia pathogenesis — review"),
-      refPending("DHT and miniaturisation — mechanistic overview"),
-      refPending("Female pattern hair loss — clinical assessment"),
+      cite(
+        "American Academy of Dermatology. Androgenetic alopecia (pattern hair loss) — patient summary.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/androgenetic-alopecia"
+      ),
+      cite(
+        "MedlinePlus (NIH). Androgenetic alopecia — genetics and description.",
+        "https://medlineplus.gov/genetics/condition/androgenetic-alopecia/"
+      ),
+      cite(
+        "Ntshingila S et al. Androgenetic alopecia: an update (JAAD Int / AAD). 2023 — open access via PMC.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10562178/"
+      ),
     ],
     Body: BodyDhtAndAga,
   },
@@ -360,9 +408,9 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ]),
     relatedSlugs: [
       "dht-and-androgenetic-alopecia",
-      "ferritin-and-hair-loss",
-      "thyroid-hair-loss-explained",
-      "finasteride-vs-saw-palmetto",
+      "postpartum-shedding-when-to-reassure-vs-when-to-test",
+      "scalp-inflammation-and-shedding",
+      "telogen-effluvium-after-illness-or-stress",
     ],
     glossarySlugs: ["telogen-effluvium", "dht"],
     references: [
@@ -429,8 +477,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ]),
     relatedSlugs: [
       "dht-and-androgenetic-alopecia",
-      "prp-vs-exosomes",
-      "diffuse-thinning-in-women",
+      "minoxidil-mechanism-and-realistic-timelines",
+      "oral-anti-androgens-in-women-specialist-led-context",
       "what-blood-tests-matter-for-hair-loss",
     ],
     glossarySlugs: ["dht"],
@@ -498,9 +546,9 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ]),
     relatedSlugs: [
       "finasteride-vs-saw-palmetto",
-      "what-blood-tests-matter-for-hair-loss",
+      "post-transplant-shock-loss-and-expectations",
       "hli-vs-hairaudit",
-      "diffuse-thinning-in-women",
+      "minoxidil-mechanism-and-realistic-timelines",
     ],
     references: [
       refPending("PRP in androgenetic alopecia — randomised trials synthesis"),
@@ -566,9 +614,9 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     ]),
     relatedSlugs: [
       "what-blood-tests-matter-for-hair-loss",
+      "post-transplant-shock-loss-and-expectations",
       "prp-vs-exosomes",
-      "finasteride-vs-saw-palmetto",
-      "dht-and-androgenetic-alopecia",
+      "scalp-inflammation-and-shedding",
     ],
     references: [
       refPending("Hair Intelligence ecosystem — public positioning statements"),
@@ -576,5 +624,492 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       refPending("Trichology scope vs surgical audit — professional boundary commentary"),
     ],
     Body: BodyHliVsHairaudit,
+  },
+  {
+    slug: "postpartum-shedding-when-to-reassure-vs-when-to-test",
+    title: "Postpartum shedding: when to reassure vs when to test",
+    deck: "Normal cycle shifts, red flags, and how clinicians think about iron and thyroid after birth.",
+    description:
+      "Increased shedding after pregnancy is common. Learn typical timing, when reassurance fits, when blood tests or referral may help, and how this overlaps with telogen effluvium and nutrition.",
+    excerpt:
+      "Postpartum hair shedding worries many new parents. Here is a calm, clinical framing of normal patterns, warning signs, and what selective testing can — and cannot — clarify.",
+    hub: "conditions",
+    audience: "patients",
+    contentType: "guide",
+    ctaType: "book-consult",
+    publishedAt: "2026-03-05",
+    updatedAt: "2026-03-29",
+    reviewedAt: "2026-03-26",
+    taxonomy: {
+      conditions: ["postpartum-shedding", "telogen-effluvium"],
+      markers: ["ferritin", "tsh"],
+      symptoms: ["sudden-shedding", "diffuse-loss"],
+      treatments: ["clinical-assessment", "laboratory-workup", "reassurance-counselling"],
+      tags: ["postpartum", "womens-health", "shedding"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "normal-postpartum-shedding", label: "Normal postpartum shedding" },
+      { id: "when-reassurance-fits", label: "When reassurance fits" },
+      { id: "red-flags-testing", label: "When clinicians consider tests" },
+      { id: "overlap-thyroid-iron", label: "Thyroid, iron, nutrition" },
+      { id: "hair-cycle-timelines", label: "Timelines and expectations" },
+      { id: "partner-with-clinician", label: "Partnering with your team" },
+      { id: "what-this-is-not", label: "What this is not" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Is heavy shedding three months after birth always normal?",
+        answer:
+          "Often it aligns with hair-cycle recovery, but severity, associated symptoms, and duration still matter. If you are unsure or unwell, book a review rather than self-diagnosing.",
+      },
+      {
+        question: "Should every breastfeeding parent have ferritin checked?",
+        answer:
+          "No. Testing follows symptoms, examination, and history. Your clinician decides whether iron or thyroid tests add value.",
+      },
+      {
+        question: "Can postpartum shedding hide pattern hair loss?",
+        answer:
+          "Sometimes several mechanisms overlap. If thinning persists beyond the usual window or shows a new pattern, reassessment is reasonable.",
+      },
+      {
+        question: "Does this article replace my postnatal checks?",
+        answer:
+          "No. Continue routine maternity and GP follow-up; use this as background for questions only.",
+      },
+    ]),
+    relatedSlugs: [
+      "telogen-effluvium-after-illness-or-stress",
+      "ferritin-and-hair-loss",
+      "thyroid-hair-loss-explained",
+      "diffuse-thinning-in-women",
+    ],
+    glossarySlugs: ["telogen-effluvium"],
+    references: [
+      refPending("Postpartum telogen effluvium — clinical review"),
+      refPending("Postpartum thyroiditis — guideline summary"),
+      refPending("Iron deficiency in the postpartum period"),
+    ],
+    Body: BodyPostpartumShedding,
+  },
+  {
+    slug: "telogen-effluvium-after-illness-or-stress",
+    title: "Telogen effluvium after illness or stress",
+    deck: "Delayed shedding, overlap with other diagnoses, and when selective labs help.",
+    description:
+      "How telogen effluvium-type shedding can follow illness, surgery, stress, or physiological shifts; why timing confuses people; and how clinicians broaden assessment when needed.",
+    excerpt:
+      "Shedding that starts after you have recovered can still be telogen effluvium. Understand triggers, timelines, overlap with pattern loss, and when to seek review — without self-labelling.",
+    hub: "hair-loss-causes",
+    audience: "both",
+    contentType: "explainer",
+    ctaType: "start-assessment",
+    publishedAt: "2026-03-08",
+    updatedAt: "2026-03-29",
+    reviewedAt: "2026-03-26",
+    taxonomy: {
+      conditions: ["telogen-effluvium", "diffuse-thinning"],
+      markers: ["ferritin", "tsh"],
+      symptoms: ["sudden-shedding", "diffuse-loss"],
+      treatments: ["clinical-assessment", "supportive-care"],
+      tags: ["shedding", "stress-recovery", "illness-recovery"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "what-te-triggers", label: "Common trigger categories" },
+      { id: "timing-after-stressor", label: "Timing after the event" },
+      { id: "overlap-pattern-loss", label: "Overlap with pattern loss" },
+      { id: "labs-when-indicated", label: "When blood tests are considered" },
+      { id: "prognosis", label: "Prognosis and patience" },
+      { id: "emotional-load", label: "Emotional load" },
+      { id: "when-specialist", label: "When a specialist helps" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Can I diagnose telogen effluvium from shedding alone?",
+        answer:
+          "No. The pattern is a clinical judgement that excludes other causes. Self-diagnosis from articles or forums often misses overlap with scalp disease or pattern thinning.",
+      },
+      {
+        question: "How long should shedding last before I worry?",
+        answer:
+          "Courses vary. If shedding is extreme, prolonged beyond your clinician’s expected window, or accompanied by red flags, book a review.",
+      },
+      {
+        question: "Do I need every blood test on the internet?",
+        answer:
+          "Selective testing follows clues. See our overview of which tests are commonly discussed and why panels are not universal.",
+      },
+      {
+        question: "Is stress “just in my head” if labs are normal?",
+        answer:
+          "Stress-related shedding is biologically plausible; normal labs do not invalidate distress. Mental health support still matters.",
+      },
+    ]),
+    relatedSlugs: [
+      "postpartum-shedding-when-to-reassure-vs-when-to-test",
+      "what-blood-tests-matter-for-hair-loss",
+      "scalp-inflammation-and-shedding",
+      "diffuse-thinning-in-women",
+    ],
+    glossarySlugs: ["telogen-effluvium"],
+    references: [
+      refPending("Acute telogen effluvium — diagnostic approach"),
+      refPending("Hair cycle biology and effluvium — review"),
+      refPending("Diffuse hair loss evaluation in primary care"),
+    ],
+    Body: BodyTelogenAfterIllnessStress,
+  },
+  {
+    slug: "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
+    title: "Vitamin D, B12, and folate: what labs may mean for hair",
+    deck: "Micronutrients in context — not a substitute for whole-person interpretation.",
+    description:
+      "How clinicians discuss vitamin D, B12, and folate when people report hair symptoms; why abnormal or normal results both require context; and why supplements are not automatic.",
+    excerpt:
+      "Micronutrient labs are often misunderstood online. This interpretation-focused guide explains sensible framing next to iron, thyroid, and examination — without supplement hype.",
+    hub: "blood-markers",
+    audience: "both",
+    contentType: "interpretation",
+    ctaType: "start-assessment",
+    publishedAt: "2026-03-12",
+    updatedAt: "2026-03-29",
+    reviewedAt: "2026-03-26",
+    taxonomy: {
+      conditions: ["diffuse-thinning", "telogen-effluvium"],
+      markers: ["vitamin-d", "b12", "folate"],
+      symptoms: ["diffuse-loss"],
+      treatments: ["laboratory-workup", "dietary-review"],
+      tags: ["micronutrients", "laboratory-interpretation", "nutrition"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "why-context-matters", label: "Why context matters" },
+      { id: "vitamin-d", label: "Vitamin D" },
+      { id: "b12-folate", label: "B12 and folate" },
+      { id: "interpretation-limits", label: "Limits of interpretation" },
+      { id: "with-iron-thyroid", label: "Iron and thyroid companions" },
+      { id: "supplementation-caution", label: "Supplementation caution" },
+      { id: "constructive-next-steps", label: "Constructive next steps" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Will raising vitamin D regrow my hair?",
+        answer:
+          "Only if deficiency is clinically relevant and part of a broader picture. Many people with hair concerns have normal micronutrient levels; fixing a lab line does not guarantee cosmetic change.",
+      },
+      {
+        question: "Should I take B complex “for hair” preventively?",
+        answer:
+          "Routine high-dose supplementation without indication can cause harm or obscure other issues. Discuss with your clinician.",
+      },
+      {
+        question: "Are home finger-prick tests enough?",
+        answer:
+          "Quality and follow-up vary. Clinician-directed testing usually ties results to a management plan.",
+      },
+      {
+        question: "How do these labs relate to ferritin?",
+        answer:
+          "They are separate domains; some work-ups consider several markers together when history supports it.",
+      },
+    ]),
+    relatedSlugs: [
+      "what-blood-tests-matter-for-hair-loss",
+      "ferritin-and-hair-loss",
+      "thyroid-hair-loss-explained",
+      "telogen-effluvium-after-illness-or-stress",
+    ],
+    references: [
+      refPending("Vitamin D deficiency — population and clinical context"),
+      refPending("B12 and folate deficiency — haematology reference"),
+      refPending("Nutritional factors in diffuse alopecia — review"),
+    ],
+    Body: BodyVitaminMicronutrientsHair,
+  },
+  {
+    slug: "scalp-inflammation-and-shedding",
+    title: "Scalp inflammation and shedding: themes for discussion with your clinician",
+    deck: "Itch, scale, and overlap with diffuse loss — education only, not a treatment guide.",
+    description:
+      "How inflammatory scalp conditions can intersect with shedding and pattern thinning; why examination matters; and why treatment choices belong with a prescriber.",
+    excerpt:
+      "An angry scalp can accompany hair shedding. Learn how clinicians separate inflammation from pure telogen effluvium and why product-first approaches often skip the real question.",
+    hub: "conditions",
+    audience: "both",
+    contentType: "guide",
+    ctaType: "book-consult",
+    publishedAt: "2026-03-15",
+    updatedAt: "2026-03-29",
+    reviewedAt: "2026-03-26",
+    taxonomy: {
+      conditions: ["seborrheic-dermatitis", "inflammatory-shedding", "telogen-effluvium"],
+      markers: [],
+      symptoms: ["itch", "flaking", "sudden-shedding"],
+      treatments: ["topical-therapy", "clinical-assessment"],
+      tags: ["scalp-health", "inflammation", "dermatology"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "inflammation-and-cycle", label: "Inflammation and the hair cycle" },
+      { id: "common-presentations", label: "Common presentations" },
+      { id: "overlap-shedding-aga", label: "Overlap with shedding and pattern loss" },
+      { id: "examination-themes", label: "Examination themes" },
+      { id: "treatment-prescriber-led", label: "Treatment is prescriber-led" },
+      { id: "alongside-systemic-health", label: "Systemic health and labs" },
+      { id: "when-urgent-care", label: "When to seek urgent review" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Can dandruff shampoo cure my shedding?",
+        answer:
+          "Sometimes a medicated regimen helps scalp disease and comfort; it is not a universal fix for all hair loss types. Diagnosis first.",
+      },
+      {
+        question: "Is itchy scalp always seborrhoeic dermatitis?",
+        answer:
+          "No. Several conditions can itch; examination narrows the list.",
+      },
+      {
+        question: "Should I get blood tests for an itchy scalp?",
+        answer:
+          "Only when history and exam suggest systemic contributors. Not every scalp symptom needs a broad panel.",
+      },
+      {
+        question: "Can I use steroid creams indefinitely on my own?",
+        answer:
+          "No. Potency, duration, and side effects require medical supervision.",
+      },
+    ]),
+    relatedSlugs: [
+      "telogen-effluvium-after-illness-or-stress",
+      "diffuse-thinning-in-women",
+      "what-blood-tests-matter-for-hair-loss",
+      "minoxidil-mechanism-and-realistic-timelines",
+    ],
+    references: [
+      refPending("Seborrhoeic dermatitis — clinical management review"),
+      refPending("Scalp psoriasis vs seborrhoeic dermatitis — differential"),
+      refPending("Trichoscopy in inflammatory scalp disease — overview"),
+    ],
+    Body: BodyScalpInflammationShedding,
+  },
+  {
+    slug: "minoxidil-mechanism-and-realistic-timelines",
+    title: "Minoxidil: mechanism themes and realistic timelines",
+    deck: "A long-game topical therapy — expectations, adherence, and when to involve your prescriber.",
+    description:
+      "High-level mechanism context for topical minoxidil in pattern hair loss, early shedding conversations, combination therapy themes, and why diagnosis still comes first.",
+    excerpt:
+      "Minoxidil is widely used but often misunderstood. This explainer covers how clinicians think about timelines, early shedding, and combination care — without replacing prescribing advice.",
+    hub: "treatments",
+    audience: "both",
+    contentType: "explainer",
+    ctaType: "compare-treatments",
+    publishedAt: "2026-03-18",
+    updatedAt: "2026-03-29",
+    reviewedAt: "2026-03-26",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia", "diffuse-thinning"],
+      markers: [],
+      symptoms: ["crown-thinning", "temple-recession"],
+      treatments: ["topical-minoxidil", "adherence-support"],
+      tags: ["medical-therapy", "expectations", "pattern-hair-loss"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "mechanism-overview", label: "Mechanism overview" },
+      { id: "who-uses-it", label: "Who uses it (conceptually)" },
+      { id: "timelines-shedding-phase", label: "Early shedding" },
+      { id: "realistic-outcomes", label: "Realistic outcomes" },
+      { id: "adherence", label: "Adherence and scalp care" },
+      { id: "combination-context", label: "Combination therapy context" },
+      { id: "not-substitute-diagnosis", label: "Not a substitute for diagnosis" },
+    ],
+    faq: faqBlock([
+      {
+        question: "How many months before I judge results?",
+        answer:
+          "Many clinicians suggest several months of consistent use before assessing response, alongside photography. Individual plans vary.",
+      },
+      {
+        question: "Is the 5% strength always better?",
+        answer:
+          "Not for everyone. Irritation, formulation, and sex-specific guidance matter — follow your prescriber or product label in your region.",
+      },
+      {
+        question: "Can I stop once hair improves?",
+        answer:
+          "Stopping commonly allows progression to resume over time. Discuss maintenance plans with your clinician.",
+      },
+      {
+        question: "Does minoxidil fix telogen effluvium from illness?",
+        answer:
+          "Not usually as a first-line answer. Addressing the driver matters; minoxidil is often discussed in pattern-loss contexts.",
+      },
+    ]),
+    relatedSlugs: [
+      "finasteride-vs-saw-palmetto",
+      "dht-and-androgenetic-alopecia",
+      "scalp-inflammation-and-shedding",
+      "telogen-effluvium-after-illness-or-stress",
+    ],
+    references: [
+      refPending("Topical minoxidil — mechanism and clinical use review"),
+      refPending("Female pattern hair loss — topical therapy trials"),
+      refPending("Early minoxidil shedding — patient counselling themes"),
+    ],
+    Body: BodyMinoxidilMechanism,
+  },
+  {
+    slug: "post-transplant-shock-loss-and-expectations",
+    title: "Post-transplant shock loss and expectations",
+    deck: "Temporary shedding after surgery — themes only; your clinic guides your case.",
+    description:
+      "What shock loss can mean after hair transplantation, broad timing expectations, when to alert your team, and how systemic optimisation may sit alongside surgical aftercare.",
+    excerpt:
+      "Shock loss after a transplant can feel alarming. This guide explains common concepts, timelines in broad terms, and how to work with your surgical team — not replace their advice.",
+    hub: "conditions",
+    audience: "patients",
+    contentType: "guide",
+    ctaType: "read-more",
+    publishedAt: "2026-03-22",
+    updatedAt: "2026-03-29",
+    reviewedAt: "2026-03-26",
+    taxonomy: {
+      conditions: ["post-transplant-instability", "telogen-effluvium"],
+      markers: ["ferritin", "tsh"],
+      symptoms: ["sudden-shedding", "diffuse-loss"],
+      treatments: ["surgical-aftercare", "supportive-medical-therapy"],
+      tags: ["hair-transplant", "expectations", "post-operative"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "shock-loss-what-it-is", label: "What shock loss can mean" },
+      { id: "typical-timing", label: "Typical timing" },
+      { id: "different-graft-concerns", label: "When to flag concerns" },
+      { id: "communication-with-team", label: "Communication with your team" },
+      { id: "labs-systemic-health", label: "Systemic health and labs" },
+      { id: "longitudinal-expectations", label: "Long-term density expectations" },
+      { id: "emotional-expectations", label: "Emotional load" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Does shock loss mean the grafts failed?",
+        answer:
+          "Not necessarily. Many patients experience temporary shedding phases; your clinic interprets what you see against your surgical plan.",
+      },
+      {
+        question: "Should I restart minoxidil on my own after surgery?",
+        answer:
+          "Only as agreed in your aftercare plan. Timing varies by surgeon protocol.",
+      },
+      {
+        question: "When is post-op shedding an emergency?",
+        answer:
+          "Spreading redness, pus, fever, or severe pain need urgent surgical or medical review — do not wait on articles.",
+      },
+      {
+        question: "Can HLI interpret my post-op photos?",
+        answer:
+          "HLI focuses on biology-first education and lab interpretation; surgical concerns belong to your operating team or dedicated audit pathways.",
+      },
+    ]),
+    relatedSlugs: [
+      "prp-vs-exosomes",
+      "hli-vs-hairaudit",
+      "what-blood-tests-matter-for-hair-loss",
+      "minoxidil-mechanism-and-realistic-timelines",
+    ],
+    references: [
+      refPending("Postoperative telogen effluvium after hair restoration — review"),
+      refPending("Follicular unit transplantation — patient counselling resources"),
+      refPending("Complications after hair surgery — when to seek care"),
+    ],
+    Body: BodyPostTransplantShockLoss,
+  },
+  {
+    slug: "oral-anti-androgens-in-women-specialist-led-context",
+    title: "Oral anti-androgens in women: specialist-led context only",
+    deck: "Why these therapies are not DIY — monitoring, fertility, and pattern-loss assessment.",
+    description:
+      "Educational framing for how oral anti-androgen or hormone-modulating therapies may be discussed in female pattern hair loss under specialist care. Not prescribing guidance.",
+    excerpt:
+      "Women’s oral anti-androgen therapy requires specialist oversight, contraception planning, and monitoring. This article explains the safety themes — not which drug to take.",
+    hub: "treatments",
+    audience: "both",
+    contentType: "guide",
+    ctaType: "book-consult",
+    publishedAt: "2026-03-25",
+    updatedAt: "2026-03-31",
+    reviewedAt: "2026-03-31",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia", "diffuse-thinning"],
+      markers: ["testosterone", "shbg"],
+      symptoms: ["crown-thinning", "diffuse-loss"],
+      treatments: ["oral-antiandrogen", "specialist-monitoring"],
+      tags: ["womens-health", "prescribing-safety", "pattern-hair-loss"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "scope-specialist-led", label: "Specialist-led scope" },
+      { id: "why-not-self-start", label: "Why not self-start" },
+      { id: "drug-classes-high-level", label: "Drug classes (high level)" },
+      { id: "monitoring-safety", label: "Monitoring and safety" },
+      { id: "fertility-pregnancy", label: "Fertility and pregnancy" },
+      { id: "relation-pattern-hair-loss", label: "Relation to pattern assessment" },
+      { id: "constructive-questions", label: "Constructive questions" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Can I start spironolactone from an online forum protocol?",
+        answer:
+          "No. Prescription anti-androgens such as spironolactone (where used for hair-related indications) require electrolyte and blood pressure monitoring, pregnancy prevention where relevant, and review of drug interactions — all under medical supervision.",
+      },
+      {
+        question: "Are oral options the first step for every woman with thinning?",
+        answer:
+          "No. Diagnosis, topical therapy, and comorbidities steer sequencing — individualised to you.",
+      },
+      {
+        question: "Do I need hormones tested before every prescription?",
+        answer:
+          "Not routinely. Testing follows clinical indication and local practice — not a universal panel.",
+      },
+      {
+        question: "Where does minoxidil fit?",
+        answer:
+          "Often as a foundational topical in pattern loss; combination plans are prescriber decisions.",
+      },
+    ]),
+    relatedSlugs: [
+      "diffuse-thinning-in-women",
+      "dht-and-androgenetic-alopecia",
+      "minoxidil-mechanism-and-realistic-timelines",
+      "finasteride-vs-saw-palmetto",
+    ],
+    references: [
+      cite(
+        "American Academy of Dermatology. Women’s hair loss (female pattern hair loss) — overview.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/womens-hair-loss-female-pattern-baldness"
+      ),
+      cite(
+        "Lee WS et al. International consensus on the treatment of female pattern hair loss. J Am Acad Dermatol. 2018. doi:10.1016/j.jaad.2017.10.007",
+        "https://doi.org/10.1016/j.jaad.2017.10.007"
+      ),
+      cite(
+        "NHS (UK). Spironolactone — uses, cautions, pregnancy (medicines A–Z).",
+        "https://www.nhs.uk/medicines/spironolactone/"
+      ),
+    ],
+    Body: BodyOralAntiandrogensWomen,
   },
 ];

@@ -27,8 +27,8 @@ export function BodyWhatBloodTestsMatter() {
         Full blood count and iron indices
       </h2>
       <p className="leading-relaxed">
-        Iron studies and related indices are often part of the conversation when shedding is diffuse, rapid, or accompanied
-        by symptoms that raise concern for low iron stores.{" "}
+        Iron studies and related indices may be part of the conversation when shedding is diffuse, rapid, or accompanied
+        by symptoms that raise concern for low iron stores — when your clinician judges testing is indicated.{" "}
         <Link href={insight("ferritin-and-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
           Ferritin interpretation
         </Link>{" "}
@@ -115,8 +115,9 @@ export function BodyFerritinAndHairLoss() {
       </h2>
       <p className="leading-relaxed">
         Laboratory reference intervals vary by laboratory and population. Public discussions sometimes cite narrow
-        “optimal” ferritin targets for hair; in practice, decisions depend on symptoms, haemoglobin, iron studies,
-        menstrual losses, diet, and tolerance of treatment. Avoid self-treating based on a label alone.
+        “optimal” ferritin targets for hair; robust trial evidence tying a single ferritin cut-off to hair outcomes is
+        limited, so decisions still depend on symptoms, haemoglobin, iron studies, menstrual losses, diet, and tolerance
+        of treatment. Avoid self-treating based on a label alone.
       </p>
       <h2 id="with-thyroid" className={h2}>
         Iron results alongside thyroid and other tests
@@ -161,8 +162,8 @@ export function BodyThyroidHairLoss() {
       </h2>
       <p className="leading-relaxed">
         Both underactive and overactive thyroid states can contribute to diffuse shedding or altered hair quality in some
-        people. The mechanism is one piece of a larger picture that includes timing, associated symptoms, and scalp
-        findings.
+        people. The link is not uniform across every patient; mechanism and context remain one piece of a larger picture
+        that includes timing, associated symptoms, and scalp findings.
       </p>
       <h2 id="common-tests" className={h2}>
         Tests commonly used in primary care
@@ -221,8 +222,8 @@ export function BodyDhtAndAga() {
   return (
     <div className={wrap}>
       <p className={lead}>
-        Androgenetic alopecia is a common pattern of hair miniaturisation driven by genetics and androgen signalling in
-        susceptible follicles.{" "}
+        Androgenetic alopecia is a common pattern of hair miniaturisation associated with genetic susceptibility and
+        androgen signalling in affected follicles.{" "}
         <Link href={glossaryPath("dht")} className="font-medium text-medical underline-offset-2 hover:underline">
           DHT
         </Link>{" "}
@@ -239,9 +240,10 @@ export function BodyDhtAndAga() {
         DHT’s role in susceptible follicles
       </h2>
       <p className="leading-relaxed">
-        DHT is derived from testosterone via the 5α-reductase pathway. In genetically susceptible hair follicles, this
-        signalling contributes to gradual miniaturisation. Individual sensitivity and other shedding drivers still matter
-        for how symptoms present and respond.
+        DHT is derived from testosterone via the 5α-reductase pathway. In susceptible hair follicles, this signalling is
+        one well-described contributor to gradual miniaturisation; human studies continue to refine how bedside findings
+        map to specific pathways. Individual sensitivity and other shedding drivers still matter for how symptoms present
+        and respond.
       </p>
       <h2 id="not-only-men" className={h2}>
         Women and androgenetic patterning
@@ -562,14 +564,18 @@ export function BodyHliVsHairaudit() {
           what blood tests matter
         </Link>
         ,{" "}
-        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
-          DHT and androgenetic alopecia
+        <Link href={insight("telogen-effluvium-after-illness-or-stress")} className="font-medium text-medical underline-offset-2 hover:underline">
+          telogen effluvium after illness or stress
         </Link>
         , and{" "}
+        <Link href={insight("postpartum-shedding-when-to-reassure-vs-when-to-test")} className="font-medium text-medical underline-offset-2 hover:underline">
+          postpartum shedding
+        </Link>{" "}
+        provide educational anchors before you commit to a pathway — alongside procedure comparisons such as{" "}
         <Link href={insight("prp-vs-exosomes")} className="font-medium text-medical underline-offset-2 hover:underline">
           PRP vs exosomes
-        </Link>{" "}
-        provide educational anchors before you commit to a pathway.
+        </Link>
+        .
       </p>
       <h2 id="when-hairaudit" className={h2}>
         When to open HairAudit first
@@ -584,6 +590,550 @@ export function BodyHliVsHairaudit() {
       <p className="leading-relaxed">
         This page helps you self-triage information needs. It does not tell you which service you “must” use, and it does
         not diagnose. Personal decisions belong with you and your qualified professionals.
+      </p>
+    </div>
+  );
+}
+
+export function BodyPostpartumShedding() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Many new parents notice increased hair shedding in the months after birth. That pattern is common and often
+        aligns with normal hair-cycle shifts — but it is not the only postpartum story. This guide separates reassurance
+        themes from situations where testing or closer review is reasonable, without replacing your midwife, GP, or
+        obstetric clinician.
+      </p>
+      <h2 id="normal-postpartum-shedding" className={h2}>
+        What “normal” postpartum shedding can look like
+      </h2>
+      <p className="leading-relaxed">
+        Shedding often becomes noticeable several months after delivery as follicles move through recovery from pregnancy-related
+        hormonal shifts. Volume changes can feel dramatic emotionally even when the pattern is physiologic. If you are
+        unsure, a routine postpartum or GP review is an appropriate first step.
+      </p>
+      <h2 id="when-reassurance-fits" className={h2}>
+        When reassurance alone may be enough
+      </h2>
+      <p className="leading-relaxed">
+        Diffuse shedding without scalp pain, scarring signs, or major systemic symptoms sometimes follows a time course
+        consistent with{" "}
+        <Link href={glossaryPath("telogen-effluvium")} className="font-medium text-medical underline-offset-2 hover:underline">
+          telogen effluvium
+        </Link>
+        -type recovery. Compare timing and context with{" "}
+        <Link href={insight("telogen-effluvium-after-illness-or-stress")} className="font-medium text-medical underline-offset-2 hover:underline">
+          shedding after illness or stress
+        </Link>{" "}
+        — triggers differ, but the hair-cycle principles rhyme.
+      </p>
+      <h2 id="red-flags-testing" className={h2}>
+        When clinicians consider blood tests or referral
+      </h2>
+      <p className="leading-relaxed">
+        Fatigue beyond expected recovery, palpitations, significant mood change, heavy bleeding, or symptoms suggesting
+        thyroid or iron issues may prompt selective labs. This is not a universal panel for every person with shedding.
+        See{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter
+        </Link>{" "}
+        and{" "}
+        <Link href={insight("ferritin-and-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          ferritin in context
+        </Link>
+        .
+      </p>
+      <h2 id="overlap-thyroid-iron" className={h2}>
+        Thyroid, iron, and nutrition after birth
+      </h2>
+      <p className="leading-relaxed">
+        Postpartum thyroiditis and iron depletion occur in some patients and can overlap with hair symptoms. Interpretation
+        belongs with clinicians who know your pregnancy history. Micronutrient articles such as{" "}
+        <Link href={insight("vitamin-d-b12-folate-what-labs-may-mean-for-hair")} className="font-medium text-medical underline-offset-2 hover:underline">
+          vitamin D, B12, and folate
+        </Link>{" "}
+        explain how those markers are discussed — not automatic causes of hair loss.
+      </p>
+      <h2 id="hair-cycle-timelines" className={h2}>
+        Timelines that help set expectations
+      </h2>
+      <p className="leading-relaxed">
+        Hair improvement, when drivers are resolving, is measured in months. Photography and gentle tracking can reduce
+        day-to-day anxiety; they do not replace medical review when red flags exist.
+      </p>
+      <h2 id="partner-with-clinician" className={h2}>
+        Partnering with your care team
+      </h2>
+      <p className="leading-relaxed">
+        Bring a simple timeline: delivery date, breastfeeding status, supplements, and symptom list. For broader female
+        thinning patterns,{" "}
+        <Link href={insight("diffuse-thinning-in-women")} className="font-medium text-medical underline-offset-2 hover:underline">
+          diffuse thinning in women
+        </Link>{" "}
+        adds context when postpartum shedding blends into longer-term change.
+      </p>
+      <h2 id="what-this-is-not" className={h2}>
+        What this article is not
+      </h2>
+      <p className="leading-relaxed">
+        This is education, not postpartum medical advice for you individually. If you feel unwell, in crisis, or unsure,
+        contact your maternity team or urgent services as local guidance recommends.
+      </p>
+    </div>
+  );
+}
+
+export function BodyTelogenAfterIllnessStress() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Telogen effluvium describes a shift in the hair cycle that can produce noticeable shedding weeks to months after
+        a physiological stressor. It is a clinical label — not something to self-diagnose from shedding alone. This piece
+        explains the idea calmly so you can ask better questions of your clinician.
+      </p>
+      <h2 id="what-te-triggers" className={h2}>
+        Common trigger categories
+      </h2>
+      <p className="leading-relaxed">
+        Illness with fever, surgery, major psychological stress, crash dieting, and some medications appear on many
+        clinicians’ lists. Postpartum shifts are another common context — see{" "}
+        <Link href={insight("postpartum-shedding-when-to-reassure-vs-when-to-test")} className="font-medium text-medical underline-offset-2 hover:underline">
+          postpartum shedding: reassure vs test
+        </Link>
+        .
+      </p>
+      <h2 id="timing-after-stressor" className={h2}>
+        Typical timing after the event
+      </h2>
+      <p className="leading-relaxed">
+        Shedding often lags the trigger because many follicles synchronise into shedding phase together. That delay
+        confuses people who no longer “feel sick” when hair falls. Your clinician correlates history with examination.
+      </p>
+      <h2 id="overlap-pattern-loss" className={h2}>
+        Overlap with pattern hair loss
+      </h2>
+      <p className="leading-relaxed">
+        Androgenetic thinning can coexist. If the scalp shows pattern miniaturisation or symptoms persist longer than
+        expected, assessment may broaden. For pattern biology,{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          DHT and androgenetic alopecia
+        </Link>{" "}
+        is a separate read — not every shedder needs that lens first.
+      </p>
+      <h2 id="labs-when-indicated" className={h2}>
+        When blood tests are considered
+      </h2>
+      <p className="leading-relaxed">
+        Selective testing may follow clues in history — for example iron or thyroid symptoms. It is not mandatory for
+        every case. Our{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          blood tests overview
+        </Link>{" "}
+        and{" "}
+        <Link href={insight("vitamin-d-b12-folate-what-labs-may-mean-for-hair")} className="font-medium text-medical underline-offset-2 hover:underline">
+          micronutrient labs article
+        </Link>{" "}
+        explain how markers are used in context.
+      </p>
+      <h2 id="prognosis" className={h2}>
+        Prognosis and patience
+      </h2>
+      <p className="leading-relaxed">
+        When the driver resolves, many people see gradual normalisation over months. Ongoing triggers or second diagnoses
+        change that picture — another reason personalised review matters.
+      </p>
+      <h2 id="emotional-load" className={h2}>
+        The emotional load of shedding
+      </h2>
+      <p className="leading-relaxed">
+        Shedding is visible and stressful. Naming the pattern can help, but it does not minimise distress. If anxiety or
+        mood symptoms dominate, discuss them with your clinician — they deserve care in their own right.
+      </p>
+      <h2 id="when-specialist" className={h2}>
+        When a hair-focused specialist helps
+      </h2>
+      <p className="leading-relaxed">
+        Rapid progression, scarring signs, pain, or diagnostic uncertainty are reasons people seek dermatology or
+        trichology-aligned review. For scalp symptoms,{" "}
+        <Link href={insight("scalp-inflammation-and-shedding")} className="font-medium text-medical underline-offset-2 hover:underline">
+          scalp inflammation and shedding
+        </Link>{" "}
+        outlines inflammatory overlap themes.
+      </p>
+    </div>
+  );
+}
+
+export function BodyVitaminMicronutrientsHair() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Vitamin D, vitamin B12, and folate are sometimes discussed when people report shedding or reduced hair quality.
+        Abnormalities can matter for overall health — but normal results do not “prove” hair cause, and supplements are not
+        a universal fix. This article explains how clinicians frame these markers next to history and examination.
+      </p>
+      <h2 id="why-context-matters" className={h2}>
+        Why context beats chasing single numbers
+      </h2>
+      <p className="leading-relaxed">
+        Diet, malabsorption, medications, pregnancy, sunlight exposure, and chronic illness all influence micronutrient
+        indices. Your clinician interprets labs against symptoms — not against generic “optimal hair” thresholds from
+        informal sources.
+      </p>
+      <h2 id="vitamin-d" className={h2}>
+        Vitamin D: what low results might mean
+      </h2>
+      <p className="leading-relaxed">
+        Low vitamin D is common in some populations and may warrant replacement for bone and general health reasons when
+        clinically appropriate. Linking a specific 25-OH vitamin D value directly to hair density is usually overstated
+        without broader assessment.
+      </p>
+      <h2 id="b12-folate" className={h2}>
+        B12 and folate
+      </h2>
+      <p className="leading-relaxed">
+        Deficiency can associate with anaemia or neurological symptoms that deserve treatment on their own merits. Hair
+        may be one part of the conversation, not the sole decision driver for dosing.
+      </p>
+      <h2 id="interpretation-limits" className={h2}>
+        Limits of laboratory interpretation
+      </h2>
+      <p className="leading-relaxed">
+        “Mild” deviations do not automatically explain months of shedding if the rest of the assessment points elsewhere.
+        Conversely, fixing a real deficiency may still leave pattern hair loss or inflammatory scalp disease to address
+        separately.
+      </p>
+      <h2 id="with-iron-thyroid" className={h2}>
+        Iron stores and thyroid: frequent companions in work-ups
+      </h2>
+      <p className="leading-relaxed">
+        When diffuse shedding is evaluated, clinicians often consider iron and thyroid in selected cases. Pair this read
+        with{" "}
+        <Link href={insight("ferritin-and-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          ferritin
+        </Link>{" "}
+        and{" "}
+        <Link href={insight("thyroid-hair-loss-explained")} className="font-medium text-medical underline-offset-2 hover:underline">
+          thyroid and hair
+        </Link>
+        .
+      </p>
+      <h2 id="supplementation-caution" className={h2}>
+        Supplementation without a clear indication
+      </h2>
+      <p className="leading-relaxed">
+        High-dose or combined supplements can cause harm, mask other issues, or interact with medicines. Dosing and
+        duration belong with prescribers who know your full history.
+      </p>
+      <h2 id="constructive-next-steps" className={h2}>
+        Constructive next steps
+      </h2>
+      <p className="leading-relaxed">
+        If you already have labs, bring them to your clinician with symptom timelines. For how tests fit a broader plan,
+        start with{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter for hair loss
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+export function BodyScalpInflammationShedding() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Inflamed or uncomfortable scalps can coincide with increased shedding, flaking, or itch. Causes range from
+        common dermatitis-type conditions to less frequent disorders that need targeted treatment. This article explains
+        themes for education — not to substitute examination or prescription decisions.
+      </p>
+      <h2 id="inflammation-and-cycle" className={h2}>
+        How scalp inflammation can intersect with shedding
+      </h2>
+      <p className="leading-relaxed">
+        Local inflammation can disrupt the comfortable hair environment and sometimes overlaps with diffuse shedding
+        patterns. Sorting inflammation from pure telogen effluvium is part of why clinicians examine the scalp closely.
+      </p>
+      <h2 id="common-presentations" className={h2}>
+        Presentations people describe
+      </h2>
+      <p className="leading-relaxed">
+        Itch, burning, tightness, yellowish scale, or redness prompt different diagnostic considerations than painless
+        diffuse shedding alone. Photography can help track change but does not replace diagnosis.
+      </p>
+      <h2 id="overlap-shedding-aga" className={h2}>
+        Overlap with shedding and pattern thinning
+      </h2>
+      <p className="leading-relaxed">
+        You can have inflammatory scalp symptoms alongside{" "}
+        <Link href={insight("telogen-effluvium-after-illness-or-stress")} className="font-medium text-medical underline-offset-2 hover:underline">
+          stress-related shedding
+        </Link>{" "}
+        or{" "}
+        <Link href={insight("diffuse-thinning-in-women")} className="font-medium text-medical underline-offset-2 hover:underline">
+          diffuse thinning
+        </Link>
+        . Sequencing treatment depends on which piece is driving symptoms and risk.
+      </p>
+      <h2 id="examination-themes" className={h2}>
+        What examination may focus on
+      </h2>
+      <p className="leading-relaxed">
+        Pattern, scale type, lymph nodes, and hair shaft changes all refine the differential. Trichoscopy may be used
+        where available — interpretation stays with the examining clinician.
+      </p>
+      <h2 id="treatment-prescriber-led" className={h2}>
+        Treatment is prescriber-led
+      </h2>
+      <p className="leading-relaxed">
+        Shampoos, topicals, and oral therapies vary by diagnosis. This site does not recommend a product by brand or
+        replace a prescription plan. If symptoms are painful, rapidly worsening, or associated with fever, seek timely
+        in-person care.
+      </p>
+      <h2 id="alongside-systemic-health" className={h2}>
+        Systemic health and selective labs
+      </h2>
+      <p className="leading-relaxed">
+        Sometimes inflammatory scalp disease prompts broader review; other times it is local. For lab philosophy, see{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter
+        </Link>
+        .
+      </p>
+      <h2 id="when-urgent-care" className={h2}>
+        When to prioritise urgent review
+      </h2>
+      <p className="leading-relaxed">
+        Sudden painful patches, pus, spreading redness, or systemic illness warrant urgent medical assessment rather than
+        self-management.
+      </p>
+    </div>
+  );
+}
+
+export function BodyMinoxidilMechanism() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Minoxidil is a widely used topical therapy in pattern hair loss and sometimes in other diagnoses as directed by
+        clinicians. It is not a cosmetic “boost” for everyone — response, side effects, and timelines vary. This explainer
+        covers mechanism themes and realistic expectations without replacing prescribing advice.
+      </p>
+      <h2 id="mechanism-overview" className={h2}>
+        Mechanism (high level)
+      </h2>
+      <p className="leading-relaxed">
+        Minoxidil’s hair effects relate to follicle biology and local blood flow signalling in ways that continue to be
+        refined in research. The practical takeaway is simpler: it is a long-game therapy assessed over months, not
+        weeks.
+      </p>
+      <h2 id="who-uses-it" className={h2}>
+        Who might use it (conceptually)
+      </h2>
+      <p className="leading-relaxed">
+        Many discussions centre on androgenetic patterning in men and women under medical guidance. Candidacy, strength,
+        and formulation depend on diagnosis, scalp condition, pregnancy status, and tolerance.
+      </p>
+      <h2 id="timelines-shedding-phase" className={h2}>
+        Early shedding and the “dread shed” conversation
+      </h2>
+      <p className="leading-relaxed">
+        Some people notice increased shedding shortly after starting. That phenomenon is discussed clinically but should
+        not be self-diagnosed. If shedding is severe or prolonged, your prescriber should review whether to continue,
+        adjust, or investigate other causes such as{" "}
+        <Link href={insight("telogen-effluvium-after-illness-or-stress")} className="font-medium text-medical underline-offset-2 hover:underline">
+          telogen effluvium
+        </Link>
+        .
+      </p>
+      <h2 id="realistic-outcomes" className={h2}>
+        Realistic outcomes
+      </h2>
+      <p className="leading-relaxed">
+        Goals are often stabilisation first, then meaningful regrowth in responders. Complete restoration of prior density
+        is not promised. Photography helps track change more reliably than daily hair counts.
+      </p>
+      <h2 id="adherence" className={h2}>
+        Adherence and scalp care
+      </h2>
+      <p className="leading-relaxed">
+        Consistent application matters. Irritant or allergic reactions should be reported. If you have active scalp
+        inflammation, addressing it may be part of making topical therapy tolerable — see{" "}
+        <Link href={insight("scalp-inflammation-and-shedding")} className="font-medium text-medical underline-offset-2 hover:underline">
+          scalp inflammation and shedding
+        </Link>
+        .
+      </p>
+      <h2 id="combination-context" className={h2}>
+        Combination with other therapies
+      </h2>
+      <p className="leading-relaxed">
+        Clinicians sometimes layer treatments in pattern loss. Oral options for men are discussed in{" "}
+        <Link href={insight("finasteride-vs-saw-palmetto")} className="font-medium text-medical underline-offset-2 hover:underline">
+          finasteride vs saw palmetto
+        </Link>
+        ; women’s oral therapies require specialist oversight — see{" "}
+        <Link href={insight("oral-anti-androgens-in-women-specialist-led-context")} className="font-medium text-medical underline-offset-2 hover:underline">
+          oral anti-androgens in women
+        </Link>
+        .
+      </p>
+      <h2 id="not-substitute-diagnosis" className={h2}>
+        Not a substitute for diagnosis
+      </h2>
+      <p className="leading-relaxed">
+        Starting minoxidil without clarity on diagnosis can blur follow-up. If thinning is diffuse or atypical, medical
+        assessment first usually serves you better than product-first shopping.
+      </p>
+    </div>
+  );
+}
+
+export function BodyPostTransplantShockLoss() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        After hair transplantation, many patients experience temporary shedding of native or transplanted hairs — often
+        discussed as “shock loss.” Timing and appearance vary by technique and individual healing. This article sets
+        expectations in general terms; your surgical team interprets what you see on your scalp.
+      </p>
+      <h2 id="shock-loss-what-it-is" className={h2}>
+        What shock loss can mean
+      </h2>
+      <p className="leading-relaxed">
+        Shock loss describes hair shedding in the surgical setting thought to relate to surgical stress on follicles and
+        surrounding hairs. It is a descriptive term, not a single disease entity, and it does not describe every post-op
+        change people notice.
+      </p>
+      <h2 id="typical-timing" className={h2}>
+        Typical timing (broadly)
+      </h2>
+      <p className="leading-relaxed">
+        Shedding may appear in the weeks after procedure, with regrowth timelines measured in months. Exact patterns
+        depend on graft type, density planning, medications, and healing — your clinic’s aftercare information is
+        authoritative for your case.
+      </p>
+      <h2 id="different-graft-concerns" className={h2}>
+        When to flag concerns to your team
+      </h2>
+      <p className="leading-relaxed">
+        Infection signs, unusual pain, expanding bald patches beyond discussed expectations, or distress should prompt
+        contact with your surgical provider. This education page cannot triage post-op urgency.
+      </p>
+      <h2 id="communication-with-team" className={h2}>
+        Communication and photographic follow-up
+      </h2>
+      <p className="leading-relaxed">
+        Many clinics use scheduled reviews and photos. Aligning expectations before surgery reduces anxiety when
+        temporary shedding appears. For ecosystem context on surgical pathways,{" "}
+        <Link href={insight("hli-vs-hairaudit")} className="font-medium text-medical underline-offset-2 hover:underline">
+          HLI vs HairAudit
+        </Link>{" "}
+        separates medical interpretation from surgical audit questions.
+      </p>
+      <h2 id="labs-systemic-health" className={h2}>
+        Systemic health and selective labs
+      </h2>
+      <p className="leading-relaxed">
+        Pre- or post-operative optimisation sometimes includes nutrition or thyroid discussion when clinically relevant.
+        That is not unique to transplant — see{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter
+        </Link>{" "}
+        and{" "}
+        <Link href={insight("vitamin-d-b12-folate-what-labs-may-mean-for-hair")} className="font-medium text-medical underline-offset-2 hover:underline">
+          micronutrient labs
+        </Link>
+        .
+      </p>
+      <h2 id="longitudinal-expectations" className={h2}>
+        Longitudinal density expectations
+      </h2>
+      <p className="leading-relaxed">
+        Final cosmetic results take time. Native hair may still miniaturise if underlying pattern loss continues — a
+        reason some plans combine surgery with medical therapy where appropriate.
+      </p>
+      <h2 id="emotional-expectations" className={h2}>
+        Emotional load
+      </h2>
+      <p className="leading-relaxed">
+        Surgery is a major decision. Temporary shedding can feel like failure even when it is within expected variation.
+        If mood or anxiety spikes, tell your clinical team or seek mental health support alongside follow-up visits.
+      </p>
+    </div>
+  );
+}
+
+export function BodyOralAntiandrogensWomen() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Oral anti-androgen or hormone-modulating therapies are sometimes used in women with pattern hair loss or related
+        endocrine pictures — always under specialist prescribing and monitoring. This article explains why self-starting is
+        unsafe, what themes appear in counselling, and how this differs from male-pattern medication discussions.
+      </p>
+      <h2 id="scope-specialist-led" className={h2}>
+        Scope: specialist-led only
+      </h2>
+      <p className="leading-relaxed">
+        Drug choice, dosing, contraception requirements, and monitoring are not DIY decisions. Dermatology, endocrinology,
+        or other qualified prescribers tailor plans to your history, fertility goals, and risk profile.
+      </p>
+      <h2 id="why-not-self-start" className={h2}>
+        Why self-starting is unsafe
+      </h2>
+      <p className="leading-relaxed">
+        Teratogenicity risk, electrolyte shifts, liver monitoring, and drug interactions are real considerations for some
+        agents. Online anecdotes do not replace individual risk assessment.
+      </p>
+      <h2 id="drug-classes-high-level" className={h2}>
+        Drug classes (high level, non-prescriptive)
+      </h2>
+      <p className="leading-relaxed">
+        Clinicians may discuss agents such as anti-androgens or other hormone modulators in selected female patients.
+        Trial evidence, licensed indications, and guideline positions differ between drugs and jurisdictions; naming a
+        specific drug here would read like indirect prescribing. Your clinician chooses based on evidence and regulation
+        in your region.
+      </p>
+      <h2 id="monitoring-safety" className={h2}>
+        Monitoring and safety themes
+      </h2>
+      <p className="leading-relaxed">
+        Baseline and follow-up labs, blood pressure, and symptom review may be scheduled. Report pregnancy immediately if
+        it occurs while on therapy — management is urgent and individualised.
+      </p>
+      <h2 id="fertility-pregnancy" className={h2}>
+        Fertility, pregnancy, and contraception
+      </h2>
+      <p className="leading-relaxed">
+        Many regimens require reliable contraception. Planning conception may require structured medication holidays under
+        supervision — never improvised from articles.
+      </p>
+      <h2 id="relation-pattern-hair-loss" className={h2}>
+        Relation to pattern hair loss assessment
+      </h2>
+      <p className="leading-relaxed">
+        For background on pattern thinning in women, read{" "}
+        <Link href={insight("diffuse-thinning-in-women")} className="font-medium text-medical underline-offset-2 hover:underline">
+          diffuse thinning in women
+        </Link>{" "}
+        and{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          DHT and androgenetic alopecia
+        </Link>
+        . Topical minoxidil context appears in{" "}
+        <Link href={insight("minoxidil-mechanism-and-realistic-timelines")} className="font-medium text-medical underline-offset-2 hover:underline">
+          minoxidil mechanism and timelines
+        </Link>
+        .
+      </p>
+      <h2 id="constructive-questions" className={h2}>
+        Constructive questions for your appointment
+      </h2>
+      <p className="leading-relaxed">
+        Ask about expected timeline, side effects to watch, what “success” means for you, and alternatives if therapy is
+        unsuitable. Bring a full medication and supplement list.
       </p>
     </div>
   );
