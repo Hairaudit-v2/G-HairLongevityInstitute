@@ -25,14 +25,18 @@ export function SecondaryButton({
   href,
   children,
   className = "",
+  download,
 }: {
   href: string;
   children: React.ReactNode;
   className?: string;
+  /** Same-origin static files (e.g. PDF in /public) — hints save-as filename when string */
+  download?: string | boolean;
 }) {
   return (
     <Link
       href={href}
+      download={download}
       className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/30 bg-white px-6 py-3 text-sm font-semibold text-[rgb(var(--medical))] shadow-soft transition hover:bg-[rgb(var(--medical))]/5 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--medical))]/40 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] ${className}`}
     >
       {children}

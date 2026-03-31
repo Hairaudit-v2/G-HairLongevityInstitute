@@ -4,7 +4,7 @@ import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
-import { Container, PrimaryButton } from "@/components/public/PublicCTA";
+import { Container, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
 import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHairIntelligenceSection";
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
 import { ResultsPreviewCard } from "@/components/public/ResultsPreviewCard";
@@ -20,6 +20,9 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
+
+/** Lead magnet: full clinical article + optional print/PDF from browser */
+const POSTPARTUM_GUIDE_HREF = "/guides/postpartum-hair-loss";
 
 // —— 1. HERO ——
 function HeroSection({ startHref: href }: { startHref: string }) {
@@ -253,6 +256,42 @@ function TrustSection() {
   );
 }
 
+// —— 6b. POSTPARTUM GUIDE (education lead magnet; secondary CTA — gold stays on analysis) ——
+function PostpartumGuideCTASection() {
+  return (
+    <section
+      className="border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16"
+      aria-labelledby="postpartum-guide-heading"
+    >
+      <Container>
+        <div className="mx-auto max-w-2xl rounded-card border border-[rgb(var(--border-soft))] bg-card px-6 py-10 shadow-card sm:px-10 sm:py-12">
+          <p className="text-center text-sm font-medium tracking-[0.12em] text-[rgb(var(--gold))]">Free clinical guide</p>
+          <h2
+            id="postpartum-guide-heading"
+            className="mt-3 text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-[1.75rem]"
+            style={{ lineHeight: 1.25 }}
+          >
+            Postpartum hair shedding — understand what&apos;s normal
+          </h2>
+          <p
+            className="mt-5 text-center text-[rgb(var(--text-secondary))] sm:text-lg"
+            style={{ lineHeight: "var(--line-height-relaxed)" }}
+          >
+            Learn why shedding often peaks after birth, when reassurance is reasonable, when clinical review may help, and
+            practical, evidence-informed steps to support regrowth — without overpromising outcomes.
+          </p>
+          <div className="mt-8 flex justify-center">
+            <SecondaryButton href={POSTPARTUM_GUIDE_HREF}>Get your free guide</SecondaryButton>
+          </div>
+          <p className="mt-6 text-center text-sm text-[rgb(var(--text-muted))] leading-relaxed">
+            Expert-led education grounded in hair and scalp science.
+          </p>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
 // —— 7. FINAL CTA (single primary CTA) ——
 function FinalCTASection({ startHref: href }: { startHref: string }) {
   return (
@@ -334,6 +373,7 @@ export default function Page() {
       <WhatWeAnalyseSection />
       <ResultsPreviewSection />
       <TrustSection />
+      <PostpartumGuideCTASection />
       <FinalCTASection startHref={href} />
       <FAQSection />
 
