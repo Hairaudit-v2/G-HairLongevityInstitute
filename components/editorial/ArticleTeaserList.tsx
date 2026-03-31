@@ -28,7 +28,7 @@ export default function ArticleTeaserList({ articles }: { articles: EditorialArt
               </Link>
             </h2>
             {a.deck ? <p className="mt-2 text-sm font-medium text-[rgb(var(--text-secondary))]">{a.deck}</p> : null}
-            <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed line-clamp-3">{a.description}</p>
+            <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed line-clamp-3">{a.excerpt}</p>
             <p className="mt-3">
               <Link href={`/insights/${a.slug}`} className="text-sm font-semibold text-medical hover:underline">
                 Read article →

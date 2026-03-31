@@ -45,14 +45,14 @@ export const EDITORIAL_CTA_TYPES: readonly EditorialCtaType[] = [
 
 /**
  * Facets for discovery, internal linking, and related-content scoring.
- * v1 seeds keep every array present; use tags when another axis is not the main focus.
+ * Arrays are optional; omit an axis when it does not apply (consumers use `?? []`).
  */
 export type EditorialTaxonomy = {
-  conditions: string[];
-  markers: string[];
-  symptoms: string[];
-  treatments: string[];
-  tags: string[];
+  conditions?: string[];
+  markers?: string[];
+  symptoms?: string[];
+  treatments?: string[];
+  tags?: string[];
 };
 
 export type EditorialPerson = {
@@ -121,5 +121,5 @@ export type EditorialArticle = EditorialArticleMeta & {
 
 /** True when at least one facet array is non-empty. */
 export function articleHasFacets(t: EditorialTaxonomy): boolean {
-  return [t.conditions, t.markers, t.symptoms, t.treatments, t.tags].some((a) => a.length > 0);
+  return [t.conditions, t.markers, t.symptoms, t.treatments, t.tags].some((a) => (a?.length ?? 0) > 0);
 }

@@ -16,38 +16,53 @@ function chip(href: string, label: string) {
 export default function RelatedTopicsModule({ taxonomy }: { taxonomy: EditorialTaxonomy }) {
   const blocks: { title: string; items: { href: string; label: string }[] }[] = [];
 
-  if (taxonomy.conditions?.length) {
+  const conditions = taxonomy.conditions ?? [];
+  const markers = taxonomy.markers ?? [];
+  const symptoms = taxonomy.symptoms ?? [];
+  const treatments = taxonomy.treatments ?? [];
+  const tags = taxonomy.tags ?? [];
+
+  if (conditions.length) {
     blocks.push({
       title: "Conditions",
-      items: taxonomy.conditions.map((c) => ({
+      items: conditions.map((c) => ({
         href: `/insights?q=${encodeURIComponent(c.replace(/-/g, " "))}`,
         label: c.replace(/-/g, " "),
       })),
     });
   }
-  if (taxonomy.markers?.length) {
+  if (markers.length) {
     blocks.push({
       title: "Markers",
-      items: taxonomy.markers.map((c) => ({
+      items: markers.map((c) => ({
         href: `/insights?topic=${encodeURIComponent(c)}`,
         label: c.replace(/-/g, " "),
       })),
     });
   }
-  if (taxonomy.symptoms?.length) {
+  if (symptoms.length) {
     blocks.push({
       title: "Symptoms",
-      items: taxonomy.symptoms.map((c) => ({
+      items: symptoms.map((c) => ({
         href: `/insights?q=${encodeURIComponent(c.replace(/-/g, " "))}`,
         label: c.replace(/-/g, " "),
       })),
     });
   }
-  if (taxonomy.treatments?.length) {
+  if (treatments.length) {
     blocks.push({
       title: "Treatments",
-      items: taxonomy.treatments.map((c) => ({
+      items: treatments.map((c) => ({
         href: `/insights?q=${encodeURIComponent(c.replace(/-/g, " "))}`,
+        label: c.replace(/-/g, " "),
+      })),
+    });
+  }
+  if (tags.length) {
+    blocks.push({
+      title: "Topics",
+      items: tags.map((c) => ({
+        href: `/insights?topic=${encodeURIComponent(c)}`,
         label: c.replace(/-/g, " "),
       })),
     });

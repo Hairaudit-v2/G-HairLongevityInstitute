@@ -4,6 +4,18 @@ import { EDITORIAL_ARTICLES } from "@/lib/content/articlesData";
 export * from "@/lib/content/types";
 export * from "@/lib/content/taxonomy";
 export * from "@/lib/content/glossary";
+export {
+  EDITORIAL_CONTENT_GAPS_9_15,
+  EDITORIAL_PUBLISH_ORDER_V1,
+  EDITORIAL_RELATED_MAP_V1,
+} from "@/lib/content/editorialPublishingPlan";
+export {
+  getExpectedSecondaryCtaLabel,
+  validateEditorialCorpus,
+  type EditorialHealthSummary,
+  type EditorialIssue,
+  type EditorialValidationResult,
+} from "@/lib/content/validateEditorial";
 export { EDITORIAL_ARTICLES } from "@/lib/content/articlesData";
 
 export function getAllArticles(): EditorialArticle[] {
@@ -43,19 +55,19 @@ function scoreArticle(a: EditorialArticle, q: string): number {
   if (!lower) return 0;
   let score = 0;
   const hay =
-    `${a.title} ${a.description} ${a.deck ?? ""} ${a.contentType} ${(a.taxonomy.tags ?? []).join(" ")}`.toLowerCase();
+    `${a.title} ${a.description} ${a.excerpt} ${a.deck ?? ""} ${a.contentType} ${(a.taxonomy.tags ?? []).join(" ")}`.toLowerCase();
   if (a.title.toLowerCase().includes(lower)) score += 10;
   if (hay.includes(lower)) score += 5;
   for (const t of a.taxonomy.tags ?? []) {
     if (t.includes(lower)) score += 2;
   }
   for (const arr of [
-    a.taxonomy.conditions,
-    a.taxonomy.markers,
-    a.taxonomy.symptoms,
-    a.taxonomy.treatments,
+    a.taxonomy.conditions ?? [],
+    a.taxonomy.markers ?? [],
+    a.taxonomy.symptoms ?? [],
+    a.taxonomy.treatments ?? [],
   ]) {
-    for (const x of arr ?? []) {
+    for (const x of arr) {
       if (x.replace(/-/g, " ").includes(lower) || lower.includes(x)) score += 3;
     }
   }
@@ -145,7 +157,7 @@ function relatedContentScore(source: EditorialArticle, candidate: EditorialArtic
  * symptoms, treatments, and tags.
  */
 export function getRelatedByTaxonomy(article: EditorialArticle, limit = 4): EditorialArticle[] {
-  const relatedFromMeta = (article.relatedSlugs ?? [])
+  const relatedFromMeta = article.relatedSlugs
     .map((s) => getArticleBySlug(s))
     .filter((x): x is EditorialArticle => Boolean(x));
 
