@@ -21,6 +21,8 @@ import GlossaryTermLinks from "@/components/editorial/GlossaryTermLinks";
 import NextStepBlocks from "@/components/editorial/NextStepBlocks";
 import RelatedTopicsModule from "@/components/editorial/RelatedTopicsModule";
 import ArticleGuideLinks from "@/components/editorial/ArticleGuideLinks";
+import ArticlePillarStartLink from "@/components/editorial/ArticlePillarStartLink";
+import { guideLinksForArticle } from "@/lib/content/pillarGuides";
 import EditorialArticleViewTracker from "@/components/editorial/EditorialArticleViewTracker";
 import EditorialArticleImage from "@/components/editorial/EditorialArticleImage";
 import EditorialHeroCtas from "@/components/editorial/EditorialHeroCtas";
@@ -137,6 +139,9 @@ export default function EditorialArticlePage({ params }: Props) {
             ) : null}
           </div>
           <div className="mt-8">
+            <ArticlePillarStartLink pillar={article.primaryPillar} />
+          </div>
+          <div className="mt-6">
             <EditorialHeroCtas assessmentHref={assessmentHref} ctaType={article.ctaType} />
           </div>
         </header>
@@ -171,11 +176,9 @@ export default function EditorialArticlePage({ params }: Props) {
             <div className="mt-10">
               <RelatedTopicsModule taxonomy={article.taxonomy} />
             </div>
-            {article.guideLinks?.length ? (
-              <div className="mt-10">
-                <ArticleGuideLinks guides={article.guideLinks} />
-              </div>
-            ) : null}
+            <div className="mt-10">
+              <ArticleGuideLinks guides={guideLinksForArticle(article)} />
+            </div>
             <div className="mt-12">
               <AuthorReviewerBlock authors={article.authors} reviewers={article.reviewers} />
             </div>

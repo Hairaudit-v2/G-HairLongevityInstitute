@@ -7,10 +7,10 @@ export default function ArticleGuideLinks({ guides }: { guides: EditorialGuideLi
   return (
     <section className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft" aria-labelledby="article-guide-links-heading">
       <h2 id="article-guide-links-heading" className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
-        Go Deeper With Guides
+        Related guides
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
-        These pillar guides pull the article into a bigger decision-making path, with summaries, takeaways, FAQs, and next-step context.
+        Pillar pages sit above a single article: broader intent, FAQs, and where this topic fits in the full hair-loss map.
       </p>
       <ul className="mt-5 grid list-none gap-4 p-0 sm:grid-cols-2">
         {guides.map((guide) => (

@@ -93,6 +93,14 @@ export type EditorialGuideLink = {
   description: string;
 };
 
+/** Import type only in consumers — defined in pillarGuides.ts to avoid circular imports here. */
+export type EditorialPillarSlug =
+  | "hair-longevity"
+  | "postpartum-hair-loss"
+  | "male-pattern-hair-loss"
+  | "androgen-index"
+  | "hair-loss-medications";
+
 export type EditorialArticleMeta = {
   slug: string;
   title: string;
@@ -117,8 +125,10 @@ export type EditorialArticleMeta = {
   faq: EditorialFaqItem[];
   /** Curated internal links (typically 3–5 slugs from the live corpus). */
   relatedSlugs: string[];
-  /** Optional pillar-guide backlinks for companion guide landings. */
-  guideLinks?: EditorialGuideLink[];
+  /** Primary public guide pillar for hierarchy and internal linking (one per article). */
+  primaryPillar: EditorialPillarSlug;
+  /** Optional second guide when two lanes are legitimately relevant; keep sparse. */
+  secondaryPillar?: EditorialPillarSlug;
   glossarySlugs?: string[];
   references: EditorialReference[];
   heroImage?: EditorialHeroImage;

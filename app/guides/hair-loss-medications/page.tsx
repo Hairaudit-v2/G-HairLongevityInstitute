@@ -12,6 +12,7 @@ import { Container, SecondaryButton } from "@/components/public/PublicCTA";
 import { GuideLibraryAssessmentCTA } from "@/components/guides/GuideLibraryAssessmentCTA";
 import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
+import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
 import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
 
@@ -142,9 +143,9 @@ const wrap = "mx-auto max-w-2xl";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides/hair-loss-medications",
-  title: "Hair loss treatment options guide: medications, natural support, off-label and emerging therapies",
+  title: "Hair loss treatments: medicines, procedures & emerging options",
   metaDescription:
-    "A diagnosis-first guide to hair loss treatment options: natural support, first-line medications, off-label therapies, adjuncts, regenerative approaches, and emerging treatment pathways.",
+    "Diagnosis-first map of topicals, prescriptions, off-label and specialist options, procedures, supplements, and newer therapies — so you compare categories before locking onto one product.",
   appendBrand: true,
 });
 
@@ -493,6 +494,8 @@ export default function HairLossMedicationsGuidePage() {
         intro="Once the broad treatment-options map is clear, move into the guide that best matches your actual diagnosis or treatment decision."
         theme="card"
       />
+
+      <GuideInsightArticleGroups pillar="hair-loss-medications" headingId="meds-insight-clusters" />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-label="Frequently asked questions">
         <Container>

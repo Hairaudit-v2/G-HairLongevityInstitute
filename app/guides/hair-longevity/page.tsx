@@ -6,6 +6,7 @@ import PublicFooter from "@/components/public/PublicFooter";
 import { Container, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
 import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
+import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
 import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -161,9 +162,9 @@ const SUPPORTING_READS = [
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides/hair-longevity",
-  title: "Hair loss guide: causes, diagnosis, testing and treatment pathways",
+  title: "Hair loss: causes, diagnosis, labs & treatment pathways",
   metaDescription:
-    "A broad hair loss guide covering what hair loss means clinically, common causes, diagnosis-first thinking, helpful testing, treatment categories, and how to choose the right next step.",
+    "Start-here overview: what hair loss means in practice, common patterns, diagnosis-first thinking, when tests help, and how treatment choices fit your story. Educational — not a substitute for your clinician.",
   appendBrand: true,
 });
 
@@ -461,6 +462,8 @@ export default function HairLongevityFoundationalGuidePage() {
           </div>
         </Container>
       </section>
+
+      <GuideInsightArticleGroups pillar="hair-longevity" headingId="foundational-insight-clusters" />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-label="Frequently asked questions">
         <Container>

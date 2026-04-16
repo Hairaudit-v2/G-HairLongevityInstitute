@@ -7,6 +7,7 @@ import { Container, SecondaryButton } from "@/components/public/PublicCTA";
 import { GuideLibraryAssessmentCTA } from "@/components/guides/GuideLibraryAssessmentCTA";
 import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
+import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
 import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -116,9 +117,9 @@ const wrap = "mx-auto max-w-2xl";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides/male-pattern-hair-loss",
-  title: "Male pattern hair loss guide: causes, stages, DHT & treatment options",
+  title: "Male pattern hair loss: recession, crown thinning, staging & treatments",
   metaDescription:
-    "A clinically grounded guide to male pattern hair loss: early signs, recession and crown thinning, DHT and genetics, staging, evidence-based treatment options, and when assessment matters.",
+    "Recession, crown thinning, how pattern loss progresses, staging, genetics, and evidence-based treatment framing. For DHT and miniaturisation mechanics, see our dedicated DHT overview.",
   appendBrand: true,
 });
 
@@ -282,6 +283,8 @@ export default function MalePatternHairLossGuidePage() {
         intro="Once the broad male-pattern picture is clear, move into the supporting read that best matches your mechanism, testing, or treatment question."
         theme="subtle"
       />
+
+      <GuideInsightArticleGroups pillar="male-pattern-hair-loss" headingId="mp-insight-clusters" />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-label="Frequently asked questions">
         <Container>

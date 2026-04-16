@@ -4,6 +4,7 @@ import { isLongevityEnabled } from "@/lib/features";
 import { GuideLibraryAssessmentCTA } from "@/components/guides/GuideLibraryAssessmentCTA";
 import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
+import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, SecondaryButton } from "@/components/public/PublicCTA";
@@ -124,9 +125,9 @@ const wrap = "mx-auto max-w-2xl";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides/postpartum-hair-loss",
-  title: "Postpartum hair loss and shedding guide: what is normal, when to test, when to monitor",
+  title: "Postpartum hair loss: normal shedding, timing, tests & red flags",
   metaDescription:
-    "A calm, clinically grounded guide to postpartum hair loss and postpartum shedding: what is normal, typical timing, when to monitor, when blood tests may help, and when professional review is worth considering.",
+    "After birth: typical postpartum shedding, when to watch and wait, when iron or thyroid may matter, and signs that deserve a clinician. Calm, patient-first context for new parents.",
   appendBrand: true,
 });
 
@@ -467,6 +468,8 @@ export default function PostpartumHairLossGuidePage() {
         headingId="pp-next-reads"
         intro="Once the broad postpartum picture is clear, move into the supporting read that best matches the question you still need answered."
       />
+
+      <GuideInsightArticleGroups pillar="postpartum-hair-loss" headingId="pp-insight-clusters" />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-label="Frequently asked questions">
         <Container>

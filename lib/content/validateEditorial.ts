@@ -2,6 +2,7 @@ import type { EditorialArticle, EditorialCtaType } from "@/lib/content/types";
 import { articleHasFacets } from "@/lib/content/types";
 import { GLOSSARY } from "@/lib/content/glossary";
 import { EDITORIAL_BODY_SECTION_IDS } from "@/lib/content/seed/bodySectionIds";
+import { EDITORIAL_PILLAR_SLUGS } from "@/lib/content/pillarGuides";
 
 export type EditorialIssueSeverity = "error" | "warning";
 
@@ -90,6 +91,7 @@ export function validateEditorialCorpus(articles: EditorialArticle[]): Editorial
   const tagUsage = new Map<string, string[]>();
 
   const glossarySet = new Set(GLOSSARY.map((g) => g.slug));
+  const pillarSet = new Set<string>(EDITORIAL_PILLAR_SLUGS);
 
   for (const a of articles) {
     if (!a.slug?.trim()) {
@@ -171,6 +173,32 @@ export function validateEditorialCorpus(articles: EditorialArticle[]): Editorial
         code: "INVALID_RELATED",
         message: `Invalid relatedSlugs: ${badRelated.join(", ")}`,
       });
+    }
+
+    if (!a.primaryPillar || !pillarSet.has(a.primaryPillar)) {
+      issues.push({
+        severity: "error",
+        slug: a.slug,
+        code: "BAD_PRIMARY_PILLAR",
+        message: "primaryPillar must be set to a valid public guide pillar",
+      });
+    }
+    if (a.secondaryPillar) {
+      if (!pillarSet.has(a.secondaryPillar)) {
+        issues.push({
+          severity: "error",
+          slug: a.slug,
+          code: "BAD_SECONDARY_PILLAR",
+          message: "secondaryPillar must be a valid public guide pillar when set",
+        });
+      } else if (a.secondaryPillar === a.primaryPillar) {
+        issues.push({
+          severity: "error",
+          slug: a.slug,
+          code: "PILLAR_DUPLICATE",
+          message: "secondaryPillar must differ from primaryPillar",
+        });
+      }
     }
 
     for (const d of [a.publishedAt, a.updatedAt, a.reviewedAt]) {

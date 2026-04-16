@@ -11,9 +11,9 @@ import { HUB_LABEL, HUB_PATH, type EditorialHubSlug } from "@/lib/content";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides",
-  title: "Hair loss guides, pillar pages & downloadable PDFs",
+  title: "Hair loss guides & PDF downloads",
   metaDescription:
-    "Pillar guides and downloadable PDFs on hair loss causes, medications, postpartum shedding, men's pattern loss, and hormone-related thinning — from the Hair Longevity Institute.",
+    "Downloadable PDFs and web guides on causes, treatments, postpartum shedding, male pattern loss, hormones, and more — Hair Longevity Institute.",
   appendBrand: true,
 });
 

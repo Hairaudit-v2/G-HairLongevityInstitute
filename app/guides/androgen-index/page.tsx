@@ -7,6 +7,7 @@ import { Container, SecondaryButton } from "@/components/public/PublicCTA";
 import { GuideLibraryAssessmentCTA } from "@/components/guides/GuideLibraryAssessmentCTA";
 import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
+import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
 import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -74,30 +75,33 @@ const FAQ_ITEMS = [
   },
 ];
 
+/** Best next reads: no DHT explainer card here — it is primary to the male-pattern pillar. Oral anti-androgens stays the single featured insight in the cluster block above. */
 const SUPPORTING_READS = [
-  {
-    href: DHT_INSIGHT,
-    category: "DHT overview",
-    title: "Pattern hair loss and DHT: a plain-English overview",
-    description: "The main companion read for DHT biology, receptor sensitivity, and what clinicians look for on the scalp.",
-  },
   {
     href: "/guides/male-pattern-hair-loss",
     category: "Men's Hair Health",
     title: "Male Pattern Hair Loss: Causes, Stages, and What Actually Helps",
-    description: "Best next read when androgen questions sit inside temple recession, crown thinning, and classic male-pattern progression.",
+    description:
+      "The pillar home for the plain-English DHT article, staging, and pattern progression — featured owner of that explainer.",
+  },
+  {
+    href: FIN_INSIGHT,
+    category: "DHT pathway (treatment)",
+    title: "Finasteride vs saw palmetto for hair loss: evidence and important differences",
+    description:
+      "Prescription 5-alpha-reductase effects versus supplement claims — androgen pathway context without double-featuring the DHT overview article.",
   },
   {
     href: "/guides/hair-loss-medications",
     category: "Treatment Guide",
     title: "Hair Loss Medications in 2026",
-    description: "Use this when your androgen question becomes a treatment-comparison question around finasteride-class therapy, minoxidil, and wider medication choices.",
+    description: "Broader treatment-options map when your question spans medicines, off-label paths, and realistic comparisons.",
   },
   {
     href: "/insights/what-blood-tests-matter-for-hair-loss",
     category: "Testing",
     title: "Blood tests and hair loss: what may actually help",
-    description: "Useful when you want a broader view of what labs may clarify and why not every androgen question is settled by hormone testing.",
+    description: "When labs add context for androgen-related questions — and when pattern matters more than a hormone panel.",
   },
 ];
 
@@ -126,9 +130,9 @@ const wrap = "mx-auto max-w-2xl";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides/androgen-index",
-  title: "DHT, testosterone, TRT, steroids and androgen sensitivity guide for hair loss",
+  title: "Testosterone, TRT & steroids: androgen sensitivity and hair loss risk",
   metaDescription:
-    "Educational guide to DHT, testosterone, androgen sensitivity, TRT, anabolic steroids, and hair-loss risk in men and women, including clinical pattern recognition, lab context, and next-step planning.",
+    "Hormones and hair: testosterone and DHT in context, follicular sensitivity, TRT and anabolic steroids, women’s androgen-related thinning, and what blood tests can and cannot prove.",
   appendBrand: true,
 });
 
@@ -445,6 +449,8 @@ export default function AndrogenIndexGuidePage() {
         intro="Once the broad hormone-and-hair picture is clear, move into the supporting read that best matches your actual next question."
         theme="card"
       />
+
+      <GuideInsightArticleGroups pillar="androgen-index" headingId="ag-insight-clusters" />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-label="Frequently asked questions">
         <Container>
