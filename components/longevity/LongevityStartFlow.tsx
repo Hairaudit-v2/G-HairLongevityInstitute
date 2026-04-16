@@ -1891,8 +1891,8 @@ export function LongevityStartFlow({
                 </div>
                 <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
                 <SingleSelect
-                  label="In the last 6 months, did you start, stop, or change any medication, hormone treatment, or related product that could be relevant to your hair?"
-                  helpText="Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, creatine monohydrate, or peptides / hormone-related products."
+                  label="In the last 6 months, did you start, stop, or change any medication, treatment, or related product that could be relevant to your hair?"
+                  helpText="Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, chemotherapy, targeted therapy, immunotherapy, creatine monohydrate, or peptides / hormone-related products."
                   value={
                     typeof adaptiveAnswerMap.medication_hormone_change_recent === "string"
                       ? adaptiveAnswerMap.medication_hormone_change_recent
