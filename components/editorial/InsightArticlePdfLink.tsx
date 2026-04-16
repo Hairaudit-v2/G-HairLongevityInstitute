@@ -4,7 +4,7 @@ const pdfLinkClass =
 
 export default function InsightArticlePdfLink({
   href,
-  label = "Download PDF",
+  label = "Download patient guide PDF",
   fileSize,
 }: {
   href: string;

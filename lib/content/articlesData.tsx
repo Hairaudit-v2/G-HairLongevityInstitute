@@ -1314,7 +1314,6 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       ),
     ],
     pdfHref: "/downloads/insights/receding-hairline-vs-mature-hairline.pdf",
-    pdfLabel: "Download patient guide PDF",
     pdfFileSize: "633 KB",
     Body: BodyRecedingHairlineVsMature,
   },
@@ -1395,7 +1394,6 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     secondaryPillar: "hair-loss-medications",
     glossarySlugs: ["dht"],
     pdfHref: "/downloads/insights/crown-thinning-why-it-can-be-harder-to-treat.pdf",
-    pdfLabel: "Download patient guide PDF",
     pdfFileSize: "835 KB",
     references: [
       cite(
@@ -1493,6 +1491,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         "https://pubmed.ncbi.nlm.nih.gov/20374680/"
       ),
     ],
+    pdfHref: "/downloads/insights/does-trt-cause-hair-loss-or-unmask-it.pdf",
+    pdfFileSize: "762 KB",
     Body: BodyTrtCauseOrUnmask,
   },
   {
@@ -1659,6 +1659,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         "https://www.aad.org/public/diseases/hair-loss/treatment/diagnosis-treat"
       ),
     ],
+    pdfHref: "/downloads/insights/oral-minoxidil-vs-topical-minoxidil.pdf",
+    pdfFileSize: "512 KB",
     Body: BodyOralVsTopicalMinoxidil,
   },
   {
@@ -1823,6 +1825,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC4387693/"
       ),
     ],
+    pdfHref: "/downloads/insights/postpartum-hair-loss-vs-female-pattern-thinning.pdf",
+    pdfFileSize: "778 KB",
     Body: BodyPostpartumVsFemalePattern,
   },
   {
@@ -1903,6 +1907,8 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         "https://pubmed.ncbi.nlm.nih.gov/28804714/"
       ),
     ],
+    pdfHref: "/downloads/insights/hair-shedding-vs-hair-breakage.pdf",
+    pdfFileSize: "765 KB",
     Body: BodySheddingVsBreakage,
   },
 ];
