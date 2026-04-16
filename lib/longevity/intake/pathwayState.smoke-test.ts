@@ -44,8 +44,11 @@ export function runPathwayStateSmokeTests(): PathwayStateSmokeResult[] {
         const timingQuestion = INTAKE_QUESTION_BANK.find(
           (question) => question.id === "exogenous_androgen_timing_vs_hair"
         );
-        assert(timingQuestion?.visibleWhen, "timing question should define a visibility rule");
-        const trtOnly = timingQuestion.visibleWhen?.({
+        if (typeof timingQuestion?.visibleWhen !== "function") {
+          throw new Error("timing question should define a visibility rule");
+        }
+        const visibleWhen = timingQuestion.visibleWhen;
+        const trtOnly = visibleWhen({
           male_androgen_exposure_context: "yes",
           male_androgen_exposure_detail: ["trt"],
         });
@@ -53,7 +56,7 @@ export function runPathwayStateSmokeTests(): PathwayStateSmokeResult[] {
           trtOnly !== true,
           "TRT-only selection should not show adaptive timing follow-up"
         );
-        const nonTrtExposure = timingQuestion.visibleWhen?.({
+        const nonTrtExposure = visibleWhen({
           male_androgen_exposure_context: "yes",
           male_androgen_exposure_detail: ["sarms_or_anabolics"],
         });
