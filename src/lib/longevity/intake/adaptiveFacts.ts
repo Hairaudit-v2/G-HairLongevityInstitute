@@ -29,12 +29,20 @@ function ageBandFromDob(dob?: string | null): string | undefined {
 export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
   const sexAtBirth = (answers.sex_at_birth as SexAtBirth | undefined) ?? "unknown";
   const patternDistribution = asStringArray(answers.pattern_distribution);
-  const scalpSymptoms = asStringArray(answers.scalp_symptoms);
+  const scalpSymptoms = asStringArray(answers.scalp_symptoms).filter((value) => value !== "none");
   const structuredHirsutismRegions = asStringArray(answers.hirsutism_structured_regions).filter(
     (value) => value !== "none"
   );
   const hirsutismSeverity =
     typeof answers.hirsutism_severity === "string" ? answers.hirsutism_severity : "";
+  const postpartumMonths =
+    typeof answers.months_since_delivery === "string" ? answers.months_since_delivery : "";
+  const adaptivePostpartumYes =
+    asBoolean(answers.postpartum_recent) ||
+    answers.postpartum_recent_gate === "yes" ||
+    ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(postpartumMonths);
+  const adaptivePostpartumExplicitNo =
+    answers.postpartum_recent === false || answers.postpartum_recent_gate === "no";
 
   const hasDiffuseLoss =
     patternDistribution.includes("diffuse_top") ||
@@ -49,7 +57,11 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
   const hasEdgesPattern = patternDistribution.includes("edges");
 
   const medicationChangeSignal =
-    asBoolean(answers.medication_change_recently) || answers.medication_hormone_change_recent === "yes";
+    asBoolean(answers.medication_change_recently) ||
+    answers.medication_hormone_change_recent === "yes" ||
+    answers.med_change_timing_vs_hair === "before_hair_change" ||
+    answers.med_change_timing_vs_hair === "around_same_time" ||
+    answers.med_change_timing_vs_hair === "after_hair_change";
 
   const recentTriggerBurden = [
     asBoolean(answers.recent_illness),
@@ -58,7 +70,7 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
     asBoolean(answers.rapid_weight_loss),
     medicationChangeSignal,
     asBoolean(answers.covid_or_high_fever),
-    asBoolean(answers.postpartum_recent),
+    adaptivePostpartumYes,
     answers.hormonal_contraception_change_gate === "yes",
   ].filter(Boolean).length;
 
@@ -66,12 +78,32 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
     answers.chief_concern === "shedding" || asBoolean(answers.active_shedding_now);
 
   const possiblePostpartumContext =
-    asBoolean(answers.postpartum_recent) ||
-    answers.reproductive_stage === "postpartum" ||
-    answers.postpartum_recent_gate === "yes" ||
-    ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(
-      typeof answers.months_since_delivery === "string" ? answers.months_since_delivery : ""
-    );
+    adaptivePostpartumYes ||
+    (!adaptivePostpartumExplicitNo && answers.reproductive_stage === "postpartum");
+
+  const possibleHyperandrogenFeatures =
+    asBoolean(answers.unwanted_facial_hair) ||
+    asBoolean(answers.increased_body_hair) ||
+    asBoolean(answers.jawline_acne_or_oily_skin) ||
+    asBoolean(answers.known_pcos);
+
+  const possibleCycleIrregularity =
+    answers.cycle_regularity === "irregular" ||
+    answers.cycle_regularity === "missed_periods";
+
+  const possibleMenopausalTransition =
+    answers.reproductive_stage === "perimenopausal" ||
+    answers.reproductive_stage === "menopausal";
+
+  const femaleHormonalGateOpen =
+    sexAtBirth === "female" &&
+    (answers.female_hormonal_context === "yes" ||
+      possibleCycleIrregularity ||
+      possiblePostpartumContext ||
+      possibleMenopausalTransition ||
+      possibleHyperandrogenFeatures ||
+      answers.hormonal_contraception_change_gate === "yes" ||
+      answers.pituitary_red_flag_followup === "yes");
 
   const mechanicalExposureCluster =
     asBoolean(answers.tight_hairstyles_or_extensions) ||
@@ -124,19 +156,11 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
       asBoolean(answers.breakage_over_shedding) || hasEdgesPattern,
 
     possible_hyperandrogen_features:
-      asBoolean(answers.unwanted_facial_hair) ||
-      asBoolean(answers.increased_body_hair) ||
-      asBoolean(answers.jawline_acne_or_oily_skin) ||
-      asBoolean(answers.known_pcos),
+      possibleHyperandrogenFeatures,
 
     possible_hirsutism_screen_trigger:
       sexAtBirth === "female" &&
-      (asBoolean(answers.unwanted_facial_hair) ||
-        asBoolean(answers.increased_body_hair) ||
-        asBoolean(answers.jawline_acne_or_oily_skin) ||
-        asBoolean(answers.known_pcos) ||
-        answers.cycle_regularity === "irregular" ||
-        answers.cycle_regularity === "missed_periods"),
+      (possibleHyperandrogenFeatures || possibleCycleIrregularity),
 
     possible_hirsutism_structured_followup:
       hirsutismSeverity === "moderate" || hirsutismSeverity === "marked",
@@ -172,28 +196,26 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
     possible_postpartum_context: possiblePostpartumContext,
 
     possible_cycle_irregularity:
-      answers.cycle_regularity === "irregular" ||
-      answers.cycle_regularity === "missed_periods",
+      possibleCycleIrregularity,
 
     possible_heavy_menses:
       asBoolean(answers.heavy_periods),
 
     possible_menopausal_transition:
-      answers.reproductive_stage === "perimenopausal" ||
-      answers.reproductive_stage === "menopausal",
+      possibleMenopausalTransition,
 
     possible_neutral_hormonal_context:
       asBoolean(answers.neutral_hormonal_context),
 
     possible_female_endocrine_context:
       sexAtBirth === "female" &&
-      (answers.cycle_regularity === "irregular" ||
-        answers.cycle_regularity === "missed_periods" ||
+      (possibleCycleIrregularity ||
         possiblePostpartumContext ||
-        answers.reproductive_stage === "perimenopausal" ||
-        answers.reproductive_stage === "menopausal" ||
+        possibleMenopausalTransition ||
         answers.hormonal_contraception_change_gate === "yes" ||
         answers.hormonal_change_vs_hair_timing === "around_same_time"),
+
+    female_hormonal_gate_open: femaleHormonalGateOpen,
 
     possible_stress_trigger_delay_overlap:
       answers.stress_shedding_delay_pattern === "yes" &&

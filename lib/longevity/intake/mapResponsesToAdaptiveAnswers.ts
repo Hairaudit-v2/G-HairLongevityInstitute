@@ -59,6 +59,10 @@ function asStringArray(value: unknown): string[] {
   return value.filter((x): x is string => typeof x === "string");
 }
 
+function hasMeaningfulArrayValues(value: unknown): boolean {
+  return Array.isArray(value) && value.length > 0;
+}
+
 function mapSexAtBirth(about?: AboutYou): V2SexAtBirth {
   const s = about?.sexAtBirth;
   if (s === "female" || s === "male" || s === "intersex" || s === "prefer_not_to_say") {
@@ -229,6 +233,10 @@ function mapScalpClusterFromEngine(cluster: string[] | undefined): string[] {
   return dedupeStrings(out);
 }
 
+function hasScalpClusterSelection(cluster: string[] | undefined): boolean {
+  return cluster?.some((value) => value && value !== "none") ?? false;
+}
+
 function hasFamilialPatternHairLoss(fh: string[] | undefined): boolean {
   return has(fh, "male_pattern_hair_loss", "female_pattern_thinning");
 }
@@ -286,7 +294,8 @@ function mapFemaleSex(
   fh: FemaleHistory | undefined,
   ai: AdaptiveIntake | undefined,
   mh: MedicalHistory | undefined,
-  tt: TimelineTriggers | undefined
+  tt: TimelineTriggers | undefined,
+  rawEngine: EngineAnswers
 ) {
   const cycles = fh?.cycles;
   let cycle_regularity: "regular" | "irregular" | "missed_periods" | "not_applicable" | "prefer_not_to_say" | undefined;
@@ -296,12 +305,22 @@ function mapFemaleSex(
   else if (cycles === "prefer_not_to_say") cycle_regularity = "prefer_not_to_say";
 
   const fc = ai?.femaleContext;
-  if (fc?.cycleRegularity === "regular") cycle_regularity = "regular";
-  if (fc?.cycleRegularity === "irregular") cycle_regularity = "irregular";
-  if (fc?.cycleRegularity === "not_occurring") cycle_regularity = "missed_periods";
-  if (fc?.cycleRegularity === "prefer_not_to_say") cycle_regularity = "prefer_not_to_say";
+  if (!cycle_regularity) {
+    if (fc?.cycleRegularity === "regular") cycle_regularity = "regular";
+    if (fc?.cycleRegularity === "irregular") cycle_regularity = "irregular";
+    if (fc?.cycleRegularity === "not_occurring") cycle_regularity = "missed_periods";
+    if (fc?.cycleRegularity === "prefer_not_to_say") cycle_regularity = "prefer_not_to_say";
+  }
 
   const life = fh?.lifeStage ?? [];
+  const postpartumMonths =
+    typeof rawEngine.months_since_delivery === "string" ? rawEngine.months_since_delivery : "";
+  const adaptivePostpartumRecent =
+    rawEngine.postpartum_recent_gate === "yes" ||
+    ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(postpartumMonths) ||
+    fc?.postpartumRecent === "yes";
+  const adaptivePostpartumExplicitNo =
+    rawEngine.postpartum_recent_gate === "no" || fc?.postpartumRecent === "no";
   let reproductive_stage:
     | "premenopausal"
     | "perimenopausal"
@@ -309,17 +328,23 @@ function mapFemaleSex(
     | "postpartum"
     | "not_applicable"
     | undefined;
-  if (life.includes("postpartum")) reproductive_stage = "postpartum";
-  else if (life.includes("perimenopausal")) reproductive_stage = "perimenopausal";
-  else if (life.includes("menopausal")) reproductive_stage = "menopausal";
-  else if (life.includes("pregnant") || life.includes("hormonal_contraception") || life.includes("hrt")) {
+  if (adaptivePostpartumRecent || (!adaptivePostpartumExplicitNo && life.includes("postpartum"))) {
+    reproductive_stage = "postpartum";
+  } else if (life.includes("perimenopausal")) {
+    reproductive_stage = "perimenopausal";
+  } else if (life.includes("menopausal")) {
+    reproductive_stage = "menopausal";
+  } else if (life.includes("pregnant") || life.includes("hormonal_contraception") || life.includes("hrt")) {
     reproductive_stage = "premenopausal";
+  } else if (fc?.menopauseContext === "perimenopause") {
+    reproductive_stage = "perimenopausal";
+  } else if (fc?.menopauseContext === "menopause") {
+    reproductive_stage = "menopausal";
   }
 
   const postpartum_recent =
-    fc?.postpartumRecent === "yes" ||
-    life.includes("postpartum") ||
-    postpartumFromTimeline(tt);
+    adaptivePostpartumRecent ||
+    (!adaptivePostpartumExplicitNo && (life.includes("postpartum") || postpartumFromTimeline(tt)));
 
   return {
     cycle_regularity,
@@ -345,20 +370,23 @@ function mapLifestyleNutritionSleep(
   rawEngine: EngineAnswers
 ) {
   const diet = lt?.dietPattern ?? [];
+  const hasStructuredDiet = hasMeaningfulArrayValues(diet);
+  const hasStructuredProteinAnswer = lt?.enoughProtein != null;
   const lifeLoad = asStringArray(rawEngine.lifestyle_load);
   const dietIntake = asStringArray(rawEngine.diet_pattern_intake);
   const proteinLevel = typeof rawEngine.protein_intake_level === "string" ? rawEngine.protein_intake_level : "";
   const lowProteinFromEngine = proteinLevel === "low" || proteinLevel === "below_average";
   return {
     vegetarian_or_vegan:
-      has(diet, "vegetarian", "vegan") || dietIntake.includes("vegetarian") || dietIntake.includes("vegan"),
+      has(diet, "vegetarian", "vegan") ||
+      (!hasStructuredDiet && (dietIntake.includes("vegetarian") || dietIntake.includes("vegan"))),
     restrictive_dieting:
       has(diet, "restrictive_dieting") ||
       ai?.restrictiveEating === "yes" ||
       has(lifeLoad, "restrictive_eating") ||
-      dietIntake.includes("low_calorie_restriction") ||
-      dietIntake.includes("omad_or_extended_fasting"),
-    low_protein_intake: lt?.enoughProtein === "no" || lowProteinFromEngine,
+      (!hasStructuredDiet &&
+        (dietIntake.includes("low_calorie_restriction") || dietIntake.includes("omad_or_extended_fasting"))),
+    low_protein_intake: lt?.enoughProtein === "no" || (!hasStructuredProteinAnswer && lowProteinFromEngine),
     low_iron_history: has(mh?.diagnoses, "iron_deficiency", "low_ferritin", "anaemia"),
     low_b12_history: false,
     low_vitamin_d_history: has(mh?.diagnoses, "vitamin_d_deficiency"),
@@ -380,6 +408,7 @@ function mapMaleAndrogen(
 ) {
   const trtActive = tt?.trtStatus != null && tt.trtStatus !== "no";
   const therapies = mhMale?.therapies ?? [];
+  const hasStructuredMaleTherapyOwner = trtActive || therapies.length > 0;
   const signals = ai?.androgenExposureSignals ?? [];
   const exposureDetail = asStringArray(rawEngine.male_androgen_exposure_detail);
   const fromAdaptive = {
@@ -389,16 +418,21 @@ function mapMaleAndrogen(
     peptides: exposureDetail.includes("peptides_or_growth"),
   };
   return {
-    current_or_past_trt: trtActive || fromAdaptive.trt,
+    current_or_past_trt:
+      trtActive ||
+      has(therapies, "testosterone_replacement_therapy") ||
+      (!hasStructuredMaleTherapyOwner && (fromAdaptive.trt || signals.includes("trt"))),
     testosterone_boosters:
       fromAdaptive.boosters ||
-      signals.includes("trt") ||
-      signals.includes("new_hormonal_medication") ||
-      has(therapies, "testosterone_replacement_therapy"),
+      (!hasStructuredMaleTherapyOwner && (signals.includes("trt") || signals.includes("new_hormonal_medication"))),
     sarms_or_anabolics:
-      fromAdaptive.sarms || signals.includes("anabolic_agents") || has(therapies, "anabolic_steroids_or_sarms"),
+      has(therapies, "anabolic_steroids_or_sarms") ||
+      fromAdaptive.sarms ||
+      (!hasStructuredMaleTherapyOwner && signals.includes("anabolic_agents")),
     peptides_or_growth_agents:
-      fromAdaptive.peptides || signals.includes("peptide_or_growth_related") || false,
+      fromAdaptive.peptides ||
+      (!hasStructuredMaleTherapyOwner && signals.includes("peptide_or_growth_related")) ||
+      false,
   };
 }
 
@@ -443,16 +477,8 @@ function applyLegacyEngineAnswers(base: AdaptiveAnswers, raw: EngineAnswers): Ad
   if (has(life, "restrictive_eating")) next.restrictive_dieting = mergeBool(next.restrictive_dieting, true);
   if (has(life, "high_intensity_sport")) next.overtraining = mergeBool(next.overtraining, true);
 
-  if (raw.female_hormonal_context === "yes" && next.sex_at_birth === "female") {
-    if (next.cycle_regularity === undefined) next.cycle_regularity = "irregular";
-  }
-
-  if (raw.male_androgen_exposure_context === "yes" && next.sex_at_birth === "male") {
-    if (!next.current_or_past_trt && !next.sarms_or_anabolics && !next.testosterone_boosters) {
-      next.testosterone_boosters = true;
-    }
-  }
-
+  const postpartumExplicitNo =
+    raw.postpartum_recent_gate === "no" && !hasRecognizedPostpartumMonths(raw.months_since_delivery);
   for (const key of Object.keys(raw)) {
     if (
       [
@@ -460,7 +486,6 @@ function applyLegacyEngineAnswers(base: AdaptiveAnswers, raw: EngineAnswers): Ad
         "scalp_symptom_cluster",
         "mechanical_exposures",
         "lifestyle_load",
-        "female_hormonal_context",
         "male_androgen_exposure_context",
         "acute_trigger_window",
       ].includes(key)
@@ -468,6 +493,9 @@ function applyLegacyEngineAnswers(base: AdaptiveAnswers, raw: EngineAnswers): Ad
       continue;
     }
     const v = raw[key];
+    if (postpartumExplicitNo && key === "postpartum_recent" && v === true) continue;
+    if (postpartumExplicitNo && key === "reproductive_stage" && v === "postpartum") continue;
+    if (BACKFILL_ONLY_V2_KEYS.has(key) && hasStoredValue(next[key])) continue;
     if (v !== undefined && v !== null && v !== "") {
       (next as Record<string, unknown>)[key] = v;
     }
@@ -476,11 +504,57 @@ function applyLegacyEngineAnswers(base: AdaptiveAnswers, raw: EngineAnswers): Ad
   return next;
 }
 
+const BACKFILL_ONLY_V2_KEYS = new Set([
+  "medication_change_recently",
+  "medication_hormone_change_recent",
+  "current_or_past_trt",
+  "testosterone_boosters",
+  "sarms_or_anabolics",
+  "peptides_or_growth_agents",
+  "cycle_regularity",
+  "heavy_periods",
+  "reproductive_stage",
+  "unwanted_facial_hair",
+  "increased_body_hair",
+  "jawline_acne_or_oily_skin",
+  "known_pcos",
+  "vegetarian_or_vegan",
+  "restrictive_dieting",
+  "low_protein_intake",
+  "low_iron_history",
+  "low_b12_history",
+  "low_vitamin_d_history",
+  "poor_sleep_quality",
+  "shift_work",
+  "high_stress_load",
+  "overtraining",
+]);
+
+function hasStoredValue(value: unknown): boolean {
+  if (value === undefined || value === null || value === "") return false;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+}
+
+function hasRecognizedPostpartumMonths(value: unknown): boolean {
+  return (
+    typeof value === "string" &&
+    ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(value)
+  );
+}
+
 function mergeV2Overlay(base: AdaptiveAnswers, overlay: AdaptiveAnswers): AdaptiveAnswers {
   const out: AdaptiveAnswers = { ...base };
+  const postpartumExplicitNo =
+    (base.postpartum_recent_gate === "no" || overlay.postpartum_recent_gate === "no") &&
+    !hasRecognizedPostpartumMonths(base.months_since_delivery) &&
+    !hasRecognizedPostpartumMonths(overlay.months_since_delivery);
   for (const [k, v] of Object.entries(overlay)) {
     if (v === undefined || v === null || v === "") continue;
     if (Array.isArray(v) && v.length === 0) continue;
+    if (postpartumExplicitNo && k === "postpartum_recent" && v === true) continue;
+    if (postpartumExplicitNo && k === "reproductive_stage" && v === "postpartum") continue;
+    if (BACKFILL_ONLY_V2_KEYS.has(k) && hasStoredValue(out[k])) continue;
     (out as Record<string, unknown>)[k] = v;
   }
   return out;
@@ -517,24 +591,16 @@ export function mapResponsesToAdaptiveAnswers(
   const onset_timing = mapOnsetTiming(mc, ai);
   const progression_speed = mapProgressionSpeed(mc, ai, tt);
 
-  const scalp_symptoms = dedupeStrings([
-    ...mapScalpSymptomsFromMain(mc?.symptoms),
-    ...mapScalpClusterFromEngine(asStringArray(rawEngine.scalp_symptom_cluster)),
-  ]);
+  const rawScalpCluster = asStringArray(rawEngine.scalp_symptom_cluster);
+  const scalp_symptoms = hasScalpClusterSelection(rawScalpCluster)
+    ? mapScalpClusterFromEngine(rawScalpCluster)
+    : dedupeStrings([
+        ...mapScalpSymptomsFromMain(mc?.symptoms),
+        ...mapScalpClusterFromEngine(rawScalpCluster),
+      ]);
 
   const ttm = mapTimelineBooleans(tt, ai);
-  const female = mapFemaleSex(fh, ai, mh, tt);
-  if (postpartumFromTimeline(tt)) {
-    female.postpartum_recent = true;
-  }
-  if (rawEngine.postpartum_recent_gate === "yes") {
-    female.postpartum_recent = true;
-  }
-  const msd = typeof rawEngine.months_since_delivery === "string" ? rawEngine.months_since_delivery : "";
-  if (["under_3_months", "3_to_6_months", "6_to_12_months"].includes(msd)) {
-    female.postpartum_recent = true;
-  }
-
+  const female = mapFemaleSex(fh, ai, mh, tt, rawEngine);
   const lifestyle = mapLifestyleNutritionSleep(lt, ai, mh, rawEngine);
   const maleA = mapMaleAndrogen(tt, mhMale, ai, rawEngine);
 
@@ -579,6 +645,9 @@ export function mapResponsesToAdaptiveAnswers(
       : {}),
     ...(ttm.medication_change_recently || rawEngine.medication_hormone_change_recent === "yes"
       ? { medication_change_recently: true }
+      : {}),
+    ...(ttm.medication_change_recently || rawEngine.medication_hormone_change_recent === "yes"
+      ? { medication_hormone_change_recent: "yes" }
       : {}),
     ...(familyHistoryV2 ? { family_history: familyHistoryV2 } : {}),
     ...(familialHair && mh?.familyHairPatternMatch && mh.familyHairPatternMatch !== "prefer_not_to_say"

@@ -118,6 +118,31 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "structured hirsutism regions preserved"
       );
     }),
+    run("structured female endocrine owners beat stale direct v2 overlap fields", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "female" },
+        femaleHistory: {
+          cycles: "regular",
+          features: ["acne"],
+          lifeStage: ["perimenopausal"],
+        },
+        medicalHistory: {
+          diagnoses: [],
+        },
+        adaptiveEngine: {
+          answers: {
+            cycle_regularity: "irregular",
+            unwanted_facial_hair: true,
+            reproductive_stage: "postpartum",
+          },
+        },
+      });
+      assert(payload.adaptive_answers.cycle_regularity === "regular", "static cycles stay authoritative");
+      assert(
+        payload.adaptive_answers.reproductive_stage === "perimenopausal",
+        "static reproductive stage stays authoritative"
+      );
+    }),
     run("adaptive engine male androgen detail maps to exposure flags", () => {
       const payload = buildLongevityAdaptivePayload({
         aboutYou: { sexAtBirth: "male" },
@@ -137,6 +162,17 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "androgen timing vs hair preserved"
       );
     }),
+    run("static TRT owners do not backfill booster flags", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "male" },
+        timelineTriggers: { trtStatus: "yes_prescribed" },
+        maleHistory: {
+          therapies: ["testosterone_replacement_therapy"],
+        },
+      });
+      assert(payload.adaptive_answers.current_or_past_trt === true, "TRT owner maps to current_or_past_trt");
+      assert(payload.adaptive_answers.testosterone_boosters !== true, "TRT alone does not imply boosters");
+    }),
     run("adaptive medication chronology sets medication_change_recently", () => {
       const payload = buildLongevityAdaptivePayload({
         aboutYou: { sexAtBirth: "female" },
@@ -154,6 +190,18 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "med vs hair timing preserved"
       );
     }),
+    run("timeline medication trigger backfills compatibility key", () => {
+      const payload = buildLongevityAdaptivePayload({
+        timelineTriggers: {
+          triggers: ["new_medication"],
+        },
+      });
+      assert(payload.adaptive_answers.medication_change_recently === true, "timeline trigger maps to boolean");
+      assert(
+        payload.adaptive_answers.medication_hormone_change_recent === "yes",
+        "timeline owner backfills compatibility key"
+      );
+    }),
     run("protein and diet_pattern_intake adjust nutritional flags", () => {
       const payload = buildLongevityAdaptivePayload({
         adaptiveEngine: {
@@ -167,6 +215,22 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
       });
       assert(payload.adaptive_answers.low_protein_intake === true, "low protein level maps");
       assert(payload.adaptive_answers.vegetarian_or_vegan === true, "vegan diet pattern maps");
+    }),
+    run("static lifestyle capture beats stale adaptive diet detail", () => {
+      const payload = buildLongevityAdaptivePayload({
+        lifestyleTreatments: {
+          dietPattern: ["omnivore"],
+          enoughProtein: "yes",
+        },
+        adaptiveEngine: {
+          answers: {
+            protein_intake_level: "low",
+            diet_pattern_intake: ["vegan"],
+          },
+        },
+      });
+      assert(payload.adaptive_answers.low_protein_intake !== true, "static protein answer wins");
+      assert(payload.adaptive_answers.vegetarian_or_vegan !== true, "static diet owner wins");
     }),
     run("scalp symptom detail fields pass through to adaptive_answers", () => {
       const payload = buildLongevityAdaptivePayload({
@@ -190,6 +254,24 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
           (payload.adaptive_answers.scalp_symptom_treatments_tried as string[]).includes("medicated_shampoo"),
         "treatments preserved"
       );
+    }),
+    run("adaptive postpartum branch can suppress stale legacy postpartum stage", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "female" },
+        femaleHistory: {
+          lifeStage: ["postpartum"],
+        },
+        adaptiveEngine: {
+          answers: {
+            female_hormonal_context: "yes",
+            postpartum_recent_gate: "no",
+            postpartum_recent: true,
+            reproductive_stage: "postpartum",
+          },
+        },
+      });
+      assert(payload.adaptive_answers.postpartum_recent !== true, "adaptive postpartum gate stays authoritative");
+      assert(payload.adaptive_answers.reproductive_stage !== "postpartum", "legacy postpartum stage is suppressed");
     }),
     run("structured family history maps side and similarity", () => {
       const payload = buildLongevityAdaptivePayload({

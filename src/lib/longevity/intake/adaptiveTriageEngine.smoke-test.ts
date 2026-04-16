@@ -242,6 +242,69 @@ export function runAdaptiveTriageSmokeTests(): SmokeTestResult[] {
         assert(result.triage.primary_pathway === "androgenic_pattern", "Expected androgenic primary");
       }
     ),
+    runCase(
+      "v2 visible questions keep retained female adaptive branch and drop duplicate owners",
+      {
+        sex_at_birth: "female",
+        chief_concern: "shedding",
+        active_shedding_now: true,
+        pattern_distribution: ["center_part", "diffuse_top"],
+        female_hormonal_context: "yes",
+        cycle_regularity: "irregular",
+        unwanted_facial_hair: true,
+      },
+      (result) => {
+        assert(
+          result.visibleQuestionIds.includes("female_hormonal_context"),
+          "Expected broad female hormonal gate"
+        );
+        assert(
+          result.visibleQuestionIds.includes("postpartum_recent_gate"),
+          "Expected retained postpartum gate"
+        );
+        assert(
+          result.visibleQuestionIds.includes("pituitary_red_flag_followup"),
+          "Expected retained pituitary safety follow-up"
+        );
+        assert(
+          result.visibleQuestionIds.includes("hirsutism_severity"),
+          "Expected retained hirsutism follow-up"
+        );
+        assert(
+          !result.visibleQuestionIds.includes("cycle_regularity"),
+          "Did not expect removed duplicate cycle question"
+        );
+        assert(
+          !result.visibleQuestionIds.includes("postpartum_recent"),
+          "Did not expect removed duplicate postpartum boolean"
+        );
+      }
+    ),
+    runCase(
+      "v2 visible questions no longer surface duplicate TRT or diet detail questions",
+      {
+        sex_at_birth: "male",
+        chief_concern: "receding_hairline",
+        pattern_distribution: ["temples", "crown"],
+        current_or_past_trt: true,
+        vegetarian_or_vegan: true,
+        restrictive_dieting: true,
+      },
+      (result) => {
+        assert(
+          !result.visibleQuestionIds.includes("current_or_past_trt"),
+          "Did not expect duplicate TRT question"
+        );
+        assert(
+          !result.visibleQuestionIds.includes("testosterone_boosters"),
+          "Did not expect duplicate booster question"
+        );
+        assert(
+          !result.visibleQuestionIds.includes("vegetarian_or_vegan"),
+          "Did not expect duplicate diet detail question"
+        );
+      }
+    ),
   ];
 }
 

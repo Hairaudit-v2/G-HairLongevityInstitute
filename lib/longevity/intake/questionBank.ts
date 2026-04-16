@@ -545,12 +545,13 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
   },
   {
     id: "medication_hormone_change_recent",
-    label: "In the last 6 months, did you start, stop, or change any prescription medicine or hormone treatment?",
+    label: "In the last 6 months, did you start, stop, or change any medication, hormone treatment, or related product that could be relevant to your hair?",
     type: "single_select",
     section: "trigger",
-    helpText: "We ask here for timing vs your hair — the timeline step stays for life events.",
+    helpText:
+      "Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, or peptides / hormone-related products.",
     explanation:
-      "If you already noted a medication change under timeline triggers, answer the same way here so your record lines up. This field is only for medicine or hormone treatments, not supplements unless prescribed.",
+      "We ask this here to compare the timing with your hair change. If you already noted a medication change under timeline triggers, answer the same way here so your record lines up.",
     options: [
       { value: "yes", label: "Yes" },
       { value: "no", label: "No" },
