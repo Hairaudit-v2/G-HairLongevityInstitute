@@ -1,18 +1,26 @@
 import type { EditorialArticle, EditorialFaqItem, EditorialPerson, EditorialReference } from "@/lib/content/types";
 import {
+  BodyCrownThinningHarderToTreat,
   BodyDiffuseThinningWomen,
   BodyDhtAndAga,
+  BodyDutasterideHairLossConversation,
   BodyFerritinAndHairLoss,
   BodyFinasterideVsSawPalmetto,
   BodyHliVsHairaudit,
   BodyMinoxidilMechanism,
+  BodyNormalTestosteroneAndrogenSensitive,
   BodyOralAntiandrogensWomen,
+  BodyOralVsTopicalMinoxidil,
   BodyPostpartumShedding,
+  BodyPostpartumVsFemalePattern,
   BodyPostTransplantShockLoss,
   BodyPrpVsExosomes,
+  BodyRecedingHairlineVsMature,
   BodyScalpInflammationShedding,
+  BodySheddingVsBreakage,
   BodyTelogenAfterIllnessStress,
   BodyThyroidHairLoss,
+  BodyTrtCauseOrUnmask,
   BodyVitaminMicronutrientsHair,
   BodyWhatBloodTestsMatter,
 } from "@/lib/content/seed/bodies";
@@ -1220,5 +1228,651 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       ),
     ],
     Body: BodyOralAntiandrogensWomen,
+  },
+  {
+    slug: "receding-hairline-vs-mature-hairline",
+    title: "Receding Hairline vs Mature Hairline: What Is the Difference?",
+    deck:
+      "Not every hairline change means male-pattern loss — here is how maturation, early recession, and clinical clues differ, without turning this into a full DHT textbook.",
+    description:
+      "A calm, clinical walkthrough: what a mature hairline usually looks like, how early androgenetic recession differs, what clinicians assess (including trichoscopy), when early action makes sense — and why acting early means clarifying the pattern first, not rushing into treatment.",
+    excerpt:
+      "Temples shifting? Learn maturation versus recession, what photos and exams add, and when a visit is sensible.",
+    hub: "hair-loss-causes",
+    audience: "patients",
+    contentType: "explainer",
+    ctaType: "compare-treatments",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia"],
+      markers: [],
+      symptoms: ["temple-recession", "miniaturisation"],
+      treatments: ["clinical-assessment", "topical-therapy"],
+      tags: ["hairline", "pattern-hair-loss", "expectations"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "why-this-question-comes-up-so-often", label: "Why this question comes up so often" },
+      { id: "what-a-mature-hairline-usually-looks-like", label: "What a mature hairline usually looks like" },
+      { id: "what-early-recession-usually-looks-like", label: "What early recession usually looks like" },
+      {
+        id: "what-clinicians-look-for-and-key-differences",
+        label: "What clinicians look for — and key differences at a glance",
+      },
+      { id: "when-it-is-worth-acting-early", label: "When it is worth acting early" },
+      { id: "the-role-of-dht-and-genetics", label: "The role of DHT and genetics" },
+      { id: "summary-and-next-steps", label: "Summary and next steps" },
+    ],
+    faq: faqBlock([
+      {
+        question: "What age does a mature hairline usually appear?",
+        answer:
+          "Maturation often begins in the late teens and completes by the mid-twenties — commonly between about seventeen and twenty-five. If meaningful movement continues beyond that window, early androgenetic alopecia is more likely than ongoing ‘normal’ maturation.",
+      },
+      {
+        question: "Can a mature hairline still look slightly thinner?",
+        answer:
+          "Yes — and that can confuse assessment. The frontal edge can look a little less dense than hair further back in some lighting because of geometry. A mature hairline still keeps full-calibre hairs; if hairs look definitively wispy, shortened, or lighter than expected, that deserves closer review.",
+      },
+      {
+        question: "How do I know if recession is still progressing?",
+        answer:
+          "The most practical approach is longitudinal photos: same angle, distance, and lighting every three to six months. Meaningful change after six to twelve months is a stronger signal than any single check-in. A clinician can also compare trichoscopy over time.",
+      },
+      {
+        question: "Does a mature hairline always stay stable?",
+        answer:
+          "Not always. You can have normal maturation in your late teens or twenties and still develop androgenetic alopecia years later from that mature baseline — the two are not mutually exclusive.",
+      },
+    ]),
+    relatedSlugs: [
+      "dht-and-androgenetic-alopecia",
+      "telogen-effluvium-after-illness-or-stress",
+      "minoxidil-mechanism-and-realistic-timelines",
+      "finasteride-vs-saw-palmetto",
+    ],
+    primaryPillar: "male-pattern-hair-loss",
+    secondaryPillar: "androgen-index",
+    glossarySlugs: ["dht"],
+    references: [
+      cite(
+        "American Academy of Dermatology. Androgenetic alopecia (pattern hair loss) — patient summary.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/androgenetic-alopecia"
+      ),
+      cite(
+        "Norwood OT. Male pattern baldness: classification and incidence. South Med J. 1975 — historical staging context (clinical teaching).",
+        "https://pubmed.ncbi.nlm.nih.gov/1247724/"
+      ),
+      cite(
+        "Ramos PM, Miot HA. Female Pattern Hair Loss: a clinical and pathophysiological review. An Bras Dermatol. 2015 — pattern recognition principles.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC4560543/"
+      ),
+    ],
+    Body: BodyRecedingHairlineVsMature,
+  },
+  {
+    slug: "crown-thinning-why-it-can-be-harder-to-treat",
+    title: "Crown Thinning: Why It Can Be Harder to Treat",
+    deck:
+      "Vertex thinning is easy to miss, slower to judge in photos, and often slower to show cosmetic change — here is why stabilisation still counts as a win while you wait for visible density.",
+    description:
+      "Why crown thinning is noticed late, why improvement can take longer than at the hairline, what usually helps first (including stabilisation as a meaningful outcome), a trimmed DHT/crown biology bridge, and a month-by-month expectations framework — plus when to seek review.",
+    excerpt:
+      "Crown thinning: late detection, stubborn appearance, realistic timelines — and why stopping further loss matters.",
+    hub: "hair-loss-causes",
+    audience: "patients",
+    contentType: "explainer",
+    ctaType: "compare-treatments",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia"],
+      markers: [],
+      symptoms: ["crown-thinning", "miniaturisation"],
+      treatments: ["topical-therapy", "antiandrogen-therapy"],
+      tags: ["crown", "adherence", "pattern-hair-loss"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "why-crown-thinning-is-often-noticed-late", label: "Why crown thinning is often noticed late" },
+      { id: "why-crown-thinning-can-feel-harder-to-improve", label: "Why crown thinning can feel harder to improve" },
+      { id: "what-usually-helps-most", label: "What usually helps most" },
+      {
+        id: "when-crown-thinning-suggests-broader-pattern-loss",
+        label: "When crown thinning suggests broader pattern loss",
+      },
+      { id: "when-to-seek-professional-review", label: "When to seek professional review" },
+      {
+        id: "understanding-the-biology-dht-miniaturisation-and-the-crown",
+        label: "Understanding the biology: DHT, miniaturisation, and the crown",
+      },
+      {
+        id: "setting-realistic-expectations-framework-for-progress",
+        label: "Setting realistic expectations: a framework for progress",
+      },
+      { id: "next-steps-and-further-reading", label: "Next steps and further reading" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Is crown thinning always male-pattern hair loss?",
+        answer:
+          "Usually androgenetic alopecia is the cause, but not always. Other possibilities include alopecia areata, diffuse telogen effluvium, nutritional or illness-related shedding, and less commonly scarring alopecias. Sudden, patchy, or symptomatic scalp changes deserve professional assessment.",
+      },
+      {
+        question: "Why does the crown look worse in bright light?",
+        answer:
+          "Overhead and direct light cast shadows onto the scalp and can exaggerate see-through appearance. Side-lit or diffuse light often looks kinder. That is mostly optics — consistent photo conditions matter for tracking progress.",
+      },
+      {
+        question: "Does crown thinning respond more slowly than a hairline?",
+        answer:
+          "Often yes: the crown may be treated at a more advanced stage, the whorl makes small gains hard to see, and cycles are slow — twelve to eighteen months is a common window before visible change for many responders.",
+      },
+      {
+        question: "Is surgery the first answer for crown loss?",
+        answer:
+          "Rarely as a first step. The crown can be technically demanding to restore; without medical stabilisation, native loss around grafts can age poorly. Many clinicians recommend establishing stability — often on the order of twelve months of medical management — before planning surgery.",
+      },
+    ]),
+    relatedSlugs: [
+      "dht-and-androgenetic-alopecia",
+      "minoxidil-mechanism-and-realistic-timelines",
+      "finasteride-vs-saw-palmetto",
+      "scalp-inflammation-and-shedding",
+    ],
+    primaryPillar: "male-pattern-hair-loss",
+    secondaryPillar: "hair-loss-medications",
+    glossarySlugs: ["dht"],
+    references: [
+      cite(
+        "American Academy of Dermatology. Hair loss: diagnosis and treatment (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss/treatment/diagnosis-treat"
+      ),
+      cite(
+        "Suchonwanit P, Thammarucha S, Leerunyakul K. Minoxidil and its use in hair disorders: a review. Drug Des Devel Ther. 2019.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6691938/"
+      ),
+      cite(
+        "Lee WS et al. International consensus on the treatment of female pattern hair loss. J Am Acad Dermatol. 2018.",
+        "https://doi.org/10.1016/j.jaad.2017.10.007"
+      ),
+    ],
+    Body: BodyCrownThinningHarderToTreat,
+  },
+  {
+    slug: "does-trt-cause-hair-loss-or-unmask-it",
+    title: "Does TRT cause hair loss — or mainly unmask pattern thinning?",
+    deck:
+      "Testosterone therapy shifts exposure; thinning may show up on a different timeline — a frame for your prescribing clinician, not a hair diagnosis from a lab slip.",
+    description:
+      "How testosterone replacement relates to pattern hair loss risk: unmasking versus other causes, what exam prioritises over a single lab, and where our broader lab overview fits — under the androgen pillar.",
+    excerpt:
+      "On TRT and noticing thinning? A biology-first frame that is not a personal prognosis.",
+    hub: "hair-loss-causes",
+    audience: "both",
+    contentType: "explainer",
+    ctaType: "book-consult",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia", "diffuse-thinning"],
+      markers: ["testosterone", "shbg"],
+      symptoms: ["temple-recession", "crown-thinning"],
+      treatments: ["hormone-therapy-context", "clinical-assessment"],
+      tags: ["trt", "androgens", "pattern-hair-loss"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "exposure-unmasking-and-differentials", label: "Exposure, “unmasking,” and other causes" },
+      { id: "pattern-and-timing-on-exam", label: "Pattern and timing (clinical, not DIY)" },
+      { id: "labs-when-they-help", label: "Labs when they help — broader map linked" },
+      { id: "shared-decision-with-prescribers", label: "Shared decision with the team managing TRT" },
+      { id: "honest-uncertainty-and-next-reads", label: "Honest uncertainty and where to read next" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Will everyone on TRT lose hair?",
+        answer:
+          "No. People differ widely; some notice little change, others notice more scalp visibility — your prescriber interprets this in context.",
+      },
+      {
+        question: "Should I stop TRT if my hair thins?",
+        answer:
+          "Do not stop or change prescribed hormones on your own. Discuss symptoms, goals, and monitoring with the clinician who manages your therapy.",
+      },
+      {
+        question: "Should I order a ‘DHT test’ to explain scalp thinning on TRT?",
+        answer:
+          "Pattern assessment is usually clinical first. Whether any hormone tests help is case-specific — our blood-test overview explains breadth without self-ordering panels.",
+      },
+      {
+        question: "Is this the same as shedding after illness or acute stress?",
+        answer:
+          "Often no. Telogen effluvium after illness or stress follows different timing and story cues — see our telogen article if that fits better.",
+      },
+    ]),
+    relatedSlugs: [
+      "dht-and-androgenetic-alopecia",
+      "what-blood-tests-matter-for-hair-loss",
+      "finasteride-vs-saw-palmetto",
+      "normal-testosterone-and-androgen-sensitive-hair-loss",
+    ],
+    primaryPillar: "androgen-index",
+    secondaryPillar: "male-pattern-hair-loss",
+    glossarySlugs: ["dht"],
+    references: [
+      cite(
+        "Bhasin S et al. Testosterone therapy in men with hypogonadism: an Endocrine Society clinical practice guideline. J Clin Endocrinol Metab. 2018.",
+        "https://doi.org/10.1210/jc.2018-00229"
+      ),
+      cite(
+        "American Academy of Dermatology. Androgenetic alopecia (pattern hair loss) — patient summary.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/androgenetic-alopecia"
+      ),
+      cite(
+        "Mella JM et al. Efficacy and safety of finasteride therapy for androgenetic alopecia: a systematic review. Dermatology. 2010 — context for pattern-loss discussion.",
+        "https://pubmed.ncbi.nlm.nih.gov/20374680/"
+      ),
+    ],
+    Body: BodyTrtCauseOrUnmask,
+  },
+  {
+    slug: "normal-testosterone-and-androgen-sensitive-hair-loss",
+    title: "Can testosterone be normal and hair loss still be androgen-sensitive?",
+    deck:
+      "A mid-range testosterone result does not settle the hair story — follicle behaviour and scalp pattern often speak louder than one line on a form.",
+    description:
+      "Why normal testosterone does not rule out androgen-sensitive pattern thinning, how clinicians use exam versus selective labs, and pointers to our DHT and blood-test articles without duplicating them.",
+    excerpt:
+      "Normal labs, thinning hair — what ‘androgen-sensitive’ can mean in plain language.",
+    hub: "hair-loss-causes",
+    audience: "both",
+    contentType: "explainer",
+    ctaType: "compare-treatments",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia", "diffuse-thinning"],
+      markers: ["testosterone", "shbg"],
+      symptoms: ["crown-thinning", "diffuse-loss"],
+      treatments: ["clinical-assessment", "medical-therapy"],
+      tags: ["androgens", "laboratory-interpretation", "pattern-hair-loss"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "follicle-biology-versus-serum", label: "Follicle biology versus a single serum line" },
+      { id: "pattern-first-selective-labs", label: "Pattern first; labs when they change management" },
+      { id: "family-line-and-normal-lab-myths", label: "Family loading and “normal testosterone” myths" },
+      { id: "where-mechanism-and-class-context-live", label: "Where mechanism and drug-class context live" },
+      { id: "questions-worth-asking", label: "Questions worth asking" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Should I take supplements to ‘balance’ testosterone for hair?",
+        answer:
+          "Avoid DIY hormone stacks marketed online. If deficiency or endocrine disease is plausible, that belongs in clinical assessment — not self-experimentation.",
+      },
+      {
+        question: "Do women need high androgens on blood tests to have pattern thinning?",
+        answer:
+          "No. Female-pattern thinning is common without raised serum androgens; examination and history still lead.",
+      },
+      {
+        question: "Where is the full ‘which labs when’ overview?",
+        answer:
+          "See our dedicated blood-test article — this page explains serum-versus-sensitivity framing, not a repeat panel list.",
+      },
+      {
+        question: "Is this article about TRT or testosterone replacement?",
+        answer:
+          "No — that lane is our TRT and hair article. Here the focus is normal-range labs alongside thinning, and why sensitivity is not read off one number.",
+      },
+    ]),
+    relatedSlugs: [
+      "does-trt-cause-hair-loss-or-unmask-it",
+      "dht-and-androgenetic-alopecia",
+      "what-blood-tests-matter-for-hair-loss",
+      "diffuse-thinning-in-women",
+    ],
+    primaryPillar: "androgen-index",
+    secondaryPillar: "hair-longevity",
+    glossarySlugs: ["dht"],
+    references: [
+      cite(
+        "American Academy of Dermatology. Androgenetic alopecia (pattern hair loss) — patient summary.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/androgenetic-alopecia"
+      ),
+      cite(
+        "Lee WS et al. International consensus on the treatment of female pattern hair loss. J Am Acad Dermatol. 2018.",
+        "https://doi.org/10.1016/j.jaad.2017.10.007"
+      ),
+      cite(
+        "Lolli F et al. Trichoscopy updates in hair disorders: a systematic review. J Eur Acad Dermatol Venereol. 2021 — clinical pattern assessment context.",
+        "https://pubmed.ncbi.nlm.nih.gov/33462611/"
+      ),
+    ],
+    Body: BodyNormalTestosteroneAndrogenSensitive,
+  },
+  {
+    slug: "oral-minoxidil-vs-topical-minoxidil",
+    title: "Oral minoxidil vs topical: which route is discussed when?",
+    deck:
+      "Route-only compare: who might discuss oral versus topical, what oversight means, and where mechanism, shed phase, and timelines are covered instead.",
+    description:
+      "High-level comparison of topical versus oral minoxidil routes for hair loss: practical themes, monitoring, and when conversations arise — not a repeat of mechanism, shed phase, or full timeline content.",
+    excerpt:
+      "Thinking about switching routes? What differs before you even get to ‘does it work yet’.",
+    hub: "treatments",
+    audience: "both",
+    contentType: "comparison",
+    ctaType: "compare-treatments",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia", "diffuse-thinning"],
+      markers: [],
+      symptoms: ["crown-thinning", "temple-recession"],
+      treatments: ["topical-minoxidil", "oral-minoxidil-context"],
+      tags: ["medical-therapy", "route-comparison", "prescriber-led"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "routes-and-who-they-suit", label: "Routes and who might discuss which" },
+      { id: "local-effects-systemic-monitoring", label: "Local effects, systemic considerations, and oversight" },
+      { id: "mechanism-and-timelines-separate-article", label: "Mechanism, shed phase, and timelines — separate article" },
+      { id: "topical-adherence-in-real-life", label: "Topical adherence in real life" },
+      { id: "prescriber-led-planning", label: "Prescriber-led planning" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Is oral minoxidil automatically ‘stronger’ than topical for hair?",
+        answer:
+          "Not by default. Delivery, absorption, side-effect profile, and legality differ — your prescriber weighs those against your scalp and medical history.",
+      },
+      {
+        question: "Does this page explain early shedding or month-by-month expectations?",
+        answer:
+          "No — that is intentionally in our minoxidil mechanism and timelines article so this one stays route-focused.",
+      },
+      {
+        question: "Can I buy low-dose oral minoxidil the same way I buy topical foam?",
+        answer:
+          "Do not treat oral therapy like an OTC cosmetic. Prescription rules and safety monitoring vary by region.",
+      },
+      {
+        question: "Does choosing a route answer whether I have pattern hair loss?",
+        answer:
+          "No. Route is a delivery decision after diagnosis and goals are clear — pattern context may still matter clinically.",
+      },
+    ]),
+    relatedSlugs: [
+      "minoxidil-mechanism-and-realistic-timelines",
+      "finasteride-vs-saw-palmetto",
+      "dht-and-androgenetic-alopecia",
+      "scalp-inflammation-and-shedding",
+    ],
+    primaryPillar: "hair-loss-medications",
+    references: [
+      cite(
+        "Suchonwanit P, Thammarucha S, Leerunyakul K. Minoxidil and its use in hair disorders: a review. Drug Des Devel Ther. 2019.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6691938/"
+      ),
+      cite(
+        "Ramos PM, Miot HA. Female Pattern Hair Loss: a clinical and pathophysiological review. An Bras Dermatol. 2015.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC4560543/"
+      ),
+      cite(
+        "American Academy of Dermatology. Hair loss: diagnosis and treatment (patient resource).",
+        "https://www.aad.org/public/diseases/hair-loss/treatment/diagnosis-treat"
+      ),
+    ],
+    Body: BodyOralVsTopicalMinoxidil,
+  },
+  {
+    slug: "dutasteride-for-hair-loss-when-it-enters-the-conversation",
+    title: "Dutasteride for hair loss: when does it enter the conversation?",
+    deck:
+      "Named in forums, gated in clinics: indications, lawful access, and why swapping from finasteride is never a DIY move.",
+    description:
+      "When dutasteride is named in pattern hair loss discussions, how it differs from finasteride at a high level, and why switching or sourcing without supervision is unsafe — companion to our finasteride comparison, not duplicate content.",
+    excerpt:
+      "Heard dutasteride in a forum thread? Safety, access, and specialist questions — not a DIY switch guide.",
+    hub: "treatments",
+    audience: "both",
+    contentType: "decision",
+    ctaType: "book-consult",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["androgenetic-alopecia"],
+      markers: ["testosterone"],
+      symptoms: ["crown-thinning", "temple-recession"],
+      treatments: ["antiandrogen-therapy", "prescriber-monitoring"],
+      tags: ["dutasteride", "5ari", "specialist-led"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "finasteride-reference-not-same-drug", label: "Finasteride as reference — a different drug" },
+      { id: "why-the-topic-surfaces-access", label: "Why the topic surfaces — and access varies" },
+      { id: "safety-monitoring-not-interchangeable", label: "Safety, monitoring, and not interchangeable" },
+      { id: "pattern-biology-elsewhere", label: "Pattern biology — elsewhere on purpose" },
+      { id: "questions-for-your-specialist", label: "Questions for your specialist" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Is dutasteride approved for hair loss where I live?",
+        answer:
+          "It depends on country, regulator, and indication. Your dermatologist or prescriber explains what is lawful and evidence-appropriate for you.",
+      },
+      {
+        question: "Can I substitute dutasteride for finasteride using a simple dose conversion?",
+        answer:
+          "No. Half-life, potency, monitoring, and fertility considerations differ — never switch or combine without supervision.",
+      },
+      {
+        question: "Where is finasteride discussed as a class reference?",
+        answer:
+          "Our finasteride versus saw palmetto article covers class themes; this page is about when dutasteride surfaces and access/safety context.",
+      },
+      {
+        question: "Will this article teach me the biochemistry of DHT?",
+        answer:
+          "No — that stays in our pattern miniaturisation overview. Here the emphasis is conversation, legality, and supervised use.",
+      },
+    ]),
+    relatedSlugs: [
+      "finasteride-vs-saw-palmetto",
+      "dht-and-androgenetic-alopecia",
+      "minoxidil-mechanism-and-realistic-timelines",
+      "oral-minoxidil-vs-topical-minoxidil",
+    ],
+    primaryPillar: "hair-loss-medications",
+    secondaryPillar: "androgen-index",
+    glossarySlugs: ["dht"],
+    references: [
+      cite(
+        "Gubelin Harcha W et al. A randomized, active- and placebo-controlled study of the efficacy and safety of different doses of dutasteride versus placebo and finasteride in the treatment of male subjects with androgenetic alopecia. J Am Acad Dermatol. 2014.",
+        "https://pubmed.ncbi.nlm.nih.gov/24041580/"
+      ),
+      cite(
+        "American Academy of Dermatology. Androgenetic alopecia (pattern hair loss) — patient summary.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/androgenetic-alopecia"
+      ),
+      cite(
+        "Singer BE, Bhimji SS. Dutasteride. StatPearls [Internet]. Treasure Island (FL): StatPearls Publishing — pharmacology overview (prescriber reference).",
+        "https://www.ncbi.nlm.nih.gov/books/NBK459284/"
+      ),
+    ],
+    Body: BodyDutasterideHairLossConversation,
+  },
+  {
+    slug: "postpartum-hair-loss-vs-female-pattern-thinning",
+    title: "Postpartum shedding or female pattern thinning: what’s the difference?",
+    deck:
+      "Expected postpartum shed versus thinning that may need a wider differential — framed for your clinician, not a verdict from one heavy-shed week.",
+    description:
+      "How typical postpartum telogen shedding differs from persistent female-pattern thinning cues, why overlap happens, and where our wider women’s thinning explainer and lab overview fit — scoped under the postpartum pillar.",
+    excerpt:
+      "After birth: expected shed versus a part that keeps widening — a practical distinction frame.",
+    hub: "conditions",
+    audience: "patients",
+    contentType: "comparison",
+    ctaType: "book-consult",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["telogen-effluvium", "androgenetic-alopecia"],
+      markers: ["ferritin", "tsh"],
+      symptoms: ["sudden-shedding", "diffuse-loss", "crown-thinning"],
+      treatments: ["clinical-assessment", "laboratory-workup"],
+      tags: ["postpartum", "womens-health", "pattern-hair-loss"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "usual-postpartum-shed-window", label: "The usual postpartum shed window" },
+      { id: "when-pattern-thinning-may-be-considered", label: "When pattern thinning may be considered" },
+      { id: "overlap-and-broader-workup", label: "Overlap, thyroid or iron talk, and broader work-up" },
+      { id: "beyond-postpartum-womens-thinning", label: "Beyond postpartum: women’s thinning more widely" },
+      { id: "support-and-next-visit", label: "Support and what to bring to follow-up" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Can I tell postpartum shed from female-pattern thinning by counting hairs?",
+        answer:
+          "Usually not reliably. Timeline after birth, how the part or density changes over months, and exam findings matter more than a single day’s shed count.",
+      },
+      {
+        question: "Should I wait it out if I’m still thinning many months after delivery?",
+        answer:
+          "Expected postpartum shedding has a typical course, but persistent or worsening patterns deserve a review — bring dated photos and notes.",
+      },
+      {
+        question: "Where is the dedicated ‘reassure versus test’ postpartum article?",
+        answer:
+          "See our postpartum shedding reassurance and testing piece — linked in the sections above.",
+      },
+      {
+        question: "Is this the same as the general women’s thinning guide?",
+        answer:
+          "No. Our diffuse-thinning-in-women explainer is broader; this comparison stays anchored to the postpartum window.",
+      },
+    ]),
+    relatedSlugs: [
+      "postpartum-shedding-when-to-reassure-vs-when-to-test",
+      "diffuse-thinning-in-women",
+      "telogen-effluvium-after-illness-or-stress",
+      "what-blood-tests-matter-for-hair-loss",
+    ],
+    primaryPillar: "postpartum-hair-loss",
+    secondaryPillar: "hair-longevity",
+    glossarySlugs: ["telogen-effluvium"],
+    references: [
+      cite(
+        "American Academy of Dermatology. Women’s hair loss (female pattern hair loss) — overview.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/womens-hair-loss-female-pattern-baldness"
+      ),
+      cite(
+        "Lee WS et al. International consensus on the treatment of female pattern hair loss. J Am Acad Dermatol. 2018.",
+        "https://doi.org/10.1016/j.jaad.2017.10.007"
+      ),
+      cite(
+        "Malkud S. Telogen effluvium: a review. J Clin Diagn Res. 2015 — postpartum telogen context.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC4387693/"
+      ),
+    ],
+    Body: BodyPostpartumVsFemalePattern,
+  },
+  {
+    slug: "hair-shedding-vs-hair-breakage",
+    title: "Hair shedding vs breakage: how can you tell?",
+    deck:
+      "Learn to describe scalp shed versus shaft damage — so your visit starts in the right lane, not the supplement aisle.",
+    description:
+      "Practical ways to separate increased scalp shedding from shaft breakage, when scalp exams or labs enter the picture, and pointers to telogen and scalp inflammation articles — under the hair-longevity pillar as a cross-cutting basics piece.",
+    excerpt:
+      "Shedding from the root or breaking mid-length? A clearer way to describe it at your visit.",
+    hub: "conditions",
+    audience: "patients",
+    contentType: "explainer",
+    ctaType: "start-assessment",
+    publishedAt: "2026-04-17",
+    updatedAt: "2026-04-17",
+    reviewedAt: "2026-04-17",
+    taxonomy: {
+      conditions: ["telogen-effluvium", "diffuse-thinning"],
+      markers: [],
+      symptoms: ["sudden-shedding", "diffuse-loss"],
+      treatments: ["clinical-assessment", "hair-care-review"],
+      tags: ["shedding", "breakage", "trichoscopy-context"],
+    },
+    authors: [author],
+    reviewers: [reviewer],
+    toc: [
+      { id: "shedding-versus-breakage-in-plain-terms", label: "Shedding versus breakage in plain terms" },
+      { id: "simple-at-home-clues", label: "Simple at-home clues (imperfect)" },
+      { id: "different-clinical-paths", label: "Different clinical paths" },
+      { id: "overlap-and-diagnosis-first", label: "When both overlap — diagnosis-first" },
+      { id: "at-your-visit", label: "At your visit" },
+    ],
+    faq: faqBlock([
+      {
+        question: "Does more breakage automatically mean I have genetic pattern thinning?",
+        answer:
+          "Not usually. Breakage often reflects styling, heat, chemicals, or friction; pattern thinning is a scalp-exam diagnosis when suspected.",
+      },
+      {
+        question: "Can I self-diagnose shed versus breakage from hairs on my pillow?",
+        answer:
+          "Sometimes you get a clue, but home checks are imperfect — bring photos and a clear timeline rather than relying on one night’s hairs.",
+      },
+      {
+        question: "Should I start biotin or ‘hair vitamins’ while I figure this out?",
+        answer:
+          "Avoid stacking supplements without a deficiency reason discussed with a clinician — it rarely replaces the right exam lane.",
+      },
+      {
+        question: "Where do I read about stress-related or illness-related shedding?",
+        answer:
+          "Our telogen effluvium article covers that arc; postpartum-specific timing has its own pillar content if birth is in the story.",
+      },
+    ]),
+    relatedSlugs: [
+      "telogen-effluvium-after-illness-or-stress",
+      "scalp-inflammation-and-shedding",
+      "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
+      "postpartum-shedding-when-to-reassure-vs-when-to-test",
+    ],
+    primaryPillar: "hair-longevity",
+    glossarySlugs: ["telogen-effluvium"],
+    references: [
+      cite(
+        "American Academy of Dermatology. Hair loss: tips for styling and caring for thinning hair.",
+        "https://www.aad.org/public/diseases/hair-loss/causes/hair-care/styling-tips"
+      ),
+      cite(
+        "Malkud S. Telogen effluvium: a review. J Clin Diagn Res. 2015.",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC4387693/"
+      ),
+      cite(
+        "Goren A et al. Hair breakage assessment methods. Skin Appendage Disord. 2018 — cosmetic damage vs shedding distinction themes.",
+        "https://pubmed.ncbi.nlm.nih.gov/28804714/"
+      ),
+    ],
+    Body: BodySheddingVsBreakage,
   },
 ];

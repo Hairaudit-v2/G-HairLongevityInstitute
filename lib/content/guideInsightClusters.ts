@@ -31,6 +31,7 @@ export const GUIDE_INSIGHT_CLUSTERS: Record<EditorialPillarSlug, GuideInsightClu
     {
       title: "Shedding, stress recovery, and mixed pictures",
       items: [
+        { slug: "hair-shedding-vs-hair-breakage", note: "Shedding from the scalp versus shaft breakage — different next steps." },
         { slug: "telogen-effluvium-after-illness-or-stress" },
         { slug: "diffuse-thinning-in-women", note: "How clinicians separate overlapping causes." },
         { slug: "scalp-inflammation-and-shedding", note: "When the scalp exam comes before product roulette." },
@@ -45,7 +46,13 @@ export const GUIDE_INSIGHT_CLUSTERS: Record<EditorialPillarSlug, GuideInsightClu
     {
       title: "Postpartum shedding and next steps",
       intro: "The postpartum insight pairs with this pillar page; labs below are common overlap topics.",
-      items: [{ slug: "postpartum-shedding-when-to-reassure-vs-when-to-test" }],
+      items: [
+        { slug: "postpartum-shedding-when-to-reassure-vs-when-to-test" },
+        {
+          slug: "postpartum-hair-loss-vs-female-pattern-thinning",
+          note: "Expected shed timing versus thinning that may need a wider differential.",
+        },
+      ],
     },
     {
       title: "When iron or thyroid are part of the conversation",
@@ -60,7 +67,17 @@ export const GUIDE_INSIGHT_CLUSTERS: Record<EditorialPillarSlug, GuideInsightClu
     {
       title: "Pattern thinning, DHT, and staging",
       intro: "The male-pattern pillar expands recession, crown thinning, and realistic treatment framing beyond a single article.",
-      items: [{ slug: "dht-and-androgenetic-alopecia", note: "Mechanism and pattern recognition — companion to this guide." }],
+      items: [
+        { slug: "dht-and-androgenetic-alopecia", note: "Mechanism and pattern recognition — companion to this guide." },
+        {
+          slug: "receding-hairline-vs-mature-hairline",
+          note: "Maturation versus recession — exam and photos, not forum labels alone.",
+        },
+        {
+          slug: "crown-thinning-why-it-can-be-harder-to-treat",
+          note: "Visibility and adherence — why the vertex frustrates without restating staging scales here.",
+        },
+      ],
     },
   ],
   "androgen-index": [
@@ -75,6 +92,17 @@ export const GUIDE_INSIGHT_CLUSTERS: Record<EditorialPillarSlug, GuideInsightClu
         },
       ],
     },
+    {
+      title: "TRT, testosterone results, and follicular sensitivity",
+      intro: "Serum numbers do not tell the whole hair story — these articles pair with the hormone-exposure framing in the guide.",
+      items: [
+        { slug: "does-trt-cause-hair-loss-or-unmask-it", note: "Exposure and timing — conversation with your prescriber." },
+        {
+          slug: "normal-testosterone-and-androgen-sensitive-hair-loss",
+          note: "Why ‘normal T’ and pattern thinning can coexist — labs versus follicle biology.",
+        },
+      ],
+    },
   ],
   "hair-loss-medications": [
     {
@@ -82,6 +110,14 @@ export const GUIDE_INSIGHT_CLUSTERS: Record<EditorialPillarSlug, GuideInsightClu
       items: [
         { slug: "finasteride-vs-saw-palmetto" },
         { slug: "minoxidil-mechanism-and-realistic-timelines" },
+        {
+          slug: "oral-minoxidil-vs-topical-minoxidil",
+          note: "Route comparison — mechanism and timelines stay in the minoxidil explainer.",
+        },
+        {
+          slug: "dutasteride-for-hair-loss-when-it-enters-the-conversation",
+          note: "When the name comes up — not interchangeable with finasteride without supervision.",
+        },
       ],
     },
     {

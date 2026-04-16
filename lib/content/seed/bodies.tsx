@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { glossaryPath } from "@/lib/content/glossary";
+import { PILLAR_GUIDE_HREF } from "@/lib/content/pillarGuides";
 
 const insight = (slug: string) => `/insights/${slug}`;
 
@@ -1147,6 +1148,774 @@ export function BodyOralAntiandrogensWomen() {
       <p className="leading-relaxed">
         Ask about expected timeline, side effects to watch, what “success” means for you, and alternatives if therapy is
         unsuitable. Bring a full medication and supplement list.
+      </p>
+    </div>
+  );
+}
+
+export function BodyRecedingHairlineVsMature() {
+  const tableCell = "border border-[rgb(var(--border-soft))] px-3 py-2 align-top";
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        For many men, the first sign of a changing hairline triggers concern. Temples shift, the frontal edge moves, and the
+        instinct is to search for answers — often landing on worst-case scenarios. But not every hairline change signals the
+        beginning of male-pattern hair loss. Understanding the distinction between a mature hairline and a genuinely receding
+        one is one of the most clinically important — and personally reassuring — pieces of information you can have. This
+        guide walks through what a mature hairline actually looks like, how early recession typically differs, what
+        clinicians examine, and when it makes sense to take action. It does not replace a professional assessment; it gives a
+        clear framework so you can approach an appointment — or your own mirror — with confidence rather than anxiety.
+      </p>
+      <h2 id="why-this-question-comes-up-so-often" className={h2}>
+        Why this question comes up so often
+      </h2>
+      <p className="leading-relaxed">
+        The confusion between a mature hairline and a receding one is common. Hairline changes in young adult men tend to be
+        gradual, subtle, and highly variable. There is rarely a single moment where a hairline visibly “flips” from normal to
+        abnormal — so the transition, if there is one, is easy to misread in either direction.
+      </p>
+      <p className="leading-relaxed">
+        Many men notice temple movement in their late teens or early twenties and assume balding has begun. Online forums can
+        amplify anxiety, with classifications and transplant timelines circulating among young men who may simply be
+        experiencing normal development. Conversely, some men dismiss genuine early recession as “just maturing,” which can
+        delay evaluation during a window where treatment tends to be most effective.
+      </p>
+      <p className="leading-relaxed">
+        The clinical reality is more nuanced. Some hairline movement is a normal part of male development. The adolescent
+        hairline sits lower on the forehead and often rises slightly through the late teens and twenties — maturation, not
+        loss. The challenge is identifying when that maturation has settled into a stable pattern versus when it represents
+        the opening phase of androgenetic alopecia.
+      </p>
+      <h2 id="what-a-mature-hairline-usually-looks-like" className={h2}>
+        What a mature hairline usually looks like
+      </h2>
+      <p className="leading-relaxed">
+        A mature hairline is the natural repositioning of the frontal hairline as part of normal male development — not hair
+        loss in the clinical sense. It is a transition from the lower, more uniform juvenile hairline to a slightly higher,
+        often slightly more angular hairline that then remains stable for many years, or for life.
+      </p>
+      <p className="leading-relaxed">
+        Movement with maturation is typically mild and relatively even across the frontal region. The temples may rise slightly
+        or show gentle recession — often modest (roughly one to two centimetres from the juvenile position) and broadly
+        symmetrical. Hair behind the frontal edge remains full. If you part the hair or look closely, density is preserved.
+        There is no visible scalp showing through at the crown or mid-scalp in the way of progressive loss, and the frontal
+        forelock remains intact and dense.
+      </p>
+      <p className="leading-relaxed">
+        Another hallmark is stability. Once maturation has completed — often by the mid-twenties — the hairline does not keep
+        moving. Men with a mature hairline can often compare photos from their mid-twenties with photos from their thirties or
+        forties and see little meaningful change in frontal position or overall density. Individual hairs remain full in
+        calibre and pigmentation, without the thin, wispy, shortened hairs that indicate miniaturisation.
+      </p>
+      <p className="leading-relaxed">
+        A mature hairline can still look slightly different from a juvenile one — that is appropriate. The goal is not to
+        preserve a teenage hairline indefinitely, but to understand whether what you see is a completed developmental change or
+        an ongoing process of loss.
+      </p>
+      <h2 id="what-early-recession-usually-looks-like" className={h2}>
+        What early recession usually looks like
+      </h2>
+      <p className="leading-relaxed">
+        Early male-pattern hair loss (androgenetic alopecia) in its initial stages can be subtle. It rarely appears as
+        dramatic overnight change. It often begins quietly at the temples, sometimes asymmetrically, and progresses at a rate
+        that is hard to perceive month to month but clearer when comparing photographs a year or more apart.
+      </p>
+      <p className="leading-relaxed">
+        Temple changes in early recession tend to be deeper than in simple maturation. Rather than a modest lift across the
+        frontal hairline, the temples show more pronounced angular recession — sometimes an early M-shaped pattern. Over
+        time, those recessions can extend inward and the central forelock may thin. Density at the frontal edges is often
+        visibly reduced. Under good lighting or with dermatoscopy, hairs at the hairline may look finer, shorter, or lighter than
+        those further back — a sign of miniaturisation.
+      </p>
+      <p className="leading-relaxed">
+        Miniaturisation is one of the most diagnostically significant findings in early androgenetic alopecia. The follicle,
+        under the influence of dihydrotestosterone (DHT), gradually produces thinner and shorter hairs with each growth cycle.
+        These changes may not be obvious to the naked eye at first, but they represent an important biological shift.{" "}
+        <span className="font-medium text-[rgb(var(--text-primary))]">Trichoscopy</span> (scalp surface imaging) can reveal
+        miniaturisation early, which is why clinical assessment matters even when visible change seems limited.
+      </p>
+      <p className="leading-relaxed">
+        Early recession does not always progress rapidly. Some men change slowly over many years; others faster. Rate varies
+        with genetics, DHT sensitivity, and individual biology — part of why early assessment and monitoring can matter for men
+        who want to preserve density.
+      </p>
+      <h2 id="what-clinicians-look-for-and-key-differences" className={h2}>
+        What clinicians look for — and key differences at a glance
+      </h2>
+      <p className="leading-relaxed">
+        Assessment is rarely a single snapshot. It combines examination, history, family background, and often scalp imaging.
+        Pattern and symmetry matter: androgenetic alopecia tends to follow recognisable distributions (for example
+        Norwood–Hamilton patterns). Family history is one of the strongest predictors — the condition is polygenic, so it can
+        appear even when neither parent shows obvious loss, and it can vary between brothers. Speed of change matters: a
+        hairline that has shifted significantly over twelve to eighteen months warrants more attention than one that has been
+        stable. Older photographs help. Trichoscopy, where available, adds precision by showing hair calibre variability at
+        the follicle level.
+      </p>
+      <p className="leading-relaxed">
+        The table below summarises core differences; it is educational, not a substitute for an in-person diagnosis.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[36rem] border-collapse text-sm">
+          <thead>
+            <tr className="bg-subtle">
+              <th className={tableCell}>Feature</th>
+              <th className={tableCell}>Mature hairline</th>
+              <th className={tableCell}>Early recession (AGA)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className={tableCell}>Temple movement</td>
+              <td className={tableCell}>Mild, even, symmetrical</td>
+              <td className={tableCell}>Deeper, angular; often asymmetric early on</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Rate of change</td>
+              <td className={tableCell}>Settles by mid-twenties</td>
+              <td className={tableCell}>Continues over months and years</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Hair density behind the edge</td>
+              <td className={tableCell}>Preserved</td>
+              <td className={tableCell}>May show early reduction or see-through appearance</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Miniaturised hairs</td>
+              <td className={tableCell}>Not expected</td>
+              <td className={tableCell}>Often present at hairline and temples</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Crown or mid-scalp</td>
+              <td className={tableCell}>Unaffected by pattern loss</td>
+              <td className={tableCell}>May show early involvement</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Frontal forelock</td>
+              <td className={tableCell}>Dense and intact</td>
+              <td className={tableCell}>May thin over time</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Typical Norwood pattern</td>
+              <td className={tableCell}>Often NW1–NW2, stable</td>
+              <td className={tableCell}>NW2 progressing toward NW3 or beyond</td>
+            </tr>
+            <tr>
+              <td className={tableCell}>Trichoscopy pattern</td>
+              <td className={tableCell}>Uniform hair calibre</td>
+              <td className={tableCell}>Calibre variability; vellus or intermediate hairs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="leading-relaxed">
+        If you are uncertain, a consultation with a dermatologist or trichologist is the most reliable next step.
+      </p>
+      <h2 id="when-it-is-worth-acting-early" className={h2}>
+        When it is worth acting early
+      </h2>
+      <p className="leading-relaxed">
+        Early action — when appropriate — is generally better than unnecessary delay.{" "}
+        <span className="font-medium text-[rgb(var(--text-primary))]">
+          Acting early does not mean rushing into treatment.
+        </span>{" "}
+        It means clarifying whether the pattern is stable maturation or active miniaturisation before deciding what, if
+        anything, to do next. Treatments for androgenetic alopecia work best on follicles that are still active, even if
+        miniaturised; once follicles have been dormant for a long time, restoring meaningful density becomes harder.
+      </p>
+      <p className="leading-relaxed">
+        Patterns that should prompt a more active response than “wait and see” include: temple recession that deepens over six
+        months or more (especially if photographs confirm it); crown thinning alongside frontal changes; loss of density in the
+        frontal forelock; and changes that fit recognised androgenetic patterns with a relevant family history. Evidence-based
+        options — including topical and oral minoxidil, finasteride, and combination approaches — have established profiles in
+        appropriate candidates. A knowledgeable clinician can clarify what fits your pattern and what realistic expectations
+        look like.
+      </p>
+      <h2 id="the-role-of-dht-and-genetics" className={h2}>
+        The role of DHT and genetics
+      </h2>
+      <p className="leading-relaxed">
+        Androgenetic alopecia is driven primarily by DHT, and whether it causes visible hair loss depends largely on genetics.
+        In men with susceptible follicles, DHT gradually triggers miniaturisation over time, but sensitivity varies — which is
+        why some men lose hair early, others much later, and some hardly at all. Because the condition is polygenic,
+        inheritance is complex and family history on both sides matters.
+      </p>
+      <p className="leading-relaxed">
+        That gradual, DHT-driven miniaturisation is part of why timing of intervention can matter. Treatments such as
+        finasteride, dutasteride (where prescribed), and minoxidil are most effective when follicles are still responding well,
+        before substantial miniaturisation has accumulated. For a deeper look at the biology of DHT and follicle
+        miniaturisation, see our{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          DHT and pattern hair loss
+        </Link>{" "}
+        explainer — this section is a bridge, not a full mechanism chapter.
+      </p>
+      <h2 id="summary-and-next-steps" className={h2}>
+        Summary and next steps
+      </h2>
+      <p className="leading-relaxed">
+        Distinguishing a mature hairline from early recession is not always straightforward, but a useful rule is to watch
+        change over time: stability is reassuring; continued progression deserves attention. If you are in your late teens or
+        early twenties, document your hairline with photographs and observe over six to twelve months. If the hairline is
+        stable, that is strongly reassuring. If it keeps shifting, or you notice crown or forelock thinning, a clinical review is
+        sensible — not an overreaction.
+      </p>
+      <p className="leading-relaxed">
+        If you are older and a previously stable hairline is changing, that pattern deserves clinical attention. Effective,
+        evidence-based treatments exist. Starting earlier — before significant miniaturisation accumulates — offers the best
+        foundation for preserving density. A conversation with a clinician is not a commitment to treatment; it is an
+        opportunity to understand your situation and decide next steps.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Recommended further reading:</span>{" "}
+        <Link href={PILLAR_GUIDE_HREF["male-pattern-hair-loss"]} className="font-medium text-medical underline-offset-2 hover:underline">
+          Male pattern hair loss guide
+        </Link>
+        ;{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          DHT and androgenetic alopecia
+        </Link>
+        ;{" "}
+        <Link href={insight("minoxidil-mechanism-and-realistic-timelines")} className="font-medium text-medical underline-offset-2 hover:underline">
+          Minoxidil: mechanism and realistic timelines
+        </Link>
+        .
+      </p>
+      <p className="leading-relaxed text-sm text-[rgb(var(--text-muted))]">
+        This page is for education and does not replace personalised medical advice. For individual assessment, consult a
+        qualified dermatologist or trichologist.
+      </p>
+    </div>
+  );
+}
+
+export function BodyCrownThinningHarderToTreat() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Crown thinning is one of the most common concerns in male-pattern hair loss — yet it is often misunderstood. Unlike
+        frontal recession, vertex thinning can develop quietly until a meaningful amount of density is already lost. That can
+        fuel frustration, unrealistic expectations, and a sense that treatment is not working. This guide explains why crown
+        thinning behaves as it does, why visible improvement may take longer than in other areas, and what evidence-based steps
+        are most likely to help — without discouraging you from sustainable, realistic planning.
+      </p>
+      <h2 id="why-crown-thinning-is-often-noticed-late" className={h2}>
+        Why crown thinning is often noticed late
+      </h2>
+      <p className="leading-relaxed">
+        The crown is structurally hard to see without a second mirror, a phone at an angle, or someone else pointing it out.
+        Routine grooming rarely includes a careful look at the top of the scalp. Without a baseline photo from a fixed angle,
+        gradual change is difficult to judge. Lighting also changes the appearance dramatically: overhead light, bright sun, or
+        some fluorescent settings can make thinning look worse than under softer, diffuse light — so a single photo in an
+        unfamiliar environment can feel alarming.
+      </p>
+      <p className="leading-relaxed">
+        The crown whorl creates a zone of naturally lower density even without hair loss, which can make early thinning hard
+        to tell from normal anatomy. Many men either dismiss early change or become anxious about something not yet clinically
+        significant. Professional assessment is often the most reliable way to separate the two. Many people do not notice
+        meaningful crown thinning until overall density in the area has already reduced substantially; early photography and
+        baseline review help.
+      </p>
+      <h2 id="why-crown-thinning-can-feel-harder-to-improve" className={h2}>
+        Why crown thinning can feel harder to improve
+      </h2>
+      <p className="leading-relaxed">
+        Even with consistent treatment, the crown can feel stubborn. That is not simply “product failure” — it reflects biology
+        and perception. Because the crown is often noticed late, treatment may start when miniaturisation is more advanced than
+        at the hairline. Follicles may still respond, but response can be slower and regrowth more modest.{" "}
+        <span className="font-medium text-[rgb(var(--text-primary))]">
+          Stabilising further loss is often the first meaningful achievable goal
+        </span>{" "}
+        in earlier treatment phases.
+      </p>
+      <p className="leading-relaxed">
+        The whorl pattern makes density hard to judge: the same amount of hair can look denser or sparser depending on parting,
+        styling, and viewing angle — so week-to-week fluctuation may reflect geometry, not true change. Photographic tracking
+        from a fixed angle under consistent lighting is essential.
+      </p>
+      <p className="leading-relaxed">
+        Miniaturisation (follicles shrinking under DHT) is reversible only in earlier stages; long-standing miniaturisation may
+        have less capacity to return to full terminal production. Treatments such as minoxidil and finasteride can slow or halt
+        further miniaturisation and may stimulate partial regrowth, but degree of response depends on how long follicles have
+        been affected.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">
+          Visible improvement at the crown often takes longer than people expect.
+        </span>{" "}
+        Hair cycles are long; regrowth from miniaturised follicles may start fine and unpigmented before thickening. Many
+        people stop effective treatment between six and ten months, just before change would become visible — patience and
+        objective photos matter.
+      </p>
+      <h2 id="what-usually-helps-most" className={h2}>
+        What usually helps most
+      </h2>
+      <p className="leading-relaxed">
+        A durable approach usually starts with clear goals in order. <span className="font-medium text-[rgb(var(--text-primary))]">Step 1: stabilise progression.</span> If thinning keeps advancing, any regrowth is offset by ongoing miniaturisation. Finasteride and minoxidil — alone or together — are among the most evidence-based tools for slowing or stopping androgenetic alopecia. For the crown,{" "}
+        <span className="font-medium text-[rgb(var(--text-primary))]">
+          preventing further loss is often the first meaningful win
+        </span>
+        , even before obvious regrowth.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Step 2: consistency over time.</span> Benefits tie to uninterrupted use where prescribed. Missing doses or long breaks allows DHT-related miniaturisation to resume. Many people see meaningful stabilisation within six months of consistent use, with visible density changes often emerging between twelve and eighteen months.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Step 3: realistic timelines.</span> Crown regrowth, when it occurs, is rarely dramatic; success may mean better coverage of the thinning area rather than full restoration of youthful density. Month-one versus month-twelve photos under consistent lighting beat day-to-day mirror checks. Progress that feels invisible can still be clinically meaningful.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Step 4: treat the broader pattern.</span> Crown thinning usually sits within a wider androgenetic pattern that may include the hairline and mid-scalp. Plans that ignore overall progression can mislead.
+      </p>
+      <h2 id="when-crown-thinning-suggests-broader-pattern-loss" className={h2}>
+        When crown thinning suggests broader pattern loss
+      </h2>
+      <p className="leading-relaxed">
+        Crown thinning is most often androgenetic alopecia. Mid-scalp thinning alongside the crown suggests loss is not focal.
+        Frontal recession plus vertex loss fits mid-to-advanced grading patterns and usually implies a more progressive overall
+        picture — relevant for medical treatment timing and whether surgery belongs in the conversation. Multi-zone thinning
+        warrants coordinated planning rather than treating only the most obvious spot.
+      </p>
+      <h2 id="when-to-seek-professional-review" className={h2}>
+        When to seek professional review
+      </h2>
+      <p className="leading-relaxed">
+        Seek review if you are unsure whether thinning is real versus normal whorl variation — dermoscopy can distinguish calibre
+        and miniaturisation from anatomy. If the crown is clearly worsening on photos over months, early intervention generally
+        produces better outcomes than delay. If you want personalised options and timelines rather than generic online advice,
+        a clinical visit helps. If you are considering surgery before medical stabilisation, review matters: the crown can be
+        technically demanding; transplanting into an actively progressing pattern risks an unnatural long-term result without
+        stabilisation first.
+      </p>
+      <h2 id="understanding-the-biology-dht-miniaturisation-and-the-crown" className={h2}>
+        Understanding the biology: DHT, miniaturisation, and the crown
+      </h2>
+      <p className="leading-relaxed">
+        Male-pattern loss is not usually about follicles vanishing overnight — follicles shrink and produce finer, shorter hairs
+        until they may stop producing visible hair: miniaturisation, driven primarily by DHT. The crown is especially prone
+        because vertex follicles often carry more androgen-sensitive signalling than the DHT-resistant occipital zone — one
+        reason the vertex can thin earlier or more noticeably.
+      </p>
+      <p className="leading-relaxed">
+        Miniaturisation is gradual and may be reversible in earlier stages, which is why earlier intervention can matter.
+        Finasteride and minoxidil tend to work best when follicles are still present but miniaturised. For fuller detail, see{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          DHT and androgenetic alopecia
+        </Link>{" "}
+        — this section is a trimmed bridge, not a duplicate explainer.
+      </p>
+      <h2 id="setting-realistic-expectations-framework-for-progress" className={h2}>
+        Setting realistic expectations: a framework for progress
+      </h2>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Months 0–3:</span> Establish treatment and tolerate
+        adjustment. Visible change is often minimal; consistency is the goal. Some minoxidil users notice a temporary increase in
+        shedding as cycles shift.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Months 3–6:</span> Shedding often settles. Crown density may
+        still look unchanged on casual inspection, but baseline photos may show early fine changes. The milestone is often{" "}
+        <span className="font-medium text-[rgb(var(--text-primary))]">
+          absence of clear worsening — stabilisation is a genuine success
+        </span>
+        , even when it does not feel dramatic.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Months 6–12:</span> Responders may see finer hairs in
+        thinned areas — not yet always cosmetically obvious. Photos beat mirrors for the crown.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Months 12–18+:</span> This is often when visible crown
+        change becomes apparent for responders. Clinicians often reassess here.{" "}
+        <span className="font-medium text-[rgb(var(--text-primary))]">
+          Stabilisation without dramatic regrowth is still a clinically meaningful outcome
+        </span>{" "}
+        — it preserves options and allows time for treatment responses to mature.
+      </p>
+      <h2 id="next-steps-and-further-reading" className={h2}>
+        Next steps and further reading
+      </h2>
+      <p className="leading-relaxed">
+        Crown thinning is manageable with realistic planning. Useful steps include: confirming diagnosis and extent; using an
+        evidence-based regimen with medical supervision where possible; taking baseline photos now; and setting a review
+        around twelve months before assuming failure or jumping to aggressive interventions.
+      </p>
+      <p className="leading-relaxed">
+        <span className="font-medium text-[rgb(var(--text-primary))]">Further reading:</span>{" "}
+        <Link href={PILLAR_GUIDE_HREF["male-pattern-hair-loss"]} className="font-medium text-medical underline-offset-2 hover:underline">
+          Male pattern hair loss guide
+        </Link>
+        ;{" "}
+        <Link href={insight("minoxidil-mechanism-and-realistic-timelines")} className="font-medium text-medical underline-offset-2 hover:underline">
+          Minoxidil: how it works and realistic timelines
+        </Link>
+        ;{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          DHT and androgenetic alopecia
+        </Link>
+        .
+      </p>
+      <p className="leading-relaxed text-sm text-[rgb(var(--text-muted))]">
+        Educational information only; not a substitute for individual medical assessment.
+      </p>
+    </div>
+  );
+}
+
+export function BodyTrtCauseOrUnmask() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Testosterone replacement therapy (TRT) changes circulating hormone exposure. Some people notice hair changes after
+        starting or adjusting therapy. A useful frame is whether a predisposition is showing up earlier versus a wholly new
+        problem — not a certain prediction either way.
+      </p>
+      <h2 id="exposure-unmasking-and-differentials" className={h2}>
+        Exposure, “unmasking,” and other causes
+      </h2>
+      <p className="leading-relaxed">
+        Therapy shifts the hormonal milieu; follicles that were already at risk may respond on a different timeline than
+        they would have without treatment — emphasis on may. Sudden diffuse shedding after illness or acute stress follows
+        different reasoning; if that fits, read{" "}
+        <Link href={insight("telogen-effluvium-after-illness-or-stress")} className="font-medium text-medical underline-offset-2 hover:underline">
+          telogen effluvium after illness or stress
+        </Link>
+        .
+      </p>
+      <h2 id="pattern-and-timing-on-exam" className={h2}>
+        Pattern and timing (clinical, not DIY)
+      </h2>
+      <p className="leading-relaxed">
+        Classic frontal or vertex patterns may steer assessment toward androgenetic alopecia — judged on scalp examination
+        and history, not from a single lab printout. Your endocrine prescriber and dermatology or hair specialist
+        interpret what you see together; this article cannot diagnose you.
+      </p>
+      <h2 id="labs-when-they-help" className={h2}>
+        Labs when they help — broader map linked
+      </h2>
+      <p className="leading-relaxed">
+        Hormone results are read in context. For when blood tests are worth discussing in hair concerns generally, see{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter for hair loss
+        </Link>
+        . TRT monitoring itself follows your clinician’s protocol.
+      </p>
+      <h2 id="shared-decision-with-prescribers" className={h2}>
+        Shared decision with the team managing TRT
+      </h2>
+      <p className="leading-relaxed">
+        If hair changes trouble you, raise it openly. Hair is one outcome among metabolic, cardiovascular, fertility, and
+        symptom goals. Do not change or stop prescribed hormones without medical supervision.
+      </p>
+      <h2 id="honest-uncertainty-and-next-reads" className={h2}>
+        Honest uncertainty and where to read next
+      </h2>
+      <p className="leading-relaxed">
+        Outcomes are individual. For pattern biology at a readable depth, see{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          pattern hair loss mechanisms
+        </Link>
+        ; for class-level drug context (not personal dosing),{" "}
+        <Link href={insight("finasteride-vs-saw-palmetto")} className="font-medium text-medical underline-offset-2 hover:underline">
+          finasteride versus saw palmetto
+        </Link>
+        . Nothing here replaces personalised medical advice.
+      </p>
+    </div>
+  );
+}
+
+export function BodyNormalTestosteroneAndrogenSensitive() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Pattern hair loss is often described as “androgen-related,” yet many people have testosterone results in the
+        expected range. This article explains why serum numbers and follicle behaviour are not the same conversation — and
+        why your clinician still starts with pattern and history.
+      </p>
+      <h2 id="follicle-biology-versus-serum" className={h2}>
+        Follicle biology versus a single serum line
+      </h2>
+      <p className="leading-relaxed">
+        Receptor sensitivity, local enzyme activity, and genetics all influence how hairs respond. Two people with similar
+        labs can have different density — that is not contradiction; it is biology with incomplete public soundbites.
+      </p>
+      <h2 id="pattern-first-selective-labs" className={h2}>
+        Pattern first; labs when they change management
+      </h2>
+      <p className="leading-relaxed">
+        Examination, progression over time, and (where used) scalp surface clues often carry more weight than one hormone
+        snapshot. Selective testing may still be appropriate for atypical features or systemic symptoms. The breadth of “who
+        gets which test” lives in{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter for hair loss
+        </Link>
+        — not re-listed here.
+      </p>
+      <h2 id="family-line-and-normal-lab-myths" className={h2}>
+        Family loading and “normal testosterone” myths
+      </h2>
+      <p className="leading-relaxed">
+        Heredity shifts risk without moral blame. A mid-range testosterone result neither proves nor disproves pattern
+        thinning on its own — interpretation sits with your clinician. Women may have female-pattern thinning without
+        raised serum androgens; see{" "}
+        <Link href={insight("diffuse-thinning-in-women")} className="font-medium text-medical underline-offset-2 hover:underline">
+          diffuse thinning in women
+        </Link>
+        .
+      </p>
+      <h2 id="where-mechanism-and-class-context-live" className={h2}>
+        Where mechanism and drug-class context live
+      </h2>
+      <p className="leading-relaxed">
+        Readable pathway context:{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          pattern miniaturisation overview
+        </Link>
+        . High-level medication themes (not personal protocols):{" "}
+        <Link href={insight("finasteride-vs-saw-palmetto")} className="font-medium text-medical underline-offset-2 hover:underline">
+          finasteride versus saw palmetto
+        </Link>
+        .
+      </p>
+      <h2 id="questions-worth-asking" className={h2}>
+        Questions worth asking
+      </h2>
+      <p className="leading-relaxed">
+        You might ask how your exam fits pattern loss, whether any tests are indicated for you specifically, and what
+        follow-up interval makes sense. Responses vary; certainty belongs to individual assessment, not articles.
+      </p>
+    </div>
+  );
+}
+
+export function BodyOralVsTopicalMinoxidil() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Minoxidil is a common discussion topic for pattern thinning. This article compares topical and oral routes at a
+        practical level — delivery, monitoring, and when a clinician might explore alternatives. It deliberately does not
+        re-cover mechanism, early shedding, or month-by-month timelines; those sit in a separate explainer.
+      </p>
+      <h2 id="routes-and-who-they-suit" className={h2}>
+        Routes and who might discuss which
+      </h2>
+      <p className="leading-relaxed">
+        Topicals emphasise scalp-level delivery with variable absorption; low-dose oral therapy (where lawfully prescribed)
+        uses systemic delivery with different follow-up themes. Indications, product availability, and regulation vary by
+        region. Irritation on topical, adherence barriers, or medical reasons to avoid certain formulations may steer a
+        conversation — always individual.
+      </p>
+      <h2 id="local-effects-systemic-monitoring" className={h2}>
+        Local effects, systemic considerations, and oversight
+      </h2>
+      <p className="leading-relaxed">
+        Topicals can irritate skin or raise application-logistics issues; oral therapy may warrant broader symptom
+        vigilance your prescriber will explain. Low-dose oral use for hair is off-label in many places and is not a
+        cosmetic DIY purchase. Self-switching between routes is unsafe.
+      </p>
+      <h2 id="mechanism-and-timelines-separate-article" className={h2}>
+        Mechanism, shed phase, and timelines — separate article
+      </h2>
+      <p className="leading-relaxed">
+        For how minoxidil is thought to work, early increased shed, and realistic month-scale expectations, read{" "}
+        <Link href={insight("minoxidil-mechanism-and-realistic-timelines")} className="font-medium text-medical underline-offset-2 hover:underline">
+          minoxidil mechanism and realistic timelines
+        </Link>
+        . This scaffold stays on route comparison only.
+      </p>
+      <h2 id="topical-adherence-in-real-life" className={h2}>
+        Topical adherence in real life
+      </h2>
+      <p className="leading-relaxed">
+        If you remain on topical therapy, consistent scalp contact usually matters more than frequent brand changes — hair
+        length, residue from products, and technique all affect outcomes. Your team can troubleshoot practically.
+      </p>
+      <h2 id="prescriber-led-planning" className={h2}>
+        Prescriber-led planning
+      </h2>
+      <p className="leading-relaxed">
+        Bring a full medication and supplement list and ask what monitoring fits your history. Responses are not
+        guaranteed; 5-alpha-reductase discussions sit elsewhere (e.g.{" "}
+        <Link href={insight("finasteride-vs-saw-palmetto")} className="font-medium text-medical underline-offset-2 hover:underline">
+          finasteride versus saw palmetto
+        </Link>
+        ).
+      </p>
+    </div>
+  );
+}
+
+export function BodyDutasterideHairLossConversation() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        Dutasteride appears in some hair-loss conversations because it affects more than one enzyme step in androgen
+        conversion — not because it is a casual swap for other medicines. This page outlines when the name surfaces, why
+        access and supervision matter, and where deeper biology is covered — without prescribing language.
+      </p>
+      <h2 id="finasteride-reference-not-same-drug" className={h2}>
+        Finasteride as reference — a different drug
+      </h2>
+      <p className="leading-relaxed">
+        Many people meet 5-alpha-reductase inhibitors first through finasteride. Class context (still not personalised
+        dosing) sits in{" "}
+        <Link href={insight("finasteride-vs-saw-palmetto")} className="font-medium text-medical underline-offset-2 hover:underline">
+          finasteride versus saw palmetto
+        </Link>
+        . Dutasteride is a distinct molecule with different pharmacology; efficacy and risk discussions in trials do not
+        translate into DIY substitution.
+      </p>
+      <h2 id="why-the-topic-surfaces-access" className={h2}>
+        Why the topic surfaces — and access varies
+      </h2>
+      <p className="leading-relaxed">
+        Names may arise after inadequate response to other approaches, in research, or in region-specific practice.
+        Licensed indications for hair loss, prostate disease, or off-label use differ by country — legal, supervised
+        prescribing only; avoid grey-market imports.
+      </p>
+      <h2 id="safety-monitoring-not-interchangeable" className={h2}>
+        Safety, monitoring, and not interchangeable
+      </h2>
+      <p className="leading-relaxed">
+        Hormonal agents can affect sexual function, mood, or laboratory monitoring plans in some individuals — specifics
+        belong with your prescriber. Dose, duration, half-life, and fertility planning are not arithmetic you recreate from
+        forums. Do not combine or swap 5-alpha-reductase inhibitors without supervision.
+      </p>
+      <h2 id="pattern-biology-elsewhere" className={h2}>
+        Pattern biology — elsewhere on purpose
+      </h2>
+      <p className="leading-relaxed">
+        Miniaturisation framing for pattern loss:{" "}
+        <Link href={insight("dht-and-androgenetic-alopecia")} className="font-medium text-medical underline-offset-2 hover:underline">
+          pattern hair loss overview
+        </Link>
+        . This article stays on medication-conversation context, not a second pathway lecture.
+      </p>
+      <h2 id="questions-for-your-specialist" className={h2}>
+        Questions for your specialist
+      </h2>
+      <p className="leading-relaxed">
+        Reasonable topics include timeline for review, what to report early, interactions with other medicines, and how
+        plans align with fertility goals. Outcomes remain individual; certainty is clinical, not editorial.
+      </p>
+    </div>
+  );
+}
+
+export function BodyPostpartumVsFemalePattern() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        After birth, many people expect shedding; some notice changes that do not follow the usual postpartum recovery arc.
+        This scaffold contrasts typical postpartum telogen shedding with features that may raise female-pattern thinning —
+        for discussion with a clinician, not self-labeling from a difficult week.
+      </p>
+      <h2 id="usual-postpartum-shed-window" className={h2}>
+        The usual postpartum shed window
+      </h2>
+      <p className="leading-relaxed">
+        Shedding often intensifies months after delivery and can feel dramatic. For reassurance cues, red flags, and when
+        testing may help, start with{" "}
+        <Link href={insight("postpartum-shedding-when-to-reassure-vs-when-to-test")} className="font-medium text-medical underline-offset-2 hover:underline">
+          postpartum shedding: when to reassure versus when to test
+        </Link>
+        .
+      </p>
+      <h2 id="when-pattern-thinning-may-be-considered" className={h2}>
+        When pattern thinning may be considered
+      </h2>
+      <p className="leading-relaxed">
+        Persistent widening of the part, crown changes that advance beyond the typical recovery window, or exam findings
+        your doctor interprets as miniaturisation may shift the differential — only on assessment, not from brush counts
+        alone.
+      </p>
+      <h2 id="overlap-and-broader-workup" className={h2}>
+        Overlap, thyroid or iron talk, and broader work-up
+      </h2>
+      <p className="leading-relaxed">
+        Sleep debt, nutrition flux, thyroid or iron issues can sit beside underlying pattern risk — more than one thing
+        can be true. If labs are discussed in general terms, the map is in{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter for hair loss
+        </Link>
+        .
+      </p>
+      <h2 id="beyond-postpartum-womens-thinning" className={h2}>
+        Beyond postpartum: women’s thinning more widely
+      </h2>
+      <p className="leading-relaxed">
+        For overlapping causes in women outside the birth timeline, see{" "}
+        <Link href={insight("diffuse-thinning-in-women")} className="font-medium text-medical underline-offset-2 hover:underline">
+          diffuse thinning in women
+        </Link>
+        .
+      </p>
+      <h2 id="support-and-next-visit" className={h2}>
+        Support and what to bring to follow-up
+      </h2>
+      <p className="leading-relaxed">
+        New parenthood is demanding; hair worries can weigh heavily. Mention mood or anxiety if they dominate. Timeline
+        notes, photos, breastfeeding context, and a medication list help your team judge when watchful waiting still fits
+        versus escalation.
+      </p>
+    </div>
+  );
+}
+
+export function BodySheddingVsBreakage() {
+  return (
+    <div className={wrap}>
+      <p className={lead}>
+        “My hair is falling out” sometimes means more hairs shedding from the scalp; sometimes it means shafts snapping
+        shorter. The next steps differ. This page helps you describe what you notice — it does not replace an exam.
+      </p>
+      <h2 id="shedding-versus-breakage-in-plain-terms" className={h2}>
+        Shedding versus breakage in plain terms
+      </h2>
+      <p className="leading-relaxed">
+        Increased shedding often involves full-length hairs; telogen hairs may show a tiny bulb and can track with illness,
+        stress, postpartum timing, or thyroid issues — see{" "}
+        <Link href={insight("telogen-effluvium-after-illness-or-stress")} className="font-medium text-medical underline-offset-2 hover:underline">
+          telogen effluvium after illness or stress
+        </Link>{" "}
+        or postpartum content when birth timing fits. Breakage produces uneven short fragments, frayed ends, or loss of
+        length from friction, heat, chemicals, or tension — volume can look thinner even without the same scalp shedding
+        pattern.
+      </p>
+      <h2 id="simple-at-home-clues" className={h2}>
+        Simple at-home clues (imperfect)
+      </h2>
+      <p className="leading-relaxed">
+        On a plain background, many similar long strands may fit shedding; varied short pieces may fit breakage. Itch,
+        scale, or burning suggest scalp surface issues worth reviewing — see{" "}
+        <Link href={insight("scalp-inflammation-and-shedding")} className="font-medium text-medical underline-offset-2 hover:underline">
+          scalp inflammation and shedding
+        </Link>
+        . Lay checks mislead often; clinicians may use structured examination.
+      </p>
+      <h2 id="different-clinical-paths" className={h2}>
+        Different clinical paths
+      </h2>
+      <p className="leading-relaxed">
+        Shedding discussions may lead to selective labs when indicated; breakage discussions may focus on styling
+        history, processing, and gentle care — sometimes both apply. No single article dictates your panel.
+      </p>
+      <h2 id="overlap-and-diagnosis-first" className={h2}>
+        When both overlap — diagnosis-first
+      </h2>
+      <p className="leading-relaxed">
+        Telogen increase plus mid-shaft damage from colour or heat can coexist; timelines and photos help. For how labs
+        fit broadly (not self-ordering), see{" "}
+        <Link href={insight("what-blood-tests-matter-for-hair-loss")} className="font-medium text-medical underline-offset-2 hover:underline">
+          what blood tests matter for hair loss
+        </Link>
+        . The hair-longevity pillar keeps the wider “start with cause” frame.
+      </p>
+      <h2 id="at-your-visit" className={h2}>
+        At your visit
+      </h2>
+      <p className="leading-relaxed">
+        Bring product lists, recent stressors or illness dates, and clear photos. Save loose hairs in a bag only if your
+        clinic asks — many prefer in-office assessment. Honest description beats a rushed label from social media.
       </p>
     </div>
   );
