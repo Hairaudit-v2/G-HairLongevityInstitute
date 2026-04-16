@@ -393,7 +393,7 @@ function mapLifestyleNutritionSleep(
     poor_sleep_quality: lt?.sleepQuality === "poor",
     shift_work: ai?.sleepShiftWork === "yes" || has(lifeLoad, "shift_work"),
     high_stress_load:
-      (lt?.stressScore != null && lt.stressScore >= 8) ||
+      (lt?.stressScore != null && lt.stressScore >= 7) ||
       ai?.majorStressEvent === "yes" ||
       has(lifeLoad, "major_stress"),
     overtraining: ai?.highIntensitySportBodybuilding === "yes" || has(lifeLoad, "high_intensity_sport"),

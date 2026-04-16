@@ -232,6 +232,14 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
       assert(payload.adaptive_answers.low_protein_intake !== true, "static protein answer wins");
       assert(payload.adaptive_answers.vegetarian_or_vegan !== true, "static diet owner wins");
     }),
+    run("stress score threshold aligns across review and adaptive facts", () => {
+      const payload = buildLongevityAdaptivePayload({
+        lifestyleTreatments: {
+          stressScore: 7,
+        },
+      });
+      assert(payload.adaptive_answers.high_stress_load === true, "stress 7/10 maps to high_stress_load");
+    }),
     run("scalp symptom detail fields pass through to adaptive_answers", () => {
       const payload = buildLongevityAdaptivePayload({
         adaptiveEngine: {

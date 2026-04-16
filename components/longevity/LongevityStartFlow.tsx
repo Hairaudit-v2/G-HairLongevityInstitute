@@ -21,6 +21,7 @@ import { AdaptiveIntakeOrchestrator } from "@/components/longevity/AdaptiveIntak
 import { PreliminaryPatientFeedback } from "@/components/longevity/PreliminaryPatientFeedback";
 import { buildPortalLoginRedirectPath } from "@/lib/longevity/redirects";
 import {
+  buildLongevityAdaptivePayload,
   buildIntakeTriageOutput,
   getCanonicalPresentationPattern,
   getPreliminaryPatientFeedback,
@@ -1317,6 +1318,10 @@ export function LongevityStartFlow({
     [responses]
   );
   const patientUploadGuidance = useMemo(() => getPatientUploadGuidance(responses), [responses]);
+  const adaptivePayload = useMemo(
+    () => buildLongevityAdaptivePayload(responses),
+    [responses]
+  );
   const preliminaryPatientFeedback = useMemo(
     () => getPreliminaryPatientFeedback(responses),
     [responses]
@@ -1329,10 +1334,20 @@ export function LongevityStartFlow({
     [a.sexAtBirth, a.dateOfBirth]
   );
   const adaptiveAnswerMap = (adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>;
+  const adaptiveAnswers = adaptivePayload.adaptive_answers as Record<string, string | string[] | boolean | null>;
   const adaptivePresentationPattern =
     typeof adaptiveAnswerMap.presentation_pattern === "string"
       ? adaptiveAnswerMap.presentation_pattern
       : undefined;
+  const normalizedMedicationTiming =
+    typeof adaptiveAnswers.med_change_timing_vs_hair === "string"
+      ? adaptiveAnswers.med_change_timing_vs_hair
+      : typeof adaptiveAnswerMap.med_change_timing_vs_hair === "string"
+        ? adaptiveAnswerMap.med_change_timing_vs_hair
+        : undefined;
+  const normalizedMedicationContext =
+    adaptiveAnswers.medication_change_recently === true ||
+    adaptiveAnswers.medication_hormone_change_recent === "yes";
   const mainConcernSymptomOptions = useMemo(() => {
     const scalpOwnedByAdaptive =
       adaptivePresentationPattern === "scalp_symptoms" ||
@@ -1351,6 +1366,18 @@ export function LongevityStartFlow({
         : ""
     ) ||
     ai.femaleContext?.postpartumRecent === "yes";
+  const femalePituitaryPromptSuppressed =
+    adaptiveAnswerMap.postpartum_recent_gate === "yes" ||
+    adaptivePostpartumContext ||
+    adaptiveAnswerMap.hormonal_contraception_change_gate === "yes";
+  const femalePituitaryStructuredTrigger =
+    fh.cycles === "not_occurring" ||
+    (fh.features ?? []).includes("missed_periods");
+  const showFemalePituitaryPromptInHistory =
+    showFemale &&
+    !femalePituitaryPromptSuppressed &&
+    femalePituitaryStructuredTrigger &&
+    adaptiveAnswerMap.pituitary_red_flag_followup == null;
   const reviewAboutRows: ReviewSummaryRow[] = [
     {
       label: "Name",
@@ -1476,11 +1503,11 @@ export function LongevityStartFlow({
     {
       label: "Medication or hormone change",
       value:
-        adaptiveAnswerMap.medication_hormone_change_recent === "yes"
+        normalizedMedicationContext
           ? joinReviewParts([
-              "Recent prescription or hormone change noted",
-              typeof adaptiveAnswerMap.med_change_timing_vs_hair === "string"
-                ? lookupOptionLabel(MEDICATION_TIMING_OPTIONS, adaptiveAnswerMap.med_change_timing_vs_hair)
+              "Recent medication, hormone, or related treatment change noted",
+              normalizedMedicationTiming
+                ? lookupOptionLabel(MEDICATION_TIMING_OPTIONS, normalizedMedicationTiming)
                 : "",
             ])
           : "",
@@ -1536,7 +1563,9 @@ export function LongevityStartFlow({
       label: "Documents",
       value:
         stepDocuments.length === 0
-          ? "None uploaded yet (optional - add anytime in the portal)"
+          ? un.currentBloodStatus === "upload_later" || un.currentBloodStatus === "not_done" || un.currentBloodStatus === "unsure"
+            ? "None uploaded yet. That is fine - you can submit now and add blood tests, photos, or other documents later in the portal."
+            : "None uploaded yet. That is fine - you can add blood tests, photos, or other documents anytime in the portal."
           : `${stepDocuments.length} document(s) uploaded`,
     },
   ].filter((row) => row.value);
@@ -1863,7 +1892,7 @@ export function LongevityStartFlow({
                 <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
                 <SingleSelect
                   label="In the last 6 months, did you start, stop, or change any medication, hormone treatment, or related product that could be relevant to your hair?"
-                  helpText="Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, or peptides / hormone-related products."
+                  helpText="Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, creatine monohydrate, or peptides / hormone-related products."
                   value={
                     typeof adaptiveAnswerMap.medication_hormone_change_recent === "string"
                       ? adaptiveAnswerMap.medication_hormone_change_recent
@@ -2048,6 +2077,30 @@ export function LongevityStartFlow({
                       })
                     }
                   />
+                  {showFemalePituitaryPromptInHistory && (
+                    <SingleSelect
+                      label="Have you had absent periods when not pregnant, breastfeeding, or on hormonal suppression - or any milky nipple discharge, new severe headaches, or visual changes?"
+                      helpText="Answer yes if any part of this applies."
+                      explanation="Most people will answer no. We ask because these symptoms deserve more direct clinician follow-up rather than being treated as routine shedding alone."
+                      value={
+                        typeof adaptiveAnswerMap.pituitary_red_flag_followup === "string"
+                          ? adaptiveAnswerMap.pituitary_red_flag_followup
+                          : undefined
+                      }
+                      options={[
+                        { key: "yes", label: "Yes" },
+                        { key: "no", label: "No" },
+                        { key: "unsure", label: "Unsure" },
+                        { key: "prefer_not_to_say", label: "Prefer not to say" },
+                      ]}
+                      onChange={(k) =>
+                        setAdaptiveEngineAnswer(
+                          "pituitary_red_flag_followup",
+                          k as string
+                        )
+                      }
+                    />
+                  )}
                   <MultiSelect label="Features" options={FEMALE_FEATURES} value={fh.features ?? []} onChange={(v) => setFemaleHistory({ features: v })} />
                   <SingleSelect
                     label="Have you noticed new or worsening jawline acne, unwanted facial hair, or coarse body hair?"

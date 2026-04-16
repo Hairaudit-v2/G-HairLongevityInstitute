@@ -37,15 +37,16 @@ function sheddingOrDiffusePresentation(answers: IntakeAnswerMap): boolean {
   );
 }
 
-function maleExposureDetailChosen(answers: IntakeAnswerMap): boolean {
-  return arr(answers.male_androgen_exposure_detail).some((x) => x && x !== "prefer_not_detail" && x !== "none");
+function maleNonTrtExposureDetailChosen(answers: IntakeAnswerMap): boolean {
+  return arr(answers.male_androgen_exposure_detail).some(
+    (x) => x && x !== "prefer_not_detail" && x !== "none" && x !== "trt"
+  );
 }
 
 function femaleEndocrinePituitaryPromptVisible(answers: IntakeAnswerMap): boolean {
-  if (!femaleHormonalYes(answers)) return false;
   if (answers.postpartum_recent_gate === "yes") return false;
   if (answers.hormonal_contraception_change_gate === "yes") return false;
-  return true;
+  return femaleHormonalYes(answers);
 }
 
 function femaleHirsutismPromptVisible(answers: IntakeAnswerMap): boolean {
@@ -451,7 +452,7 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
     label: "Which exposures apply (or applied) most recently?",
     type: "multi_select",
     section: "sex_specific",
-    helpText: "Select any that fit. This stays in the androgen section only.",
+    helpText: "Select any that fit. TRT timing is covered in the timeline section.",
     explanation:
       "Prescribed testosterone (TRT) is different from gym or online products. Peptides and some “boosters” can also affect hormone balance. Choose “Prefer not to detail” if you want to skip specifics.",
     options: [
@@ -479,10 +480,10 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
   },
   {
     id: "exogenous_androgen_timing_vs_hair",
-    label: "For the main exposure you selected, when did it start relative to your hair change?",
+    label: "For the main non-TRT exposure you selected, when did it start relative to your hair change?",
     type: "single_select",
     section: "sex_specific",
-    helpText: "One timeline is enough if you had several exposures.",
+    helpText: "Use this for boosters, SARMs, peptides, or another non-TRT exposure. One timeline is enough if you had several.",
     options: [
       { value: "before_hair_change", label: "Before the hair change" },
       { value: "around_same_time", label: "Around the same time" },
@@ -490,7 +491,7 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
       { value: "unsure", label: "Unsure" },
     ],
     allowSkip: true,
-    visibleWhen: (a) => maleAndrogenYes(a) && maleExposureDetailChosen(a),
+    visibleWhen: (a) => maleAndrogenYes(a) && maleNonTrtExposureDetailChosen(a),
     pathwayHints: ["medication_androgen_exposure", "androgenic_pattern"],
   },
   {
@@ -549,7 +550,7 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
     type: "single_select",
     section: "trigger",
     helpText:
-      "Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, or peptides / hormone-related products.",
+      "Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, creatine monohydrate, or peptides / hormone-related products.",
     explanation:
       "We ask this here to compare the timing with your hair change. If you already noted a medication change under timeline triggers, answer the same way here so your record lines up.",
     options: [
