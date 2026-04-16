@@ -201,6 +201,34 @@ function summarizeLabels(labels: string[], max = 3): string {
   return `${labels.slice(0, max).join(", ")} +${labels.length - max} more`;
 }
 
+function normalizeExclusiveMultiSelect(
+  previous: string[] | undefined,
+  next: string[],
+  exclusiveKeys: string[]
+): string[] {
+  const prev = previous ?? [];
+  const deduped = Array.from(new Set(next.filter(Boolean)));
+  if (deduped.length <= 1) return deduped;
+  if (deduped.length <= prev.length) return deduped;
+
+  const exclusive = new Set(exclusiveKeys);
+  const added = deduped.find((value) => !prev.includes(value));
+  if (!added) return deduped;
+  if (exclusive.has(added)) return [added];
+  return deduped.filter((value) => !exclusive.has(value));
+}
+
+function summarizeSpecialSelection(
+  options: ReadonlyArray<{ key: string; label: string }>,
+  values: string[] | null | undefined,
+  specialKeys: string[]
+): string {
+  if (!values?.length) return "";
+  const special = values.find((value) => specialKeys.includes(value));
+  if (special) return lookupOptionLabel(options, special);
+  return summarizeLabels(pickSelectedLabels(options, values, []));
+}
+
 function joinReviewParts(parts: Array<string | null | undefined | false>, separator = " • "): string {
   return parts.filter((part): part is string => typeof part === "string" && part.length > 0).join(separator);
 }
@@ -558,6 +586,49 @@ const DIAGNOSES = [
   { key: "eczema", label: "Eczema" },
   { key: "none", label: "None" },
 ];
+
+const CANCER_TREATMENT_HISTORY_OPTIONS = [
+  { key: "yes", label: "Yes" },
+  { key: "no", label: "No" },
+  { key: "unsure", label: "Unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+const CANCER_TREATMENT_TYPES = [
+  { key: "chemotherapy", label: "Chemotherapy" },
+  { key: "radiation", label: "Radiation" },
+  { key: "targeted_therapy", label: "Targeted therapy" },
+  { key: "immunotherapy", label: "Immunotherapy" },
+  { key: "hormone_blocking_therapy", label: "Hormone-blocking therapy" },
+  { key: "mixed_or_unsure", label: "Mixed or unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+const SYSTEMIC_DISEASE_BUNDLE = [
+  { key: "chronic_liver_disease", label: "Chronic liver disease" },
+  { key: "chronic_kidney_disease", label: "Chronic kidney disease" },
+  { key: "bariatric_surgery", label: "Bariatric surgery" },
+  { key: "inflammatory_bowel_disease", label: "Inflammatory bowel disease" },
+  { key: "celiac_or_malabsorption", label: "Celiac disease or malabsorption" },
+  { key: "none", label: "None" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+const WEIGHT_LOSS_INTENT_OPTIONS = [
+  { key: "intentional", label: "Intentional" },
+  { key: "unintentional", label: "Unintentional" },
+  { key: "mixed_or_unclear", label: "Mixed or unclear" },
+  { key: "unsure", label: "Unsure" },
+] as const;
+
+const MAJOR_ILLNESS_OR_HOSPITAL_REASON_OPTIONS = [
+  { key: "infection_or_fever", label: "Infection or fever" },
+  { key: "surgery_or_procedure", label: "Surgery or procedure" },
+  { key: "pregnancy_related", label: "Pregnancy-related" },
+  { key: "cancer_treatment", label: "Cancer treatment" },
+  { key: "inflammatory_or_autoimmune_flare", label: "Inflammatory or autoimmune flare" },
+  { key: "other_or_unsure", label: "Other or unsure" },
+] as const;
 
 const CURRENT_SYMPTOMS = [
   { key: "fatigue", label: "Fatigue" },
@@ -1378,6 +1449,10 @@ export function LongevityStartFlow({
     !femalePituitaryPromptSuppressed &&
     femalePituitaryStructuredTrigger &&
     adaptiveAnswerMap.pituitary_red_flag_followup == null;
+  const rapidWeightLossSelected = (tt.triggers ?? []).includes("rapid_weight_loss");
+  const illnessOrHospitalContextSelected =
+    (tt.triggers ?? []).includes("recent_illness_or_infection") ||
+    (tt.pastYearEvents ?? []).includes("hospital_admission");
   const reviewAboutRows: ReviewSummaryRow[] = [
     {
       label: "Name",
@@ -1427,6 +1502,31 @@ export function LongevityStartFlow({
     {
       label: "Current symptoms",
       value: summarizeLabels(pickSelectedLabels(CURRENT_SYMPTOMS, mh.currentSymptoms)),
+    },
+    {
+      label: "Cancer treatment history",
+      value:
+        mh.cancerTreatmentHistory === "yes"
+          ? joinReviewParts([
+              "Cancer treatment noted",
+              summarizeSpecialSelection(CANCER_TREATMENT_TYPES, mh.cancerTreatmentTypes, ["prefer_not_to_say"]),
+              lookupOptionLabel(
+                MEDICATION_TIMING_OPTIONS,
+                mh.cancerTreatmentTimingVsHair as string | null | undefined
+              ),
+            ])
+          : lookupOptionLabel(
+              CANCER_TREATMENT_HISTORY_OPTIONS as ReadonlyArray<{ key: string; label: string }>,
+              mh.cancerTreatmentHistory
+            ),
+    },
+    {
+      label: "Systemic health or procedure history",
+      value: summarizeSpecialSelection(
+        SYSTEMIC_DISEASE_BUNDLE as ReadonlyArray<{ key: string; label: string }>,
+        mh.systemicDiseaseBundle,
+        ["none", "prefer_not_to_say"]
+      ),
     },
     {
       label: "Family history",
@@ -1499,6 +1599,20 @@ export function LongevityStartFlow({
     {
       label: "Current trend",
       value: lookupOptionLabel(SHEDDING_TREND_OPTIONS, tt.sheddingTrend),
+    },
+    {
+      label: "Weight loss intent",
+      value: lookupOptionLabel(
+        WEIGHT_LOSS_INTENT_OPTIONS as ReadonlyArray<{ key: string; label: string }>,
+        tt.weightLossIntent
+      ),
+    },
+    {
+      label: "Severe illness or hospital context",
+      value: lookupOptionLabel(
+        MAJOR_ILLNESS_OR_HOSPITAL_REASON_OPTIONS as ReadonlyArray<{ key: string; label: string }>,
+        tt.majorIllnessOrHospitalReason
+      ),
     },
     {
       label: "Medication or hormone change",
@@ -1889,10 +2003,23 @@ export function LongevityStartFlow({
                     </div>
                   )}
                 </div>
-                <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
+                <MultiSelect
+                  label="Triggers around the time of change"
+                  options={TRIGGERS}
+                  value={tt.triggers ?? []}
+                  onChange={(v) => {
+                    const keepMajorIllnessReason =
+                      v.includes("recent_illness_or_infection") || (tt.pastYearEvents ?? []).includes("hospital_admission");
+                    setTimelineTriggers({
+                      triggers: v,
+                      weightLossIntent: v.includes("rapid_weight_loss") ? tt.weightLossIntent : undefined,
+                      majorIllnessOrHospitalReason: keepMajorIllnessReason ? tt.majorIllnessOrHospitalReason : undefined,
+                    });
+                  }}
+                />
                 <SingleSelect
-                  label="In the last 6 months, did you start, stop, or change any medication, treatment, or related product that could be relevant to your hair?"
-                  helpText="Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, chemotherapy, targeted therapy, immunotherapy, creatine monohydrate, or peptides / hormone-related products."
+                  label="In the last 6 months, did you start, stop, or change any medication, treatment, or related product around the time your hair symptoms changed?"
+                  helpText="This is about recent timing. Examples include antidepressants, ADHD/stimulant medication, thyroid medicine, weight-loss medication, Roaccutane / isotretinoin, TRT / testosterone-related treatment, chemotherapy, targeted therapy, immunotherapy, creatine monohydrate, or peptides / hormone-related products."
                   value={
                     typeof adaptiveAnswerMap.medication_hormone_change_recent === "string"
                       ? adaptiveAnswerMap.medication_hormone_change_recent
@@ -1917,7 +2044,41 @@ export function LongevityStartFlow({
                     onChange={(k) => setAdaptiveEngineAnswer("med_change_timing_vs_hair", k)}
                   />
                 )}
-                <MultiSelect label="Past year events" options={PAST_YEAR_EVENTS} value={tt.pastYearEvents ?? []} onChange={(v) => setTimelineTriggers({ pastYearEvents: v })} />
+                {rapidWeightLossSelected && (
+                  <SingleSelect
+                    label="Was that weight loss intentional?"
+                    helpText="This helps separate deliberate dieting from unexpected or illness-related weight loss."
+                    value={tt.weightLossIntent}
+                    options={[...WEIGHT_LOSS_INTENT_OPTIONS]}
+                    onChange={(k) => setTimelineTriggers({ weightLossIntent: k as TimelineTriggers["weightLossIntent"] })}
+                  />
+                )}
+                <MultiSelect
+                  label="Past year events"
+                  options={PAST_YEAR_EVENTS}
+                  value={tt.pastYearEvents ?? []}
+                  onChange={(v) => {
+                    const keepMajorIllnessReason =
+                      (tt.triggers ?? []).includes("recent_illness_or_infection") || v.includes("hospital_admission");
+                    setTimelineTriggers({
+                      pastYearEvents: v,
+                      majorIllnessOrHospitalReason: keepMajorIllnessReason ? tt.majorIllnessOrHospitalReason : undefined,
+                    });
+                  }}
+                />
+                {illnessOrHospitalContextSelected && (
+                  <SingleSelect
+                    label="What was the main reason for that hospital stay or severe illness?"
+                    helpText="Choose the closest fit if more than one applies."
+                    value={tt.majorIllnessOrHospitalReason}
+                    options={[...MAJOR_ILLNESS_OR_HOSPITAL_REASON_OPTIONS]}
+                    onChange={(k) =>
+                      setTimelineTriggers({
+                        majorIllnessOrHospitalReason: k as TimelineTriggers["majorIllnessOrHospitalReason"],
+                      })
+                    }
+                  />
+                )}
                 <SingleSelect label="Shedding trend" value={tt.sheddingTrend} options={[{ key: "stable", label: "Stable" }, { key: "improved", label: "Improved" }, { key: "worsened", label: "Worsened" }, { key: "comes_and_goes", label: "Comes and goes" }]} onChange={(k) => setTimelineTriggers({ sheddingTrend: k })} />
                 {(presentationCanon === "acute_shedding" || presentationCanon === "diffuse_thinning") && (
                   <SingleSelect
@@ -1972,10 +2133,68 @@ export function LongevityStartFlow({
             <Card>
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 4</div>
               <h2 className="mt-2 text-2xl font-semibold">Medical history</h2>
-              <p className="mt-2 text-white/70">Relevant diagnoses and blood work.</p>
+              <p className="mt-2 text-white/70">Diagnoses, broader systemic history, and blood work.</p>
               <div className="mt-6 space-y-6">
                 <MultiSelect label="Diagnoses (select any that apply)" options={DIAGNOSES} value={mh.diagnoses ?? []} onChange={(v) => setMedicalHistory({ diagnoses: v })} />
                 <MultiSelect label="Current symptoms" options={CURRENT_SYMPTOMS} value={mh.currentSymptoms ?? []} onChange={(v) => setMedicalHistory({ currentSymptoms: v })} />
+                <SingleSelect
+                  label="Have you ever had cancer treatment that might be relevant to your hair changes?"
+                  helpText="Optional. This is broader treatment history, not just the last 6 months."
+                  value={mh.cancerTreatmentHistory}
+                  options={[...CANCER_TREATMENT_HISTORY_OPTIONS]}
+                  onChange={(k) =>
+                    setMedicalHistory({
+                      cancerTreatmentHistory: k as MedicalHistory["cancerTreatmentHistory"],
+                      cancerTreatmentTypes: k === "yes" ? mh.cancerTreatmentTypes : undefined,
+                      cancerTreatmentTimingVsHair: k === "yes" ? mh.cancerTreatmentTimingVsHair : undefined,
+                    })
+                  }
+                />
+                {mh.cancerTreatmentHistory === "yes" && (
+                  <>
+                    <MultiSelect
+                      label="If yes, which best fits the treatment you had?"
+                      helpText="Select all that apply, or choose mixed / unsure."
+                      options={[...CANCER_TREATMENT_TYPES]}
+                      value={mh.cancerTreatmentTypes ?? []}
+                      onChange={(v) =>
+                        setMedicalHistory({
+                          cancerTreatmentTypes: normalizeExclusiveMultiSelect(
+                            mh.cancerTreatmentTypes,
+                            v,
+                            ["mixed_or_unsure", "prefer_not_to_say"]
+                          ) as MedicalHistory["cancerTreatmentTypes"],
+                        })
+                      }
+                    />
+                    <SingleSelect
+                      label="How does that treatment line up with your hair changes?"
+                      helpText="Approximate timing is enough."
+                      value={mh.cancerTreatmentTimingVsHair}
+                      options={MEDICATION_TIMING_OPTIONS}
+                      onChange={(k) =>
+                        setMedicalHistory({
+                          cancerTreatmentTimingVsHair: k as MedicalHistory["cancerTreatmentTimingVsHair"],
+                        })
+                      }
+                    />
+                  </>
+                )}
+                <MultiSelect
+                  label="Do any of these health conditions or procedures apply to you?"
+                  helpText="Select all that apply."
+                  options={[...SYSTEMIC_DISEASE_BUNDLE]}
+                  value={mh.systemicDiseaseBundle ?? []}
+                  onChange={(v) =>
+                    setMedicalHistory({
+                      systemicDiseaseBundle: normalizeExclusiveMultiSelect(
+                        mh.systemicDiseaseBundle,
+                        v,
+                        ["none", "prefer_not_to_say"]
+                      ) as MedicalHistory["systemicDiseaseBundle"],
+                    })
+                  }
+                />
                 <MultiSelect label="Family history" options={FAMILY_HISTORY} value={mh.familyHistory ?? []} onChange={(v) => setMedicalHistory({ familyHistory: v })} />
                 {((mh.familyHistory ?? []).includes("male_pattern_hair_loss") ||
                   (mh.familyHistory ?? []).includes("female_pattern_thinning")) && (
