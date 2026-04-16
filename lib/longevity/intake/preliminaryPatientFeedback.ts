@@ -590,7 +590,7 @@ export function getPreliminaryPatientFeedback(
   );
 
   const sorted = sortCards(matched);
-  const cards =
+  const cards: Array<PreliminaryPatientFeedbackCard & { summaryLabel: string }> =
     sorted.length > 0
       ? sorted.slice(0, 4)
       : [
