@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
+import { buildAuthRequiredJson } from "@/lib/longevity/redirects";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
@@ -13,11 +14,18 @@ export async function GET(req: Request) {
   }
   try {
     const profileId = await getLongevitySessionFromRequest();
-    if (!profileId) {
-      return NextResponse.json({ ok: false, error: "Session required." }, { status: 401 });
-    }
     const { searchParams } = new URL(req.url);
     const intakeId = searchParams.get("intakeId") ?? undefined;
+    if (!profileId) {
+      return NextResponse.json(
+        buildAuthRequiredJson(
+          intakeId ? `/longevity/start?resume=${intakeId}` : "/longevity/start",
+          "Please sign in to access your uploaded documents.",
+          { error: "session-expired" }
+        ),
+        { status: 401 }
+      );
+    }
     const supabase = supabaseAdmin();
     const documents = await listDocumentsForProfile(supabase, profileId, intakeId);
     return NextResponse.json({ ok: true, documents });

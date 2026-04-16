@@ -3,6 +3,8 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { buildPortalAuthCallbackUrl } from "@/lib/longevity/authCallback";
+import { getSafePostAuthRedirect } from "@/lib/longevity/redirects";
 import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
 
 const GOLD = "rgb(198,167,94)";
@@ -34,24 +36,6 @@ function GoogleIcon({ className }: { className?: string }) {
 const RESEND_COOLDOWN_SECONDS = 60;
 const MAGIC_LINK_EXPIRY_MINUTES = 10;
 
-/** Canonical callback for OAuth + magic link so PKCE/session cookies stay on one host (not window.location.origin). */
-const CANONICAL_PORTAL_AUTH_CALLBACK_BASE =
-  "https://www.hairlongevityinstitute.com/portal/auth/callback";
-
-/** Build callback URL; optional redirect param preserved for post-login routing. */
-function getRedirectUrl(redirectPath?: string | null): string {
-  if (redirectPath && redirectPath.startsWith("/")) {
-    return `${CANONICAL_PORTAL_AUTH_CALLBACK_BASE}?redirect=${encodeURIComponent(redirectPath)}`;
-  }
-  return CANONICAL_PORTAL_AUTH_CALLBACK_BASE;
-}
-
-/** Allowed post-login redirect paths (same-origin only). */
-function isAllowedRedirect(path: string | null): path is string {
-  if (!path || typeof path !== "string") return false;
-  return path.startsWith("/longevity/") || path.startsWith("/portal/");
-}
-
 const NO_EMAIL_MESSAGE =
   "We could not create your profile because your sign-in provider did not provide an email address. Please sign in using an email-based login.";
 
@@ -61,9 +45,15 @@ function PortalLoginContent() {
   const searchParams = useSearchParams();
   const redirectParam = searchParams.get("redirect");
   const errorParam = searchParams.get("error");
-  const afterLoginRedirect = isAllowedRedirect(redirectParam) ? redirectParam : null;
+  const afterLoginRedirect = redirectParam ? getSafePostAuthRedirect(redirectParam) : null;
   const showNoEmailMessage = errorParam === "no-email";
   const showSessionExpiredMessage = errorParam === "session-expired";
+  const resumingAssessment =
+    afterLoginRedirect?.startsWith("/longevity/intake/") ||
+    afterLoginRedirect?.startsWith("/longevity/start?resume=") ||
+    afterLoginRedirect?.startsWith("/longevity/start?intakeId=");
+  const startingAssessment =
+    !!afterLoginRedirect?.startsWith("/longevity/start") && !resumingAssessment;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -87,7 +77,7 @@ function PortalLoginContent() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: getRedirectUrl(afterLoginRedirect),
+          redirectTo: buildPortalAuthCallbackUrl(afterLoginRedirect),
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -113,7 +103,7 @@ function PortalLoginContent() {
       const { error } = await supabase.auth.signInWithOtp({
         email: emailToUse.trim().toLowerCase(),
         options: {
-          emailRedirectTo: getRedirectUrl(afterLoginRedirect),
+          emailRedirectTo: buildPortalAuthCallbackUrl(afterLoginRedirect),
           shouldCreateUser: true,
         },
       });
@@ -212,7 +202,7 @@ function PortalLoginContent() {
           return;
         }
         // Sync route sets longevity cookie (Route Handler), then redirects.
-        const redirectTo = afterLoginRedirect ?? "/portal/dashboard";
+        const redirectTo = getSafePostAuthRedirect(afterLoginRedirect);
         window.location.href = `/api/longevity/session/sync?redirect=${encodeURIComponent(redirectTo)}`;
       } catch (err) {
         setMessage({
@@ -250,7 +240,7 @@ function PortalLoginContent() {
           email: emailTrimmed.toLowerCase(),
           password,
           options: {
-            emailRedirectTo: getRedirectUrl(afterLoginRedirect),
+            emailRedirectTo: buildPortalAuthCallbackUrl(afterLoginRedirect),
           },
         });
         if (error) {
@@ -259,7 +249,7 @@ function PortalLoginContent() {
           return;
         }
         if (data.session) {
-          const redirectTo = afterLoginRedirect ?? "/portal/dashboard";
+          const redirectTo = getSafePostAuthRedirect(afterLoginRedirect);
           window.location.href = `/api/longevity/session/sync?redirect=${encodeURIComponent(redirectTo)}`;
           return;
         }
@@ -285,11 +275,15 @@ function PortalLoginContent() {
       <div className="text-sm tracking-widest text-[rgb(var(--gold))]">
         Hair Longevity Institute™ — Patient Portal
       </div>
-      <h1 className="mt-2 text-2xl font-semibold text-white">Sign in</h1>
+      <h1 className="mt-2 text-2xl font-semibold text-white">
+        {startingAssessment ? "Create your account or sign in" : "Sign in"}
+      </h1>
       <p className="mt-1 text-white/70">
-        {afterLoginRedirect?.startsWith("/longevity/intake/")
+        {resumingAssessment
           ? "Please sign in to resume your assessment."
-          : "Use your email to access your intakes and documents."}
+          : startingAssessment
+            ? "A secure portal account is required before your assessment can begin. Once you sign in, you will return straight to the intake."
+            : "Use your email to access your intakes and documents."}
       </p>
 
       {showNoEmailMessage && (
@@ -300,6 +294,12 @@ function PortalLoginContent() {
       {showSessionExpiredMessage && (
         <div className="mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-200">
           {SESSION_EXPIRED_MESSAGE}
+        </div>
+      )}
+      {startingAssessment && (
+        <div className="mt-4 rounded-xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 px-3 py-2.5 text-sm text-white/85">
+          Your assessment draft will only be created after authentication. Nothing starts before you
+          sign in.
         </div>
       )}
 
@@ -547,11 +547,7 @@ function PortalLoginContent() {
       )}
 
       <p className="mt-6 text-sm text-white/50">
-        You can also{" "}
-        <Link href="/longevity/start" className="text-[rgb(var(--gold))] hover:underline">
-          start an intake without an account
-        </Link>
-        ; your progress is tied to your email.
+        Secure patient assessments now require a portal account before the intake begins.
       </p>
       <Link href="/longevity" className="mt-4 inline-block text-sm text-white/60 hover:text-white/90">
         ← Back to Longevity

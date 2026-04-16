@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { getSafePostAuthRedirect } from "@/lib/longevity/redirects";
 import { createLongevitySupabaseBrowserClient } from "@/lib/longevity/supabaseBrowser";
 
 /** Supabase PKCE magic link uses type=email; we also accept magiclink. Map recovery/signup to email for verifyOtp. */
@@ -17,7 +18,6 @@ function toOtpType(type: string | null): "email" | "magiclink" {
  * Implicit flow (legacy): consume access_token + refresh_token from URL hash and setSession().
  */
 function CallbackContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"exchanging" | "done" | "error">("exchanging");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,10 +33,7 @@ function CallbackContent() {
       const query = new URLSearchParams(queryString);
 
       const redirectTo = query.get("redirect") ?? searchParams.get("redirect");
-      const allowedRedirect =
-        redirectTo &&
-        (redirectTo.startsWith("/longevity/") || redirectTo.startsWith("/portal/"));
-      const finalRedirect = allowedRedirect ? redirectTo : "/portal/dashboard";
+      const finalRedirect = getSafePostAuthRedirect(redirectTo);
       const destination = `/api/longevity/session/sync?redirect=${encodeURIComponent(finalRedirect)}`;
 
       // 0) OAuth (e.g. Google): code in query — exchange for session then redirect.
@@ -96,7 +93,7 @@ function CallbackContent() {
       setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
       setStatus("error");
     }
-  }, [router, searchParams]);
+  }, [searchParams]);
 
   useEffect(() => {
     exchange();

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { normalizeEmail } from "@/lib/longevity/email";
 import { getLongevitySessionFromRequest, setLongevitySession } from "@/lib/longevityAuth";
+import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
+import { buildAuthRequiredJson } from "@/lib/longevity/redirects";
+import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
 import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 
@@ -16,7 +18,14 @@ export async function GET() {
   try {
     const profileId = await getLongevitySessionFromRequest();
     if (!profileId) {
-      return NextResponse.json({ ok: true, intakes: [] });
+      return NextResponse.json(
+        buildAuthRequiredJson(
+          "/portal/dashboard",
+          "Please sign in to view your intakes.",
+          { error: "session-expired" }
+        ),
+        { status: 401 }
+      );
     }
     const supabase = supabaseAdmin();
     const { data, error } = await supabase
@@ -37,7 +46,7 @@ export async function GET() {
 }
 
 /**
- * Create draft intake. Create or resolve profile; set session cookie; create intake + questionnaire.
+ * Create draft intake for an authenticated portal patient only.
  * Contract: intakeId is returned only after both hli_longevity_intakes and hli_longevity_questionnaires
  * rows exist, so the client can rely on a stable draft and intakeId before any later step actions.
  * Longitudinal: POST always creates a new intake row (additive). It never overwrites or replaces a
@@ -50,52 +59,55 @@ export async function POST(req: Request) {
   }
   try {
     const body = await req.json().catch(() => ({}));
-    const email = normalizeEmail(String(body.email ?? ""));
     const full_name = String(body.full_name ?? "").trim();
-    if (!email) {
-      return NextResponse.json({ ok: false, error: "Email is required." }, { status: 400 });
+
+    const authUser = await getPortalUser();
+    if (!authUser) {
+      return NextResponse.json(
+        buildAuthRequiredJson(
+          "/longevity/start",
+          "Please create your account or sign in to begin your assessment."
+        ),
+        { status: 401 }
+      );
+    }
+    const trichologist = await getTrichologistFromRequest();
+    if (trichologist) {
+      return NextResponse.json(
+        { ok: false, error: "Clinician accounts cannot start patient intakes." },
+        { status: 403 }
+      );
     }
 
     const supabase = supabaseAdmin();
-    let profileId: string | null = await getLongevitySessionFromRequest();
-
-    if (!profileId) {
-      const { data: existing } = await supabase
-        .from("hli_longevity_profiles")
-        .select("id")
-        .ilike("email", email)
-        .limit(1)
-        .maybeSingle();
-      if (existing?.id) {
-        profileId = existing.id;
-        if (full_name) {
-          await supabase
-            .from("hli_longevity_profiles")
-            .update({ full_name, updated_at: new Date().toISOString() })
-            .eq("id", profileId);
-        }
-      } else {
-        const { data: created, error: createErr } = await supabase
-          .from("hli_longevity_profiles")
-          .insert({ email, full_name: full_name || null })
-          .select("id")
-          .single();
-        if (createErr || !created?.id) {
-          return NextResponse.json(
-            { ok: false, error: createErr?.message ?? "Failed to create profile." },
-            { status: 500 }
-          );
-        }
-        profileId = created.id;
+    const profileResult = await ensurePortalProfile(supabase, authUser);
+    if (!profileResult.ok) {
+      if (profileResult.reason === "no_email") {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Your account is missing an email address. Please sign in with an email-based login.",
+          },
+          { status: 400 }
+        );
       }
-      if (profileId) await setLongevitySession(profileId);
+      return NextResponse.json(
+        { ok: false, error: "We could not prepare your patient profile. Please try signing in again." },
+        { status: 500 }
+      );
     }
 
-    if (!profileId) {
-      return NextResponse.json(
-        { ok: false, error: "Session or profile required." },
-        { status: 401 }
-      );
+    const profileId = profileResult.profileId;
+    const existingSession = await getLongevitySessionFromRequest();
+    if (existingSession !== profileId) {
+      await setLongevitySession(profileId);
+    }
+
+    if (full_name) {
+      await supabase
+        .from("hli_longevity_profiles")
+        .update({ full_name, updated_at: new Date().toISOString() })
+        .eq("id", profileId);
     }
 
     const { data: intake, error: intakeErr } = await supabase

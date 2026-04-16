@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
+import { buildAuthRequiredJson } from "@/lib/longevity/redirects";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { REVIEW_STATUS_IN_QUEUE } from "@/lib/longevity/reviewConstants";
@@ -34,6 +35,16 @@ export async function POST(
     if (!id) {
       return NextResponse.json({ ok: false, error: "Missing intake id." }, { status: 400 });
     }
+    if (!profileId) {
+      return NextResponse.json(
+        buildAuthRequiredJson(
+          `/longevity/start?resume=${id}`,
+          "Please sign in to submit your assessment.",
+          { error: "session-expired" }
+        ),
+        { status: 401 }
+      );
+    }
     const supabase = supabaseAdmin();
     const { data: intake, error: fetchErr } = await supabase
       .from("hli_longevity_intakes")
@@ -43,7 +54,7 @@ export async function POST(
     if (fetchErr || !intake) {
       return NextResponse.json({ ok: false, error: "Intake not found." }, { status: 404 });
     }
-    if (!profileId || intake.profile_id !== profileId) {
+    if (intake.profile_id !== profileId) {
       return NextResponse.json({ ok: false, error: "Not authorized." }, { status: 403 });
     }
     if (intake.status !== "draft") {

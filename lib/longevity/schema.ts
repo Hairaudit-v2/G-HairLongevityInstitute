@@ -88,7 +88,9 @@ export type MedicalHistory = {
 
 export type FemaleHistory = {
   cycles?: "regular" | "irregular" | "not_occurring" | "prefer_not_to_say";
+  cycleChangeAroundHairChange?: "yes" | "no" | "unsure" | "prefer_not_to_say";
   features?: string[];
+  newWorseningHyperandrogenFeatures?: "yes" | "no" | "unsure" | "prefer_not_to_say";
   lifeStage?: string[];
 };
 

@@ -1,10 +1,3 @@
-import {
-  ANDROGEN_GUIDE_PDF_DOWNLOAD_AS,
-  ANDROGEN_GUIDE_PDF_HREF,
-  MALE_PATTERN_GUIDE_PDF_DOWNLOAD_AS,
-  MALE_PATTERN_GUIDE_PDF_HREF,
-} from "@/lib/guides/hliGuidePdfs";
-
 /**
  * Featured downloadable / landing-page guides for HLI marketing surfaces.
  * Order matters: first item is the foundational “start here” guide on the homepage.
@@ -20,9 +13,8 @@ export type HliFeaturedGuide = {
   href?: string;
   /** When set with href, passed to SecondaryButton for same-origin PDFs */
   downloadAs?: string;
-  /** Used as primary button target when href is omitted (editorial stand-in until PDF/landing ships) */
+  /** Optional second link when a landing page href and an alternate path both exist */
   readOnlineHref?: string;
-  /** Second link when both a landing href and an alternate read path exist */
   readOnlineLabel?: string;
 };
 
@@ -59,10 +51,7 @@ export const FEATURED_HLI_GUIDES: HliFeaturedGuide[] = [
     description:
       "Learn how male pattern hair loss progresses, what early signs to look for, and which evidence-based strategies may actually help.",
     ctaLabel: HLI_GUIDE_CTA_READ,
-    href: MALE_PATTERN_GUIDE_PDF_HREF,
-    downloadAs: MALE_PATTERN_GUIDE_PDF_DOWNLOAD_AS,
-    readOnlineHref: "/insights/dht-and-androgenetic-alopecia",
-    readOnlineLabel: "Read overview: pattern loss & DHT",
+    href: "/guides/male-pattern-hair-loss",
   },
   {
     id: "androgen-biology",
@@ -71,9 +60,6 @@ export const FEATURED_HLI_GUIDES: HliFeaturedGuide[] = [
     description:
       "Explore how androgen biology, hormone exposure, and follicular sensitivity can shape hair-loss risk in both men and women.",
     ctaLabel: HLI_GUIDE_CTA_READ,
-    href: ANDROGEN_GUIDE_PDF_HREF,
-    downloadAs: ANDROGEN_GUIDE_PDF_DOWNLOAD_AS,
-    readOnlineHref: "/insights/finasteride-vs-saw-palmetto",
-    readOnlineLabel: "Read related: finasteride vs supplements",
+    href: "/guides/androgen-index",
   },
 ];

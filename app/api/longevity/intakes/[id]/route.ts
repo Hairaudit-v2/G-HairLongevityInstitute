@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
+import { buildAuthRequiredJson } from "@/lib/longevity/redirects";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { QUESTIONNAIRE_SCHEMA_VERSION } from "@/lib/longevity/schema";
@@ -50,15 +51,8 @@ export async function GET(
     // No session: instruct frontend to redirect to login so user can resume after signing in.
     // Do not fetch intake (avoids leaking existence); no intake data is returned.
     if (!profileId) {
-      const redirectPath = `/longevity/intake/${id}`;
-      const loginRedirect = `/portal/login?redirect=${encodeURIComponent(redirectPath)}`;
       return NextResponse.json(
-        {
-          ok: false,
-          requiresAuth: true,
-          redirectTo: loginRedirect,
-          message: "Please sign in to resume your assessment.",
-        },
+        buildAuthRequiredJson(`/longevity/intake/${id}`, "Please sign in to resume your assessment."),
         { status: 401 }
       );
     }
@@ -143,6 +137,16 @@ export async function PATCH(
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ ok: false, error: "Missing intake id." }, { status: 400 });
+    }
+    if (!profileId) {
+      return NextResponse.json(
+        buildAuthRequiredJson(
+          `/longevity/start?resume=${id}`,
+          "Please sign in to continue your assessment.",
+          { error: "session-expired" }
+        ),
+        { status: 401 }
+      );
     }
     const body = await req.json().catch(() => ({}));
     const questionnairePayload = body.questionnaire as LongevityQuestionnaireResponses | undefined;

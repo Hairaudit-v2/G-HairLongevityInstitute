@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
+import { buildAuthRequiredJson } from "@/lib/longevity/redirects";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { getPatientProgressForProfile } from "@/lib/longevity/patientProgress";
@@ -22,7 +23,11 @@ export async function GET() {
     const profileId = await getLongevitySessionFromRequest();
     if (!profileId) {
       return NextResponse.json(
-        { ok: false, error: "Session required." },
+        buildAuthRequiredJson(
+          "/portal/dashboard",
+          "Please sign in to access your dashboard.",
+          { error: "session-expired" }
+        ),
         { status: 401 }
       );
     }

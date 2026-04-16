@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setLongevitySession } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
+import { getSafePostAuthRedirect } from "@/lib/longevity/redirects";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-
-function isAllowedRedirect(path: string | null | undefined): path is string {
-  if (!path || typeof path !== "string") return false;
-  return path.startsWith("/longevity/") || path.startsWith("/portal/");
-}
 
 /**
  * GET: Sync longevity session cookie for the current portal user.
@@ -37,6 +33,6 @@ export async function GET(req: NextRequest) {
   await setLongevitySession(profileResult.profileId);
 
   const redirectTo = req.nextUrl.searchParams.get("redirect");
-  const target = isAllowedRedirect(redirectTo) ? redirectTo : "/portal/dashboard";
+  const target = getSafePostAuthRedirect(redirectTo);
   return NextResponse.redirect(new URL(target, req.url));
 }

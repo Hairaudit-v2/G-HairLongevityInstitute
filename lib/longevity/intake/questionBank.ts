@@ -23,6 +23,10 @@ function lifestyleLoadEngaged(answers: IntakeAnswerMap): boolean {
   return l.length > 0 && !l.every((x) => x === "none");
 }
 
+function hasLifestyleSignal(answers: IntakeAnswerMap, ...keys: string[]): boolean {
+  return arr(answers.lifestyle_load).some((value) => keys.includes(value));
+}
+
 function sheddingOrDiffusePresentation(answers: IntakeAnswerMap): boolean {
   const p = answers.presentation_pattern;
   return (
@@ -35,6 +39,13 @@ function sheddingOrDiffusePresentation(answers: IntakeAnswerMap): boolean {
 
 function maleExposureDetailChosen(answers: IntakeAnswerMap): boolean {
   return arr(answers.male_androgen_exposure_detail).some((x) => x && x !== "prefer_not_detail" && x !== "none");
+}
+
+function femaleEndocrinePituitaryPromptVisible(answers: IntakeAnswerMap): boolean {
+  if (!femaleHormonalYes(answers)) return false;
+  if (answers.postpartum_recent_gate === "yes") return false;
+  if (answers.hormonal_contraception_change_gate === "yes") return false;
+  return true;
 }
 
 export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
@@ -317,6 +328,46 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
     ],
     allowSkip: true,
     visibleWhen: (a) => femaleHormonalYes(a) && a.hormonal_contraception_change_gate === "yes",
+    pathwayHints: ["hormonal_endocrine_female_pattern"],
+  },
+  {
+    id: "stress_shedding_delay_pattern",
+    label: "Did your shedding start 2-4 months after a major stress period, illness, surgery, or major life disruption?",
+    type: "single_select",
+    section: "trigger",
+    helpText: "Best guess is fine if the timing is not exact.",
+    explanation:
+      "Hair shedding often lags behind a body-level stress or illness. That time gap can help separate a trigger-related shed from slower pattern change.",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+      { value: "unsure", label: "Unsure" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    allowSkip: true,
+    visibleWhen: (a) =>
+      femaleHormonalYes(a) &&
+      sheddingOrDiffusePresentation(a) &&
+      (a.acute_trigger_window === "yes" || hasLifestyleSignal(a, "major_stress")),
+    pathwayHints: ["hormonal_endocrine_female_pattern", "telogen_effluvium_diffuse_shedding"],
+  },
+  {
+    id: "pituitary_red_flag_followup",
+    label:
+      "Have you had absent periods when not pregnant, breastfeeding, or on hormonal suppression — or any milky nipple discharge, new severe headaches, or visual changes?",
+    type: "single_select",
+    section: "sex_specific",
+    helpText: "Answer yes if any part of this applies.",
+    explanation:
+      "Most people will answer no. We ask because these symptoms deserve more direct clinician follow-up rather than being treated as routine shedding alone.",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+      { value: "unsure", label: "Unsure" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    allowSkip: true,
+    visibleWhen: (a) => femaleEndocrinePituitaryPromptVisible(a),
     pathwayHints: ["hormonal_endocrine_female_pattern"],
   },
   {

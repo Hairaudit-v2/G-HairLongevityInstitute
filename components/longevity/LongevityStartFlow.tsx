@@ -18,9 +18,12 @@ import type {
 } from "@/lib/longevity/schema";
 import { LONGEVITY_DOC_TYPE, getPatientDocTypeLabel } from "@/lib/longevity/documentTypes";
 import { AdaptiveIntakeOrchestrator } from "@/components/longevity/AdaptiveIntakeOrchestrator";
+import { PreliminaryPatientFeedback } from "@/components/longevity/PreliminaryPatientFeedback";
+import { buildPortalLoginRedirectPath } from "@/lib/longevity/redirects";
 import {
   buildIntakeTriageOutput,
   getCanonicalPresentationPattern,
+  getPreliminaryPatientFeedback,
   getPatientUploadGuidance,
   getPathwayStateFromQuestionnaire,
 } from "@/lib/longevity/intake";
@@ -43,6 +46,15 @@ async function parseLongevityResponse(
     // Non-JSON or malformed; leave json null
   }
   return { status, json };
+}
+
+function getRecoveryHref(
+  json: Record<string, unknown> | null,
+  fallbackPath: string
+): string {
+  return typeof json?.redirectTo === "string"
+    ? (json.redirectTo as string)
+    : buildPortalLoginRedirectPath(fallbackPath, { error: "session-expired" });
 }
 
 const GENERIC_RECOVERY_MESSAGE =
@@ -133,6 +145,7 @@ function Input({
   type = "text",
   placeholder,
   required,
+  disabled,
 }: {
   label: string;
   value: string;
@@ -140,6 +153,7 @@ function Input({
   type?: string;
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <div>
@@ -148,11 +162,12 @@ function Input({
         {required ? " *" : ""}
       </label>
       <input
-        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]"
+        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)] disabled:cursor-not-allowed disabled:opacity-70"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         type={type}
         placeholder={placeholder}
+        disabled={disabled}
       />
     </div>
   );
@@ -728,10 +743,15 @@ function AboutYouStep({
   );
 }
 
-export function LongevityStartFlow() {
+export function LongevityStartFlow({
+  portalEmail,
+}: {
+  portalEmail?: string | null;
+}) {
+  const lockedPortalEmail = portalEmail?.trim().toLowerCase() ?? "";
   const [step, setStep] = useState<StepId>("welcome");
   const [intakeId, setIntakeId] = useState<string | null>(null);
-  const [identifyEmail, setIdentifyEmail] = useState("");
+  const [identifyEmail, setIdentifyEmail] = useState(lockedPortalEmail);
   const [identifyName, setIdentifyName] = useState("");
   const [responses, setResponses] = useState<LongevityQuestionnaireResponses>({});
   const [saving, setSaving] = useState(false);
@@ -777,9 +797,7 @@ export function LongevityStartFlow() {
       }
       if (status === 403 || status === 404) {
         setError(LOAD_RESUME_FORBIDDEN_MESSAGE);
-        setLoadResumeRecoveryHref(
-          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
-        );
+        setLoadResumeRecoveryHref(getRecoveryHref(json, `/longevity/start?resume=${id}`));
         return;
       }
       if (!res.ok || !json?.ok) {
@@ -788,9 +806,7 @@ export function LongevityStartFlow() {
             ? GENERIC_RECOVERY_MESSAGE
             : (typeof json.error === "string" ? json.error : "Failed to load intake.")
         );
-        setLoadResumeRecoveryHref(
-          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
-        );
+        setLoadResumeRecoveryHref(getRecoveryHref(json, `/longevity/start?resume=${id}`));
         return;
       }
       setLoadResumeRecoveryHref(null);
@@ -798,23 +814,19 @@ export function LongevityStartFlow() {
       const questionnaire = json.questionnaire as { responses?: LongevityQuestionnaireResponses } | undefined;
       if (!intake?.id) {
         setError(LOAD_RESUME_FORBIDDEN_MESSAGE);
-        setLoadResumeRecoveryHref(
-          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
-        );
+        setLoadResumeRecoveryHref(getRecoveryHref(json, `/longevity/start?resume=${id}`));
         return;
       }
       setIntakeId(intake.id);
       const r = (questionnaire?.responses ?? {}) as LongevityQuestionnaireResponses;
       setResponses(r);
-      setIdentifyEmail(r.aboutYou?.email ?? "");
+      setIdentifyEmail(r.aboutYou?.email ?? lockedPortalEmail);
       setIdentifyName([r.aboutYou?.firstName, r.aboutYou?.lastName].filter(Boolean).join(" ") || "");
     } catch {
       setError(GENERIC_RECOVERY_MESSAGE);
-      setLoadResumeRecoveryHref(
-        `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${id}`)}`
-      );
+      setLoadResumeRecoveryHref(getRecoveryHref(null, `/longevity/start?resume=${id}`));
     }
-  }, []);
+  }, [lockedPortalEmail]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -824,7 +836,7 @@ export function LongevityStartFlow() {
   }, [loadResume]);
 
   const createDraft = useCallback(async () => {
-    if (!identifyEmail.trim()) {
+    if (!(lockedPortalEmail || identifyEmail).trim()) {
       setError("Email is required.");
       return;
     }
@@ -835,11 +847,19 @@ export function LongevityStartFlow() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: identifyEmail.trim(),
+          email: (lockedPortalEmail || identifyEmail).trim(),
           full_name: identifyName.trim() || undefined,
         }),
       });
       const { status, json } = await parseLongevityResponse(res);
+      if (status === 401 && json?.requiresAuth === true && typeof json.redirectTo === "string") {
+        setError(
+          (json.message as string) ??
+            "Please create your account or sign in to begin your assessment."
+        );
+        window.location.href = json.redirectTo as string;
+        return;
+      }
       if (!res.ok || !json?.ok) {
         const rawMsg =
           status >= 500 || json == null ? null : (json.error as string) ?? null;
@@ -861,7 +881,7 @@ export function LongevityStartFlow() {
         ...prev,
         aboutYou: {
           ...prev.aboutYou,
-          email: identifyEmail.trim(),
+          email: (lockedPortalEmail || identifyEmail).trim(),
           firstName: identifyName.trim() ? identifyName.trim().split(" ")[0] : undefined,
           lastName: identifyName.trim() ? identifyName.trim().split(" ").slice(1).join(" ") : undefined,
         },
@@ -873,7 +893,7 @@ export function LongevityStartFlow() {
     } finally {
       setSaving(false);
     }
-  }, [identifyEmail, identifyName]);
+  }, [identifyEmail, identifyName, lockedPortalEmail]);
 
   const saveProgress = useCallback(
     async (): Promise<{ ok: true } | { ok: false; error: unknown }> => {
@@ -888,6 +908,13 @@ export function LongevityStartFlow() {
         });
         const { status, json } = await parseLongevityResponse(res);
         if (!res.ok || !json?.ok) {
+          if (status === 401 && json?.requiresAuth === true && typeof json.redirectTo === "string") {
+            setError(
+              (json.message as string) ?? "Please sign in again to continue your assessment."
+            );
+            window.location.href = json.redirectTo as string;
+            return { ok: false, error: json?.error ?? new Error("Authentication required.") };
+          }
           const message =
             status >= 500 || json == null
               ? GENERIC_RECOVERY_MESSAGE
@@ -936,9 +963,7 @@ export function LongevityStartFlow() {
       const res = await fetch(`/api/longevity/documents?intakeId=${intakeId}`);
       const { status, json } = await parseLongevityResponse(res);
       if (status === 401) {
-        setDocumentsSessionRecoveryHref(
-          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
-        );
+        setDocumentsSessionRecoveryHref(getRecoveryHref(json, `/longevity/start?resume=${intakeId}`));
         return [];
       }
       if (res.ok && json?.ok && Array.isArray(json.documents)) {
@@ -975,9 +1000,7 @@ export function LongevityStartFlow() {
           const { status, json } = await parseLongevityResponse(res);
           if (status === 401) {
             setUploadError(UPLOAD_SESSION_EXPIRED_MESSAGE);
-            setDocumentsSessionRecoveryHref(
-              `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
-            );
+            setDocumentsSessionRecoveryHref(getRecoveryHref(json, `/longevity/start?resume=${intakeId}`));
             return;
           }
           if (!res.ok || !json?.ok) {
@@ -1053,9 +1076,7 @@ export function LongevityStartFlow() {
       const { status, json } = await parseLongevityResponse(res);
       if (status === 401 || status === 403) {
         setError(SUBMIT_SESSION_EXPIRED_MESSAGE);
-        setSubmitRecoveryHref(
-          `/portal/login?redirect=${encodeURIComponent(`/longevity/start?resume=${intakeId}`)}`
-        );
+        setSubmitRecoveryHref(getRecoveryHref(json, `/longevity/start?resume=${intakeId}`));
         return;
       }
       if (!res.ok || !json?.ok) {
@@ -1123,6 +1144,10 @@ export function LongevityStartFlow() {
     [responses]
   );
   const patientUploadGuidance = useMemo(() => getPatientUploadGuidance(responses), [responses]);
+  const preliminaryPatientFeedback = useMemo(
+    () => getPreliminaryPatientFeedback(responses),
+    [responses]
+  );
   const adaptiveContext = useMemo(
     () => ({
       sexAtBirth: a.sexAtBirth,
@@ -1204,16 +1229,18 @@ export function LongevityStartFlow() {
             <Card>
               <h2 className="text-2xl font-semibold">Get started</h2>
               <p className="mt-2 text-white/70">
-                We’ll create a draft linked to your email so you can save and resume.
+                We’ll create your draft inside your secure account so you can save progress, upload
+                documents, and resume later.
               </p>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <Input
-                  label="Email"
+                  label={lockedPortalEmail ? "Account email" : "Email"}
                   value={identifyEmail}
                   onChange={setIdentifyEmail}
                   type="email"
                   placeholder="you@example.com"
                   required
+                  disabled={!!lockedPortalEmail}
                 />
                 <Input
                   label="Full name (optional for now)"
@@ -1222,6 +1249,11 @@ export function LongevityStartFlow() {
                   placeholder="e.g. Jane Smith"
                 />
               </div>
+              {lockedPortalEmail && (
+                <p className="mt-3 text-sm text-white/60">
+                  Using your signed-in portal email for this assessment.
+                </p>
+              )}
               {error && (
                 <p className="mt-4 text-sm text-white/80">
                   {CREATE_DRAFT_FAILURE_SECONDARY}
@@ -1232,7 +1264,7 @@ export function LongevityStartFlow() {
                   Back
                 </Button>
                 <Button onClick={createDraft} disabled={saving}>
-                  {saving ? "Creating…" : error ? "Try again" : "Create draft & continue"}
+                  {saving ? "Creating…" : error ? "Try again" : "Create secure draft & continue"}
                 </Button>
               </div>
             </Card>
@@ -1513,7 +1545,42 @@ export function LongevityStartFlow() {
                     ]}
                     onChange={(k) => setFemaleHistory({ cycles: k })}
                   />
+                  <SingleSelect
+                    label="Have your periods become more irregular, stopped, or changed noticeably around the time your hair changed?"
+                    helpText="Only answer if periods apply to you."
+                    explanation="We ask about timing because hair changes can sometimes line up with changes in cycle pattern. This does not label the cause on its own."
+                    value={fh.cycleChangeAroundHairChange}
+                    options={[
+                      { key: "yes", label: "Yes" },
+                      { key: "no", label: "No" },
+                      { key: "unsure", label: "Unsure" },
+                      { key: "prefer_not_to_say", label: "Prefer not to say" },
+                    ]}
+                    onChange={(k) =>
+                      setFemaleHistory({
+                        cycleChangeAroundHairChange: k as FemaleHistory["cycleChangeAroundHairChange"],
+                      })
+                    }
+                  />
                   <MultiSelect label="Features" options={FEMALE_FEATURES} value={fh.features ?? []} onChange={(v) => setFemaleHistory({ features: v })} />
+                  <SingleSelect
+                    label="Have you noticed new or worsening jawline acne, unwanted facial hair, or coarse body hair?"
+                    helpText="A simple yes/no is enough here."
+                    explanation="These changes can add useful hormone-context clues. We use them only to guide review and follow-up questions."
+                    value={fh.newWorseningHyperandrogenFeatures}
+                    options={[
+                      { key: "yes", label: "Yes" },
+                      { key: "no", label: "No" },
+                      { key: "unsure", label: "Unsure" },
+                      { key: "prefer_not_to_say", label: "Prefer not to say" },
+                    ]}
+                    onChange={(k) =>
+                      setFemaleHistory({
+                        newWorseningHyperandrogenFeatures:
+                          k as FemaleHistory["newWorseningHyperandrogenFeatures"],
+                      })
+                    }
+                  />
                   <MultiSelect label="Life stage" options={FEMALE_LIFE_STAGE} value={fh.lifeStage ?? []} onChange={(v) => setFemaleHistory({ lifeStage: v })} />
                   <SingleSelect
                     label="Recent postpartum period?"
@@ -1948,6 +2015,7 @@ export function LongevityStartFlow() {
                 <div><span className="text-white/60">Current blood status:</span> {un.currentBloodStatus ?? "—"}</div>
                 <div><span className="text-white/60">Documents:</span> {stepDocuments.length === 0 ? "None uploaded yet (optional—add anytime in the portal)" : `${stepDocuments.length} document(s) uploaded`}</div>
               </dl>
+              <PreliminaryPatientFeedback feedback={preliminaryPatientFeedback} />
               {submitRecoveryHref && (
                 <div className="mt-4 rounded-2xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 px-4 py-3">
                   <p className="text-sm text-white/90">

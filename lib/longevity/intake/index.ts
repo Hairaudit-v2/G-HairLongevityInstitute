@@ -19,5 +19,7 @@ export * from "./adaptiveBloodworkEligibility";
 export * from "./adaptiveBloodworkEligibility.smoke-test";
 export * from "./patientUploadGuidance";
 export * from "./patientUploadGuidance.smoke-test";
+export * from "./preliminaryPatientFeedback";
+export * from "./preliminaryPatientFeedback.smoke-test";
 export * from "@/src/lib/longevity/intake";
 

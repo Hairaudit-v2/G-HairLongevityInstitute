@@ -60,6 +60,8 @@ export const INTAKE_PATHWAYS: IntakePathwayDefinition[] = [
       "breastfeeding_status",
       "hormonal_contraception_change_gate",
       "hormonal_change_vs_hair_timing",
+      "stress_shedding_delay_pattern",
+      "pituitary_red_flag_followup",
     ],
   },
   {

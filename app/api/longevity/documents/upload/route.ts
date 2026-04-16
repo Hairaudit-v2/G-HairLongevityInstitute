@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isLongevityApiEnabled } from "@/lib/features";
+import { buildAuthRequiredJson } from "@/lib/longevity/redirects";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { LONGEVITY_DOC_TYPE, type LongevityDocType } from "@/lib/longevity/documentTypes";
@@ -45,10 +46,6 @@ export async function POST(req: Request) {
   }
   try {
     const profileId = await getLongevitySessionFromRequest();
-    if (!profileId) {
-      return NextResponse.json({ ok: false, error: "Session required." }, { status: 401 });
-    }
-
     const formData = await req.formData().catch(() => null);
     if (!formData) {
       return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
@@ -58,6 +55,17 @@ export async function POST(req: Request) {
     const bloodRequestId = formData.get("bloodRequestId")?.toString()?.trim() || null;
     const docTypeRaw = formData.get("docType")?.toString()?.trim();
     const file = formData.get("file");
+
+    if (!profileId) {
+      return NextResponse.json(
+        buildAuthRequiredJson(
+          intakeId ? `/longevity/start?resume=${intakeId}` : "/longevity/start",
+          "Please sign in to upload supporting documents.",
+          { error: "session-expired" }
+        ),
+        { status: 401 }
+      );
+    }
 
     if (!intakeId) {
       return NextResponse.json({ ok: false, error: "Missing intakeId." }, { status: 400 });

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
+import { getSafePostAuthRedirect, isAllowedPostAuthRedirect } from "@/lib/longevity/redirects";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { listDocumentsForProfile } from "@/lib/longevity/documents";
 import { listBloodRequestsForProfile } from "@/lib/longevity/bloodRequests";
@@ -25,12 +26,6 @@ import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocum
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
 import { PortalSetPassword } from "@/components/longevity/PortalSetPassword";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
-
-/** Allowed post-login redirect paths (same-origin paths only). */
-function isAllowedRedirect(path: string | null | undefined): path is string {
-  if (!path || typeof path !== "string") return false;
-  return path.startsWith("/longevity/") || path.startsWith("/portal/");
-}
 
 /**
  * Portal dashboard: auth required; resolves profile from auth, sets longevity cookie, lists intakes + documents.
@@ -66,8 +61,8 @@ export default async function PortalDashboardPage({
   // Cookie must be set in a Route Handler, not during render. Redirect to sync so it sets the cookie and redirects back.
   const existingSession = await getLongevitySessionFromRequest();
   const needsSync = existingSession !== profileId;
-  if (needsSync || isAllowedRedirect(redirectTo)) {
-    const syncRedirect = isAllowedRedirect(redirectTo) ? redirectTo : "/portal/dashboard";
+  if (needsSync || isAllowedPostAuthRedirect(redirectTo)) {
+    const syncRedirect = getSafePostAuthRedirect(redirectTo);
     redirect(`/api/longevity/session/sync?redirect=${encodeURIComponent(syncRedirect)}`);
   }
 

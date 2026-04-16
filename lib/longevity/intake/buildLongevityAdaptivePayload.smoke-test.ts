@@ -80,6 +80,31 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "hormonal vs hair timing preserved"
       );
     }),
+    run("new female endocrine branch answers pass through to adaptive_answers", () => {
+      const payload = buildLongevityAdaptivePayload({
+        aboutYou: { sexAtBirth: "female" },
+        adaptiveEngine: {
+          answers: {
+            presentation_pattern: "diffuse_thinning",
+            female_hormonal_context: "yes",
+            acute_trigger_window: "yes",
+            lifestyle_load: ["major_stress"],
+            stress_shedding_delay_pattern: "yes",
+            postpartum_recent_gate: "no",
+            hormonal_contraception_change_gate: "no",
+            pituitary_red_flag_followup: "yes",
+          },
+        },
+      });
+      assert(
+        payload.adaptive_answers.stress_shedding_delay_pattern === "yes",
+        "stress delay pattern preserved"
+      );
+      assert(
+        payload.adaptive_answers.pituitary_red_flag_followup === "yes",
+        "pituitary follow-up prompt preserved"
+      );
+    }),
     run("adaptive engine male androgen detail maps to exposure flags", () => {
       const payload = buildLongevityAdaptivePayload({
         aboutYou: { sexAtBirth: "male" },
