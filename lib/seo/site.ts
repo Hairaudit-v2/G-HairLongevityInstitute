@@ -1,16 +1,25 @@
 /**
  * Single source for public site origin and metadata base URL.
- * Prefer NEXT_PUBLIC_SITE_URL in production so canonicals and OG URLs stay on the primary domain.
+ * Production and preview builds should always resolve to the primary domain unless an explicit override is set.
  */
+
+const PRODUCTION_SITE_ORIGIN = "https://hairlongevityinstitute.com";
+
+function normalizeOrigin(value: string): string {
+  return value.replace(/\/$/, "");
+}
 
 export function getSiteOrigin(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+    return normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL);
   }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NODE_ENV === "development") {
+    if (process.env.VERCEL_URL) {
+      return normalizeOrigin(`https://${process.env.VERCEL_URL}`);
+    }
+    return "http://localhost:3000";
   }
-  return "https://hairlongevityinstitute.com";
+  return PRODUCTION_SITE_ORIGIN;
 }
 
 /** Next.js `metadataBase` expects a URL with protocol. */

@@ -86,6 +86,13 @@ export type EditorialHeroImage = {
   priority?: boolean;
 };
 
+export type EditorialGuideLink = {
+  href: string;
+  label: string;
+  title: string;
+  description: string;
+};
+
 export type EditorialArticleMeta = {
   slug: string;
   title: string;
@@ -110,6 +117,8 @@ export type EditorialArticleMeta = {
   faq: EditorialFaqItem[];
   /** Curated internal links (typically 3–5 slugs from the live corpus). */
   relatedSlugs: string[];
+  /** Optional pillar-guide backlinks for companion guide landings. */
+  guideLinks?: EditorialGuideLink[];
   glossarySlugs?: string[];
   references: EditorialReference[];
   heroImage?: EditorialHeroImage;

@@ -43,6 +43,7 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
             <h3 className={headingClass}>Explore</h3>
             <nav className="mt-3 flex flex-col gap-2 text-sm" aria-label="Explore">
               <Link href="/about" className={linkClass}>About</Link>
+              <Link href="/guides" className={linkClass}>Guides</Link>
               <Link href="/insights" className={linkClass}>Insights</Link>
               <Link href="/how-it-works" className={linkClass}>How it works</Link>
               <Link href="/science" className={linkClass}>Science</Link>
@@ -83,8 +84,8 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
           </div>
           {showPortalLogin && (
             <div>
-              <h3 className={headingClass}>Portal access</h3>
-              <nav className="mt-3 flex flex-col gap-2 text-sm" aria-label="Portal access">
+              <h3 className={headingClass}>Patient Portal</h3>
+              <nav className="mt-3 flex flex-col gap-2 text-sm" aria-label="Patient Portal">
                 <Link href="/portal" className={legalLinkClass}>Patient Portal</Link>
                 <Link href="/login/trichologist" className={legalLinkClass}>Trichologist Login</Link>
               </nav>

@@ -36,15 +36,43 @@ function partitionInsightsFeatured(
   return { featured, rest };
 }
 
-export const metadata: Metadata = buildPageMetadata({
-  path: "/insights",
-  title: "Hair loss insights — understand shedding, thinning, and next steps",
-  metaDescription:
-    "Clear guides on sudden shedding, gradual thinning, hormones and blood tests, scalp health, and treatment questions — from the Hair Longevity Institute. Search or browse by topic.",
-  appendBrand: true,
-});
-
 type SearchProps = { searchParams: Record<string, string | string[] | undefined> };
+
+function firstString(value: string | string[] | undefined): string | undefined {
+  return typeof value === "string" ? value : Array.isArray(value) ? value[0] : undefined;
+}
+
+function hasFacetOrSearchState(searchParams: SearchProps["searchParams"]): boolean {
+  const q = (firstString(searchParams.q) ?? "").trim();
+  const hub = firstString(searchParams.hub) ?? "all";
+  const audience = firstString(searchParams.audience) ?? "all";
+  const contentType = firstString(searchParams.contentType) ?? "all";
+  const sort = firstString(searchParams.sort) ?? "newest";
+  const topic = (firstString(searchParams.topic) ?? "").trim();
+  return (
+    q !== "" ||
+    topic !== "" ||
+    hub !== "all" ||
+    audience !== "all" ||
+    contentType !== "all" ||
+    sort !== "newest"
+  );
+}
+
+export function generateMetadata({ searchParams }: SearchProps): Metadata {
+  const filtered = hasFacetOrSearchState(searchParams);
+  return buildPageMetadata({
+    path: "/insights",
+    title: filtered
+      ? "Hair loss insights search results"
+      : "Hair loss insights — understand shedding, thinning, and next steps",
+    metaDescription: filtered
+      ? "Filtered Hair Longevity Institute insight results for hair loss causes, blood markers, treatments, and common patient questions."
+      : "Clear guides on sudden shedding, gradual thinning, hormones and blood tests, scalp health, and treatment questions — from the Hair Longevity Institute. Search or browse by topic.",
+    appendBrand: true,
+    robots: filtered ? { index: false, follow: true } : { index: true, follow: true },
+  });
+}
 
 function normalizeHub(v: string | undefined): EditorialHubSlug | "all" {
   const allowed = new Set(["conditions", "blood-markers", "treatments", "hair-loss-causes", "all"]);

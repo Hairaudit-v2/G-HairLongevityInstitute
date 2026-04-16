@@ -3,6 +3,8 @@
  * Minimal, truthful schema only. No ratings, reviews, or unsupported claims.
  */
 
+import { getSiteOrigin } from "@/lib/seo/site";
+
 /** Canonical site name for schema. */
 const SITE_NAME = "Hair Longevity Institute™";
 
@@ -10,18 +12,9 @@ const SITE_NAME = "Hair Longevity Institute™";
 const WEBSITE_DESCRIPTION =
   "Biology-first hair loss analysis and treatment planning. Hormone mapping, blood interpretation, and personalised strategy — delivered globally.";
 
-/**
- * Base URL for absolute schema URLs. Mirrors sitemap/robots/layout logic.
- * Prefer NEXT_PUBLIC_SITE_URL; fallback Vercel URL or production domain.
- */
+/** Base URL for absolute schema URLs. Mirrors sitemap/robots/layout logic. */
 export function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  return "https://hairlongevityinstitute.com";
+  return getSiteOrigin();
 }
 
 /** Logo path (relative). Used with base URL for absolute logo URL in schema. */

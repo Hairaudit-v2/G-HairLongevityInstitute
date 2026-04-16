@@ -100,6 +100,14 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "vitamin-d-b12-folate-what-labs-may-mean-for-hair",
       "telogen-effluvium-after-illness-or-stress",
     ],
+    guideLinks: [
+      {
+        href: "/guides/hair-longevity",
+        label: "Foundational guide",
+        title: "The Complete Guide to Hair Longevity",
+        description: "Start with the broader biology, testing, and treatment framework before narrowing into individual lab markers.",
+      },
+    ],
     glossarySlugs: ["ferritin", "telogen-effluvium"],
     references: [
       cite(
@@ -331,6 +339,20 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "minoxidil-mechanism-and-realistic-timelines",
       "telogen-effluvium-after-illness-or-stress",
     ],
+    guideLinks: [
+      {
+        href: "/guides/male-pattern-hair-loss",
+        label: "Men's hair health guide",
+        title: "Male Pattern Hair Loss: Causes, Stages, and What Actually Helps",
+        description: "Use this pillar page if your main question is recession, crown thinning, staging, and evidence-based next steps.",
+      },
+      {
+        href: "/guides/androgen-index",
+        label: "Hormones & hair guide",
+        title: "Testosterone, DHT, TRT, Steroids, and Hair Loss Risk in Men and Women",
+        description: "Go deeper on DHT biology, TRT, steroid exposure, and how androgen-sensitive thinning is framed in men and women.",
+      },
+    ],
     glossarySlugs: ["dht"],
     references: [
       cite(
@@ -485,6 +507,20 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "minoxidil-mechanism-and-realistic-timelines",
       "oral-anti-androgens-in-women-specialist-led-context",
       "what-blood-tests-matter-for-hair-loss",
+    ],
+    guideLinks: [
+      {
+        href: "/guides/hair-loss-medications",
+        label: "Treatment guide",
+        title: "Hair Loss Medications in 2026",
+        description: "See how prescription options, off-label use, supplement claims, and realistic decision-making fit together in one guide.",
+      },
+      {
+        href: "/guides/androgen-index",
+        label: "Hormones & hair guide",
+        title: "Testosterone, DHT, TRT, Steroids, and Hair Loss Risk in Men and Women",
+        description: "Useful if your treatment questions sit inside a bigger androgen or DHT story.",
+      },
     ],
     glossarySlugs: ["dht"],
     references: [
@@ -717,6 +753,14 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "ferritin-and-hair-loss",
       "thyroid-hair-loss-explained",
       "diffuse-thinning-in-women",
+    ],
+    guideLinks: [
+      {
+        href: "/guides/postpartum-hair-loss",
+        label: "Women's hair health guide",
+        title: "The Truth About Postpartum Hair Loss",
+        description: "The pillar version of this topic, with who-it-helps guidance, practical decisions, FAQs, and a fuller postpartum context.",
+      },
     ],
     glossarySlugs: ["telogen-effluvium"],
     references: [
@@ -1028,6 +1072,14 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "scalp-inflammation-and-shedding",
       "telogen-effluvium-after-illness-or-stress",
     ],
+    guideLinks: [
+      {
+        href: "/guides/hair-loss-medications",
+        label: "Treatment guide",
+        title: "Hair Loss Medications in 2026",
+        description: "Use the companion guide for a higher-level comparison of common medicines, off-label paths, and realistic treatment decisions.",
+      },
+    ],
     references: [
       cite(
         "MedlinePlus (NIH). Minoxidil topical — patient drug information (uses, precautions, timelines).",
@@ -1181,6 +1233,20 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
       "dht-and-androgenetic-alopecia",
       "minoxidil-mechanism-and-realistic-timelines",
       "finasteride-vs-saw-palmetto",
+    ],
+    guideLinks: [
+      {
+        href: "/guides/androgen-index",
+        label: "Hormones & hair guide",
+        title: "Testosterone, DHT, TRT, Steroids, and Hair Loss Risk in Men and Women",
+        description: "Go broader than one prescribing category and see how androgen-sensitive thinning is framed across men and women.",
+      },
+      {
+        href: "/guides/hair-loss-medications",
+        label: "Treatment guide",
+        title: "Hair Loss Medications in 2026",
+        description: "Helpful if you want this article placed inside the wider medication landscape rather than read in isolation.",
+      },
     ],
     references: [
       cite(

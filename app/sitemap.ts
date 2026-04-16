@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { isLongevityEnabled } from "@/lib/features";
 import { getAllSlugs } from "@/lib/content/index";
 import { GLOSSARY, glossaryPath } from "@/lib/content/glossary";
+import { FEATURED_HLI_GUIDES } from "@/lib/guides/hliDownloadableGuides";
 import { getSiteOrigin } from "@/lib/seo/site";
 
 const STATIC_PUBLIC_PATHS: Array<{
@@ -18,6 +19,7 @@ const STATIC_PUBLIC_PATHS: Array<{
   { path: "/membership", changeFrequency: "monthly", priority: 0.85 },
   { path: "/start", changeFrequency: "monthly", priority: 0.95 },
   { path: "/insights", changeFrequency: "weekly", priority: 0.95 },
+  { path: "/guides", changeFrequency: "weekly", priority: 0.95 },
   { path: "/conditions", changeFrequency: "weekly", priority: 0.85 },
   { path: "/blood-markers", changeFrequency: "weekly", priority: 0.9 },
   { path: "/treatments", changeFrequency: "weekly", priority: 0.85 },
@@ -30,47 +32,48 @@ const STATIC_PUBLIC_PATHS: Array<{
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteOrigin();
   const now = new Date();
+  const seen = new Set<string>();
 
-  const entries: MetadataRoute.Sitemap = STATIC_PUBLIC_PATHS.map((e) => ({
-    url: `${base}${e.path}`,
-    lastModified: now,
-    changeFrequency: e.changeFrequency,
-    priority: e.priority,
-  }));
+  const entries: MetadataRoute.Sitemap = [];
+
+  function pushEntry(
+    path: string,
+    changeFrequency: MetadataRoute.Sitemap[0]["changeFrequency"],
+    priority: number
+  ) {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    const url = `${base}${normalizedPath}`;
+    if (seen.has(url)) return;
+    seen.add(url);
+    entries.push({
+      url,
+      lastModified: now,
+      changeFrequency,
+      priority,
+    });
+  }
+
+  for (const e of STATIC_PUBLIC_PATHS) {
+    pushEntry(e.path, e.changeFrequency, e.priority);
+  }
+
+  for (const guide of FEATURED_HLI_GUIDES) {
+    if (guide.href?.startsWith("/guides/")) {
+      pushEntry(guide.href, "monthly", guide.id === "hair-longevity-foundational" ? 0.92 : 0.82);
+    }
+  }
 
   if (isLongevityEnabled()) {
-    entries.push(
-      {
-        url: `${base}/longevity`,
-        lastModified: now,
-        changeFrequency: "monthly",
-        priority: 0.9,
-      },
-      {
-        url: `${base}/longevity/start`,
-        lastModified: now,
-        changeFrequency: "monthly",
-        priority: 0.95,
-      }
-    );
+    pushEntry("/longevity", "monthly", 0.9);
+    pushEntry("/longevity/start", "monthly", 0.95);
   }
 
   for (const slug of getAllSlugs()) {
-    entries.push({
-      url: `${base}/insights/${slug}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    });
+    pushEntry(`/insights/${slug}`, "monthly", 0.8);
   }
 
   for (const g of GLOSSARY) {
-    entries.push({
-      url: `${base}${glossaryPath(g.slug)}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.55,
-    });
+    pushEntry(glossaryPath(g.slug), "monthly", 0.55);
   }
 
   return entries;

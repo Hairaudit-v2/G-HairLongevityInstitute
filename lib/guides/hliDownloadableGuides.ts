@@ -1,8 +1,3 @@
-import {
-  HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_DOWNLOAD_AS,
-  HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_HREF,
-} from "@/lib/guides/hliGuidePdfs";
-
 /**
  * Featured downloadable / landing-page guides for HLI marketing surfaces.
  * Order matters: first item is the foundational “start here” guide on the homepage.
@@ -45,16 +40,15 @@ export const FEATURED_HLI_GUIDES: HliFeaturedGuide[] = [
   },
   {
     id: "hair-loss-medications-in-2026",
-    category: "Patient Guide",
+    category: "Treatment Guide",
     title: "Hair Loss Medications in 2026",
     shortTitle: "Hair Loss Medications",
     description:
-      "A complete patient guide to what is available now, what is used off-label, what is natural, and what is still in trials.",
+      "A pillar guide to what is available now, what is used off-label, what is natural, what is still in trials, and how to compare options without hype.",
     audience: "patients",
     updatedAt: "April 2026",
     ctaLabel: HLI_GUIDE_CTA_READ,
-    href: HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_HREF,
-    downloadAs: HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_DOWNLOAD_AS,
+    href: "/guides/hair-loss-medications",
   },
   {
     id: "postpartum",

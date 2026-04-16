@@ -6,6 +6,9 @@ import PublicFooter from "@/components/public/PublicFooter";
 import { Container, SecondaryButton } from "@/components/public/PublicCTA";
 import { GuideLibraryAssessmentCTA } from "@/components/guides/GuideLibraryAssessmentCTA";
 import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
+import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
+import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
+import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   MALE_PATTERN_GUIDE_PDF_DOWNLOAD_AS,
@@ -31,6 +34,36 @@ const COVERS = [
   "When structured assessment and examination matter most",
 ];
 
+const TAKEAWAYS = [
+  "Male pattern hair loss is usually recognised clinically; a single DHT or testosterone result rarely diagnoses it on its own.",
+  "Temple recession, crown thinning, and overall density change do not all progress at the same speed, so staging and photographs matter.",
+  "Pattern loss can overlap with shedding, scalp inflammation, or systemic contributors, which is why not every case is solved by treatment chatter alone.",
+  "The most useful early decision is often whether you need reassurance, diagnosis confirmation, or a realistic treatment-planning discussion.",
+];
+
+const FAQ_ITEMS = [
+  {
+    question: "Is this guide only for men who already know they have male pattern hair loss?",
+    answer:
+      "No. It is also for people who suspect pattern loss but are still trying to separate it from shedding, scalp issues, or temporary change after stress or illness.",
+  },
+  {
+    question: "Will this guide tell me whether finasteride or minoxidil is right for me?",
+    answer:
+      "It explains the treatment landscape at a high level, but it does not replace diagnosis or prescribing. Use it to prepare better questions, then discuss fit and risk with your clinician.",
+  },
+  {
+    question: "Why link out to the DHT article if this page is already about male pattern hair loss?",
+    answer:
+      "This guide acts as the pillar page. The linked insight article gives you the deeper mechanism-level read on DHT and pattern thinning when you want more detail.",
+  },
+  {
+    question: "Can younger men use this guide too?",
+    answer:
+      "Yes. Early-onset recession and crown thinning are common reasons people land here, and the guide is written to help you understand early signs and next-step options calmly.",
+  },
+];
+
 const RELATED = [
   {
     href: "/guides/hair-longevity",
@@ -52,13 +85,40 @@ const RELATED = [
   },
 ];
 
+const SUPPORTING_READS = [
+  {
+    href: MAIN_INSIGHT,
+    category: "DHT overview",
+    title: "Pattern hair loss and DHT: a plain-English overview",
+    description: "The main companion article for DHT biology, scalp pattern recognition, and how clinicians separate mechanism from hype.",
+  },
+  {
+    href: "/guides/androgen-index",
+    category: "Hormones & Hair",
+    title: "Testosterone, DHT, TRT, Steroids, and Hair Loss Risk",
+    description: "Best next read when male-pattern questions turn into broader androgen, TRT, or steroid-exposure questions.",
+  },
+  {
+    href: "/guides/hair-loss-medications",
+    category: "Treatment Guide",
+    title: "Hair Loss Medications in 2026",
+    description: "Use this when you are ready to compare medical treatment, adjuncts, off-label options, and long-term maintenance logic.",
+  },
+  {
+    href: "/insights/what-blood-tests-matter-for-hair-loss",
+    category: "Testing",
+    title: "Blood tests and hair loss: what may actually help",
+    description: "Helpful if you are unsure whether labs add value or whether pattern recognition matters more than another panel.",
+  },
+];
+
 const wrap = "mx-auto max-w-2xl";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/guides/male-pattern-hair-loss",
-  title: "Male pattern hair loss: causes, stages & evidence-based help",
+  title: "Male pattern hair loss guide: causes, stages, DHT & treatment options",
   metaDescription:
-    "A clinically grounded guide for men: how male pattern hair loss begins and progresses, DHT and genetics, early signs, staging, what helps, and when assessment matters — Hair Longevity Institute.",
+    "A clinically grounded guide to male pattern hair loss: early signs, recession and crown thinning, DHT and genetics, staging, evidence-based treatment options, and when assessment matters.",
   appendBrand: true,
 });
 
@@ -74,6 +134,7 @@ export default function MalePatternHairLossGuidePage() {
         ctaLabel="Start My Hair Analysis"
         theme="light"
       />
+      <HomeFaqJsonLd items={FAQ_ITEMS} />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-14 sm:py-20" aria-labelledby="mp-guide-hero">
         <Container>
@@ -119,6 +180,21 @@ export default function MalePatternHairLossGuidePage() {
         </Container>
       </section>
 
+      <section className="border-b border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="mp-decide">
+        <Container>
+          <div className={wrap}>
+            <h2 id="mp-decide" className="text-xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-2xl">
+              What this guide helps you decide
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
+              Use this page to work out whether your next step is documenting progression, ruling in pattern loss over
+              short-term shedding, discussing treatment options with a prescriber, or getting a more structured
+              interpretation because more than one cause may be in play.
+            </p>
+          </div>
+        </Container>
+      </section>
+
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="mp-covers">
         <Container>
           <div className={wrap}>
@@ -127,6 +203,21 @@ export default function MalePatternHairLossGuidePage() {
             </h2>
             <ul className="mt-5 list-disc space-y-2 pl-5 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
               {COVERS.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-b border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="mp-takeaways">
+        <Container>
+          <div className={wrap}>
+            <h2 id="mp-takeaways" className="text-xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-2xl">
+              Key takeaways
+            </h2>
+            <ul className="mt-5 list-disc space-y-2 pl-5 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
+              {TAKEAWAYS.map((line) => (
                 <li key={line}>{line}</li>
               ))}
             </ul>
@@ -180,6 +271,22 @@ export default function MalePatternHairLossGuidePage() {
               <li>Prefer evidence-based framing before choosing treatments with a prescriber</li>
               <li>Are considering HLI to understand pattern, labs, and next steps in one structured review</li>
             </ul>
+          </div>
+        </Container>
+      </section>
+
+      <GuideSupportingReads
+        items={SUPPORTING_READS}
+        headingId="mp-next-reads"
+        title="Best next reads / supporting articles"
+        intro="Once the broad male-pattern picture is clear, move into the supporting read that best matches your mechanism, testing, or treatment question."
+        theme="subtle"
+      />
+
+      <section className="border-b border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-label="Frequently asked questions">
+        <Container>
+          <div className={wrap}>
+            <EditorialFaqSection items={FAQ_ITEMS} />
           </div>
         </Container>
       </section>
