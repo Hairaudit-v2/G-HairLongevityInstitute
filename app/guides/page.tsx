@@ -6,6 +6,9 @@ import PublicFooter from "@/components/public/PublicFooter";
 import { Container } from "@/components/public/PublicCTA";
 import { HliGuideCard } from "@/components/public/HliGuideCard";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import type { EditorialArticle } from "@/lib/content/types";
+import { getArticleBySlug } from "@/lib/content";
+import { GUIDES_HUB_INSIGHT_PICK_SLUGS } from "@/lib/content/publicInsightPicks";
 import { FEATURED_HLI_GUIDES } from "@/lib/guides/hliDownloadableGuides";
 import { HUB_LABEL, HUB_PATH, type EditorialHubSlug } from "@/lib/content";
 
@@ -21,6 +24,9 @@ export default function GuidesHubPage() {
   const useLongevity = isLongevityEnabled();
   const startHref = useLongevity ? "/longevity/start" : "/start";
   const [foundational, ...followOn] = FEATURED_HLI_GUIDES;
+  const insightPicks: EditorialArticle[] = GUIDES_HUB_INSIGHT_PICK_SLUGS.map((slug) => getArticleBySlug(slug)).filter(
+    (a): a is EditorialArticle => Boolean(a)
+  );
 
   return (
     <main className="min-h-screen bg-page">
@@ -68,6 +74,29 @@ export default function GuidesHubPage() {
               Browse all insight articles →
             </Link>
           </p>
+
+          {insightPicks.length > 0 ? (
+            <div className="mx-auto mt-10 max-w-2xl border-t border-[rgb(var(--border-soft))] pt-10 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+                Specific questions
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                Targeted insight articles that pair with the guides — not substitutes for the pillar pages above.
+              </p>
+              <ul className="mt-5 flex list-none flex-col gap-2.5 p-0 sm:mx-auto sm:inline-flex sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6 sm:gap-y-2">
+                {insightPicks.map((a) => (
+                  <li key={a.slug}>
+                    <Link
+                      href={`/insights/${a.slug}`}
+                      className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+                    >
+                      {a.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </Container>
       </section>
 

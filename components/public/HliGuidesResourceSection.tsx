@@ -1,4 +1,7 @@
 import Link from "next/link";
+import type { EditorialArticle } from "@/lib/content/types";
+import { getArticleBySlug } from "@/lib/content";
+import { HOMEPAGE_INSIGHT_PICK_SLUGS } from "@/lib/content/publicInsightPicks";
 import { Container } from "@/components/public/PublicCTA";
 import { HliGuideCard } from "@/components/public/HliGuideCard";
 import { FEATURED_HLI_GUIDES, HLI_GUIDES_HUB_PATH } from "@/lib/guides/hliDownloadableGuides";
@@ -12,6 +15,9 @@ const SECTION_FOOTNOTE =
 
 export function HliGuidesResourceSection() {
   const [foundational, ...followOn] = FEATURED_HLI_GUIDES;
+  const insightPicks: EditorialArticle[] = HOMEPAGE_INSIGHT_PICK_SLUGS.map((slug) => getArticleBySlug(slug)).filter(
+    (a): a is EditorialArticle => Boolean(a)
+  );
 
   return (
     <section
@@ -64,6 +70,37 @@ export function HliGuidesResourceSection() {
             View all guides →
           </Link>
         </p>
+
+        {insightPicks.length > 0 ? (
+          <div className="mx-auto mt-12 max-w-2xl border-t border-[rgb(var(--border-soft))] pt-10 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+              From our insights library
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+              Short reads on focused questions — use the guides above for the full pillar view.
+            </p>
+            <ul className="mt-5 flex list-none flex-col gap-2.5 p-0 sm:mx-auto sm:inline-flex sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6 sm:gap-y-2">
+              {insightPicks.map((a) => (
+                <li key={a.slug}>
+                  <Link
+                    href={`/insights/${a.slug}`}
+                    className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+                  >
+                    {a.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5">
+              <Link
+                href="/insights"
+                className="text-sm font-medium text-[rgb(var(--text-muted))] underline-offset-2 hover:text-medical hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+              >
+                Browse all insights →
+              </Link>
+            </p>
+          </div>
+        ) : null}
       </Container>
     </section>
   );

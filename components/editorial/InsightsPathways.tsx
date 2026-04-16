@@ -20,9 +20,9 @@ const pathways: { title: string; blurb: string; href: string }[] = [
     href: "/insights/what-blood-tests-matter-for-hair-loss",
   },
   {
-    title: "I’ve already had treatment and still have concerns",
-    blurb: "Medicines, PRP-style procedures, or a transplant — where to read next and how your care team fits in.",
-    href: "/insights/hli-vs-hairaudit",
+    title: "I’m comparing minoxidil routes",
+    blurb: "Topical versus oral minoxidil — what’s shared, what differs, and why “stronger” isn’t the whole story.",
+    href: "/insights/oral-minoxidil-vs-topical-minoxidil",
   },
 ];
 

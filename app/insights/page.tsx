@@ -15,14 +15,7 @@ import ArticleTeaserList from "@/components/editorial/ArticleTeaserList";
 import InsightsPathways from "@/components/editorial/InsightsPathways";
 import PopularTopics from "@/components/editorial/PopularTopics";
 import { HUB_LABEL, HUB_PATH } from "@/lib/content/taxonomy";
-
-/** Shown first on the insights index when no filters — mirrors common patient entry points. */
-const INSIGHTS_FEATURED_SLUGS: readonly string[] = [
-  "telogen-effluvium-after-illness-or-stress",
-  "what-blood-tests-matter-for-hair-loss",
-  "diffuse-thinning-in-women",
-  "ferritin-and-hair-loss",
-];
+import { INSIGHTS_FEATURED_SLUGS } from "@/lib/content/publicInsightPicks";
 
 function partitionInsightsFeatured(
   articles: EditorialArticle[],
@@ -161,7 +154,8 @@ function InsightsContent({ searchParams }: SearchProps) {
                 Common starting points
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
-                Short list of guides that match how many people first look for help.
+                Curated starting articles — including recent deep-dives — plus evergreen entry points for labs and sudden
+                shedding.
               </p>
               <div className="mt-6">
                 <ArticleTeaserList
