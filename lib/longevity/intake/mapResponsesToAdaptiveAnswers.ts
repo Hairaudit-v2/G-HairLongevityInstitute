@@ -656,6 +656,12 @@ export function mapResponsesToAdaptiveAnswers(
     ...(familialHair && mh?.familyHairOnsetAgeBand && mh.familyHairOnsetAgeBand !== "prefer_not_to_say"
       ? { family_hair_onset_age_band: mh.familyHairOnsetAgeBand }
       : {}),
+    ...(mh?.cancerTreatmentHistory ? { cancer_treatment_history: mh.cancerTreatmentHistory } : {}),
+    ...(mh?.cancerTreatmentTypes?.length ? { cancer_treatment_types: mh.cancerTreatmentTypes } : {}),
+    ...(mh?.cancerTreatmentTimingVsHair
+      ? { cancer_treatment_timing_vs_hair: mh.cancerTreatmentTimingVsHair }
+      : {}),
+    ...(mh?.systemicDiseaseBundle?.length ? { systemic_disease_bundle: mh.systemicDiseaseBundle } : {}),
     ...(maleA.current_or_past_trt ? { current_or_past_trt: true } : {}),
     ...(maleA.testosterone_boosters ? { testosterone_boosters: true } : {}),
     ...(maleA.sarms_or_anabolics ? { sarms_or_anabolics: true } : {}),
@@ -686,6 +692,10 @@ export function mapResponsesToAdaptiveAnswers(
     ...(lifestyle.shift_work ? { shift_work: true } : {}),
     ...(lifestyle.high_stress_load ? { high_stress_load: true } : {}),
     ...(lifestyle.overtraining ? { overtraining: true } : {}),
+    ...(tt?.weightLossIntent ? { weight_loss_intent: tt.weightLossIntent } : {}),
+    ...(tt?.majorIllnessOrHospitalReason
+      ? { major_illness_or_hospital_reason: tt.majorIllnessOrHospitalReason }
+      : {}),
     ...(lt?.currentTreatments?.length ? { treatment_history: lt.currentTreatments } : {}),
   };
 
@@ -726,6 +736,10 @@ const V2_ENGINE_KEYS = new Set([
   "family_history",
   "family_hair_pattern_match",
   "family_hair_onset_age_band",
+  "cancer_treatment_history",
+  "cancer_treatment_types",
+  "cancer_treatment_timing_vs_hair",
+  "systemic_disease_bundle",
   "perceived_severity",
   "pattern_confidence",
   "recent_hair_trend",
@@ -754,6 +768,8 @@ const V2_ENGINE_KEYS = new Set([
   "shift_work",
   "high_stress_load",
   "overtraining",
+  "weight_loss_intent",
+  "major_illness_or_hospital_reason",
   "tight_hairstyles_or_extensions",
   "frequent_helmet_or_headgear",
   "contact_sports_or_headgear_sport",
