@@ -13,6 +13,10 @@ import {
   drawBodyParagraph,
   drawBulletList,
   bodyLineHeight,
+  estimateParagraphHeight,
+  estimateBulletListHeight,
+  estimateSectionHeadingHeight,
+  ensureLetterSpace,
   wrapText,
   PDF_COLORS,
   PDF_LAYOUT,
@@ -80,20 +84,29 @@ export async function generateGpSupportLetterPdf(
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
-  const page = doc.addPage([PDF_LAYOUT.pageWidth, PDF_LAYOUT.pageHeight]);
+  const letterFonts = { regular: font, bold: fontBold };
+  let page = doc.addPage([PDF_LAYOUT.pageWidth, PDF_LAYOUT.pageHeight]);
+  const pages = [page];
   const margin = PDF_LAYOUT.margin;
   const lh = bodyLineHeight();
 
-  let y = await drawHliLetterHeader(doc, page, {
-    regular: font,
-    bold: fontBold,
-  });
+  let y = await drawHliLetterHeader(doc, page, letterFonts);
+
+  async function ensureSpace(requiredHeight: number): Promise<void> {
+    const next = await ensureLetterSpace(doc, page, y, letterFonts, requiredHeight);
+    if (next.page !== page) {
+      page = next.page;
+      pages.push(page);
+    }
+    y = next.y;
+  }
 
   const formattedDate = formatLetterDate(input.generationDate);
   const contentWidth = PDF_LAYOUT.contentWidth;
+  const titleSize = 16;
+  const titleLineH = titleSize * HLI_TYPOGRAPHY.lineHeightHeading + 2;
 
   // Document title — larger, bold; spacing below
-  const titleSize = 16;
   page.drawText(DOCUMENT_TITLE, {
     x: margin,
     y,
@@ -101,7 +114,6 @@ export async function generateGpSupportLetterPdf(
     font: fontBold,
     color: PDF_COLORS.primary,
   });
-  const titleLineH = titleSize * HLI_TYPOGRAPHY.lineHeightHeading + 2;
   y -= titleLineH + 10;
 
   // Date — right-aligned on its own line; then spacing
@@ -117,6 +129,7 @@ export async function generateGpSupportLetterPdf(
   y -= dateSize * 1.4 + 2 + HLI_TYPOGRAPHY.sectionGap;
 
   // Patient block — two lines only: Patient: [Name], Date: [Date]
+  await ensureSpace(lh * 2 + HLI_TYPOGRAPHY.sectionGap);
   page.drawText(`Patient: ${input.patientName}`, {
     x: margin,
     y,
@@ -136,6 +149,11 @@ export async function generateGpSupportLetterPdf(
 
   // Intro (To the Treating GP + thank you + context)
   const introParagraphs = INTRO.split(/\n\n+/);
+  const introHeight =
+    introParagraphs.reduce((sum, para) => {
+      return sum + estimateParagraphHeight(para) + HLI_TYPOGRAPHY.blockGap;
+    }, 0) + HLI_TYPOGRAPHY.sectionGap;
+  await ensureSpace(introHeight);
   for (const para of introParagraphs) {
     y = drawBodyParagraph(page, para, { x: margin, y, font });
     y -= HLI_TYPOGRAPHY.blockGap;
@@ -143,6 +161,14 @@ export async function generateGpSupportLetterPdf(
   y -= HLI_TYPOGRAPHY.sectionGap;
 
   // Clinical Considerations
+  const considerationItems = reasonToBulletItems(input.reason);
+  const clinicalConsiderationsHeight =
+    estimateSectionHeadingHeight() +
+    estimateParagraphHeight(CLINICAL_CONSIDERATIONS_INTRO) +
+    HLI_TYPOGRAPHY.blockGap +
+    estimateBulletListHeight(considerationItems) +
+    HLI_TYPOGRAPHY.sectionGap;
+  await ensureSpace(clinicalConsiderationsHeight);
   y = drawSectionHeading(page, "Clinical Considerations", {
     x: margin,
     y,
@@ -155,11 +181,21 @@ export async function generateGpSupportLetterPdf(
     font,
   });
   y -= HLI_TYPOGRAPHY.blockGap;
-  const considerationItems = reasonToBulletItems(input.reason);
   y = drawBulletList(page, considerationItems, { x: margin, y, font });
   y -= HLI_TYPOGRAPHY.sectionGap;
 
   // Suggested Investigations
+  const testItems =
+    input.recommendedTests.length > 0
+      ? input.recommendedTests.map(formatTestLabel)
+      : ["As clinically appropriate."];
+  const suggestedInvestigationsHeight =
+    estimateSectionHeadingHeight() +
+    estimateParagraphHeight(SUGGESTED_INVESTIGATIONS_INTRO) +
+    HLI_TYPOGRAPHY.blockGap +
+    estimateBulletListHeight(testItems) +
+    HLI_TYPOGRAPHY.sectionGap;
+  await ensureSpace(suggestedInvestigationsHeight);
   y = drawSectionHeading(page, "Suggested Investigations", {
     x: margin,
     y,
@@ -172,14 +208,15 @@ export async function generateGpSupportLetterPdf(
     font,
   });
   y -= HLI_TYPOGRAPHY.blockGap;
-  const testItems =
-    input.recommendedTests.length > 0
-      ? input.recommendedTests.map(formatTestLabel)
-      : ["As clinically appropriate."];
   y = drawBulletList(page, testItems, { x: margin, y, font });
   y -= HLI_TYPOGRAPHY.sectionGap;
 
   // Clinical Note
+  const clinicalNoteHeight =
+    estimateSectionHeadingHeight() +
+    estimateParagraphHeight(CLINICAL_NOTE) +
+    HLI_TYPOGRAPHY.sectionGap;
+  await ensureSpace(clinicalNoteHeight);
   y = drawSectionHeading(page, "Clinical Note", {
     x: margin,
     y,
@@ -190,6 +227,15 @@ export async function generateGpSupportLetterPdf(
   y -= HLI_TYPOGRAPHY.sectionGap;
 
   // Disclaimer — divider above, spacing, smaller lighter text
+  const disclaimerSize = 8;
+  const disclaimerLh = disclaimerSize * 1.4 + 2;
+  const inlineDisclaimerHeight =
+    18 +
+    16 +
+    (HLI_TYPOGRAPHY.smallSize * 1.3 + 2) +
+    wrapText(DISCLAIMER_BODY, PDF_LAYOUT.disclaimerCharsPerLine).length * disclaimerLh +
+    HLI_TYPOGRAPHY.sectionGap;
+  await ensureSpace(inlineDisclaimerHeight);
   y -= 18;
   page.drawLine({
     start: { x: margin, y },
@@ -206,8 +252,6 @@ export async function generateGpSupportLetterPdf(
     color: PDF_COLORS.muted,
   });
   y -= HLI_TYPOGRAPHY.smallSize * 1.3 + 2;
-  const disclaimerSize = 8;
-  const disclaimerLh = disclaimerSize * 1.4 + 2;
   for (const line of wrapText(DISCLAIMER_BODY, PDF_LAYOUT.disclaimerCharsPerLine)) {
     page.drawText(line, {
       x: margin,
@@ -221,6 +265,8 @@ export async function generateGpSupportLetterPdf(
   y -= HLI_TYPOGRAPHY.sectionGap;
 
   // Sign-off
+  const signOffHeight = lh * 3 + 14 + HLI_TYPOGRAPHY.sectionGap;
+  await ensureSpace(signOffHeight);
   page.drawText(SIGN_OFF_LINE_1, {
     x: margin,
     y,
@@ -247,9 +293,11 @@ export async function generateGpSupportLetterPdf(
   y -= lh + HLI_TYPOGRAPHY.sectionGap;
 
   // Footer (same disclaimer again in footer area for consistency)
-  drawHliLetterFooter(page, font, {
-    disclaimer: DISCLAIMER_BODY,
-  });
+  for (const footerPage of pages) {
+    drawHliLetterFooter(footerPage, font, {
+      disclaimer: DISCLAIMER_BODY,
+    });
+  }
 
   return doc.save();
 }

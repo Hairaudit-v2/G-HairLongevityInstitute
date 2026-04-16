@@ -9,6 +9,10 @@ import type { PDFDocument, PDFPage, PDFFont } from "pdf-lib";
 import { rgb, RGB } from "pdf-lib";
 import { HLI_BRAND, HLI_TYPOGRAPHY } from "@/lib/hliBranding";
 
+const PDF_MARGIN = 54;
+const PDF_FOOTER_RESERVED_HEIGHT = 72;
+const PDF_CONTENT_SAFETY_BUFFER = 10;
+
 /** PDF color palette — charcoal, soft gold, muted (aligned with HLI_COLORS). */
 export const PDF_COLORS = {
   /** Primary text — charcoal */
@@ -24,16 +28,16 @@ export const PDF_COLORS = {
 } as const;
 
 export const PDF_LAYOUT = {
-  margin: 54,
+  margin: PDF_MARGIN,
   pageWidth: 595,
   pageHeight: 842,
-  /** Max content width (page width minus margins); keeps body and divider within bounds */
-  contentWidth: 595 - 54 * 2,
+  contentWidth: 595 - PDF_MARGIN * 2,
+  footerReservedHeight: PDF_FOOTER_RESERVED_HEIGHT,
+  contentBottomY: PDF_MARGIN + PDF_FOOTER_RESERVED_HEIGHT,
+  contentSafetyBuffer: PDF_CONTENT_SAFETY_BUFFER,
   logoMaxWidth: 150,
-  /** Chars per line for body — comfortable line length, avoids mid-word wrap */
   bodyCharsPerLine: 72,
   disclaimerCharsPerLine: 82,
-  /** Space below header divider before body starts */
   headerBottomGap: 28,
 } as const;
 
@@ -73,6 +77,11 @@ export type HliLetterHeaderOptions = {
   ruleBelow?: boolean;
 };
 
+export type HliLetterFonts = {
+  regular: PDFFont;
+  bold: PDFFont;
+};
+
 /**
  * Draw the HLI branded header: logo (if available), business name, optional tagline,
  * address, contact line (email · website · phone · ABN), optional rule.
@@ -81,7 +90,7 @@ export type HliLetterHeaderOptions = {
 export async function drawHliLetterHeader(
   doc: PDFDocument,
   page: PDFPage,
-  fonts: { regular: PDFFont; bold: PDFFont },
+  fonts: HliLetterFonts,
   options: HliLetterHeaderOptions = {}
 ): Promise<number> {
   const { margin, pageHeight, contentWidth, logoMaxWidth } = PDF_LAYOUT;
@@ -239,6 +248,15 @@ export function bodyLineHeight(): number {
 /** Space below section heading before body (points). */
 const SECTION_HEADING_BOTTOM = 12;
 
+/** Approximate vertical space used by a section heading including spacing below. */
+export function estimateSectionHeadingHeight(): number {
+  return (
+    HLI_TYPOGRAPHY.headingSize * HLI_TYPOGRAPHY.lineHeightHeading +
+    2 +
+    SECTION_HEADING_BOTTOM
+  );
+}
+
 /** Draw a section heading (bold, distinct); returns new y with spacing below. */
 export function drawSectionHeading(
   page: PDFPage,
@@ -284,6 +302,12 @@ export function drawBodyParagraph(
   return y;
 }
 
+/** Estimate height consumed by a wrapped body paragraph. */
+export function estimateParagraphHeight(text: string, maxChars?: number): number {
+  const lineCount = wrapText(text, maxChars ?? PDF_LAYOUT.bodyCharsPerLine).length;
+  return lineCount * bodyLineHeight();
+}
+
 /** Bullet list: gap between items (points) so items like "Free T4" stay clear. */
 const BULLET_ITEM_GAP = 6;
 
@@ -313,4 +337,37 @@ export function drawBulletList(
     y -= BULLET_ITEM_GAP;
   }
   return y + BULLET_ITEM_GAP; // don't double-gap after last item
+}
+
+/** Estimate height consumed by a wrapped bullet list including item gaps. */
+export function estimateBulletListHeight(items: string[], maxChars?: number): number {
+  if (items.length === 0) return 0;
+  const lineWidth = maxChars ?? PDF_LAYOUT.bodyCharsPerLine;
+  const totalLineHeight = items.reduce((sum, item) => {
+    return sum + wrapText(`• ${item.trim()}`, lineWidth).length * bodyLineHeight();
+  }, 0);
+  return totalLineHeight + BULLET_ITEM_GAP * (items.length - 1);
+}
+
+/**
+ * Ensure the next flowing content block fits above the reserved footer band.
+ * If not, create a new page and redraw the standard HLI header.
+ */
+export async function ensureLetterSpace(
+  doc: PDFDocument,
+  page: PDFPage,
+  y: number,
+  fonts: HliLetterFonts,
+  requiredHeight: number,
+  headerOptions: HliLetterHeaderOptions = {}
+): Promise<{ page: PDFPage; y: number }> {
+  const requiredHeightWithBuffer = requiredHeight + PDF_LAYOUT.contentSafetyBuffer;
+
+  if (y - requiredHeightWithBuffer >= PDF_LAYOUT.contentBottomY) {
+    return { page, y };
+  }
+
+  const nextPage = doc.addPage([PDF_LAYOUT.pageWidth, PDF_LAYOUT.pageHeight]);
+  const nextY = await drawHliLetterHeader(doc, nextPage, fonts, headerOptions);
+  return { page: nextPage, y: nextY };
 }
