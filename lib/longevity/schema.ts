@@ -67,11 +67,45 @@ export type TimelineTriggers = {
   trtStatus?: TrtStatus;
   /** When TRT was started; only relevant when trtStatus indicates current or previous use. */
   trtStartedWhen?: TrtStartedWhen;
+  /** Whether the selected rapid weight loss was intentional or not. */
+  weightLossIntent?: "intentional" | "unintentional" | "mixed_or_unclear" | "unsure";
+  /** High-level context for a recent severe illness or hospital admission. */
+  majorIllnessOrHospitalReason?:
+    | "infection_or_fever"
+    | "surgery_or_procedure"
+    | "pregnancy_related"
+    | "cancer_treatment"
+    | "inflammatory_or_autoimmune_flare"
+    | "other_or_unsure";
 };
 
 export type MedicalHistory = {
   diagnoses?: string[];
   currentSymptoms?: string[];
+  /** Broad cancer-treatment screen for hair-relevant oncology history. */
+  cancerTreatmentHistory?: "yes" | "no" | "unsure" | "prefer_not_to_say";
+  /** Treatment groups selected when cancerTreatmentHistory is yes. */
+  cancerTreatmentTypes?: Array<
+    | "chemotherapy"
+    | "radiation"
+    | "targeted_therapy"
+    | "immunotherapy"
+    | "hormone_blocking_therapy"
+    | "mixed_or_unsure"
+    | "prefer_not_to_say"
+  >;
+  /** Timing of cancer treatment relative to hair changes. */
+  cancerTreatmentTimingVsHair?: "before_hair_change" | "around_same_time" | "after_hair_change" | "unsure";
+  /** Bundled systemic-disease and malabsorption history. */
+  systemicDiseaseBundle?: Array<
+    | "chronic_liver_disease"
+    | "chronic_kidney_disease"
+    | "bariatric_surgery"
+    | "inflammatory_bowel_disease"
+    | "celiac_or_malabsorption"
+    | "none"
+    | "prefer_not_to_say"
+  >;
   familyHistory?: string[];
   /**
    * Which side of the family hair thinning/loss runs on, when male- or female-pattern family history is selected.
