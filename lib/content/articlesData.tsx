@@ -285,6 +285,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "dht-and-androgenetic-alopecia",
     title: "DHT and pattern hair loss: how miniaturisation works",
+    seoTitle: "How DHT drives pattern hair loss (miniaturisation)",
     deck: "How DHT fits male- and female-pattern thinning — without blaming one hormone for everything.",
     description:
       "Plain-language mechanics: DHT, follicular miniaturisation, male- and female-pattern context, what clinicians look for on the scalp, and when blood tests are secondary. Complements the male pattern guide for progression and treatment framing.",
@@ -1232,6 +1233,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "receding-hairline-vs-mature-hairline",
     title: "Receding Hairline vs Mature Hairline: What Is the Difference?",
+    seoTitle: "Receding vs mature hairline: how to tell",
     deck:
       "Not every hairline change means male-pattern loss — here is how maturation, early recession, and clinical clues differ, without turning this into a full DHT textbook.",
     description:
@@ -1311,11 +1313,15 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC4560543/"
       ),
     ],
+    pdfHref: "/downloads/insights/receding-hairline-vs-mature-hairline.pdf",
+    pdfLabel: "Download patient guide PDF",
+    pdfFileSize: "633 KB",
     Body: BodyRecedingHairlineVsMature,
   },
   {
     slug: "crown-thinning-why-it-can-be-harder-to-treat",
     title: "Crown Thinning: Why It Can Be Harder to Treat",
+    seoTitle: "Crown thinning: expectations & why change feels slow",
     deck:
       "Vertex thinning is easy to miss, slower to judge in photos, and often slower to show cosmetic change — here is why stabilisation still counts as a win while you wait for visible density.",
     description:
@@ -1388,6 +1394,9 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
     primaryPillar: "male-pattern-hair-loss",
     secondaryPillar: "hair-loss-medications",
     glossarySlugs: ["dht"],
+    pdfHref: "/downloads/insights/crown-thinning-why-it-can-be-harder-to-treat.pdf",
+    pdfLabel: "Download patient guide PDF",
+    pdfFileSize: "835 KB",
     references: [
       cite(
         "American Academy of Dermatology. Hair loss: diagnosis and treatment (patient resource).",
@@ -1407,6 +1416,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "does-trt-cause-hair-loss-or-unmask-it",
     title: "Does TRT Cause Hair Loss, or Just Unmask It?",
+    seoTitle: "TRT & hair loss: new cause vs unmasking",
     deck:
       "Whether TRT starts hair loss or reveals an existing androgen-sensitive pattern — a biology-first frame for your prescriber, not a verdict from a lab slip.",
     description:
@@ -1488,6 +1498,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "normal-testosterone-and-androgen-sensitive-hair-loss",
     title: "Can You Have Normal Testosterone and Still Have Androgen-Sensitive Hair Loss?",
+    seoTitle: "Normal testosterone, still thinning: why it happens",
     deck:
       "Yes — follicle sensitivity and pattern often matter more than one mid-range lab line.",
     description:
@@ -1568,6 +1579,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   },
   {
     slug: "oral-minoxidil-vs-topical-minoxidil",
+    seoTitle: "Oral vs topical minoxidil: route comparison",
     title: "Oral Minoxidil vs Topical Minoxidil for Hair Loss",
     deck:
       "Same active drug, different delivery — adherence, systemic monitoring, and who might discuss which route, with mechanism and timelines kept in a separate article.",
@@ -1652,6 +1664,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "dutasteride-for-hair-loss-when-it-enters-the-conversation",
     title: "Dutasteride for Hair Loss: When It Enters the Conversation",
+    seoTitle: "Dutasteride for hair loss: when clinicians discuss it",
     deck:
       "Not first-line for everyone — when clinicians may discuss it, what ‘stronger’ gets wrong, and how it fits a long-term plan with supervision.",
     description:
@@ -1733,6 +1746,7 @@ export const EDITORIAL_ARTICLES: EditorialArticle[] = [
   {
     slug: "postpartum-hair-loss-vs-female-pattern-thinning",
     title: "Postpartum Hair Loss vs Female Pattern Thinning: How to Tell the Difference",
+    seoTitle: "Postpartum shedding vs female-pattern thinning",
     deck:
       "Diffuse postpartum telogen shedding versus central, progressive pattern thinning — and when both overlap after birth.",
     description:

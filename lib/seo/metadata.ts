@@ -30,7 +30,8 @@ function normalizeTitle(title: string, appendBrand: boolean): string {
 
 /**
  * Consistent canonical, Open Graph, and Twitter metadata for public marketing pages.
- * Relies on root `metadataBase` from layout; still sets explicit `alternates.canonical`.
+ * Relies on root `metadataBase` from layout; still sets explicit `alternates.canonical`
+ * (path-only URLs resolved with `absoluteUrl` / `getSiteOrigin()` — keep in sync with `NEXT_PUBLIC_SITE_URL` in production).
  */
 export function buildPageMetadata(input: BuildPageMetadataInput): Metadata {
   const path = input.path.startsWith("/") ? input.path : `/${input.path}`;

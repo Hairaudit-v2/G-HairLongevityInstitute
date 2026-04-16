@@ -33,3 +33,15 @@ export function absoluteUrl(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
   return `${origin.replace(/\/$/, "")}${p}`;
 }
+
+/**
+ * Origin for `sitemap.xml` and `robots.txt` sitemap directive.
+ * Prefer `NEXT_PUBLIC_SITE_URL` in production; otherwise the public marketing domain — avoids
+ * emitting preview/staging hostnames as indexable URLs when the env var is unset.
+ */
+export function getSitemapSiteOrigin(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL);
+  }
+  return PRODUCTION_SITE_ORIGIN;
+}

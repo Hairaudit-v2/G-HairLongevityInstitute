@@ -26,6 +26,7 @@ import { guideLinksForArticle } from "@/lib/content/pillarGuides";
 import EditorialArticleViewTracker from "@/components/editorial/EditorialArticleViewTracker";
 import EditorialArticleImage from "@/components/editorial/EditorialArticleImage";
 import EditorialHeroCtas from "@/components/editorial/EditorialHeroCtas";
+import InsightArticlePdfLink from "@/components/editorial/InsightArticlePdfLink";
 import { isLongevityEnabled } from "@/lib/features";
 
 type Props = { params: { slug: string } };
@@ -48,7 +49,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const path = `/insights/${article.slug}`;
   return buildPageMetadata({
     path,
-    title: article.title,
+    title: article.seoTitle ?? article.title,
     metaDescription: article.description,
     appendBrand: true,
     openGraphType: "article",
@@ -144,6 +145,13 @@ export default function EditorialArticlePage({ params }: Props) {
           <div className="mt-6">
             <EditorialHeroCtas assessmentHref={assessmentHref} ctaType={article.ctaType} />
           </div>
+          {article.pdfHref ? (
+            <InsightArticlePdfLink
+              href={article.pdfHref}
+              label={article.pdfLabel}
+              fileSize={article.pdfFileSize}
+            />
+          ) : null}
         </header>
 
         {article.heroImage ? (

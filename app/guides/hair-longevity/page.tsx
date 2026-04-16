@@ -8,7 +8,7 @@ import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
 import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
-import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
+import GuidePageJsonLd from "@/components/seo/GuidePageJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   HAIR_LONGEVITY_GUIDE_PDF_DOWNLOAD_AS,
@@ -180,7 +180,11 @@ export default function HairLongevityFoundationalGuidePage() {
         ctaLabel="Start My Hair Analysis"
         theme="light"
       />
-      <HomeFaqJsonLd items={FAQ_ITEMS} />
+      <GuidePageJsonLd
+        guidePath="/guides/hair-longevity"
+        lastBreadcrumbName="Hair longevity overview"
+        faqItems={FAQ_ITEMS}
+      />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-14 sm:py-20" aria-labelledby="foundational-guide-heading">
         <Container>

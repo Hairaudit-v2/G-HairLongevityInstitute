@@ -14,7 +14,7 @@ import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
 import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
-import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
+import GuidePageJsonLd from "@/components/seo/GuidePageJsonLd";
 
 const FINASTERIDE_INSIGHT = "/insights/finasteride-vs-saw-palmetto";
 const MINOXIDIL_INSIGHT = "/insights/minoxidil-mechanism-and-realistic-timelines";
@@ -161,7 +161,11 @@ export default function HairLossMedicationsGuidePage() {
         ctaLabel="Start My Hair Analysis"
         theme="light"
       />
-      <HomeFaqJsonLd items={FAQ_ITEMS} />
+      <GuidePageJsonLd
+        guidePath="/guides/hair-loss-medications"
+        lastBreadcrumbName="Treatments & medications"
+        faqItems={FAQ_ITEMS}
+      />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-14 sm:py-20" aria-labelledby="meds-guide-hero">
         <Container>

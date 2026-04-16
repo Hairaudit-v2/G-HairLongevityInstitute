@@ -104,6 +104,11 @@ export type EditorialPillarSlug =
 export type EditorialArticleMeta = {
   slug: string;
   title: string;
+  /**
+   * Optional `<title>` / Open Graph title override for SERP differentiation (H1 stays `title`).
+   * Use sparingly when a pillar guide and an insight article share vocabulary.
+   */
+  seoTitle?: string;
   /** Optional subtitle shown on the article page header. */
   deck?: string;
   /** SEO / social description. */
@@ -132,6 +137,14 @@ export type EditorialArticleMeta = {
   glossarySlugs?: string[];
   references: EditorialReference[];
   heroImage?: EditorialHeroImage;
+  /**
+   * Optional patient-facing PDF (served from `public/`). When set, the insight page shows a download CTA.
+   */
+  pdfHref?: string;
+  /** Defaults to a calm “Download PDF”-style label in the UI when omitted. */
+  pdfLabel?: string;
+  /** Human-readable size for the link line (e.g. “632 KB”); optional. */
+  pdfFileSize?: string;
 };
 
 export type EditorialArticle = EditorialArticleMeta & {

@@ -3,7 +3,7 @@ import { isLongevityEnabled } from "@/lib/features";
 import { getAllSlugs } from "@/lib/content/index";
 import { GLOSSARY, glossaryPath } from "@/lib/content/glossary";
 import { FEATURED_HLI_GUIDES } from "@/lib/guides/hliDownloadableGuides";
-import { getSiteOrigin } from "@/lib/seo/site";
+import { getSitemapSiteOrigin } from "@/lib/seo/site";
 
 const STATIC_PUBLIC_PATHS: Array<{
   path: string;
@@ -30,7 +30,7 @@ const STATIC_PUBLIC_PATHS: Array<{
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = getSiteOrigin();
+  const base = getSitemapSiteOrigin();
   const now = new Date();
   const seen = new Set<string>();
 

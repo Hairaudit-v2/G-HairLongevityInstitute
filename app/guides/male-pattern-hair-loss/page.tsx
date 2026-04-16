@@ -9,7 +9,7 @@ import { GuideRelatedGuides } from "@/components/guides/GuideRelatedGuides";
 import { GuideSupportingReads } from "@/components/guides/GuideSupportingReads";
 import { GuideInsightArticleGroups } from "@/components/guides/GuideInsightArticleGroups";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
-import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
+import GuidePageJsonLd from "@/components/seo/GuidePageJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import {
   MALE_PATTERN_GUIDE_PDF_DOWNLOAD_AS,
@@ -135,7 +135,11 @@ export default function MalePatternHairLossGuidePage() {
         ctaLabel="Start My Hair Analysis"
         theme="light"
       />
-      <HomeFaqJsonLd items={FAQ_ITEMS} />
+      <GuidePageJsonLd
+        guidePath="/guides/male-pattern-hair-loss"
+        lastBreadcrumbName="Male pattern hair loss"
+        faqItems={FAQ_ITEMS}
+      />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-14 sm:py-20" aria-labelledby="mp-guide-hero">
         <Container>

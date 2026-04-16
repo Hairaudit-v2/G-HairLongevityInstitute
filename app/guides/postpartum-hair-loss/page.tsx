@@ -10,7 +10,7 @@ import PublicFooter from "@/components/public/PublicFooter";
 import { Container, SecondaryButton } from "@/components/public/PublicCTA";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import EditorialFaqSection from "@/components/editorial/EditorialFaqSection";
-import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
+import GuidePageJsonLd from "@/components/seo/GuidePageJsonLd";
 import {
   POSTPARTUM_GUIDE_PDF_DOWNLOAD_AS,
   POSTPARTUM_GUIDE_PDF_HREF,
@@ -143,7 +143,11 @@ export default function PostpartumHairLossGuidePage() {
         ctaLabel="Start My Hair Analysis"
         theme="light"
       />
-      <HomeFaqJsonLd items={FAQ_ITEMS} />
+      <GuidePageJsonLd
+        guidePath="/guides/postpartum-hair-loss"
+        lastBreadcrumbName="Postpartum hair loss"
+        faqItems={FAQ_ITEMS}
+      />
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-14 sm:py-20" aria-labelledby="pp-guide-hero">
         <Container>

@@ -17,6 +17,9 @@ import PopularTopics from "@/components/editorial/PopularTopics";
 import { HUB_LABEL, HUB_PATH } from "@/lib/content/taxonomy";
 import { INSIGHTS_FEATURED_SLUGS } from "@/lib/content/publicInsightPicks";
 
+/** Faceted `/insights?...` views need per-request metadata (canonical `/insights`, noindex when filtered). */
+export const dynamic = "force-dynamic";
+
 function partitionInsightsFeatured(
   articles: EditorialArticle[],
   order: readonly string[]
