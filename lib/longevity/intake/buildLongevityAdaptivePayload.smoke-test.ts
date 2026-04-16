@@ -202,6 +202,58 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
         "timeline owner backfills compatibility key"
       );
     }),
+    run("approved systemic history fields pass through to adaptive_answers", () => {
+      const payload = buildLongevityAdaptivePayload({
+        medicalHistory: {
+          cancerTreatmentHistory: "yes",
+          cancerTreatmentTypes: ["chemotherapy", "immunotherapy"],
+          cancerTreatmentTimingVsHair: "around_same_time",
+          systemicDiseaseBundle: ["bariatric_surgery"],
+        },
+        timelineTriggers: {
+          triggers: ["rapid_weight_loss", "recent_illness_or_infection"],
+          weightLossIntent: "unintentional",
+          majorIllnessOrHospitalReason: "infection_or_fever",
+        },
+      });
+      assert(payload.adaptive_answers.cancer_treatment_history === "yes", "cancer history preserved");
+      assert(
+        Array.isArray(payload.adaptive_answers.cancer_treatment_types) &&
+          (payload.adaptive_answers.cancer_treatment_types as string[]).includes("chemotherapy"),
+        "cancer treatment types preserved"
+      );
+      assert(
+        payload.adaptive_answers.cancer_treatment_timing_vs_hair === "around_same_time",
+        "cancer treatment timing preserved"
+      );
+      assert(
+        Array.isArray(payload.adaptive_answers.systemic_disease_bundle) &&
+          (payload.adaptive_answers.systemic_disease_bundle as string[]).includes("bariatric_surgery"),
+        "systemic bundle preserved"
+      );
+      assert(payload.adaptive_answers.weight_loss_intent === "unintentional", "weight loss intent preserved");
+      assert(
+        payload.adaptive_answers.major_illness_or_hospital_reason === "infection_or_fever",
+        "major illness reason preserved"
+      );
+    }),
+    run("systemic history special answers preserve none and prefer-not-to-say", () => {
+      const payload = buildLongevityAdaptivePayload({
+        medicalHistory: {
+          cancerTreatmentHistory: "prefer_not_to_say",
+          systemicDiseaseBundle: ["none"],
+        },
+      });
+      assert(
+        payload.adaptive_answers.cancer_treatment_history === "prefer_not_to_say",
+        "prefer not to say cancer history preserved"
+      );
+      assert(
+        Array.isArray(payload.adaptive_answers.systemic_disease_bundle) &&
+          (payload.adaptive_answers.systemic_disease_bundle as string[])[0] === "none",
+        "none systemic bundle preserved"
+      );
+    }),
     run("protein and diet_pattern_intake adjust nutritional flags", () => {
       const payload = buildLongevityAdaptivePayload({
         adaptiveEngine: {
