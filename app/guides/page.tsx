@@ -12,7 +12,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/guides",
   title: "Free hair loss guides",
   metaDescription:
-    "Foundational hair longevity guide plus focused resources: postpartum shedding, men's pattern loss, hormones and hair — from the Hair Longevity Institute.",
+    "Foundational hair longevity guide plus focused resources on medications, postpartum shedding, men's pattern loss, and hormones — from the Hair Longevity Institute.",
   appendBrand: true,
 });
 
@@ -37,7 +37,8 @@ export default function GuidesHubPage() {
             Hair loss guides
           </h1>
           <p className="mt-4 max-w-2xl text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            Start with the foundational guide, then go deeper on postpartum health, men&apos;s pattern loss, and hormones.
+            Start with the foundational guide, then go deeper on medications, postpartum health, men&apos;s pattern loss,
+            and hormones.
             Downloadable PDFs are listed on each guide page where available.
           </p>
         </Container>

@@ -8,3 +8,6 @@ export const MALE_PATTERN_GUIDE_PDF_DOWNLOAD_AS = "Male-Pattern-Hair-Loss-Causes
 
 export const ANDROGEN_GUIDE_PDF_HREF = "/Testosterone-DHT-TRT-Steroids-and-Hair-Loss-Risk-in-Men-and-Women.pdf";
 export const ANDROGEN_GUIDE_PDF_DOWNLOAD_AS = "Testosterone-DHT-TRT-Steroids-and-Hair-Loss-Risk-in-Men-and-Women.pdf";
+
+export const HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_HREF = "/Hair-Loss-Medications-in-2026.pdf";
+export const HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_DOWNLOAD_AS = "Hair-Loss-Medications-in-2026.pdf";

@@ -1,3 +1,8 @@
+import {
+  HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_DOWNLOAD_AS,
+  HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_HREF,
+} from "@/lib/guides/hliGuidePdfs";
+
 /**
  * Featured downloadable / landing-page guides for HLI marketing surfaces.
  * Order matters: first item is the foundational “start here” guide on the homepage.
@@ -6,7 +11,10 @@ export type HliFeaturedGuide = {
   id: string;
   category: string;
   title: string;
+  shortTitle?: string;
   description: string;
+  audience?: "patients" | "clinicians" | "both";
+  updatedAt?: string;
   /** Shown on the primary button when an action href resolves */
   ctaLabel: string;
   /** Guide landing page or direct PDF path under /public */
@@ -34,6 +42,19 @@ export const FEATURED_HLI_GUIDES: HliFeaturedGuide[] = [
       "Understand how hair loss works, the most common causes of thinning and shedding, what early signs matter, which tests are worth considering, and what evidence-based options may actually help.",
     ctaLabel: HLI_GUIDE_CTA_READ,
     href: "/guides/hair-longevity",
+  },
+  {
+    id: "hair-loss-medications-in-2026",
+    category: "Patient Guide",
+    title: "Hair Loss Medications in 2026",
+    shortTitle: "Hair Loss Medications",
+    description:
+      "A complete patient guide to what is available now, what is used off-label, what is natural, and what is still in trials.",
+    audience: "patients",
+    updatedAt: "April 2026",
+    ctaLabel: HLI_GUIDE_CTA_READ,
+    href: HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_HREF,
+    downloadAs: HAIR_LOSS_MEDICATIONS_IN_2026_GUIDE_PDF_DOWNLOAD_AS,
   },
   {
     id: "postpartum",

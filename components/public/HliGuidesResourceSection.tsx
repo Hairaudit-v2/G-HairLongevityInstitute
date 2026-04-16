@@ -6,7 +6,7 @@ import { FEATURED_HLI_GUIDES, HLI_GUIDES_HUB_PATH } from "@/lib/guides/hliDownlo
 const SECTION_EYEBROW = "Evidence-based resources";
 const SECTION_HEADLINE = "Start with Our Free Hair Loss Guides";
 const SECTION_SUPPORTING =
-  "Begin with HLI's foundational guide to hair longevity, then explore more specific resources on postpartum shedding, male pattern hair loss, and androgen-related thinning.";
+  "Begin with HLI's foundational guide to hair longevity, then explore more specific resources on medications, postpartum shedding, male pattern hair loss, and androgen-related thinning.";
 const SECTION_FOOTNOTE =
   "Clear, practical education grounded in hair and scalp science — designed to support better decisions before problems progress.";
 
