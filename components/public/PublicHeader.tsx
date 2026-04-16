@@ -95,12 +95,9 @@ export default function PublicHeader({
             )}
             {showLongevityLinks && (
               <Link href="/portal" className={linkClassMuted} title="Returning patients">
-                Patient portal
+                Patient Portal
               </Link>
             )}
-            <Link href="/login/patient" className={linkClass} title="Patient dashboard sign in">
-              Patient Login
-            </Link>
             <Link href="/login/trichologist" className={linkClass} title="Trichologist review portal sign in">
               Trichologist Login
             </Link>
@@ -154,12 +151,9 @@ export default function PublicHeader({
             )}
             {showLongevityLinks && (
               <Link href="/portal" onClick={() => setMobileOpen(false)} className={isLight ? "min-h-[48px] rounded-xl px-4 py-3 text-sm font-medium text-neutral-500 hover:bg-neutral-100" : "min-h-[48px] rounded-xl px-4 py-3 text-sm font-medium text-white/55 hover:bg-white/5 hover:text-white/75"} title="Returning patients">
-                Patient portal
+                Patient Portal
               </Link>
             )}
-            <Link href="/login/patient" onClick={() => setMobileOpen(false)} className={mobileLinkClass} title="Patient dashboard sign in">
-              Patient Login
-            </Link>
             <Link href="/login/trichologist" onClick={() => setMobileOpen(false)} className={mobileLinkClass} title="Trichologist review portal sign in">
               Trichologist Login
             </Link>

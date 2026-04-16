@@ -85,7 +85,7 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
             <div>
               <h3 className={headingClass}>Portal access</h3>
               <nav className="mt-3 flex flex-col gap-2 text-sm" aria-label="Portal access">
-                <Link href="/login/patient" className={legalLinkClass}>Patient Login</Link>
+                <Link href="/portal" className={legalLinkClass}>Patient Portal</Link>
                 <Link href="/login/trichologist" className={legalLinkClass}>Trichologist Login</Link>
               </nav>
             </div>
