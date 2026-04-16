@@ -58,7 +58,8 @@ export function runPreliminaryPatientFeedbackSmokeTests(): PreliminaryPatientFee
       );
       const hormonalCard = feedback.cards.find((card) => card.id === "hormonal_review");
       assert(
-        hormonalCard?.body.toLowerCase().includes("female endocrine"),
+        hormonalCard != null &&
+          hormonalCard.body.toLowerCase().includes("female endocrine"),
         "expected stronger endocrine wording"
       );
     }),
@@ -126,12 +127,14 @@ export function runPreliminaryPatientFeedbackSmokeTests(): PreliminaryPatientFee
       );
       const triggerCard = feedback.cards.find((card) => card.id === "trigger_review");
       assert(
-        triggerCard?.body.toLowerCase().includes("few months"),
+        triggerCard != null &&
+          triggerCard.body.toLowerCase().includes("few months"),
         "expected delayed trigger nuance wording"
       );
       const followupCard = feedback.cards.find((card) => card.id === "pituitary_followup");
       assert(
-        followupCard?.body.toLowerCase().includes("milky nipple discharge"),
+        followupCard != null &&
+          followupCard.body.toLowerCase().includes("milky nipple discharge"),
         "expected direct clinician follow-up wording"
       );
     }),
