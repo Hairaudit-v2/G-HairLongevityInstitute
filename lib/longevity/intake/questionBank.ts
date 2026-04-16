@@ -48,6 +48,24 @@ function femaleEndocrinePituitaryPromptVisible(answers: IntakeAnswerMap): boolea
   return true;
 }
 
+function femaleHirsutismPromptVisible(answers: IntakeAnswerMap): boolean {
+  if (!femaleHormonalYes(answers)) return false;
+  return (
+    answers.unwanted_facial_hair === "yes" ||
+    answers.increased_body_hair === "yes" ||
+    answers.jawline_acne_or_oily_skin === "yes" ||
+    answers.known_pcos === "yes" ||
+    answers.female_hormonal_context === "yes"
+  );
+}
+
+function femaleHirsutismStructuredVisible(answers: IntakeAnswerMap): boolean {
+  return (
+    answers.hirsutism_severity === "moderate" ||
+    answers.hirsutism_severity === "marked"
+  );
+}
+
 export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
   {
     id: "presentation_pattern",
@@ -368,6 +386,65 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
     ],
     allowSkip: true,
     visibleWhen: (a) => femaleEndocrinePituitaryPromptVisible(a),
+    pathwayHints: ["hormonal_endocrine_female_pattern"],
+  },
+  {
+    id: "hirsutism_severity",
+    label: "If facial or body hair change is part of the picture, how noticeable does it feel to you?",
+    type: "single_select",
+    section: "sex_specific",
+    helpText: "If this is not really relevant, choose “Not really / not relevant.”",
+    explanation:
+      "This is a simple severity check only. It helps your clinician judge whether androgen-related follow-up is worth keeping in mind, without assuming a diagnosis.",
+    options: [
+      { value: "not_really", label: "Not really / not relevant" },
+      { value: "mild", label: "Mild" },
+      { value: "moderate", label: "Moderate" },
+      { value: "marked", label: "Marked" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    allowSkip: true,
+    visibleWhen: (a) => femaleHirsutismPromptVisible(a),
+    pathwayHints: ["hormonal_endocrine_female_pattern"],
+  },
+  {
+    id: "hirsutism_structured_check_opt_in",
+    label: "If you want, would you be comfortable doing a brief private self-check of a few areas to make this more specific?",
+    type: "single_select",
+    section: "sex_specific",
+    helpText: "This is optional and only for extra detail if you want to give it.",
+    explanation:
+      "This uses a short body-area checklist inspired by medical hirsutism scoring, but in a lighter and more privacy-sensitive format.",
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    allowSkip: true,
+    visibleWhen: (a) => femaleHirsutismStructuredVisible(a),
+    pathwayHints: ["hormonal_endocrine_female_pattern"],
+  },
+  {
+    id: "hirsutism_structured_regions",
+    label: "Which areas feel more noticeably affected by coarser or darker hair growth?",
+    type: "multi_select",
+    section: "sex_specific",
+    helpText: "Select any that clearly feel relevant to you. Skip if you would rather not answer.",
+    explanation:
+      "This is not a diagnosis or a full body-hair score. It is just a structured self-check to help your clinician understand whether androgen-sensitive features deserve more attention.",
+    options: [
+      { value: "upper_lip", label: "Upper lip" },
+      { value: "chin_jawline", label: "Chin / jawline" },
+      { value: "chest", label: "Chest" },
+      { value: "around_nipples", label: "Around the nipples" },
+      { value: "lower_abdomen", label: "Lower abdomen" },
+      { value: "inner_thighs", label: "Inner thighs" },
+      { value: "none", label: "None of these / not sure" },
+    ],
+    allowSkip: true,
+    visibleWhen: (a) =>
+      femaleHirsutismStructuredVisible(a) &&
+      a.hirsutism_structured_check_opt_in === "yes",
     pathwayHints: ["hormonal_endocrine_female_pattern"],
   },
   {

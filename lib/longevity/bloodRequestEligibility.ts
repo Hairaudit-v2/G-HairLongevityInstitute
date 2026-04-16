@@ -11,6 +11,7 @@ import {
   bloodsLikelyNeeded,
   hasRecentPathology,
 } from "./derivedFlags";
+import { getEndocrineReviewDomainsFromResponses } from "./endocrineReviewDomains";
 import { REVIEW_OUTCOME } from "./reviewConstants";
 
 /** Canonical test codes for recommended_tests jsonb (patient- and clinician-facing labels). */
@@ -86,7 +87,27 @@ export function reasonFromFlags(responses: LongevityQuestionnaireResponses): str
   const parts: string[] = [];
   if (possibleIronRisk(responses)) parts.push("iron/ferritin relevance");
   if (possibleThyroidRisk(responses)) parts.push("thyroid relevance");
-  if (possibleHormonalPattern(responses)) parts.push("hormonal pattern");
+  if (possibleHormonalPattern(responses)) {
+    const endocrineDomains = getEndocrineReviewDomainsFromResponses(responses);
+    if (endocrineDomains.includes("female_endocrine_review")) {
+      parts.push("female endocrine context");
+    }
+    if (endocrineDomains.includes("androgen_adrenal_review")) {
+      parts.push("androgen/adrenal-androgen context");
+    }
+    if (endocrineDomains.includes("stress_trigger_overlap_review")) {
+      parts.push("stress-trigger overlap context");
+    }
+    if (endocrineDomains.includes("thyroid_iron_nutrition_review")) {
+      parts.push("thyroid/iron/nutrition review context");
+    }
+    if (endocrineDomains.includes("pituitary_prolactin_followup")) {
+      parts.push("more specific endocrine follow-up context");
+    }
+    if (parts.every((item) => !item.includes("context"))) {
+      parts.push("hormonal review context");
+    }
+  }
   if (parts.length === 0) return "Routine screening for hair loss workup";
   return parts.join("; ");
 }

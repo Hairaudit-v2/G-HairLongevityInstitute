@@ -89,6 +89,10 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
             female_hormonal_context: "yes",
             acute_trigger_window: "yes",
             lifestyle_load: ["major_stress"],
+            unwanted_facial_hair: true,
+            hirsutism_severity: "moderate",
+            hirsutism_structured_check_opt_in: "yes",
+            hirsutism_structured_regions: ["upper_lip", "chin_jawline"],
             stress_shedding_delay_pattern: "yes",
             postpartum_recent_gate: "no",
             hormonal_contraception_change_gate: "no",
@@ -103,6 +107,15 @@ export function runBuildLongevityAdaptivePayloadSmokeTests(): PayloadSmokeTest[]
       assert(
         payload.adaptive_answers.pituitary_red_flag_followup === "yes",
         "pituitary follow-up prompt preserved"
+      );
+      assert(
+        payload.adaptive_answers.hirsutism_severity === "moderate",
+        "hirsutism severity preserved"
+      );
+      assert(
+        Array.isArray(payload.adaptive_answers.hirsutism_structured_regions) &&
+          (payload.adaptive_answers.hirsutism_structured_regions as string[]).includes("upper_lip"),
+        "structured hirsutism regions preserved"
       );
     }),
     run("adaptive engine male androgen detail maps to exposure flags", () => {

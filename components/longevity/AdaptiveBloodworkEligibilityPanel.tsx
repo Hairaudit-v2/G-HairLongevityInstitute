@@ -12,6 +12,25 @@ function pretty(value: string): string {
   return value.replace(/_/g, " ");
 }
 
+function prettyDomain(value: string): string {
+  switch (value) {
+    case "female_endocrine_review":
+      return "Female endocrine review";
+    case "androgen_adrenal_review":
+      return "Androgen / adrenal-androgen review";
+    case "thyroid_iron_nutrition_review":
+      return "Thyroid / iron / nutrition review";
+    case "stress_trigger_overlap_review":
+      return "Stress-trigger overlap review";
+    case "pituitary_prolactin_followup":
+      return "Pituitary / prolactin follow-up";
+    case "hormonal_context_review":
+      return "Hormonal context review";
+    default:
+      return pretty(value);
+  }
+}
+
 export function AdaptiveBloodworkEligibilityPanel({
   eligibility,
   onSelectOutcome,
@@ -50,10 +69,52 @@ export function AdaptiveBloodworkEligibilityPanel({
                 key={domain}
                 className="rounded-full border border-sky-300/30 bg-sky-400/10 px-2 py-0.5 text-xs text-sky-100/90"
               >
-                {pretty(domain)}
+                {prettyDomain(domain)}
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {eligibility.endocrine_domain_summary && (
+        <div className="mt-3 rounded-md border border-sky-300/20 bg-sky-950/20 p-3">
+          <p className="text-xs text-sky-200/70">Endocrine domain summary</p>
+          {eligibility.endocrine_domain_summary.primaryDomain && (
+            <p className="mt-1 text-xs text-sky-100/90">
+              Primary:{" "}
+              <span className="font-medium">
+                {prettyDomain(eligibility.endocrine_domain_summary.primaryDomain)}
+              </span>
+            </p>
+          )}
+          {eligibility.endocrine_domain_summary.secondaryDomains.length > 0 && (
+            <p className="mt-1 text-xs text-sky-100/85">
+              Secondary:{" "}
+              {eligibility.endocrine_domain_summary.secondaryDomains
+                .map(prettyDomain)
+                .join(", ")}
+            </p>
+          )}
+          {eligibility.endocrine_domain_summary.escalationDomains.length > 0 && (
+            <p className="mt-1 text-xs text-amber-100/90">
+              Escalation:{" "}
+              {eligibility.endocrine_domain_summary.escalationDomains
+                .map(prettyDomain)
+                .join(", ")}
+            </p>
+          )}
+          {Object.entries(eligibility.endocrine_domain_summary.supportedBy).length > 0 && (
+            <div className="mt-2 space-y-1">
+              {Object.entries(eligibility.endocrine_domain_summary.supportedBy).map(
+                ([domain, signals]) =>
+                  signals.length > 0 ? (
+                    <p key={domain} className="text-xs text-sky-100/80">
+                      {prettyDomain(domain)}: {signals.join(", ")}
+                    </p>
+                  ) : null
+              )}
+            </div>
+          )}
         </div>
       )}
 

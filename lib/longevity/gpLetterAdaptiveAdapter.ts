@@ -29,6 +29,25 @@ function uniq<T extends string>(values: T[]): T[] {
   return Array.from(new Set(values));
 }
 
+function domainLabel(domain: BloodworkEligibilityDomain): string {
+  switch (domain) {
+    case "female_endocrine_review":
+      return "female endocrine review";
+    case "androgen_adrenal_review":
+      return "androgen/adrenal-androgen review";
+    case "thyroid_iron_nutrition_review":
+      return "thyroid/iron/nutrition review";
+    case "stress_trigger_overlap_review":
+      return "stress-trigger overlap review";
+    case "pituitary_prolactin_followup":
+      return "pituitary/prolactin follow-up";
+    case "hormonal_context_review":
+      return "hormonal context review";
+    default:
+      return domain.replace(/_/g, " ");
+  }
+}
+
 function mapDomainToTests(domain: BloodworkEligibilityDomain): BloodTestCode[] {
   switch (domain) {
     case "iron_studies":
@@ -39,6 +58,27 @@ function mapDomainToTests(domain: BloodworkEligibilityDomain): BloodTestCode[] {
       return [BLOOD_TEST_CODES.VITAMIN_D];
     case "b12_folate":
       return [BLOOD_TEST_CODES.B12, BLOOD_TEST_CODES.FOLATE];
+    case "female_endocrine_review":
+      return [BLOOD_TEST_CODES.HORMONAL_PANEL];
+    case "androgen_adrenal_review":
+      return [BLOOD_TEST_CODES.HORMONAL_PANEL];
+    case "thyroid_iron_nutrition_review":
+      return [
+        BLOOD_TEST_CODES.FERRITIN,
+        BLOOD_TEST_CODES.IRON_STUDIES,
+        BLOOD_TEST_CODES.TSH,
+        BLOOD_TEST_CODES.T4,
+        BLOOD_TEST_CODES.VITAMIN_D,
+      ];
+    case "stress_trigger_overlap_review":
+      return [
+        BLOOD_TEST_CODES.FERRITIN,
+        BLOOD_TEST_CODES.IRON_STUDIES,
+        BLOOD_TEST_CODES.TSH,
+        BLOOD_TEST_CODES.T4,
+      ];
+    case "pituitary_prolactin_followup":
+      return [BLOOD_TEST_CODES.HORMONAL_PANEL];
     case "hormonal_context_review":
       return [BLOOD_TEST_CODES.HORMONAL_PANEL];
     case "metabolic_context_review":
@@ -65,7 +105,7 @@ function mapTriageConsiderationToDomain(
     item === "androgen_hormone_review_if_clinically_appropriate" ||
     item === "hormonal_contextual_panel_if_indicated"
   ) {
-    return "hormonal_context_review";
+    return "androgen_adrenal_review";
   }
   if (item === "metabolic_review_if_clinically_appropriate") {
     return "metabolic_context_review";
@@ -75,6 +115,7 @@ function mapTriageConsiderationToDomain(
 
 function buildReasonText(args: {
   domains: BloodworkEligibilityDomain[];
+  eligibility?: AdaptiveBloodworkEligibilitySupport | null;
   triage: AdaptiveDerivedSummary | null | undefined;
   patientSafeSummary?: string | null;
 }): string {
@@ -87,6 +128,16 @@ function buildReasonText(args: {
     thyroid_panel: "Thyroid context may be relevant.",
     vitamin_d: "Vitamin D context may be relevant.",
     b12_folate: "B12/folate context may be relevant.",
+    female_endocrine_review:
+      "Female endocrine context may be relevant where clinically appropriate.",
+    androgen_adrenal_review:
+      "Androgen or adrenal-androgen context may be relevant where clinically appropriate.",
+    thyroid_iron_nutrition_review:
+      "Thyroid, iron, or nutritional context may be relevant where clinically appropriate.",
+    stress_trigger_overlap_review:
+      "Trigger-related or delayed-shedding overlap may be relevant in clinical context.",
+    pituitary_prolactin_followup:
+      "A more specific endocrine follow-up context may be relevant where clinically appropriate.",
     hormonal_context_review: "Hormonal context may be relevant where clinically appropriate.",
     metabolic_context_review: "Metabolic context may be relevant where clinically appropriate.",
   };
@@ -94,6 +145,41 @@ function buildReasonText(args: {
   for (const domain of args.domains) {
     const line = domainReasonMap[domain];
     if (line) reasons.push(line);
+  }
+
+  const endocrineSummary = args.eligibility?.endocrine_domain_summary;
+  if (endocrineSummary?.primaryDomain) {
+    reasons.push(
+      `Primary internal review domain: ${domainLabel(endocrineSummary.primaryDomain)}.`
+    );
+  }
+  if (endocrineSummary && endocrineSummary.secondaryDomains.length > 0) {
+    reasons.push(
+      `Secondary internal review domains: ${endocrineSummary.secondaryDomains
+        .map(domainLabel)
+        .join(", ")}.`
+    );
+  }
+  if (endocrineSummary && endocrineSummary.escalationDomains.length > 0) {
+    reasons.push(
+      `Escalation-focused follow-up: ${endocrineSummary.escalationDomains
+        .map(domainLabel)
+        .join(", ")}.`
+    );
+  }
+  if (endocrineSummary) {
+    for (const domain of [
+      endocrineSummary.primaryDomain,
+      ...endocrineSummary.secondaryDomains,
+      ...endocrineSummary.escalationDomains,
+    ].filter((value): value is BloodworkEligibilityDomain => value != null)) {
+      const support = endocrineSummary.supportedBy[domain] ?? [];
+      if (support.length > 0) {
+        reasons.push(
+          `${domainLabel(domain)} supported by: ${support.join(", ")}.`
+        );
+      }
+    }
   }
 
   const likelyPattern =
@@ -140,6 +226,7 @@ export function buildGpLetterAdaptivePrefillPayload(
         : [BLOOD_TEST_CODES.FERRITIN, BLOOD_TEST_CODES.FBC],
     reason: buildReasonText({
       domains,
+      eligibility,
       triage,
       patientSafeSummary: input.clinician_patient_safe_summary,
     }),

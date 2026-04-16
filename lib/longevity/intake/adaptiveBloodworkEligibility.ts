@@ -3,6 +3,10 @@ import type {
   AdaptiveClinicianSuggestion,
   AdaptiveRescoreComparison,
 } from "@/lib/longevity/intake";
+import {
+  getEndocrineReviewDomainsFromTriage,
+  type EndocrineReviewDomain,
+} from "@/lib/longevity/endocrineReviewDomains";
 
 export type BloodworkEligibilityConfidenceBand = "low" | "moderate" | "high";
 
@@ -11,8 +15,20 @@ export type BloodworkEligibilityDomain =
   | "thyroid_panel"
   | "vitamin_d"
   | "b12_folate"
+  | "female_endocrine_review"
+  | "androgen_adrenal_review"
+  | "thyroid_iron_nutrition_review"
+  | "stress_trigger_overlap_review"
+  | "pituitary_prolactin_followup"
   | "hormonal_context_review"
   | "metabolic_context_review";
+
+export type EndocrineDomainSummary = {
+  primaryDomain: BloodworkEligibilityDomain | null;
+  secondaryDomains: BloodworkEligibilityDomain[];
+  escalationDomains: BloodworkEligibilityDomain[];
+  supportedBy: Partial<Record<BloodworkEligibilityDomain, string[]>>;
+};
 
 export type AdaptiveBloodworkEligibilitySupport = {
   eligible: boolean;
@@ -20,6 +36,7 @@ export type AdaptiveBloodworkEligibilitySupport = {
   reasons: string[];
   suggested_bloodwork_domains: BloodworkEligibilityDomain[];
   caution_notes: string[];
+  endocrine_domain_summary: EndocrineDomainSummary | null;
 };
 
 export type AdaptiveBloodworkEligibilityInput = {
@@ -41,6 +58,221 @@ function includesAny(source: string[], match: string[]): boolean {
   return match.some((item) => source.includes(item));
 }
 
+function mapEndocrineDomain(domain: EndocrineReviewDomain): BloodworkEligibilityDomain {
+  switch (domain) {
+    case "female_endocrine_review":
+      return "female_endocrine_review";
+    case "androgen_adrenal_review":
+      return "androgen_adrenal_review";
+    case "thyroid_iron_nutrition_review":
+      return "thyroid_iron_nutrition_review";
+    case "stress_trigger_overlap_review":
+      return "stress_trigger_overlap_review";
+    case "pituitary_prolactin_followup":
+      return "pituitary_prolactin_followup";
+  }
+}
+
+const ENDOCRINE_DOMAIN_PRIORITY: BloodworkEligibilityDomain[] = [
+  "pituitary_prolactin_followup",
+  "female_endocrine_review",
+  "androgen_adrenal_review",
+  "thyroid_iron_nutrition_review",
+  "stress_trigger_overlap_review",
+];
+
+function pushSupportSignal(
+  target: Partial<Record<BloodworkEligibilityDomain, string[]>>,
+  domain: BloodworkEligibilityDomain,
+  signal: string
+) {
+  if (!signal) return;
+  const existing = target[domain] ?? [];
+  if (!existing.includes(signal)) {
+    target[domain] = [...existing, signal];
+  }
+}
+
+function buildEndocrineDomainSummary(
+  triage: AdaptiveDerivedSummary,
+  domains: BloodworkEligibilityDomain[],
+  reasons: string[]
+): EndocrineDomainSummary | null {
+  const endocrineDomains = ENDOCRINE_DOMAIN_PRIORITY.filter((domain) =>
+    domains.includes(domain)
+  );
+  if (endocrineDomains.length === 0) return null;
+
+  const pathway =
+    typeof triage.primary_pathway === "string" ? triage.primary_pathway : "";
+  const drivers = asStringArray(triage.possible_drivers);
+  const flags = asStringArray(triage.clinician_attention_flags);
+  const considerations = asStringArray(triage.bloodwork_considerations);
+  const supportedBy: Partial<Record<BloodworkEligibilityDomain, string[]>> = {};
+
+  if (endocrineDomains.includes("female_endocrine_review")) {
+    if (pathway === "female_hormonal_pattern") {
+      pushSupportSignal(
+        supportedBy,
+        "female_endocrine_review",
+        "female hormonal-pattern pathway"
+      );
+    }
+    if (drivers.includes("female_endocrine_context")) {
+      pushSupportSignal(
+        supportedBy,
+        "female_endocrine_review",
+        "female endocrine context"
+      );
+    }
+    if (drivers.includes("cycle_irregularity")) {
+      pushSupportSignal(
+        supportedBy,
+        "female_endocrine_review",
+        "cycle irregularity signal"
+      );
+    }
+    if (drivers.includes("hirsutism_supporting_signal")) {
+      pushSupportSignal(
+        supportedBy,
+        "female_endocrine_review",
+        "supporting hirsutism severity signal"
+      );
+    }
+  }
+
+  if (endocrineDomains.includes("androgen_adrenal_review")) {
+    if (drivers.includes("hyperandrogen_features")) {
+      pushSupportSignal(
+        supportedBy,
+        "androgen_adrenal_review",
+        "hyperandrogen feature signal"
+      );
+    }
+    if (drivers.includes("hirsutism_supporting_signal")) {
+      pushSupportSignal(
+        supportedBy,
+        "androgen_adrenal_review",
+        "supporting hirsutism severity signal"
+      );
+    }
+    if (flags.includes("possible_pcos_signal")) {
+      pushSupportSignal(
+        supportedBy,
+        "androgen_adrenal_review",
+        "PCOS-style attention flag"
+      );
+    }
+    if (
+      considerations.includes("androgen_hormone_review_if_clinically_appropriate")
+    ) {
+      pushSupportSignal(
+        supportedBy,
+        "androgen_adrenal_review",
+        "androgen hormone review consideration"
+      );
+    }
+  }
+
+  if (endocrineDomains.includes("thyroid_iron_nutrition_review")) {
+    if (pathway === "thyroid_metabolic_pattern") {
+      pushSupportSignal(
+        supportedBy,
+        "thyroid_iron_nutrition_review",
+        "thyroid/metabolic pathway"
+      );
+    }
+    if (pathway === "nutritional_deficiency_pattern") {
+      pushSupportSignal(
+        supportedBy,
+        "thyroid_iron_nutrition_review",
+        "nutritional-deficiency pathway"
+      );
+    }
+    if (flags.includes("heavy_period_related_iron_risk")) {
+      pushSupportSignal(
+        supportedBy,
+        "thyroid_iron_nutrition_review",
+        "heavy-period iron-risk flag"
+      );
+    }
+    if (drivers.includes("nutritional_risk")) {
+      pushSupportSignal(
+        supportedBy,
+        "thyroid_iron_nutrition_review",
+        "nutritional risk cluster"
+      );
+    }
+  }
+
+  if (endocrineDomains.includes("stress_trigger_overlap_review")) {
+    if (pathway === "postpartum_pattern") {
+      pushSupportSignal(
+        supportedBy,
+        "stress_trigger_overlap_review",
+        "postpartum overlap pathway"
+      );
+    }
+    if (
+      pathway === "telogen_effluvium_acute" ||
+      pathway === "telogen_effluvium_chronic"
+    ) {
+      pushSupportSignal(
+        supportedBy,
+        "stress_trigger_overlap_review",
+        "telogen-effluvium overlap pathway"
+      );
+    }
+    if (drivers.includes("recent_trigger_burden")) {
+      pushSupportSignal(
+        supportedBy,
+        "stress_trigger_overlap_review",
+        "recent trigger burden"
+      );
+    }
+    if (drivers.includes("stress_trigger_delay_overlap")) {
+      pushSupportSignal(
+        supportedBy,
+        "stress_trigger_overlap_review",
+        "delayed-shedding overlap"
+      );
+    }
+  }
+
+  if (endocrineDomains.includes("pituitary_prolactin_followup")) {
+    if (drivers.includes("pituitary_followup_prompt")) {
+      pushSupportSignal(
+        supportedBy,
+        "pituitary_prolactin_followup",
+        "pituitary follow-up prompt"
+      );
+    }
+    if (reasons.some((reason) => reason.toLowerCase().includes("pituitary/prolactin"))) {
+      pushSupportSignal(
+        supportedBy,
+        "pituitary_prolactin_followup",
+        "specific endocrine follow-up signal"
+      );
+    }
+  }
+
+  const escalationDomains = endocrineDomains.filter(
+    (domain) => domain === "pituitary_prolactin_followup"
+  );
+  const primaryDomain =
+    escalationDomains[0] ??
+    endocrineDomains.find((domain) => domain !== "pituitary_prolactin_followup") ??
+    null;
+  const secondaryDomains = endocrineDomains.filter((domain) => domain !== primaryDomain);
+
+  return {
+    primaryDomain,
+    secondaryDomains,
+    escalationDomains,
+    supportedBy,
+  };
+}
+
 export function deriveAdaptiveBloodworkEligibilitySupport(
   input: AdaptiveBloodworkEligibilityInput
 ): AdaptiveBloodworkEligibilitySupport {
@@ -54,6 +286,7 @@ export function deriveAdaptiveBloodworkEligibilitySupport(
       caution_notes: [
         "No adaptive triage payload available for bloodwork consideration support.",
       ],
+      endocrine_domain_summary: null,
     };
   }
 
@@ -105,8 +338,8 @@ export function deriveAdaptiveBloodworkEligibilitySupport(
   }
 
   if (hasPathway("female_hormonal_pattern")) {
-    reasons.push("Hormonal-pattern signal where hormone-context review may be useful.");
-    domains.push("hormonal_context_review");
+    reasons.push("Female endocrine-pattern signal where endocrine review may be useful.");
+    domains.push("female_endocrine_review");
   }
 
   if (includesAny(triageDomains, ["iron_studies"])) domains.push("iron_studies");
@@ -118,12 +351,44 @@ export function deriveAdaptiveBloodworkEligibilitySupport(
       "androgen_hormone_review_if_clinically_appropriate",
     ])
   ) {
-    domains.push("hormonal_context_review");
+    domains.push("androgen_adrenal_review");
   }
   if (
     includesAny(triageDomains, ["metabolic_review_if_clinically_appropriate"])
   ) {
     domains.push("metabolic_context_review");
+  }
+
+  const endocrineDomains = getEndocrineReviewDomainsFromTriage(triage).map(
+    mapEndocrineDomain
+  );
+  domains.push(...endocrineDomains);
+
+  if (endocrineDomains.includes("female_endocrine_review")) {
+    reasons.push("Female endocrine history signals suggest a broader endocrine review domain.");
+  }
+  if (endocrineDomains.includes("androgen_adrenal_review")) {
+    reasons.push(
+      "Androgen-sensitive or PCOS-style signals suggest androgen/adrenal-androgen review."
+    );
+  }
+  if (endocrineDomains.includes("thyroid_iron_nutrition_review")) {
+    reasons.push(
+      "Thyroid, iron, or nutritional overlap signals suggest broader systemic review."
+    );
+  }
+  if (endocrineDomains.includes("stress_trigger_overlap_review")) {
+    reasons.push(
+      "Delayed-shedding or postpartum/trigger overlap signals suggest trigger-context review."
+    );
+  }
+  if (endocrineDomains.includes("pituitary_prolactin_followup")) {
+    reasons.push(
+      "Specific endocrine follow-up prompts suggest direct pituitary/prolactin-oriented review."
+    );
+    cautionNotes.push(
+      "Escalation-style endocrine follow-up signal present; prioritise direct clinician review over routine low-priority batching."
+    );
   }
 
   if (deltaChanged) {
@@ -151,6 +416,11 @@ export function deriveAdaptiveBloodworkEligibilitySupport(
   const uniqueReasons = uniq(reasons);
   const uniqueDomains = uniq(domains);
   const eligible = uniqueReasons.length > 0 || uniqueDomains.length > 0;
+  const endocrine_domain_summary = buildEndocrineDomainSummary(
+    triage,
+    uniqueDomains,
+    uniqueReasons
+  );
 
   const confidence_band: BloodworkEligibilityConfidenceBand = !eligible
     ? "low"
@@ -164,6 +434,7 @@ export function deriveAdaptiveBloodworkEligibilitySupport(
     reasons: uniqueReasons,
     suggested_bloodwork_domains: uniqueDomains,
     caution_notes: uniq(cautionNotes),
+    endocrine_domain_summary,
   };
 }
 

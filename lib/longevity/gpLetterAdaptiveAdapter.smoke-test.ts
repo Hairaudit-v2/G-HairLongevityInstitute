@@ -31,6 +31,7 @@ const BASE_ELIGIBILITY: AdaptiveBloodworkEligibilitySupport = {
   reasons: [],
   suggested_bloodwork_domains: [],
   caution_notes: [],
+  endocrine_domain_summary: null,
 };
 
 export function runGpLetterAdaptiveAdapterSmokeTests(): GpAdapterSmokeTestResult[] {
@@ -85,12 +86,85 @@ export function runGpLetterAdaptiveAdapterSmokeTests(): GpAdapterSmokeTestResult
         adaptive_triage_output: triage,
         adaptive_bloodwork_eligibility: {
           ...BASE_ELIGIBILITY,
-          suggested_bloodwork_domains: ["hormonal_context_review"],
+          suggested_bloodwork_domains: [
+            "female_endocrine_review",
+            "androgen_adrenal_review",
+          ],
+          endocrine_domain_summary: {
+            primaryDomain: "female_endocrine_review",
+            secondaryDomains: ["androgen_adrenal_review"],
+            escalationDomains: [],
+            supportedBy: {
+              female_endocrine_review: ["female hormonal-pattern pathway"],
+              androgen_adrenal_review: ["androgen hormone review consideration"],
+            },
+          },
         },
       });
       assert(
         payload.recommended_tests.includes("hormonal_panel"),
         "Expected hormonal panel in recommended tests"
+      );
+      assert(
+        payload.reason.toLowerCase().includes("female endocrine context"),
+        "Expected female endocrine wording in reason"
+      );
+      assert(
+        payload.reason.toLowerCase().includes("primary internal review domain"),
+        "Expected internal domain summary in reason"
+      );
+    }),
+    run("pituitary and trigger-overlap prefill", () => {
+      const triage: AdaptiveDerivedSummary = {
+        primary_pathway: "postpartum_pattern",
+        possible_drivers: ["stress_trigger_delay_overlap", "pituitary_followup_prompt"],
+      };
+      const payload = buildGpLetterAdaptivePrefillPayload({
+        adaptive_triage_output: triage,
+        adaptive_bloodwork_eligibility: {
+          ...BASE_ELIGIBILITY,
+          suggested_bloodwork_domains: [
+            "stress_trigger_overlap_review",
+            "pituitary_prolactin_followup",
+          ],
+          endocrine_domain_summary: {
+            primaryDomain: "pituitary_prolactin_followup",
+            secondaryDomains: ["stress_trigger_overlap_review"],
+            escalationDomains: ["pituitary_prolactin_followup"],
+            supportedBy: {
+              pituitary_prolactin_followup: ["pituitary follow-up prompt"],
+              stress_trigger_overlap_review: ["delayed-shedding overlap"],
+            },
+          },
+        },
+      });
+      assert(
+        payload.recommended_tests.includes("hormonal_panel"),
+        "Expected hormonal panel for pituitary/prolactin follow-up"
+      );
+      assert(
+        payload.recommended_tests.includes("tsh"),
+        "Expected thyroid coverage for stress-trigger overlap review"
+      );
+      assert(
+        payload.reason.toLowerCase().includes("escalation-focused follow-up"),
+        "Expected escalation wording in reason"
+      );
+    }),
+    run("legacy hormonal context compatibility", () => {
+      const triage: AdaptiveDerivedSummary = {
+        bloodwork_considerations: ["hormonal_contextual_panel_if_indicated"],
+      };
+      const payload = buildGpLetterAdaptivePrefillPayload({
+        adaptive_triage_output: triage,
+        adaptive_bloodwork_eligibility: {
+          ...BASE_ELIGIBILITY,
+          suggested_bloodwork_domains: ["hormonal_context_review"],
+        },
+      });
+      assert(
+        payload.recommended_tests.includes("hormonal_panel"),
+        "Expected hormonal panel for legacy hormonal context path"
       );
     }),
     run("release gating unchanged (adapter payload only)", () => {

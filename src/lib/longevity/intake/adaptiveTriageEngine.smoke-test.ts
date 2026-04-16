@@ -34,6 +34,10 @@ export function runAdaptiveTriageSmokeTests(): SmokeTestResult[] {
         onset_timing: "6_to_12_months",
         pattern_distribution: ["center_part"],
         cycle_regularity: "irregular",
+        unwanted_facial_hair: true,
+        hirsutism_severity: "moderate",
+        hirsutism_structured_check_opt_in: "yes",
+        hirsutism_structured_regions: ["upper_lip", "chin_jawline"],
         known_pcos: true,
       },
       (result) => {
@@ -48,6 +52,10 @@ export function runAdaptiveTriageSmokeTests(): SmokeTestResult[] {
         assert(
           result.triage.clinician_attention_flags.includes("possible_pcos_signal"),
           "Expected possible_pcos_signal attention flag"
+        );
+        assert(
+          result.triage.possible_drivers.includes("hirsutism_supporting_signal"),
+          "Expected supporting hirsutism signal driver"
         );
       }
     ),

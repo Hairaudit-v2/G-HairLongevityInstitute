@@ -10,6 +10,15 @@ function has(arr: string[] | undefined, ...keys: string[]): boolean {
   return keys.some((k) => arr.includes(k));
 }
 
+function adaptiveYes(
+  r: LongevityQuestionnaireResponses,
+  key: string
+): boolean {
+  const answers = r.adaptiveEngine?.answers;
+  const adaptiveAnswers = r.adaptiveEngine?.adaptive_answers;
+  return answers?.[key] === "yes" || adaptiveAnswers?.[key] === "yes";
+}
+
 /** Possible iron-related risk (diet, history, symptoms, pattern). */
 export function possibleIronRisk(r: LongevityQuestionnaireResponses): boolean {
   const m = r.medicalHistory;
@@ -41,9 +50,25 @@ export function possibleHormonalPattern(r: LongevityQuestionnaireResponses): boo
   const m = r.medicalHistory;
   if (!f && !m) return false;
   if (f?.cycles === "irregular") return true;
+  if (f?.cycles === "not_occurring") return true;
+  if (f?.cycleChangeAroundHairChange === "yes") return true;
   if (has(m?.diagnoses, "pcos", "endometriosis")) return true;
-  if (has(f?.features, "acne", "increased_facial_or_body_hair")) return true;
+  if (
+    has(
+      f?.features,
+      "acne",
+      "increased_facial_or_body_hair",
+      "fertility_issues",
+      "missed_periods"
+    )
+  ) {
+    return true;
+  }
+  if (f?.newWorseningHyperandrogenFeatures === "yes") return true;
   if (has(f?.lifeStage, "postpartum", "perimenopausal", "menopausal", "hormonal_contraception", "hrt")) return true;
+  if (adaptiveYes(r, "female_hormonal_context")) return true;
+  if (adaptiveYes(r, "pituitary_red_flag_followup")) return true;
+  if (adaptiveYes(r, "hormonal_contraception_change_gate")) return true;
   return false;
 }
 

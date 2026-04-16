@@ -9,6 +9,7 @@ import type { MarkerTrendRow } from "./bloodMarkerTrends";
 import { getMarkerDefinition } from "./bloodMarkerRegistry";
 import { REVIEW_OUTCOME } from "./reviewConstants";
 import type { TriageFlags } from "./triage";
+import { getEndocrineReviewDomainsFromResponses } from "./endocrineReviewDomains";
 import type { LongevityQuestionnaireResponses } from "./schema";
 
 export type ClinicalInsights = {
@@ -195,12 +196,74 @@ export function buildClinicalInsights(input: ClinicalInsightInput): ClinicalInsi
   ].filter(Boolean).length;
   const prolactinRaised = hasStatus(markersByKey, ["prolactin"], HIGH_STATUSES);
   const cycleHormonesOutside = hasStatus(markersByKey, ["lh", "fsh", "estradiol", "progesterone"], OUTSIDE_STATUSES);
-  if (
+  const endocrineDomains = getEndocrineReviewDomainsFromResponses(
+    input.questionnaireResponses
+  );
+  const hasFemaleEndocrineReview =
+    endocrineDomains.includes("female_endocrine_review") || cycleHormonesOutside;
+  const hasAndrogenAdrenalReview =
+    endocrineDomains.includes("androgen_adrenal_review") ||
     androgenSignals >= 2 ||
-    prolactinRaised ||
-    cycleHormonesOutside ||
-    flags.possibleHormonalPattern ||
-    flags.possibleAndrogenPattern
+    flags.possibleAndrogenPattern;
+  const hasThyroidIronNutritionReview =
+    endocrineDomains.includes("thyroid_iron_nutrition_review");
+  const hasStressTriggerOverlapReview =
+    endocrineDomains.includes("stress_trigger_overlap_review");
+  const hasPituitaryProlactinFollowup =
+    endocrineDomains.includes("pituitary_prolactin_followup") || prolactinRaised;
+
+  if (hasFemaleEndocrineReview) {
+    pushUnique(activeDrivers, "Female endocrine review");
+    pushUnique(
+      clinicianInsights,
+      "Female endocrine-context follow-up may help interpret the current hair-loss pattern."
+    );
+    pushUnique(
+      patientSafeInsights,
+      "Some hormone-related history details may be worth reviewing alongside your hair changes."
+    );
+  }
+  if (hasAndrogenAdrenalReview) {
+    pushUnique(activeDrivers, "Androgen / adrenal-androgen review");
+    pushUnique(
+      clinicianInsights,
+      "Androgen or adrenal-androgen contributors may warrant more specific follow-up."
+    );
+    pushUnique(
+      patientSafeInsights,
+      "Some androgen-sensitive features may be worth reviewing alongside your hair pattern."
+    );
+  }
+  if (hasThyroidIronNutritionReview) {
+    pushUnique(followUpConsiderations, "Review thyroid, iron, and nutritional overlap alongside endocrine context.");
+  }
+  if (hasStressTriggerOverlapReview) {
+    pushUnique(activeDrivers, "Stress-trigger / delayed-shedding overlap review");
+    pushUnique(
+      clinicianInsights,
+      "Trigger-related shedding overlap may still need to be separated from endocrine-pattern contributors."
+    );
+    pushUnique(
+      patientSafeInsights,
+      "A trigger-related shedding pattern may overlap with other contributors and may benefit from review."
+    );
+  }
+  if (hasPituitaryProlactinFollowup) {
+    pushUnique(activeDrivers, "Pituitary / prolactin follow-up review");
+    pushUnique(
+      clinicianInsights,
+      "Specific endocrine follow-up may be warranted rather than treating this as routine shedding alone."
+    );
+    pushUnique(
+      patientSafeInsights,
+      "A few answers suggest more direct clinician follow-up would be sensible."
+    );
+  }
+  if (
+    !hasFemaleEndocrineReview &&
+    !hasAndrogenAdrenalReview &&
+    !hasPituitaryProlactinFollowup &&
+    flags.possibleHormonalPattern
   ) {
     pushUnique(activeDrivers, "Hormonal / androgen-related");
     pushUnique(clinicianInsights, "Hormonal / androgen-related drivers may still be active.");

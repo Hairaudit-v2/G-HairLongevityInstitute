@@ -122,6 +122,14 @@ function buildPatientFollowUpMessage(driver: string): string {
       return "Some inflammation or metabolic factors may still need follow-up.";
     case "Hormonal / androgen-related":
       return "Hormonal factors may still need follow-up.";
+    case "Female endocrine review":
+      return "Female endocrine-related factors may still need follow-up.";
+    case "Androgen / adrenal-androgen review":
+      return "Androgen-related factors may still need follow-up.";
+    case "Stress-trigger / delayed-shedding overlap review":
+      return "Trigger-related shedding overlap may still need follow-up.";
+    case "Pituitary / prolactin follow-up review":
+      return "Some answers may still need more direct clinician follow-up.";
     case "Protein / systemic support":
       return "Some broader systemic support factors may still need follow-up.";
     case "Stress / trigger-related":
@@ -145,6 +153,14 @@ function buildPreviousDriverResolvedMessage(driver: string): string {
       return "Inflammatory or metabolic drivers look less prominent than on the previous review.";
     case "Hormonal / androgen-related":
       return "Hormonal drivers look less prominent than on the previous review.";
+    case "Female endocrine review":
+      return "Female endocrine-related drivers look less prominent than on the previous review.";
+    case "Androgen / adrenal-androgen review":
+      return "Androgen-related drivers look less prominent than on the previous review.";
+    case "Stress-trigger / delayed-shedding overlap review":
+      return "Trigger-related overlap looks less prominent than on the previous review.";
+    case "Pituitary / prolactin follow-up review":
+      return "The need for more specific endocrine follow-up looks less prominent than on the previous review.";
     case "Protein / systemic support":
       return "Broader systemic support markers look less prominent than on the previous review.";
     default:
@@ -164,6 +180,14 @@ function buildNewDriverConcern(driver: string): string {
       return "Inflammatory or metabolic drivers are more prominent in this review.";
     case "Hormonal / androgen-related":
       return "Hormonal or androgen-related drivers are more prominent in this review.";
+    case "Female endocrine review":
+      return "Female endocrine-related drivers are more prominent in this review.";
+    case "Androgen / adrenal-androgen review":
+      return "Androgen-related drivers are more prominent in this review.";
+    case "Stress-trigger / delayed-shedding overlap review":
+      return "Trigger-related overlap is more prominent in this review.";
+    case "Pituitary / prolactin follow-up review":
+      return "A more specific endocrine follow-up issue is more prominent in this review.";
     case "Stress / trigger-related":
       return "Stress or trigger-related drivers are more prominent in this review.";
     default:

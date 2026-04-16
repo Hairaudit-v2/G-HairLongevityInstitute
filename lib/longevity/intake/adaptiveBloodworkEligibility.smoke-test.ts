@@ -67,8 +67,8 @@ export function runAdaptiveBloodworkEligibilitySmokeTests(): BloodworkSmokeTestR
       });
       assert(result.eligible === true, "Expected eligibility true for chronic TE");
       assert(
-        result.suggested_bloodwork_domains.includes("thyroid_panel"),
-        "Expected thyroid panel domain"
+        result.suggested_bloodwork_domains.includes("stress_trigger_overlap_review"),
+        "Expected stress-trigger overlap domain"
       );
     }),
     run("postpartum diffuse shedding case", () => {
@@ -81,8 +81,8 @@ export function runAdaptiveBloodworkEligibilitySmokeTests(): BloodworkSmokeTestR
       });
       assert(result.eligible === true, "Expected postpartum eligibility");
       assert(
-        result.suggested_bloodwork_domains.includes("iron_studies"),
-        "Expected iron domain for postpartum case"
+        result.suggested_bloodwork_domains.includes("stress_trigger_overlap_review"),
+        "Expected stress-trigger overlap domain for postpartum case"
       );
     }),
     run("thyroid/metabolic suspicion case", () => {
@@ -98,7 +98,70 @@ export function runAdaptiveBloodworkEligibilitySmokeTests(): BloodworkSmokeTestR
         result.suggested_bloodwork_domains.includes("metabolic_context_review"),
         "Expected metabolic context suggestion"
       );
+      assert(
+        result.suggested_bloodwork_domains.includes("thyroid_iron_nutrition_review"),
+        "Expected thyroid/iron/nutritional review domain"
+      );
       assert(result.caution_notes.length > 0, "Expected caution notes with delta");
+    }),
+    run("female endocrine and androgen routing case", () => {
+      const triage: AdaptiveDerivedSummary = {
+        primary_pathway: "female_hormonal_pattern",
+        possible_drivers: ["female_endocrine_context", "hyperandrogen_features"],
+        clinician_attention_flags: ["possible_pcos_signal"],
+        bloodwork_considerations: ["androgen_hormone_review_if_clinically_appropriate"],
+      };
+      const result = deriveAdaptiveBloodworkEligibilitySupport({
+        adaptive_triage_output: triage,
+      });
+      assert(
+        result.suggested_bloodwork_domains.includes("female_endocrine_review"),
+        "Expected female endocrine review domain"
+      );
+      assert(
+        result.suggested_bloodwork_domains.includes("androgen_adrenal_review"),
+        "Expected androgen/adrenal review domain"
+      );
+      assert(
+        result.endocrine_domain_summary?.primaryDomain === "female_endocrine_review",
+        "Expected female endocrine primary domain"
+      );
+      assert(
+        result.endocrine_domain_summary?.secondaryDomains.includes(
+          "androgen_adrenal_review"
+        ) === true,
+        "Expected androgen/adrenal review as secondary domain"
+      );
+    }),
+    run("pituitary follow-up routing case", () => {
+      const triage: AdaptiveDerivedSummary = {
+        primary_pathway: "female_hormonal_pattern",
+        possible_drivers: ["pituitary_followup_prompt"],
+      };
+      const result = deriveAdaptiveBloodworkEligibilitySupport({
+        adaptive_triage_output: triage,
+      });
+      assert(
+        result.suggested_bloodwork_domains.includes(
+          "pituitary_prolactin_followup"
+        ),
+        "Expected pituitary/prolactin follow-up domain"
+      );
+      assert(
+        result.caution_notes.some((note) => note.toLowerCase().includes("escalation")),
+        "Expected escalation caution for pituitary/prolactin follow-up"
+      );
+      assert(
+        result.endocrine_domain_summary?.primaryDomain ===
+          "pituitary_prolactin_followup",
+        "Expected escalation domain to become primary"
+      );
+      assert(
+        result.endocrine_domain_summary?.escalationDomains.includes(
+          "pituitary_prolactin_followup"
+        ) === true,
+        "Expected escalation domain list to include pituitary/prolactin follow-up"
+      );
     }),
     run("negative / no-eligibility fallback", () => {
       const triage: AdaptiveDerivedSummary = {

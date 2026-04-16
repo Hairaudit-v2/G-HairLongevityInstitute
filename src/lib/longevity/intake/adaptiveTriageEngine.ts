@@ -234,15 +234,19 @@ function derivePossibleDrivers(facts: Record<string, unknown>): string[] {
   const drivers: string[] = [];
 
   if (facts.possible_cycle_irregularity) drivers.push("cycle_irregularity");
+  if (facts.possible_female_endocrine_context) drivers.push("female_endocrine_context");
   if (facts.possible_hyperandrogen_features) drivers.push("hyperandrogen_features");
+  if (facts.hirsutism_supporting_signal) drivers.push("hirsutism_supporting_signal");
   if (facts.possible_heavy_menses) drivers.push("heavy_menstrual_loss");
   if (facts.sleep_stress_cluster) drivers.push("sleep_stress_load");
   if (facts.nutritional_risk_cluster) drivers.push("nutritional_risk");
   if (facts.possible_androgen_exposure) drivers.push("androgen_exposure");
   if (facts.mechanical_exposure_cluster) drivers.push("mechanical_traction_exposure");
   if (facts.recent_trigger_burden && Number(facts.recent_trigger_burden) > 0) drivers.push("recent_trigger_burden");
+  if (facts.possible_stress_trigger_delay_overlap) drivers.push("stress_trigger_delay_overlap");
   if (facts.has_inflammatory_scalp_symptoms) drivers.push("scalp_inflammation");
   if (facts.possible_neutral_hormonal_context) drivers.push("self_reported_neutral_hormonal_context");
+  if (facts.possible_pituitary_followup_prompt) drivers.push("pituitary_followup_prompt");
 
   return dedupeStrings(drivers);
 }

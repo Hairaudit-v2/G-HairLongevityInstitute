@@ -330,6 +330,65 @@ export const ADAPTIVE_QUESTION_BANK: AdaptiveQuestion[] = [
       { fact: "suspected_patterned_loss", operator: "eq", value: true },
     ],
   },
+  {
+    id: "hirsutism_severity",
+    kind: "branch_followup",
+    prompt:
+      "If facial or body hair change is part of the picture, how noticeable does it feel to you?",
+    answerType: "single_select",
+    sensitive: true,
+    patientMaySkip: true,
+    options: [
+      { value: "not_really", label: "Not really / not relevant" },
+      { value: "mild", label: "Mild" },
+      { value: "moderate", label: "Moderate" },
+      { value: "marked", label: "Marked" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    helpText: "If this does not really apply, choose the first option or skip it.",
+    showWhen: [{ fact: "possible_hirsutism_screen_trigger", operator: "eq", value: true }],
+  },
+  {
+    id: "hirsutism_structured_check_opt_in",
+    kind: "branch_followup",
+    prompt:
+      "If you want, would you be comfortable doing a brief private self-check of a few areas to make this more specific?",
+    answerType: "single_select",
+    sensitive: true,
+    patientMaySkip: true,
+    options: [
+      { value: "yes", label: "Yes" },
+      { value: "no", label: "No" },
+      { value: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    helpText: "Optional. This adds a little more detail without using a full scoring system.",
+    showWhen: [
+      { fact: "possible_hirsutism_structured_followup", operator: "eq", value: true },
+    ],
+  },
+  {
+    id: "hirsutism_structured_regions",
+    kind: "branch_followup",
+    prompt:
+      "Which areas feel more noticeably affected by coarser or darker hair growth?",
+    answerType: "multi_select",
+    sensitive: true,
+    patientMaySkip: true,
+    options: [
+      { value: "upper_lip", label: "Upper lip" },
+      { value: "chin_jawline", label: "Chin / jawline" },
+      { value: "chest", label: "Chest" },
+      { value: "around_nipples", label: "Around the nipples" },
+      { value: "lower_abdomen", label: "Lower abdomen" },
+      { value: "inner_thighs", label: "Inner thighs" },
+      { value: "none", label: "None of these / not sure" },
+    ],
+    helpText: "Optional private self-check. Select only what clearly feels relevant.",
+    showWhen: [
+      { fact: "possible_hirsutism_structured_followup", operator: "eq", value: true },
+      { fact: "hirsutism_structured_check_opt_in", operator: "eq", value: "yes" },
+    ],
+  },
 
   {
     id: "neutral_hormonal_context",

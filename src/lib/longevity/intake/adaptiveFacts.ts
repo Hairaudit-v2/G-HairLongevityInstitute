@@ -30,6 +30,11 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
   const sexAtBirth = (answers.sex_at_birth as SexAtBirth | undefined) ?? "unknown";
   const patternDistribution = asStringArray(answers.pattern_distribution);
   const scalpSymptoms = asStringArray(answers.scalp_symptoms);
+  const structuredHirsutismRegions = asStringArray(answers.hirsutism_structured_regions).filter(
+    (value) => value !== "none"
+  );
+  const hirsutismSeverity =
+    typeof answers.hirsutism_severity === "string" ? answers.hirsutism_severity : "";
 
   const hasDiffuseLoss =
     patternDistribution.includes("diffuse_top") ||
@@ -124,6 +129,23 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
       asBoolean(answers.jawline_acne_or_oily_skin) ||
       asBoolean(answers.known_pcos),
 
+    possible_hirsutism_screen_trigger:
+      sexAtBirth === "female" &&
+      (asBoolean(answers.unwanted_facial_hair) ||
+        asBoolean(answers.increased_body_hair) ||
+        asBoolean(answers.jawline_acne_or_oily_skin) ||
+        asBoolean(answers.known_pcos) ||
+        answers.cycle_regularity === "irregular" ||
+        answers.cycle_regularity === "missed_periods"),
+
+    possible_hirsutism_structured_followup:
+      hirsutismSeverity === "moderate" || hirsutismSeverity === "marked",
+
+    hirsutism_supporting_signal:
+      hirsutismSeverity === "moderate" ||
+      hirsutismSeverity === "marked" ||
+      structuredHirsutismRegions.length >= 2,
+
     possible_androgen_exposure:
       asBoolean(answers.current_or_past_trt) ||
       asBoolean(answers.sarms_or_anabolics) ||
@@ -162,6 +184,23 @@ export function deriveAdaptiveFacts(answers: AdaptiveAnswers): AdaptiveFacts {
 
     possible_neutral_hormonal_context:
       asBoolean(answers.neutral_hormonal_context),
+
+    possible_female_endocrine_context:
+      sexAtBirth === "female" &&
+      (answers.cycle_regularity === "irregular" ||
+        answers.cycle_regularity === "missed_periods" ||
+        possiblePostpartumContext ||
+        answers.reproductive_stage === "perimenopausal" ||
+        answers.reproductive_stage === "menopausal" ||
+        answers.hormonal_contraception_change_gate === "yes" ||
+        answers.hormonal_change_vs_hair_timing === "around_same_time"),
+
+    possible_stress_trigger_delay_overlap:
+      answers.stress_shedding_delay_pattern === "yes" &&
+      recentTriggerBurden > 0,
+
+    possible_pituitary_followup_prompt:
+      answers.pituitary_red_flag_followup === "yes",
 
     family_pattern_similar_to_self: answers.family_hair_pattern_match === "similar_to_mine",
 
