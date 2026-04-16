@@ -15,7 +15,7 @@ export function PreliminaryPatientFeedback({ feedback }: Props) {
 
       <div className="mt-6">
         <h4 className="text-sm font-semibold text-white/90">
-          Initial areas we may need to investigate
+          What your review will focus on next
         </h4>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {feedback.cards.map((card) => (

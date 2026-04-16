@@ -86,6 +86,8 @@ type StepId =
   | "review"
   | "done";
 
+type MainConcernStage = "router" | "focused" | "pattern" | "timing";
+
 const STEP_ORDER: StepId[] = [
   "welcome",
   "identify",
@@ -107,6 +109,107 @@ function Card({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+type ReviewSummaryRow = {
+  label: string;
+  value: string;
+};
+
+type ReviewSummaryAction = {
+  label: string;
+  onClick: () => void;
+};
+
+function ReviewSummarySection({
+  title,
+  rows,
+  actions = [],
+}: {
+  title: string;
+  rows: ReviewSummaryRow[];
+  actions?: ReviewSummaryAction[];
+}) {
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h3 className="text-sm font-semibold text-white/90">{title}</h3>
+        {actions.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={action.onClick}
+                className="text-xs font-medium text-[rgb(198,167,94)] transition hover:text-white"
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <dl className="mt-3 grid gap-2 text-sm md:grid-cols-2">
+        {rows.map((row) => (
+          <div key={`${title}-${row.label}`}>
+            <dt className="text-white/55">{row.label}</dt>
+            <dd className="mt-1 text-white/85">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+function formatReviewDate(value?: string): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function lookupOptionLabel(
+  options: ReadonlyArray<{ key: string; label: string }>,
+  value: string | null | undefined
+): string {
+  if (!value) return "";
+  return options.find((option) => option.key === value)?.label ?? value;
+}
+
+function pickSelectedLabels(
+  options: ReadonlyArray<{ key: string; label: string }>,
+  values: string[] | null | undefined,
+  ignored: string[] = ["none", "none_known", "unsure", "prefer_not_to_say", "skip"]
+): string[] {
+  if (!values?.length) return [];
+  const ignoredKeys = new Set(ignored);
+  return values
+    .filter((value) => !ignoredKeys.has(value))
+    .map((value) => lookupOptionLabel(options, value))
+    .filter(Boolean);
+}
+
+function summarizeLabels(labels: string[], max = 3): string {
+  if (labels.length === 0) return "";
+  if (labels.length <= max) return labels.join(", ");
+  return `${labels.slice(0, max).join(", ")} +${labels.length - max} more`;
+}
+
+function joinReviewParts(parts: Array<string | null | undefined | false>, separator = " • "): string {
+  return parts.filter((part): part is string => typeof part === "string" && part.length > 0).join(separator);
+}
+
+const MAIN_CONCERN_STAGE_META: Array<{ key: MainConcernStage; label: string }> = [
+  { key: "router", label: "Main concern router" },
+  { key: "focused", label: "Focused follow-ups" },
+  { key: "pattern", label: "Pattern and distribution" },
+  { key: "timing", label: "Timing and impact" },
+];
 
 function Button({
   children,
@@ -398,8 +501,6 @@ const TRIGGERS = [
   { key: "menopause_perimenopause", label: "Menopause / perimenopause" },
   { key: "rapid_weight_loss", label: "Rapid weight loss" },
   { key: "dietary_change", label: "Dietary change" },
-  { key: "new_medication", label: "New medication" },
-  { key: "stopping_medication", label: "Stopping medication" },
   { key: "none", label: "None" },
 ];
 
@@ -425,6 +526,20 @@ const TRT_STARTED_WHEN_OPTIONS: { key: string; label: string }[] = [
   { key: "one_to_two_years", label: "1–2 years ago" },
   { key: "more_than_two_years", label: "2+ years ago" },
   { key: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+const MEDICATION_CHANGE_RECENT_OPTIONS: { key: string; label: string }[] = [
+  { key: "yes", label: "Yes" },
+  { key: "no", label: "No" },
+  { key: "unsure", label: "Unsure" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+const MEDICATION_TIMING_OPTIONS: { key: string; label: string }[] = [
+  { key: "before_hair_change", label: "Before hair symptoms" },
+  { key: "around_same_time", label: "Around the same time" },
+  { key: "after_hair_change", label: "After hair symptoms" },
+  { key: "unsure", label: "Unsure" },
 ];
 
 const DIAGNOSES = [
@@ -467,15 +582,12 @@ const FEMALE_FEATURES = [
   { key: "heavy_periods", label: "Heavy periods" },
   { key: "painful_periods", label: "Painful periods" },
   { key: "missed_periods", label: "Missed periods" },
-  { key: "acne", label: "Acne" },
-  { key: "increased_facial_or_body_hair", label: "Increased facial or body hair" },
   { key: "fertility_issues", label: "Fertility issues" },
   { key: "none", label: "None" },
 ];
 
 const FEMALE_LIFE_STAGE = [
   { key: "pregnant", label: "Pregnant" },
-  { key: "postpartum", label: "Postpartum" },
   { key: "perimenopausal", label: "Perimenopausal" },
   { key: "menopausal", label: "Menopausal" },
   { key: "hormonal_contraception", label: "Hormonal contraception" },
@@ -537,6 +649,47 @@ const AVAILABLE_UPLOADS = [
   { key: "prior_treatment_plans", label: "Prior treatment plans" },
 ];
 
+const SEX_AT_BIRTH_OPTIONS = [
+  { key: "female", label: "Female" },
+  { key: "male", label: "Male" },
+  { key: "intersex", label: "Intersex" },
+  { key: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+const SHEDDING_TREND_OPTIONS = [
+  { key: "stable", label: "Stable" },
+  { key: "improved", label: "Improved" },
+  { key: "worsened", label: "Worsened" },
+  { key: "comes_and_goes", label: "Comes and goes" },
+];
+
+const PRIOR_BLOOD_TEST_OPTIONS = [
+  { key: "last_3_months", label: "In the last 3 months" },
+  { key: "older_than_3_months", label: "Older than 3 months" },
+  { key: "no", label: "No" },
+  { key: "unsure", label: "Unsure" },
+];
+
+const CURRENT_BLOOD_STATUS_OPTIONS = [
+  { key: "uploading_now", label: "Uploading now" },
+  { key: "upload_later", label: "I’ll upload later" },
+  { key: "not_done", label: "Not done" },
+  { key: "unsure", label: "Unsure" },
+];
+
+const SLEEP_QUALITY_OPTIONS = [
+  { key: "good", label: "Good" },
+  { key: "average", label: "Average" },
+  { key: "poor", label: "Poor" },
+];
+
+const TREATMENT_RESPONSE_OPTIONS = [
+  { key: "improved", label: "Improved" },
+  { key: "no_change", label: "No clear change" },
+  { key: "worsened", label: "Worsened" },
+  { key: "uncertain", label: "Uncertain / too early to tell" },
+];
+
 const TRACTION_SIGNALS: SelectOption[] = [
   {
     key: "tight_braids_or_extensions",
@@ -595,14 +748,14 @@ function AboutYouStep({
   identifyEmail,
   setAboutYou,
   setStep,
-  goNext,
+  openMainConcern,
   saving,
 }: {
   a: AboutYou;
   identifyEmail: string;
   setAboutYou: (next: Partial<AboutYou>) => void;
   setStep: (step: StepId) => void;
-  goNext: (nextStep: StepId) => void | Promise<void>;
+  openMainConcern: () => void | Promise<void>;
   saving: boolean;
 }) {
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
@@ -737,7 +890,7 @@ function AboutYouStep({
       </div>
       <div className="mt-8 flex flex-wrap gap-3">
         <Button variant="secondary" onClick={() => setStep("identify")}>Back</Button>
-        <Button onClick={() => goNext("mainConcern")} disabled={saving || !canContinue}>Save & continue</Button>
+        <Button onClick={openMainConcern} disabled={saving || !canContinue}>Save & continue</Button>
       </div>
     </Card>
   );
@@ -750,6 +903,7 @@ export function LongevityStartFlow({
 }) {
   const lockedPortalEmail = portalEmail?.trim().toLowerCase() ?? "";
   const [step, setStep] = useState<StepId>("welcome");
+  const [mainConcernStage, setMainConcernStage] = useState<MainConcernStage>("router");
   const [intakeId, setIntakeId] = useState<string | null>(null);
   const [identifyEmail, setIdentifyEmail] = useState(lockedPortalEmail);
   const [identifyName, setIdentifyName] = useState("");
@@ -779,7 +933,6 @@ export function LongevityStartFlow({
       adaptive.chronicWindow,
       adaptive.tractionSignals?.length ? "yes" : "",
       adaptive.cosmeticSignals?.length ? "yes" : "",
-      adaptive.androgenExposureSignals?.length ? "yes" : "",
     ];
     const answered = adaptiveChecks.filter(Boolean).length;
     const adaptiveFactor = Math.min(1, answered / adaptiveChecks.length);
@@ -1130,6 +1283,26 @@ export function LongevityStartFlow({
     setResponses((r) => ({ ...r, adaptiveIntake: { ...r.adaptiveIntake, ...next } }));
   const setAdaptiveEngine = (next: Partial<AdaptiveEnginePayload>) =>
     setResponses((r) => ({ ...r, adaptiveEngine: { ...r.adaptiveEngine, ...next } }));
+  const setAdaptiveEngineAnswer = useCallback((questionId: string, value: string | string[] | boolean | null) => {
+    setResponses((r) => ({
+      ...r,
+      adaptiveEngine: {
+        ...r.adaptiveEngine,
+        answers: {
+          ...((r.adaptiveEngine?.answers ?? {}) as Record<string, string | string[] | boolean | null>),
+          [questionId]: value,
+        },
+      },
+    }));
+  }, []);
+  const openMainConcern = useCallback(async () => {
+    setMainConcernStage("router");
+    await goNext("mainConcern");
+  }, [goNext]);
+  const jumpToMainConcern = useCallback((stage: MainConcernStage) => {
+    setMainConcernStage(stage);
+    setStep("mainConcern");
+  }, []);
 
   const sexAtBirth = a.sexAtBirth;
   const showFemale = sexAtBirth === "female";
@@ -1155,6 +1328,218 @@ export function LongevityStartFlow({
     }),
     [a.sexAtBirth, a.dateOfBirth]
   );
+  const adaptiveAnswerMap = (adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>;
+  const adaptivePresentationPattern =
+    typeof adaptiveAnswerMap.presentation_pattern === "string"
+      ? adaptiveAnswerMap.presentation_pattern
+      : undefined;
+  const mainConcernSymptomOptions = useMemo(() => {
+    const scalpOwnedByAdaptive =
+      adaptivePresentationPattern === "scalp_symptoms" ||
+      adaptivePresentationPattern === "mixed_or_unsure";
+    if (!scalpOwnedByAdaptive) return SYMPTOMS;
+    return SYMPTOMS.filter(
+      (option) =>
+        !["itch", "burning", "tenderness", "flaking", "greasiness"].includes(option.key)
+    );
+  }, [adaptivePresentationPattern]);
+  const adaptivePostpartumContext =
+    adaptiveAnswerMap.postpartum_recent_gate === "yes" ||
+    ["under_3_months", "3_to_6_months", "6_to_12_months"].includes(
+      typeof adaptiveAnswerMap.months_since_delivery === "string"
+        ? adaptiveAnswerMap.months_since_delivery
+        : ""
+    ) ||
+    ai.femaleContext?.postpartumRecent === "yes";
+  const reviewAboutRows: ReviewSummaryRow[] = [
+    {
+      label: "Name",
+      value: [a.firstName, a.lastName].filter(Boolean).join(" "),
+    },
+    { label: "Email", value: a.email ?? "" },
+    { label: "Date of birth", value: formatReviewDate(a.dateOfBirth) },
+    {
+      label: "Sex at birth",
+      value: lookupOptionLabel(SEX_AT_BIRTH_OPTIONS, a.sexAtBirth),
+    },
+  ].filter((row) => row.value);
+  const reviewConcernRows: ReviewSummaryRow[] = [
+    {
+      label: "Primary concerns",
+      value: summarizeLabels(pickSelectedLabels(PRIMARY_CONCERNS, mc.primaryConcerns)),
+    },
+    {
+      label: "Change started",
+      value: joinReviewParts([
+        lookupOptionLabel(FIRST_NOTICED, mc.firstNoticed),
+        lookupOptionLabel(ONSET_PATTERN, mc.onsetPattern),
+      ]),
+    },
+    {
+      label: "Most affected areas",
+      value: summarizeLabels(pickSelectedLabels(AFFECTED_AREAS, mc.affectedAreas)),
+    },
+    {
+      label: "Day-to-day impact",
+      value: lookupOptionLabel(PERCEIVED_SEVERITY as ReadonlyArray<{ key: string; label: string }>, mc.perceivedSeverity),
+    },
+    {
+      label: "Pattern fit",
+      value:
+        mc.patternConfidence && mc.patternConfidence !== "prefer_not_to_say"
+          ? lookupOptionLabel(PATTERN_CONFIDENCE as ReadonlyArray<{ key: string; label: string }>, mc.patternConfidence)
+          : "",
+    },
+  ].filter((row) => row.value);
+  const familyHistoryLabels = pickSelectedLabels(FAMILY_HISTORY, mh.familyHistory);
+  const reviewHistoryRows: ReviewSummaryRow[] = [
+    {
+      label: "Diagnoses",
+      value: summarizeLabels(pickSelectedLabels(DIAGNOSES, mh.diagnoses)),
+    },
+    {
+      label: "Current symptoms",
+      value: summarizeLabels(pickSelectedLabels(CURRENT_SYMPTOMS, mh.currentSymptoms)),
+    },
+    {
+      label: "Family history",
+      value: joinReviewParts([
+        summarizeLabels(familyHistoryLabels),
+        familyHistoryLabels.some((label) =>
+          ["Male pattern hair loss", "Female pattern thinning"].includes(label)
+        )
+          ? lookupOptionLabel(FAMILY_SIDE as ReadonlyArray<{ key: string; label: string }>, mh.familyHistorySide)
+          : "",
+      ]),
+    },
+    showFemale
+      ? {
+          label: "Female-specific context",
+          value: joinReviewParts([
+            fh.cycles && fh.cycles !== "regular" && fh.cycles !== "prefer_not_to_say"
+              ? `Cycles: ${lookupOptionLabel(
+                  [
+                    { key: "regular", label: "Regular" },
+                    { key: "irregular", label: "Irregular" },
+                    { key: "not_occurring", label: "Not occurring" },
+                    { key: "prefer_not_to_say", label: "Prefer not to say" },
+                  ],
+                  fh.cycles
+                )}`
+              : "",
+            summarizeLabels(pickSelectedLabels(FEMALE_LIFE_STAGE, fh.lifeStage)),
+            summarizeLabels(pickSelectedLabels(FEMALE_FEATURES, fh.features)),
+            fh.newWorseningHyperandrogenFeatures === "yes" ? "New or worsening hormone-related features" : "",
+            adaptivePostpartumContext ? "Recent postpartum context" : "",
+          ]),
+        }
+      : showMale
+        ? {
+            label: "Male-specific context",
+            value: joinReviewParts([
+              summarizeLabels(pickSelectedLabels(MALE_THERAPIES, mhMale.therapies)),
+              summarizeLabels(pickSelectedLabels(MALE_ASSOCIATED_CHANGES, mhMale.associatedChanges)),
+              summarizeLabels(pickSelectedLabels(ANDROGEN_EXPOSURE_SIGNALS, ai.androgenExposureSignals)),
+            ]),
+          }
+        : {
+            label: "Hormonal context",
+            value: joinReviewParts([
+              ai.neutralContext?.endocrineHistoryKnown === "yes" ? "Hormonal or endocrine history noted" : "",
+              ai.neutralContext?.hormonalContextFreeText ? "Additional endocrine context provided" : "",
+            ]),
+          },
+  ].filter((row) => row.value);
+  const reviewCurrentContextRows: ReviewSummaryRow[] = [
+    {
+      label: "Recent triggers",
+      value: summarizeLabels(pickSelectedLabels(TRIGGERS, tt.triggers)),
+    },
+    {
+      label: "Past-year events",
+      value: summarizeLabels(pickSelectedLabels(PAST_YEAR_EVENTS, tt.pastYearEvents)),
+    },
+    {
+      label: "TRT context",
+      value:
+        tt.trtStatus && tt.trtStatus !== "no"
+          ? joinReviewParts([
+              lookupOptionLabel(TRT_STATUS_OPTIONS, tt.trtStatus),
+              lookupOptionLabel(TRT_STARTED_WHEN_OPTIONS, tt.trtStartedWhen),
+            ])
+          : "",
+    },
+    {
+      label: "Current trend",
+      value: lookupOptionLabel(SHEDDING_TREND_OPTIONS, tt.sheddingTrend),
+    },
+    {
+      label: "Medication or hormone change",
+      value:
+        adaptiveAnswerMap.medication_hormone_change_recent === "yes"
+          ? joinReviewParts([
+              "Recent prescription or hormone change noted",
+              typeof adaptiveAnswerMap.med_change_timing_vs_hair === "string"
+                ? lookupOptionLabel(MEDICATION_TIMING_OPTIONS, adaptiveAnswerMap.med_change_timing_vs_hair)
+                : "",
+            ])
+          : "",
+    },
+    {
+      label: "Lifestyle context",
+      value: joinReviewParts([
+        summarizeLabels(pickSelectedLabels(DIET_PATTERN, lt.dietPattern)),
+        lt.enoughProtein === "no" ? "Protein may be low" : "",
+        lt.stressScore != null && lt.stressScore >= 7 ? `Stress ${lt.stressScore}/10` : "",
+        lt.sleepQuality ? `Sleep: ${lookupOptionLabel(SLEEP_QUALITY_OPTIONS, lt.sleepQuality)}` : "",
+      ]),
+    },
+    {
+      label: "Current treatments",
+      value: summarizeLabels(pickSelectedLabels(CURRENT_TREATMENTS, lt.currentTreatments)),
+    },
+    {
+      label: "Treatment response",
+      value: joinReviewParts([
+        lt.treatmentHelpfulness === "yes"
+          ? "Treatments felt helpful"
+          : lt.treatmentHelpfulness === "no"
+            ? "Treatments not clearly helpful"
+            : "",
+        lookupOptionLabel(TREATMENT_RESPONSE_OPTIONS, lt.treatmentResponse),
+      ]),
+    },
+  ].filter((row) => row.value);
+  const reviewInvestigationRows: ReviewSummaryRow[] = [
+    {
+      label: "Prior blood tests",
+      value: lookupOptionLabel(PRIOR_BLOOD_TEST_OPTIONS, mh.priorBloodTests),
+    },
+    {
+      label: "Blood upload preference",
+      value:
+        mh.wantsToUploadBloodsNow === true
+          ? "Planning to upload blood results in this intake"
+          : mh.wantsToUploadBloodsNow === false
+            ? "Not planning to upload blood results in this intake"
+            : "",
+    },
+    {
+      label: "Current blood status",
+      value: lookupOptionLabel(CURRENT_BLOOD_STATUS_OPTIONS, un.currentBloodStatus),
+    },
+    {
+      label: "Available uploads",
+      value: summarizeLabels(pickSelectedLabels(AVAILABLE_UPLOADS, un.availableUploads, ["none", "unsure", "prefer_not_to_say", "skip"])),
+    },
+    {
+      label: "Documents",
+      value:
+        stepDocuments.length === 0
+          ? "None uploaded yet (optional - add anytime in the portal)"
+          : `${stepDocuments.length} document(s) uploaded`,
+    },
+  ].filter((row) => row.value);
 
   return (
     <main className="min-h-screen text-white" style={{ background: BG }}>
@@ -1276,7 +1661,7 @@ export function LongevityStartFlow({
               identifyEmail={identifyEmail}
               setAboutYou={setAboutYou}
               setStep={setStep}
-              goNext={goNext}
+              openMainConcern={openMainConcern}
               saving={saving}
             />
           )}
@@ -1285,84 +1670,158 @@ export function LongevityStartFlow({
             <Card>
               <div className="text-sm tracking-widest text-[rgb(198,167,94)]">Step 2</div>
               <h2 className="mt-2 text-2xl font-semibold">Main concern</h2>
-              <p className="mt-2 text-white/70">What brings you in? Select all that apply.</p>
-              <div className="mt-6 space-y-6">
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm text-white/80">
-                    We adapt follow-up questions based on your pattern so we only ask high-yield questions.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <span className="text-xs text-white/60">Current pathway focus:</span>
-                    {activePathways.slice(0, 3).map((pathway) => (
-                      <span key={pathway} className="rounded-full border border-[rgb(198,167,94)]/30 bg-[rgb(198,167,94)]/10 px-2 py-1 text-xs text-white/90">
-                        {pathway.replaceAll("_", " ")}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <MultiSelect label="Primary concerns" options={PRIMARY_CONCERNS} value={mc.primaryConcerns ?? []} onChange={(v) => setMainConcern({ primaryConcerns: v })} />
-                <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm font-medium text-white/90">Pattern and focused follow-ups</p>
-                  <p className="mt-1 text-xs text-white/55">
-                    Your presentation pattern and related questions live here — one place, aligned with the pathway focus above.
-                  </p>
-                  <div className="mt-4">
-                    <AdaptiveIntakeOrchestrator
-                      mode="intake"
-                      answers={(adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>}
-                      context={adaptiveContext}
-                      onChange={(questionId, value) => {
-                        const answers = {
-                          ...((adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>),
-                          [questionId]: value,
-                        };
-                        setAdaptiveEngine({ answers });
-                        if (questionId === "presentation_pattern" && typeof value === "string") {
-                          setAdaptiveIntake({
-                            presentationPattern: value as NonNullable<AdaptiveIntake["presentationPattern"]>,
-                          });
-                        }
-                        const triage = buildIntakeTriageOutput(answers, adaptiveContext);
-                        setAdaptiveEngine({ triage });
-                      }}
-                    />
-                  </div>
-                </div>
-                <SingleSelect label="When did you first notice?" value={mc.firstNoticed} options={FIRST_NOTICED} onChange={(k) => setMainConcern({ firstNoticed: k as MainConcern["firstNoticed"] })} />
-                <SingleSelect label="Onset pattern" value={mc.onsetPattern} options={ONSET_PATTERN} onChange={(k) => setMainConcern({ onsetPattern: k as MainConcern["onsetPattern"] })} />
-                <SingleSelect
-                  label="How much is this affecting you day to day?"
-                  helpText="Your own sense of impact—not a medical score."
-                  explanation="This helps your team understand urgency and support needs. It does not replace clinical examination."
-                  value={mc.perceivedSeverity}
-                  options={[...PERCEIVED_SEVERITY]}
-                  onChange={(k) => setMainConcern({ perceivedSeverity: k as MainConcern["perceivedSeverity"] })}
-                />
-                <SingleSelect
-                  label="How well does the pattern you picked above fit what you see?"
-                  helpText="Optional. Skip with “Prefer not to say” if you like."
-                  value={mc.patternConfidence}
-                  options={[...PATTERN_CONFIDENCE]}
-                  onChange={(k) => setMainConcern({ patternConfidence: k as MainConcern["patternConfidence"] })}
-                />
-                <MultiSelect label="Affected areas" options={AFFECTED_AREAS} value={mc.affectedAreas ?? []} onChange={(v) => setMainConcern({ affectedAreas: v })} />
-                <MultiSelect
-                  label="Symptoms"
-                  subtitle="Scalp-focused detail is captured in the adaptive checklist above when you select a scalp-related presentation."
-                  helpText="“Shedding” here means hairs falling out with the root. Itch, burning, and flakes describe the scalp itself."
-                  explanation="Broken or snapped hairs (short pieces) are different from shedding: breakage is about damage along the hair strand; shedding is the whole hair coming out. If you notice both, you can select more than one option."
-                  options={SYMPTOMS}
-                  value={mc.symptoms ?? []}
-                  onChange={(v) => setMainConcern({ symptoms: v })}
-                />
-                <div>
-                  <label className="text-sm text-white/75">Anything else? (optional)</label>
-                  <textarea className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]" rows={3} value={mc.freeText ?? ""} onChange={(e) => setMainConcern({ freeText: e.target.value })} placeholder="Free text…" />
+              <p className="mt-2 text-white/70">
+                We’ll move through this in a few short parts so it is easier to complete and easier to review.
+              </p>
+              <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  {MAIN_CONCERN_STAGE_META.map((stageMeta, index) => {
+                    const activeIndex = MAIN_CONCERN_STAGE_META.findIndex((stage) => stage.key === mainConcernStage);
+                    const isActive = stageMeta.key === mainConcernStage;
+                    const isComplete = activeIndex > index;
+
+                    return (
+                      <button
+                        key={stageMeta.key}
+                        type="button"
+                        onClick={() => setMainConcernStage(stageMeta.key)}
+                        className={`rounded-full border px-3 py-1 text-xs transition ${
+                          isActive
+                            ? "border-[rgb(198,167,94)] bg-[rgb(198,167,94)]/10 text-white"
+                            : isComplete
+                              ? "border-white/15 bg-white/[0.04] text-white/80"
+                              : "border-white/10 bg-transparent text-white/55 hover:border-white/20 hover:text-white/80"
+                        }`}
+                      >
+                        {index + 1}. {stageMeta.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+              <div className="mt-6 space-y-6">
+                {mainConcernStage === "router" && (
+                  <>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                      <p className="text-sm text-white/80">
+                        Start with the main concerns you want reviewed. We’ll use that to guide the follow-up questions in the next part.
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <span className="text-xs text-white/60">Current pathway focus:</span>
+                        {activePathways.slice(0, 3).map((pathway) => (
+                          <span key={pathway} className="rounded-full border border-[rgb(198,167,94)]/30 bg-[rgb(198,167,94)]/10 px-2 py-1 text-xs text-white/90">
+                            {pathway.replaceAll("_", " ")}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <MultiSelect label="Primary concerns" options={PRIMARY_CONCERNS} value={mc.primaryConcerns ?? []} onChange={(v) => setMainConcern({ primaryConcerns: v })} />
+                  </>
+                )}
+                {mainConcernStage === "focused" && (
+                  <>
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                      <p className="text-sm font-medium text-white/90">Pattern and focused follow-ups</p>
+                      <p className="mt-1 text-xs text-white/55">
+                        Your presentation pattern and any pathway-specific follow-ups live here in one place, so the remaining parts can stay lighter.
+                      </p>
+                      <div className="mt-4">
+                        <AdaptiveIntakeOrchestrator
+                          mode="intake"
+                          answers={(adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>}
+                          context={adaptiveContext}
+                          onChange={(questionId, value) => {
+                            const answers = {
+                              ...((adaptiveEngine.answers ?? {}) as Record<string, string | string[] | boolean | null>),
+                              [questionId]: value,
+                            };
+                            setAdaptiveEngine({ answers });
+                            if (questionId === "presentation_pattern" && typeof value === "string") {
+                              setAdaptiveIntake({
+                                presentationPattern: value as NonNullable<AdaptiveIntake["presentationPattern"]>,
+                              });
+                            }
+                            const triage = buildIntakeTriageOutput(answers, adaptiveContext);
+                            setAdaptiveEngine({ triage });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+                {mainConcernStage === "pattern" && (
+                  <>
+                    <p className="text-sm text-white/65">
+                      Next, confirm where you notice the change most and any symptoms that help describe it.
+                    </p>
+                    <MultiSelect label="Affected areas" options={AFFECTED_AREAS} value={mc.affectedAreas ?? []} onChange={(v) => setMainConcern({ affectedAreas: v })} />
+                    <MultiSelect
+                      label="Symptoms"
+                      subtitle={
+                        adaptivePresentationPattern === "scalp_symptoms" ||
+                        adaptivePresentationPattern === "mixed_or_unsure"
+                          ? "Scalp-focused detail is already captured in the adaptive checklist above."
+                          : undefined
+                      }
+                      helpText="“Shedding” here means hairs falling out with the root. Itch, burning, and flakes describe the scalp itself."
+                      explanation="Broken or snapped hairs (short pieces) are different from shedding: breakage is about damage along the hair strand; shedding is the whole hair coming out. If you notice both, you can select more than one option."
+                      options={mainConcernSymptomOptions}
+                      value={mc.symptoms ?? []}
+                      onChange={(v) => setMainConcern({ symptoms: v })}
+                    />
+                    <SingleSelect
+                      label="How well does the pattern you picked above fit what you see?"
+                      helpText="Optional. Skip with “Prefer not to say” if you like."
+                      value={mc.patternConfidence}
+                      options={[...PATTERN_CONFIDENCE]}
+                      onChange={(k) => setMainConcern({ patternConfidence: k as MainConcern["patternConfidence"] })}
+                    />
+                    <div>
+                      <label className="text-sm text-white/75">Anything else? (optional)</label>
+                      <textarea className="mt-2 w-full rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-white outline-none focus:border-[rgb(198,167,94)]" rows={3} value={mc.freeText ?? ""} onChange={(e) => setMainConcern({ freeText: e.target.value })} placeholder="Free text…" />
+                    </div>
+                  </>
+                )}
+                {mainConcernStage === "timing" && (
+                  <>
+                    <p className="text-sm text-white/65">
+                      Finally, add the rough timing and how much this is affecting you day to day.
+                    </p>
+                    <SingleSelect label="When did you first notice?" value={mc.firstNoticed} options={FIRST_NOTICED} onChange={(k) => setMainConcern({ firstNoticed: k as MainConcern["firstNoticed"] })} />
+                    <SingleSelect label="Onset pattern" value={mc.onsetPattern} options={ONSET_PATTERN} onChange={(k) => setMainConcern({ onsetPattern: k as MainConcern["onsetPattern"] })} />
+                    <SingleSelect
+                      label="How much is this affecting you day to day?"
+                      helpText="Your own sense of impact—not a medical score."
+                      explanation="This helps your team understand urgency and support needs. It does not replace clinical examination."
+                      value={mc.perceivedSeverity}
+                      options={[...PERCEIVED_SEVERITY]}
+                      onChange={(k) => setMainConcern({ perceivedSeverity: k as MainConcern["perceivedSeverity"] })}
+                    />
+                  </>
+                )}
+              </div>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="secondary" onClick={() => setStep("aboutYou")}>Back</Button>
-                <Button onClick={() => goNext("timelineTriggers")} disabled={saving}>Save & continue</Button>
+                {mainConcernStage === "router" ? (
+                  <>
+                    <Button variant="secondary" onClick={() => setStep("aboutYou")}>Back</Button>
+                    <Button onClick={() => setMainConcernStage("focused")} disabled={saving}>Continue</Button>
+                  </>
+                ) : mainConcernStage === "focused" ? (
+                  <>
+                    <Button variant="secondary" onClick={() => setMainConcernStage("router")}>Back</Button>
+                    <Button onClick={() => setMainConcernStage("pattern")} disabled={saving}>Continue</Button>
+                  </>
+                ) : mainConcernStage === "pattern" ? (
+                  <>
+                    <Button variant="secondary" onClick={() => setMainConcernStage("focused")}>Back</Button>
+                    <Button onClick={() => setMainConcernStage("timing")} disabled={saving}>Continue</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="secondary" onClick={() => setMainConcernStage("pattern")}>Back</Button>
+                    <Button onClick={() => goNext("timelineTriggers")} disabled={saving}>Save & continue</Button>
+                  </>
+                )}
               </div>
             </Card>
           )}
@@ -1402,6 +1861,33 @@ export function LongevityStartFlow({
                   )}
                 </div>
                 <MultiSelect label="Triggers around the time of change" options={TRIGGERS} value={tt.triggers ?? []} onChange={(v) => setTimelineTriggers({ triggers: v })} />
+                <SingleSelect
+                  label="In the last 6 months, did you start, stop, or change any prescription medicine or hormone treatment?"
+                  helpText="Examples include Roaccutane / isotretinoin, hormonal treatments, thyroid medicine, antidepressants, or similar prescription changes."
+                  value={
+                    typeof adaptiveAnswerMap.medication_hormone_change_recent === "string"
+                      ? adaptiveAnswerMap.medication_hormone_change_recent
+                      : undefined
+                  }
+                  options={MEDICATION_CHANGE_RECENT_OPTIONS}
+                  onChange={(k) => {
+                    setAdaptiveEngineAnswer("medication_hormone_change_recent", k);
+                    if (k !== "yes") setAdaptiveEngineAnswer("med_change_timing_vs_hair", null);
+                  }}
+                />
+                {adaptiveAnswerMap.medication_hormone_change_recent === "yes" && (
+                  <SingleSelect
+                    label="How did that change line up with your hair symptoms?"
+                    helpText="Approximate timing is enough."
+                    value={
+                      typeof adaptiveAnswerMap.med_change_timing_vs_hair === "string"
+                        ? adaptiveAnswerMap.med_change_timing_vs_hair
+                        : undefined
+                    }
+                    options={MEDICATION_TIMING_OPTIONS}
+                    onChange={(k) => setAdaptiveEngineAnswer("med_change_timing_vs_hair", k)}
+                  />
+                )}
                 <MultiSelect label="Past year events" options={PAST_YEAR_EVENTS} value={tt.pastYearEvents ?? []} onChange={(v) => setTimelineTriggers({ pastYearEvents: v })} />
                 <SingleSelect label="Shedding trend" value={tt.sheddingTrend} options={[{ key: "stable", label: "Stable" }, { key: "improved", label: "Improved" }, { key: "worsened", label: "Worsened" }, { key: "comes_and_goes", label: "Comes and goes" }]} onChange={(k) => setTimelineTriggers({ sheddingTrend: k })} />
                 {(presentationCanon === "acute_shedding" || presentationCanon === "diffuse_thinning") && (
@@ -1447,7 +1933,7 @@ export function LongevityStartFlow({
                 />
               </div>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="secondary" onClick={() => setStep("mainConcern")}>Back</Button>
+                <Button variant="secondary" onClick={() => jumpToMainConcern("timing")}>Back</Button>
                 <Button onClick={() => goNext("medicalHistory")} disabled={saving}>Save & continue</Button>
               </div>
             </Card>
@@ -1582,20 +2068,6 @@ export function LongevityStartFlow({
                     }
                   />
                   <MultiSelect label="Life stage" options={FEMALE_LIFE_STAGE} value={fh.lifeStage ?? []} onChange={(v) => setFemaleHistory({ lifeStage: v })} />
-                  <SingleSelect
-                    label="Recent postpartum period?"
-                    value={ai.femaleContext?.postpartumRecent}
-                    options={[
-                      { key: "yes", label: "Yes" },
-                      { key: "no", label: "No" },
-                      { key: "unsure", label: "Unsure" },
-                    ]}
-                    onChange={(k) =>
-                      setAdaptiveIntake({
-                        femaleContext: { ...ai.femaleContext, postpartumRecent: k },
-                      })
-                    }
-                  />
                   <MultiSelect
                     label="Hyperandrogen signs (optional, skip if preferred)"
                     helpText="“Hyperandrogen” only means signs that can go with higher male-type hormone effect—not a diagnosis."
@@ -1650,14 +2122,6 @@ export function LongevityStartFlow({
                         maleContext: { ...ai.maleContext, crownProgression: k },
                       })
                     }
-                  />
-                  <MultiSelect
-                    label="Androgen exposure context (optional)"
-                    helpText="“Androgen” here means things that affect male-type hormones (including testosterone products)."
-                    explanation="This can include prescribed testosterone, some gym or performance products, or changes to hormone medicines. We only use this to understand your hair story."
-                    options={ANDROGEN_EXPOSURE_SIGNALS}
-                    value={ai.androgenExposureSignals ?? []}
-                    onChange={(v) => setAdaptiveIntake({ androgenExposureSignals: v })}
                   />
                 </div>
               )}
@@ -2007,14 +2471,39 @@ export function LongevityStartFlow({
               <p className="mt-2 text-white/70">
                 Confirm your details. You can go back to edit any step before submitting. Submitting without documents is fine—you can add them later in your secure portal.
               </p>
-              <dl className="mt-6 space-y-2 text-sm">
-                <div><span className="text-white/60">Name:</span> {(a.firstName || a.lastName) ? [a.firstName, a.lastName].filter(Boolean).join(" ") : "—"}</div>
-                <div><span className="text-white/60">Email:</span> {a.email || "—"}</div>
-                <div><span className="text-white/60">Primary concerns:</span> {(mc.primaryConcerns?.length) ? mc.primaryConcerns.join(", ") : "—"}</div>
-                <div><span className="text-white/60">Prior blood tests:</span> {mh.priorBloodTests ?? "—"}</div>
-                <div><span className="text-white/60">Current blood status:</span> {un.currentBloodStatus ?? "—"}</div>
-                <div><span className="text-white/60">Documents:</span> {stepDocuments.length === 0 ? "None uploaded yet (optional—add anytime in the portal)" : `${stepDocuments.length} document(s) uploaded`}</div>
-              </dl>
+              <div className="mt-6 space-y-4">
+                <ReviewSummarySection
+                  title="About you"
+                  rows={reviewAboutRows}
+                  actions={[{ label: "Edit", onClick: () => setStep("aboutYou") }]}
+                />
+                <ReviewSummarySection
+                  title="Main hair concerns"
+                  rows={reviewConcernRows}
+                  actions={[{ label: "Edit", onClick: () => jumpToMainConcern("router") }]}
+                />
+                <ReviewSummarySection
+                  title="Relevant history"
+                  rows={reviewHistoryRows}
+                  actions={[
+                    { label: "Edit history", onClick: () => setStep("medicalHistory") },
+                    { label: "Edit sex-specific", onClick: () => setStep("sexSpecific") },
+                  ]}
+                />
+                <ReviewSummarySection
+                  title="Current context"
+                  rows={reviewCurrentContextRows}
+                  actions={[
+                    { label: "Edit timeline", onClick: () => setStep("timelineTriggers") },
+                    { label: "Edit lifestyle", onClick: () => setStep("lifestyleTreatments") },
+                  ]}
+                />
+                <ReviewSummarySection
+                  title="Investigations and uploads"
+                  rows={reviewInvestigationRows}
+                  actions={[{ label: "Edit", onClick: () => setStep("uploadsNextSteps") }]}
+                />
+              </div>
               <PreliminaryPatientFeedback feedback={preliminaryPatientFeedback} />
               {submitRecoveryHref && (
                 <div className="mt-4 rounded-2xl border border-[rgb(var(--gold))]/30 bg-[rgb(var(--gold))]/10 px-4 py-3">

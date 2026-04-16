@@ -22,8 +22,6 @@ export const INTAKE_PATHWAYS: IntakePathwayDefinition[] = [
     exitCriteria: [(a) => a.presentation_pattern != null],
     followupQuestionIds: [
       "male_androgen_exposure_context",
-      "male_androgen_exposure_detail",
-      "exogenous_androgen_timing_vs_hair",
     ],
   },
   {
@@ -40,12 +38,6 @@ export const INTAKE_PATHWAYS: IntakePathwayDefinition[] = [
     followupQuestionIds: [
       "acute_trigger_window",
       "lifestyle_load",
-      "medication_hormone_change_recent",
-      "med_change_timing_vs_hair",
-      "protein_intake_level",
-      "diet_pattern_intake",
-      "male_androgen_exposure_detail",
-      "exogenous_androgen_timing_vs_hair",
     ],
   },
   {
@@ -91,7 +83,7 @@ export const INTAKE_PATHWAYS: IntakePathwayDefinition[] = [
     label: "Nutritional deficiency suspicion",
     entryCriteria: [(a) => hasAny(a.lifestyle_load, ["rapid_weight_loss", "restrictive_eating"])],
     exitCriteria: [(a) => a.lifestyle_load != null],
-    followupQuestionIds: ["lifestyle_load", "protein_intake_level", "diet_pattern_intake"],
+    followupQuestionIds: ["lifestyle_load"],
   },
   {
     id: "medication_androgen_exposure",
@@ -103,8 +95,6 @@ export const INTAKE_PATHWAYS: IntakePathwayDefinition[] = [
     followupQuestionIds: [
       "male_androgen_exposure_context",
       "female_hormonal_context",
-      "male_androgen_exposure_detail",
-      "exogenous_androgen_timing_vs_hair",
     ],
   },
   {
@@ -116,15 +106,9 @@ export const INTAKE_PATHWAYS: IntakePathwayDefinition[] = [
       "lifestyle_load",
       "scalp_symptom_cluster",
       "mechanical_exposures",
-      "medication_hormone_change_recent",
-      "med_change_timing_vs_hair",
-      "protein_intake_level",
-      "diet_pattern_intake",
       "scalp_symptom_duration",
       "scalp_symptom_flare_pattern",
       "scalp_symptom_treatments_tried",
-      "male_androgen_exposure_detail",
-      "exogenous_androgen_timing_vs_hair",
     ],
   },
 ];

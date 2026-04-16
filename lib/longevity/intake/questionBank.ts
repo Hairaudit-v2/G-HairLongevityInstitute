@@ -261,7 +261,7 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
   },
   {
     id: "postpartum_recent_gate",
-    label: "In the last 18 months, did you give birth?",
+    label: "In the last 12 months, did you give birth?",
     type: "single_select",
     section: "sex_specific",
     helpText: "We only ask because birth and early postpartum can line up with shedding timing.",
@@ -287,7 +287,6 @@ export const INTAKE_QUESTION_BANK: IntakeQuestionDefinition[] = [
       { value: "under_3_months", label: "Under 3 months" },
       { value: "3_to_6_months", label: "3–6 months" },
       { value: "6_to_12_months", label: "6–12 months" },
-      { value: "over_12_months", label: "Over 12 months" },
       { value: "prefer_not_to_say", label: "Prefer not to say" },
     ],
     allowSkip: true,

@@ -4,6 +4,7 @@ This document describes the **persistent patient portal** for the Hair Longevity
 
 ## Goals
 
+- **Single-entry patient model**: `Start My Hair Analysis` is the new-patient intake CTA, `Patient Portal` is the returning-patient entry, and `/login/patient` remains only as a legacy redirect to `/portal`.
 - **Login-based patient portal**: users can sign in, return, update information, upload documents, and complete follow-up assessments over time.
 - **One profile per auth user**: each patient has one `hli_longevity_profiles` row, optionally linked to Supabase Auth via `auth_user_id`.
 - **Multiple intakes per profile**: intakes are never overwritten; each submission is a new row in `hli_longevity_intakes`.
@@ -48,11 +49,12 @@ Future clinician (Trichologist) features should treat **profile → many intakes
 
 | Route | Auth | Purpose |
 |-------|------|--------|
-| `/longevity` | None | Longevity landing; links to Start intake, Patient portal, Dashboard (session). |
-| `/longevity/start` | Cookie (or set by portal) | Start or resume intake; same as before. |
+| `/longevity` | None | Longevity landing; exposes the `Start My Hair Analysis` CTA for new patients and `Patient Portal` for returning patients. |
+| `/longevity/start` | Cookie (or set by portal) | Start or resume intake; primary new-patient intake flow. |
 | `/longevity/dashboard` | Cookie | Cookie-based dashboard (no login). Unchanged. |
-| `/portal` | Redirect | Redirects to `/portal/dashboard` if logged in, else `/portal/login`. |
+| `/portal` | Redirect | Canonical returning-patient entry; redirects to `/portal/dashboard` if logged in, else `/portal/login`. |
 | `/portal/login` | None | Sign in: magic link, password, or Google. |
+| `/login/patient` | Redirect | Legacy patient-login URL; immediately redirects to `/portal`. |
 | `/portal/auth/callback` | None | Handles magic link, OAuth code, or hash; exchanges for session, then redirects to dashboard. |
 | `/portal/dashboard` | Supabase Auth | Portal dashboard: next step, intake history, documents, “New intake”, “Resume”, Sign out. Sets longevity cookie so start/resume use the same profile. |
 

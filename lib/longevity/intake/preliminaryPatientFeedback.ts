@@ -75,10 +75,10 @@ function formatNaturalList(parts: string[]): string {
 const CARD_DEFINITIONS: CardDefinition[] = [
   {
     id: "hormonal_review",
-    title: "Hormonal context may need review",
+    title: "Hormonal context may need closer review",
     summaryLabel: "hormonal contributors",
     body:
-      "Some of what you shared overlaps with female endocrine hair-loss patterns, including cycle disruption, postpartum or menopause-related change, or androgen-sensitive features such as jawline acne or increased facial/body hair. This does not confirm the cause, but it makes endocrine review more relevant.",
+      "Part of the next review may be checking whether hormone-related context could be influencing the pattern or timing of your hair changes. This is still only an early review focus, not a diagnosis.",
     evaluate: ({ responses, adaptiveAnswers, primaryPathway, secondaryPathways }) => {
       const femaleHistory = responses.femaleHistory;
       const medicalHistory = responses.medicalHistory;
@@ -355,10 +355,10 @@ const CARD_DEFINITIONS: CardDefinition[] = [
   },
   {
     id: "trigger_review",
-    title: "Stress-, illness-, or medication-related shedding may need review",
+    title: "Your timeline may need closer review",
     summaryLabel: "trigger-related shedding",
     body:
-      "When shedding follows major stress, illness, surgery, postpartum change, or medication change, a trigger-related shedding pattern becomes more plausible. If the timeline is delayed by a few months after a body-level stressor, that can still fit trigger-related shedding, but it may need review alongside other endocrine or metabolic contributors.",
+      "The next review may focus on how the timing of your hair change lines up with any recent stress, illness, postpartum change, surgery, or medication change. That timing can be helpful, but it may still need to be weighed alongside other possible contributors.",
     evaluate: (context) => {
       const mainConcern = context.responses.mainConcern;
       const timeline = context.responses.timelineTriggers;
@@ -455,10 +455,10 @@ const CARD_DEFINITIONS: CardDefinition[] = [
   },
   {
     id: "pattern_clarification",
-    title: "Pattern confirmation still matters before any diagnosis",
+    title: "Pattern confirmation comes next",
     summaryLabel: "pattern clarification",
     body:
-      "Early questionnaires often suggest overlapping contributors rather than one single cause. Pattern confirmation usually depends on the full history, scalp distribution, any images, and whether the presentation stays consistent after review.",
+      "Questionnaires often point to a review focus rather than one clear explanation. The next step is confirming the overall pattern against your history and any images or documents you choose to provide.",
     evaluate: (context) => {
       const signals: string[] = [];
       if (
@@ -473,10 +473,10 @@ const CARD_DEFINITIONS: CardDefinition[] = [
   },
   {
     id: "bloodwork_followup",
-    title: "Blood tests may still be requested",
+    title: "Recent blood tests may help clarify the next step",
     summaryLabel: "targeted bloodwork follow-up",
     body:
-      "If recent blood tests are not already available, targeted bloodwork may be requested to help distinguish between overlapping causes such as thyroid involvement, iron/ferritin issues, nutritional gaps, or hormone-related contributors.",
+      "If recent blood tests are not already available, they may help narrow the next step by checking for common contributors such as iron, thyroid, nutritional, or hormone-related factors. You can still submit now and add results later if needed.",
     evaluate: (context) => {
       const medicalHistory = context.responses.medicalHistory;
       const uploads = context.responses.uploadsNextSteps;
@@ -497,10 +497,10 @@ const CARD_DEFINITIONS: CardDefinition[] = [
   },
   {
     id: "clinical_correlation",
-    title: "More than one contributor may be overlapping",
+    title: "Your review will weigh the whole picture",
     summaryLabel: "overlapping contributors",
     body:
-      "Hair loss often reflects more than one process at the same time. Part of the next step is separating the main pattern from secondary contributors so the final interpretation is clinically useful rather than overly simplistic.",
+      "Hair changes do not always follow one single explanation. The next review may need to sort out the main pattern from any secondary contributors so the final interpretation is more useful and specific.",
     evaluate: (context) => {
       if (
         hasPathway(context, "mixed_pattern", "unclear_pattern") ||
@@ -529,10 +529,10 @@ function buildSummary(
 ): string {
   const labels = uniq(cards.map((card) => card.summaryLabel)).slice(0, 3);
   if (labels.length === 0) {
-    return "You have provided enough detail for an early structured review, but the pattern still needs full clinical correlation before any conclusion is made.";
+    return "You have already provided enough information for a useful early review focus. Final interpretation still depends on your full history, any uploads, and clinician review.";
   }
   const list = formatNaturalList(labels);
-  return `You have already given enough information for an early structured clinical impression. At this stage, the strongest signals point toward ${list} as areas worth clarifying next, rather than a confirmed diagnosis.`;
+  return `You have already provided enough information for an early review focus. At this stage, the next step is likely to look more closely at ${list}, rather than jump to a diagnosis.`;
 }
 
 function buildNextSteps(
@@ -590,28 +590,19 @@ export function getPreliminaryPatientFeedback(
   );
 
   const sorted = sortCards(matched);
-  const selected = [...sorted];
-
-  for (const fallbackId of [
-    "pattern_clarification",
-    "bloodwork_followup",
-    "clinical_correlation",
-  ] as const) {
-    if (selected.length >= 4) break;
-    if (selected.some((card) => card.id === fallbackId)) continue;
-    const fallback = CARD_DEFINITIONS.find((card) => card.id === fallbackId);
-    if (!fallback) continue;
-    const fallbackSignals = fallback.evaluate(context);
-    selected.push({
-      id: fallback.id,
-      title: fallback.title,
-      body: fallback.body,
-      matchedSignals: fallbackSignals.length > 0 ? fallbackSignals : ["review_context"],
-      summaryLabel: fallback.summaryLabel,
-    });
-  }
-
-  const cards = selected.slice(0, 4);
+  const cards =
+    sorted.length > 0
+      ? sorted.slice(0, 4)
+      : [
+          {
+            id: "pattern_clarification",
+            title: "Pattern confirmation comes next",
+            body:
+              "Your answers already give the team a useful starting point. The next step is confirming the overall pattern against your history and any images or documents you choose to provide.",
+            matchedSignals: ["review_context"],
+            summaryLabel: "pattern clarification",
+          },
+        ];
 
   return {
     headline: "Preliminary review based on the information provided so far",

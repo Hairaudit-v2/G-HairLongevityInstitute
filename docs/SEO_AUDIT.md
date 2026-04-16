@@ -18,14 +18,14 @@ The site has a solid base: consistent page-level titles and descriptions on most
 - **Finding:** No `sitemap.xml` or `app/sitemap.ts` exists. Search engines have no explicit list of URLs to crawl.
 - **Impact:** Slower or incomplete discovery of pages, especially secondary pages (How it works, Science, For professionals, Book, Membership).
 - **Recommendation:** Add `app/sitemap.ts` and return a `MetadataRoute.Sitemap` array. Include public indexable URLs:
-  - `/`, `/about`, `/how-it-works`, `/science`, `/for-professionals`, `/book`, `/membership`, `/start` (or `/longevity/start` when enabled), `/longevity` (when enabled), `/privacy`, `/terms`, `/disclaimer`, `/login/patient`, `/login/trichologist`. Exclude portal, admin, doctor, and dynamic intake/audit routes from the sitemap.
+  - `/`, `/about`, `/how-it-works`, `/science`, `/for-professionals`, `/book`, `/membership`, `/start` (or `/longevity/start` when enabled), `/longevity` (when enabled), `/privacy`, `/terms`, `/disclaimer`, `/login/trichologist`. Exclude portal, admin, doctor, dynamic intake/audit routes, and the legacy `/login/patient` redirect from the sitemap.
 
 ### 1.2 Robots.txt — **Missing (high priority)**
 
 - **Finding:** No `robots.txt` or `app/robots.ts`. Crawlers use default behavior and are not pointed to a sitemap.
 - **Recommendation:** Add `app/robots.ts` returning `MetadataRoute.Robots` with:
   - `allow: '/'` for general crawling.
-  - `disallow` for `/portal`, `/admin`, `/doctor`, `/longevity/dashboard`, `/longevity/analytics`, `/longevity/intake`, `/audits`, `/login` (or allow `/login/patient` and `/login/trichologist` if you want them indexed).
+  - `disallow` for `/portal`, `/admin`, `/doctor`, `/longevity/dashboard`, `/longevity/analytics`, `/longevity/intake`, `/audits`, `/login`, and the legacy `/login/patient` redirect. If any login page should stay indexable, keep that decision explicit per route rather than treating `/login/patient` as a public destination.
   - `sitemap: 'https://<your-domain>/sitemap.xml'`.
 
 ### 1.3 Canonical URLs
@@ -62,7 +62,8 @@ The site has a solid base: consistent page-level titles and descriptions on most
 | `/book`                   | ✅                  | Good. |
 | `/membership`             | ✅                  | Good. |
 | `/privacy`, `/terms`, `/disclaimer` | ✅ | Good. |
-| `/login/patient`, `/login/trichologist` | ✅ | Good. |
+| `/login/patient` | Legacy redirect only | Do not treat as a public landing page or index target; canonical returning-patient entry is `/portal`. |
+| `/login/trichologist` | ✅ | Good. |
 | `/start`                  | Inherits layout only| Client component; cannot export `metadata`. Use layout for `/start` or a parent layout to set title/description. |
 | `/longevity`              | ❌ None             | No `metadata` export. |
 | `/longevity/start`        | ❌ None             | No `metadata` export. |
@@ -126,6 +127,7 @@ The site has a solid base: consistent page-level titles and descriptions on most
 - **Language:** Root `<html lang="en">` is set. ✅
 - **Title format:** Consistent “Page Name | Hair Longevity Institute™” on pages that export metadata. ✅
 - **Primary CTA:** “Start My Hair Analysis” is consistent with design rules. ✅
+- **Patient entry model:** Preferred public entry points are `Start My Hair Analysis` for new patients and `Patient Portal` for returning patients. `/login/patient` should stay a legacy redirect only. ✅
 - **Test / admin routes:** `/test` exists; ensure it’s excluded from sitemap and consider `noindex` or disallow in robots so it doesn’t appear in search.
 
 ---
