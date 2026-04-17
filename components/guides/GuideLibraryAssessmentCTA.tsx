@@ -17,7 +17,7 @@ export function GuideLibraryAssessmentCTA({ startHref, headingId }: Props) {
           <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
             A structured HLI assessment can help clarify whether you are dealing with pattern loss, shedding, hormonal
             influence, inflammatory scalp issues, or a mixed picture — and which evidence-based next steps may fit your
-            biology. No referral required; clear interpretation, typically within 48 hours.
+            biology. No referral required; clear interpretation. Most cases are reviewed within 12–24 hours after complete submission.
           </p>
           <div className="mt-8">
             <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>

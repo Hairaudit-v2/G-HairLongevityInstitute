@@ -21,7 +21,7 @@ const STEPS = [
   { step: 2, title: "Upload photos (optional)", body: "Add hair photos and blood tests if you have them. You can also upload later." },
   { step: 3, title: "We triage your case", body: "Your case is prioritised and routed to a senior trichologist (30+ years experience)." },
   { step: 4, title: "Specialist review", body: "One expert interprets your biology and designs a clear strategy and roadmap." },
-  { step: 5, title: "Receive your plan", body: "Your personalised summary and next steps — typically within 48 hours of a complete submission." },
+  { step: 5, title: "Receive your plan", body: "Your personalised summary and next steps — most cases are reviewed within 12–24 hours after complete submission." },
 ];
 
 const AFTER_SUBMIT = [
@@ -46,7 +46,7 @@ export default function HowItWorksPage() {
             From first step to your personalised plan
           </h1>
           <p className="mt-4 max-w-2xl text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            No referral required. You complete a short intake, add any documents you have, and we deliver a clear interpretation and roadmap — usually within 48 hours.
+            No referral required. You complete a short intake, add any documents you have, and we deliver a clear interpretation and roadmap. Most cases are reviewed within 12–24 hours after complete submission.
           </p>
         </Container>
       </section>
@@ -74,7 +74,7 @@ export default function HowItWorksPage() {
         <Container>
           <h2 className="text-xl font-semibold text-[rgb(var(--text-primary))]">What happens after you submit</h2>
           <p className="mt-2 text-sm text-[rgb(var(--text-secondary))]">
-            Typical turnaround: 48 hours from complete submission.
+            Typical turnaround: 12–24 hours from complete submission in most cases.
           </p>
           <ul className="mt-6 flex flex-wrap gap-4">
             {AFTER_SUBMIT.map((item, i) => (

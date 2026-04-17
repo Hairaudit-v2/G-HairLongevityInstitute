@@ -90,7 +90,7 @@ export default function LongevityPage() {
                 One place. One journey. Full visibility.
               </p>
               <p className="mt-5 text-xs font-medium uppercase tracking-[0.08em] text-white/45" aria-hidden>
-                No referral required · Usually 48 hours to your summary
+                No referral required · Usually within 12–24 hours
               </p>
               <div className="mt-10 flex flex-col items-center gap-4 sm:mt-12 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
                 <PrimaryButton href="/longevity/start">
@@ -117,8 +117,8 @@ export default function LongevityPage() {
               Not a one-off form or a generic quiz. Hair Longevity Institute is a
               full care pathway: you complete a guided intake, upload bloods and
               photos, your case is reviewed by a senior trichologist, and you
-              receive a structured summary and roadmap — typically within 48
-              hours. Your data and timeline live in one place, and you can
+              receive a structured summary and roadmap. Most cases are reviewed
+              within 12–24 hours after complete submission. Your data and timeline live in one place, and you can
               return for reassessments and follow-up whenever you need to.
             </p>
           </div>
@@ -220,8 +220,8 @@ export default function LongevityPage() {
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-white/70">
                 Complete the guided intake, upload your bloods and photos, and
-                submit. Your case is reviewed by a specialist; you'll receive
-                your summary — typically within 48 hours.
+                submit. Your case is reviewed by a specialist; typically within
+                12–24 hours, depending on completeness and case complexity.
               </p>
               <div className="mt-6">
                 <PrimaryButton href="/longevity/start">

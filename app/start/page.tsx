@@ -1041,7 +1041,7 @@ export default function StartPage() {
                             {email ? (
                                 <div className="mt-5 rounded-2xl border border-white/10 bg-black/10 p-4 text-sm text-white/80">
                                     <strong className="text-white">Report delivery:</strong> We&apos;ll send your diagnostic report to{" "}
-                                    <span className="text-[rgb(198,167,94)]">{email}</span> within 48 hours.
+                                    <span className="text-[rgb(198,167,94)]">{email}</span> typically within 12–24 hours, depending on completeness and case complexity.
                                 </div>
                             ) : null}
                             {intakeId ? (

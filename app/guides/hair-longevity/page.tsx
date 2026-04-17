@@ -492,7 +492,7 @@ export default function HairLongevityFoundationalGuidePage() {
               Ready for a personalised plan?
             </h2>
             <p className="mt-3 text-sm text-[rgb(var(--text-secondary))] leading-relaxed sm:text-base">
-              Structured intake, optional photos and labs, and specialist interpretation — typically within 48 hours.
+              Structured intake, optional photos and labs, and specialist interpretation. Most cases are reviewed within 12–24 hours after complete submission.
             </p>
             <div className="mt-8">
               <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
