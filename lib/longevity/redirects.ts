@@ -4,7 +4,17 @@ export type PortalLoginError = "session-expired" | "no-email" | "profile";
 
 export function isAllowedPostAuthRedirect(path: string | null | undefined): path is string {
   if (!path || typeof path !== "string") return false;
-  return path.startsWith("/longevity/") || path.startsWith("/portal/");
+  if (!path.startsWith("/") || path.startsWith("//")) return false;
+  const pathname = path.split("?")[0]?.split("#")[0] ?? "";
+  if (pathname.startsWith("/longevity/") || pathname.startsWith("/portal/") || pathname.startsWith("/checkout/")) {
+    return true;
+  }
+  return (
+    pathname === "/pricing" ||
+    pathname === "/membership" ||
+    pathname === "/book" ||
+    pathname === "/"
+  );
 }
 
 export function getSafePostAuthRedirect(

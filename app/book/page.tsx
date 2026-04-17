@@ -7,6 +7,8 @@ import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { EcosystemCrossLinks } from "@/components/public/EcosystemCrossLinks";
 import { Container, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
+import { EntitlementAwareCheckoutButton } from "@/components/public/EntitlementAwareCheckoutButton";
+import { HLI_OFFERING } from "@/lib/payment/hliOffers";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -26,22 +28,40 @@ const BEST_SUITED_FOR = [
   "Patients wanting personalised review beyond the free initial analysis.",
 ] as const;
 
-export default function BookPage() {
+export default async function BookPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
   const useLongevity = isLongevityEnabled();
   const startHref = useLongevity ? "/longevity/start" : "/start";
   const consult = getHliPatientPricingTier("trich-appointment");
+  const { welcome } = await searchParams;
+  const showPaidWelcome = welcome === "appointment";
 
   return (
     <main className="min-h-screen bg-[rgb(var(--bg-dark))] text-white">
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}
-        ctaLabel="Start Free Hair Analysis"
+        ctaLabel="Start My Hair Analysis"
         theme="dark"
       />
 
       <section className="py-14 md:py-16">
         <Container>
+          {showPaidWelcome ? (
+            <div
+              className="mb-8 max-w-2xl rounded-2xl border border-emerald-400/25 bg-emerald-950/40 p-4 text-sm leading-relaxed text-emerald-50/95"
+              role="status"
+            >
+              <p className="font-medium text-emerald-100/95">Booking fee paid</p>
+              <p className="mt-2 text-emerald-50/90">
+                Your one-on-one appointment fee is on file. Email us to schedule your session — include your preferred
+                times if helpful.
+              </p>
+            </div>
+          ) : null}
           <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
             OPTIONAL · PREMIUM CONSULTATION
           </p>
@@ -59,8 +79,11 @@ export default function BookPage() {
               Not ready to book?{" "}
               <span className="text-white/90">Start with the free initial hair analysis first.</span>
             </p>
-            <div className="mt-4">
-              <PrimaryButton href={startHref}>Start Free Hair Analysis</PrimaryButton>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+              <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
+              <EntitlementAwareCheckoutButton offering={HLI_OFFERING.TRICHOLOGIST_APPOINTMENT} theme="light">
+                Pay $199 booking fee — One-on-One Appointment
+              </EntitlementAwareCheckoutButton>
             </div>
           </div>
 

@@ -12,6 +12,8 @@ import { generateGpSupportLetterPdf } from "@/lib/longevity/gpLetterGenerator";
 import { buildLetterStoragePath, uploadLongevityFile } from "@/lib/longevity/storage";
 import { createBloodRequestLetterDocument, auditLongevityEvent } from "@/lib/longevity/documents";
 import { stageLongevityRemindersForIntake } from "@/lib/longevity/reminders";
+import { getProfilePaymentRow } from "@/lib/payment/profilePayment";
+import { computeHliEntitlements } from "@/lib/payment/entitlements";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,27 @@ export async function POST(
         document_id: br.letter_document_id,
         already_generated: true,
       });
+    }
+
+    const paymentRow = await getProfilePaymentRow(supabase, profileId);
+    if (!paymentRow) {
+      return NextResponse.json(
+        { ok: false, error: "Could not load account for this session." },
+        { status: 500 }
+      );
+    }
+    const ent = computeHliEntitlements(paymentRow);
+    if (!ent.bloodRequestLetter) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Blood request letter access is not active for this account. Complete checkout for the letter or join membership, then try again.",
+          code: "payment_required",
+          checkoutPath: "/pricing",
+        },
+        { status: 402 }
+      );
     }
 
     const { data: profile } = await supabase

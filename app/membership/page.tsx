@@ -2,10 +2,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isLongevityEnabled } from "@/lib/features";
-import { getHliPatientPricingTier } from "@/lib/content/hliPatientPricing";
+import { getHliPatientPricingTier, HLI_MEMBERSHIP_INCLUDES_AND_CANCEL } from "@/lib/content/hliPatientPricing";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
 import { Container, PrimaryButton, SecondaryButton } from "@/components/public/PublicCTA";
+import { EntitlementAwareCheckoutButton } from "@/components/public/EntitlementAwareCheckoutButton";
+import { HLI_OFFERING } from "@/lib/payment/hliOffers";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -26,7 +28,7 @@ export default function MembershipPage() {
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}
-        ctaLabel="Start Free Hair Analysis"
+        ctaLabel="Start My Hair Analysis"
         theme="dark"
       />
 
@@ -49,6 +51,7 @@ export default function MembershipPage() {
               <p className="text-2xl font-semibold text-[rgb(var(--gold))]">{membership.price}</p>
             </div>
             <p className="mt-4 text-white/80 leading-relaxed">{membership.body}</p>
+            <p className="mt-3 text-sm text-white/70 leading-relaxed">{HLI_MEMBERSHIP_INCLUDES_AND_CANCEL}</p>
             <p className="mt-3 text-sm text-white/60 leading-relaxed">
               <span className="font-medium text-white/75">Best for:</span> {membership.bestFor}
             </p>
@@ -59,8 +62,11 @@ export default function MembershipPage() {
               </Link>
               .
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <PrimaryButton href={startHref}>Start Free Hair Analysis</PrimaryButton>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
+              <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
+              <EntitlementAwareCheckoutButton offering={HLI_OFFERING.MEMBERSHIP} theme="light">
+                Join Membership — $10/month
+              </EntitlementAwareCheckoutButton>
               <SecondaryButton href="/pricing">View all pricing</SecondaryButton>
               <SecondaryButton href="/book">Book one-on-one consultation</SecondaryButton>
             </div>

@@ -16,3 +16,13 @@ export { buildGpLetterEmail, SUBJECT as SUBJECT_GP_LETTER } from "./templates/gp
 export { buildReminderEmail, SUBJECT_CONTINUE } from "./templates/reminder";
 export { buildFollowUpEmail, SUBJECT as SUBJECT_FOLLOW_UP } from "./templates/followUp";
 export { buildWelcomeEmail, SUBJECT as SUBJECT_WELCOME } from "./templates/welcome";
+export {
+  buildMembershipCancelledEmail,
+  buildMembershipStartedEmail,
+  buildOneTimePurchaseEmail,
+  buildTrichBookingFeeEmail,
+  SUBJECT_MEMBERSHIP_CANCELLED,
+  SUBJECT_MEMBERSHIP_STARTED,
+  SUBJECT_ONE_TIME_PURCHASE,
+  SUBJECT_TRICH_BOOKING_FEE,
+} from "./templates/paymentTransactional";

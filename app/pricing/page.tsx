@@ -24,7 +24,7 @@ export default function PricingPage() {
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}
-        ctaLabel="Start Free Hair Analysis"
+        ctaLabel="Start My Hair Analysis"
         theme="light"
       />
 
@@ -49,10 +49,11 @@ export default function PricingPage() {
             id="pricing"
             headingId="pricing-details-heading"
             intro="Each tier is designed to stand alone or combine over time. There is no pressure to upgrade."
+            startHref={startHref}
           />
 
           <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
-            <PrimaryButton href={startHref}>Start Free Hair Analysis</PrimaryButton>
+            <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
             <SecondaryButton href="/book">Book one-on-one consultation</SecondaryButton>
             <Link
               href="/membership"

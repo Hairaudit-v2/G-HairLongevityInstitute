@@ -26,6 +26,9 @@ import { LongevityDocumentsSection } from "@/components/longevity/LongevityDocum
 import { PortalNextStep } from "@/components/longevity/PortalNextStep";
 import { PortalSetPassword } from "@/components/longevity/PortalSetPassword";
 import { PortalSignOut } from "@/components/longevity/PortalSignOut";
+import { getBillingSnapshotForProfile } from "@/lib/payment/billingSnapshot";
+import { PortalBillingCard } from "@/components/longevity/PortalBillingCard";
+import { PortalCheckoutWelcome } from "@/components/longevity/PortalCheckoutWelcome";
 
 /**
  * Portal dashboard: auth required; resolves profile from auth, sets longevity cookie, lists intakes + documents.
@@ -38,7 +41,7 @@ import { PortalSignOut } from "@/components/longevity/PortalSignOut";
 export default async function PortalDashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>;
+  searchParams: Promise<{ redirect?: string; welcome?: string }>;
 }) {
   const user = await getPortalUser();
   if (!user) redirect("/portal/login");
@@ -56,13 +59,18 @@ export default async function PortalDashboardPage({
   }
 
   const profileId = profileResult.profileId;
-  const { redirect: redirectTo } = await searchParams;
+  const { redirect: redirectTo, welcome } = await searchParams;
 
   // Cookie must be set in a Route Handler, not during render. Redirect to sync so it sets the cookie and redirects back.
   const existingSession = await getLongevitySessionFromRequest();
   const needsSync = existingSession !== profileId;
   if (needsSync || isAllowedPostAuthRedirect(redirectTo)) {
-    const syncRedirect = getSafePostAuthRedirect(redirectTo);
+    let syncRedirect = "/portal/dashboard";
+    if (isAllowedPostAuthRedirect(redirectTo)) {
+      syncRedirect = getSafePostAuthRedirect(redirectTo);
+    } else if (typeof welcome === "string" && welcome.trim() !== "") {
+      syncRedirect = `/portal/dashboard?welcome=${encodeURIComponent(welcome.trim())}`;
+    }
     redirect(`/api/longevity/session/sync?redirect=${encodeURIComponent(syncRedirect)}`);
   }
 
@@ -86,6 +94,7 @@ export default async function PortalDashboardPage({
   }
 
   const list = intakes ?? [];
+  const billingSnapshot = await getBillingSnapshotForProfile(supabase, profileId);
   const documents = await listDocumentsForProfile(supabase, profileId);
   const bloodRequests = await listBloodRequestsForProfile(supabase, profileId);
   const patientProgress = await getPatientProgressForProfile(supabase, profileId);
@@ -194,6 +203,11 @@ export default async function PortalDashboardPage({
             Longevity home
           </Link>
         </div>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        <PortalCheckoutWelcome welcome={typeof welcome === "string" ? welcome : null} />
+        {billingSnapshot ? <PortalBillingCard snapshot={billingSnapshot} /> : null}
       </div>
 
       <div className="mt-8" aria-labelledby="next-step-heading">

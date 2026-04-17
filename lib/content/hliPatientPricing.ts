@@ -25,28 +25,28 @@ export const HLI_PATIENT_PRICING_TIERS: readonly HliPatientPricingTier[] = [
     id: "blood-letter",
     title: "Blood Request Letter",
     price: "$10",
-    body: "Request a pathology letter to help guide relevant testing.",
+    body: "One payment unlocks ongoing access on this account to generate pathology/GP request letters when you need them (not a single-use token).",
     bestFor: "When you want structured wording to support appropriate blood tests.",
   },
   {
     id: "blood-followup",
     title: "Follow-up Blood Analysis Review",
     price: "$10",
-    body: "Have your blood results reviewed and interpreted in the context of your hair concerns.",
+    body: "One payment unlocks ongoing eligibility on this account for follow-up blood result review in the context of your hair concerns (not time-limited in the app).",
     bestFor: "After results are back and you want them placed in context for hair health.",
   },
   {
     id: "trich-appointment",
     title: "One-on-One Trichologist Appointment",
     price: "$199",
-    body: "Book a dedicated consultation for deeper case review and personalised discussion.",
+    body: "One payment covers the appointment booking fee on this account; scheduling and session logistics are arranged separately after payment.",
     bestFor: "When you want dedicated time for depth, questions, and a tailored discussion.",
   },
   {
     id: "membership",
     title: "Membership",
     price: "$10/month",
-    body: "Ongoing support including blood request letters, blood analysis reviews, and continuity of care.",
+    body: "Monthly membership includes blood request letters, follow-up blood analysis reviews, and ongoing support while your subscription is active (recurring billing until you cancel).",
     bestFor: "When you want continuity and included letter and review support over time.",
   },
 ] as const;
@@ -74,11 +74,16 @@ export const HLI_PRICING_SECURE_START_LINES: readonly string[] = [
 ];
 
 export const HLI_PRICING_PATIENT_NOTES: readonly string[] = [
+  "Blood request letter and blood analysis review are one-time account unlocks ($10 each) — not subscriptions.",
+  "Membership is $10/month and includes letters, reviews, and ongoing support while active; cancel any time.",
   "You do not need blood tests to begin.",
   "You do not need to book a consultation to start.",
-  "Membership is optional.",
   "HLI does not replace your GP or prescribing doctor.",
 ];
+
+/** Short line for membership surfaces (calm, premium). */
+export const HLI_MEMBERSHIP_INCLUDES_AND_CANCEL =
+  "Includes blood request letters, follow-up blood analysis reviews, and ongoing support while your subscription is active. Cancel any time from billing.";
 
 export function getHliPatientPricingTier(id: HliPatientPricingTier["id"]): HliPatientPricingTier {
   const t = HLI_PATIENT_PRICING_TIERS.find((x) => x.id === id);
