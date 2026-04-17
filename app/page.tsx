@@ -34,7 +34,7 @@ const HERO_REASSURANCE_POINTS = [
 ] as const;
 
 const HERO_TRUST_STRIP = [
-  { label: "Turnaround", value: "Usually within 48 hours" },
+  { label: "Turnaround", value: "Usually within 12–24 hours" },
   { label: "Approach", value: "Biology-first clinical review" },
   { label: "Next step", value: "Paid support only if you need it" },
 ] as const;
@@ -99,32 +99,36 @@ function HeroSection({ startHref: href }: { startHref: string }) {
               className="object-cover object-right"
             />
             <div
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(12,20,34,0.97)_0%,rgba(12,20,34,0.94)_34%,rgba(12,20,34,0.82)_56%,rgba(12,20,34,0.42)_78%,rgba(12,20,34,0.12)_100%)]"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(10,18,29,0.995)_0%,rgba(10,18,29,0.985)_24%,rgba(10,18,29,0.95)_44%,rgba(10,18,29,0.82)_60%,rgba(10,18,29,0.52)_78%,rgba(10,18,29,0.22)_100%)]"
               aria-hidden
             />
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_80%_at_18%_0%,rgba(198,167,94,0.18),transparent_55%),radial-gradient(ellipse_70%_60%_at_78%_20%,rgba(255,255,255,0.08),transparent_55%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_76%_at_18%_0%,rgba(198,167,94,0.14),transparent_48%),radial-gradient(ellipse_70%_60%_at_78%_20%,rgba(255,255,255,0.05),transparent_55%)]"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 w-full max-w-[52rem] bg-[linear-gradient(180deg,rgba(7,13,22,0.18)_0%,rgba(7,13,22,0.04)_100%)]"
               aria-hidden
             />
             <div className="relative grid gap-6 p-6 sm:gap-8 sm:p-8 md:p-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(320px,0.86fr)] lg:items-center lg:p-12">
-              <div className="max-w-3xl">
+              <div className="max-w-3xl lg:pr-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                   Biology-first hair support
                 </p>
                 <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
                   Free, personalised hair analysis — no referral required
                 </h1>
-                <p className="mt-4 max-w-2xl text-lg text-white/82 sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                <p className="mt-4 max-w-2xl text-lg text-white/92 sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
                   Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review, if you choose it.
                 </p>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/68 sm:text-base">
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base">
                   Read first, start a guided analysis, bring blood results into context, and add an appointment only if it helps.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
                   {HERO_REASSURANCE_POINTS.map((item) => (
                     <span
                       key={item}
-                      className="inline-flex min-h-[44px] items-center rounded-full border border-white/12 bg-white/10 px-4 py-2 text-sm font-medium text-white/88 shadow-[0_12px_28px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+                      className="inline-flex min-h-[44px] items-center rounded-full border border-white/16 bg-white/12 px-4 py-2 text-sm font-medium text-white/94 shadow-[0_12px_28px_rgba(0,0,0,0.12)]"
                     >
                       {item}
                     </span>
@@ -134,7 +138,7 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                   <PrimaryButton href={href} className="w-full sm:w-auto">
                     Start My Hair Analysis
                   </PrimaryButton>
-                  <p className="flex flex-col gap-2 text-sm leading-relaxed text-white/66 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
+                  <p className="flex flex-col gap-2 text-sm leading-relaxed text-white/78 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
                     Prefer to read first?{" "}
                     <a
                       href="#how-it-works"
@@ -142,12 +146,12 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                     >
                       See how it works
                     </a>
-                    <span className="mx-2 text-white/28" aria-hidden>
+                    <span className="mx-2 text-white/36" aria-hidden>
                       ·
                     </span>
                     <Link
                       href="/guides"
-                      className="inline-flex min-h-[44px] items-center font-medium text-white/82 underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
+                      className="inline-flex min-h-[44px] items-center font-medium text-white/90 underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
                     >
                       Browse guides
                     </Link>
@@ -157,39 +161,39 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                   {HERO_TRUST_STRIP.map((item) => (
                     <div
                       key={item.label}
-                      className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-4 shadow-[0_18px_34px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+                      className="rounded-[1.25rem] border border-white/14 bg-black/18 px-4 py-4 shadow-[0_18px_34px_rgba(0,0,0,0.14)]"
                     >
                       <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold))]">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-sm leading-relaxed text-white/84">{item.value}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-white/92">{item.value}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-[1.9rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.08)_100%)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)] backdrop-blur-md sm:p-7">
+              <div className="rounded-[1.9rem] border border-white/14 bg-[linear-gradient(180deg,rgba(17,27,40,0.94)_0%,rgba(17,27,40,0.88)_100%)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.22)] sm:p-7">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                   A calmer place to start
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   What happens next
                 </h2>
-                <p className="mt-3 text-sm text-white/78 sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                <p className="mt-3 text-sm text-white/88 sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
                   You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
                 </p>
                 <ol className="mt-5 space-y-3 sm:mt-6">
                   {WHAT_HAPPENS_NEXT.map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/10 bg-black/10 px-4 py-3.5 text-sm text-white/82">
-                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/20 text-xs font-semibold text-[rgb(var(--gold))]">
+                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/12 bg-black/18 px-4 py-3.5 text-sm text-white/92">
+                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/22 text-xs font-semibold text-[rgb(var(--gold))]">
                         {index + 1}
                       </span>
                       <span className="leading-relaxed">{step}</span>
                     </li>
                   ))}
                 </ol>
-                <div className="mt-5 rounded-[1.15rem] border border-white/10 bg-white/8 px-4 py-4">
-                  <p className="text-sm leading-relaxed text-white/74">
+                <div className="mt-5 rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-4">
+                  <p className="text-sm leading-relaxed text-white/84">
                     You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
                   </p>
                 </div>
@@ -266,7 +270,7 @@ const HOW_IT_WORKS = [
   {
     step: 3,
     title: "Receive your personalised plan",
-    description: "Clear interpretation and next steps, usually within 48 hours.",
+    description: "Clear interpretation and next steps. Most cases are reviewed within 12–24 hours after complete submission.",
     icon: (
       <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -308,7 +312,7 @@ function HowItWorksSection() {
             <ul className="space-y-2 text-sm">
               <li><strong className="text-[rgb(var(--text-primary))]">Triage</strong> — Every case is prioritised and routed to a senior trichologist (30+ years experience).</li>
               <li><strong className="text-[rgb(var(--text-primary))]">Review</strong> — One specialist interprets intake, bloods, and photos using our biological framework.</li>
-              <li><strong className="text-[rgb(var(--text-primary))]">Summary</strong> — Written diagnostic summary and next-step recommendations, typically within 48 hours of complete submission.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Summary</strong> — Written diagnostic summary and next-step recommendations, typically within 12–24 hours, depending on completeness and case complexity.</li>
             </ul>
           </ExpandableDetailPanel>
         </div>
@@ -451,17 +455,17 @@ function ResultsPreviewSection() {
           Your results, in one place
         </h2>
         <p className={SECTION_HEADING_COPY} style={{ lineHeight: "var(--line-height-relaxed)" }}>
-          A clear snapshot and a path forward — usually within 48 hours.
+          A clear snapshot and a path forward. Most cases are reviewed within 12–24 hours after complete submission.
         </p>
         <div className="mx-auto mt-10 grid max-w-6xl gap-8 sm:mt-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
-          <div className="rounded-[1.85rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.9)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:p-7">
-            <div className="overflow-hidden rounded-[1.45rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-dark))]">
+          <div className="rounded-[1.85rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(242,236,229,0.94)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.07)] sm:p-7">
+            <div className="overflow-hidden rounded-[1.45rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-dark))] shadow-[0_16px_34px_rgba(8,16,28,0.18)]">
               <Image
                 src="/homepage/hli-results-report-visual.svg"
                 alt="Illustrated preview of an HLI report and analysis dashboard."
                 width={1200}
                 height={900}
-                className="h-auto w-full"
+                className="h-auto w-full contrast-110 saturate-[1.03]"
                 sizes="(max-width: 1024px) 100vw, 480px"
               />
             </div>
@@ -469,7 +473,7 @@ function ResultsPreviewSection() {
               {RESULTS_VISUAL_POINTS.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))]/90 bg-white/88 px-4 py-3.5"
+                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))] bg-white/96 px-4 py-3.5"
                 >
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
                     {item.label}
@@ -583,7 +587,7 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
             Begin with a free hair analysis
           </h2>
           <p className="mt-5 text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            Create a secure account, complete your intake, and receive your personalised review. No referral required. Optional paid support is there if you need it after your first review.
+            Create a secure account, complete your intake, and receive your personalised review. Most cases are reviewed within 12–24 hours after complete submission. No referral required. Optional paid support is there if you need it after your first review.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <PrimaryButton href={href} className="w-full sm:w-auto">
