@@ -123,8 +123,8 @@ function InsightsContent({ searchParams }: SearchProps) {
   const showFeaturedBand = isDefaultView && featured.length > 0 && rest.length > 0;
 
   return (
-    <div className="pb-14 pt-8 sm:pb-16 sm:pt-10">
-      <header className="mx-auto max-w-2xl px-1 text-center sm:max-w-2xl">
+    <div className="pb-16 pt-8 sm:pb-20 sm:pt-10">
+      <header className="mx-auto max-w-4xl rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] px-6 py-8 text-center shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:px-10 sm:py-10">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[rgb(var(--gold))] sm:text-sm sm:tracking-[0.2em]">
           Insights
         </p>
@@ -146,7 +146,7 @@ function InsightsContent({ searchParams }: SearchProps) {
         </Suspense>
       </div>
 
-      <div className="mx-auto mt-12 grid max-w-6xl gap-10 lg:mt-14 lg:grid-cols-[1fr_280px]">
+      <div className="mx-auto mt-12 grid max-w-6xl gap-10 lg:mt-14 lg:grid-cols-[1fr_300px]">
         <div className={showFeaturedBand ? "pt-2" : ""}>
           {showFeaturedBand ? (
             <>
@@ -193,8 +193,11 @@ function InsightsContent({ searchParams }: SearchProps) {
         </div>
         <aside className="space-y-8 lg:pt-8">
           <PopularTopics />
-          <nav className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft" aria-label="Hubs">
+          <nav className="rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft" aria-label="Hubs">
             <p className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">Hubs</p>
+            <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+              Browse by causes, blood markers, and treatment questions without losing the main library structure.
+            </p>
             <ul className="mt-3 space-y-2 text-sm">
               {(Object.keys(HUB_PATH) as EditorialHubSlug[]).map((slug) => (
                 <li key={slug}>

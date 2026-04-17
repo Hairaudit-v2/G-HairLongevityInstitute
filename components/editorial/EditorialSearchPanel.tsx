@@ -62,7 +62,7 @@ export default function EditorialSearchPanel() {
   return (
     <form
       key={formKey}
-      className="space-y-4 rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft"
+      className="space-y-5 rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.95)_100%)] p-5 shadow-[0_18px_52px_rgba(0,0,0,0.08)]"
       onSubmit={(e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
@@ -81,6 +81,12 @@ export default function EditorialSearchPanel() {
         });
       }}
     >
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold))]">Search the library</p>
+        <p className="text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+          Browse by concern, audience, format, or topic without losing the full educational depth of the insights library.
+        </p>
+      </div>
       <div>
         <label htmlFor="insights-q" className="sr-only">
           Search insights
@@ -91,7 +97,7 @@ export default function EditorialSearchPanel() {
           type="search"
           defaultValue={q}
           placeholder="Search causes, markers, treatments…"
-          className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-subtle/40 px-4 py-3 text-sm text-[rgb(var(--text-primary))] placeholder:text-[rgb(var(--text-muted))] focus:border-[rgb(var(--gold))]/40 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/25"
+          className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-3 text-sm text-[rgb(var(--text-primary))] placeholder:text-[rgb(var(--text-muted))] focus:border-[rgb(var(--gold))]/40 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/25"
         />
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -103,7 +109,7 @@ export default function EditorialSearchPanel() {
             id="insights-hub"
             name="hub"
             defaultValue={hub}
-            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-card px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
+            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
             onChange={(e) => {
               track(EDITORIAL_EVENT.SEARCH_FILTER, { field: "hub", value: e.target.value });
               applyUpdates({
@@ -131,7 +137,7 @@ export default function EditorialSearchPanel() {
             id="insights-audience"
             name="audience"
             defaultValue={audience}
-            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-card px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
+            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
             onChange={(e) => {
               track(EDITORIAL_EVENT.SEARCH_FILTER, { field: "audience", value: e.target.value });
               applyUpdates({
@@ -159,7 +165,7 @@ export default function EditorialSearchPanel() {
             id="insights-content-type"
             name="contentType"
             defaultValue={contentType}
-            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-card px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
+            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
             onChange={(e) => {
               track(EDITORIAL_EVENT.SEARCH_FILTER, { field: "contentType", value: e.target.value });
               applyUpdates({
@@ -187,7 +193,7 @@ export default function EditorialSearchPanel() {
             id="insights-sort"
             name="sort"
             defaultValue={sort}
-            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-card px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
+            className="w-full rounded-btn border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-2 text-sm text-[rgb(var(--text-primary))]"
             onChange={(e) => {
               track(EDITORIAL_EVENT.SEARCH_FILTER, { field: "sort", value: e.target.value });
               applyUpdates({
@@ -209,12 +215,17 @@ export default function EditorialSearchPanel() {
         </div>
       </div>
       {topic ? <input type="hidden" name="topic" value={topic} /> : null}
-      <button
-        type="submit"
-        className="inline-flex min-h-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/30 bg-medical/10 px-5 py-2.5 text-sm font-semibold text-medical hover:bg-medical/15"
-      >
-        Search
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/25 bg-[rgb(var(--medical))]/10 px-5 py-2.5 text-sm font-semibold text-medical transition hover:bg-[rgb(var(--medical))]/15"
+        >
+          Search
+        </button>
+        <p className="text-xs leading-relaxed text-[rgb(var(--text-muted))]">
+          Use filters to narrow the library, then return to the broader hub when you want a wider view.
+        </p>
+      </div>
     </form>
   );
 }

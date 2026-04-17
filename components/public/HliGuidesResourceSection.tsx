@@ -22,7 +22,7 @@ export function HliGuidesResourceSection() {
   return (
     <section
       id="hair-guides"
-      className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16"
+      className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-20"
       aria-labelledby="hair-guides-heading"
     >
       <Container>
@@ -43,7 +43,7 @@ export function HliGuidesResourceSection() {
         </header>
 
         {foundational ? (
-          <div className="mx-auto mt-12 max-w-4xl">
+          <div className="mx-auto mt-12 max-w-5xl rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.92)_0%,rgba(245,240,235,0.72)_100%)] p-4 shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:p-5">
             <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
               Start here
             </p>

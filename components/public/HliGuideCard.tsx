@@ -26,10 +26,14 @@ export function HliGuideCard({ guide, prominent }: Props) {
     <article
       className={
         prominent
-          ? "flex h-full flex-col rounded-card border border-[rgb(var(--gold))]/25 bg-card p-8 shadow-card sm:p-10"
-          : "flex h-full flex-col rounded-card border border-[rgb(var(--border-soft))] bg-card p-6 shadow-soft transition hover:border-[rgb(var(--gold))]/20 hover:shadow-card sm:p-7"
+          ? "relative flex h-full flex-col overflow-hidden rounded-card border border-[rgb(var(--gold))]/25 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(247,243,238,0.96)_100%)] p-8 shadow-[0_16px_44px_rgba(0,0,0,0.08)] sm:p-10"
+          : "relative flex h-full flex-col overflow-hidden rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.94)_100%)] p-6 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/25 hover:shadow-card sm:p-7"
       }
     >
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(198,167,94,0.12),transparent_70%)]"
+        aria-hidden
+      />
       <p
         className={
           prominent
@@ -42,8 +46,8 @@ export function HliGuideCard({ guide, prominent }: Props) {
       <h3
         className={
           prominent
-            ? "mt-4 text-xl font-semibold leading-snug tracking-tight text-[rgb(var(--text-primary))] sm:text-2xl"
-            : "mt-3 text-lg font-semibold leading-snug tracking-tight text-[rgb(var(--text-primary))]"
+            ? "relative mt-4 text-xl font-semibold leading-snug tracking-tight text-[rgb(var(--text-primary))] sm:text-2xl"
+            : "relative mt-3 text-lg font-semibold leading-snug tracking-tight text-[rgb(var(--text-primary))]"
         }
       >
         {guide.title}

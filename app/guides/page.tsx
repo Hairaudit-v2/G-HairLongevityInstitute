@@ -39,15 +39,17 @@ export default function GuidesHubPage() {
 
       <section className="border-b border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="guides-hub-heading">
         <Container>
-          <p className="text-sm font-medium tracking-[0.12em] text-[rgb(var(--gold))]">Hair Longevity Institute</p>
-          <h1 id="guides-hub-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl">
-            Hair loss guides
-          </h1>
-          <p className="mt-4 max-w-2xl text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            Start with the foundational guide, then go deeper on medications, postpartum health, men&apos;s pattern loss,
-            and hormones. Each guide now works as a pillar page with web summaries, FAQs, decision support, and PDF
-            access where available.
-          </p>
+          <div className="rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] px-6 py-8 shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:px-10 sm:py-10">
+            <p className="text-sm font-medium tracking-[0.12em] text-[rgb(var(--gold))]">Hair Longevity Institute</p>
+            <h1 id="guides-hub-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl">
+              Hair loss guides
+            </h1>
+            <p className="mt-4 max-w-2xl text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+              Start with the foundational guide, then go deeper on medications, postpartum health, men&apos;s pattern loss,
+              and hormones. Each guide now works as a pillar page with web summaries, FAQs, decision support, and PDF
+              access where available.
+            </p>
+          </div>
         </Container>
       </section>
 

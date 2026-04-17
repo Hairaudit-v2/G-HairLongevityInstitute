@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const cardClass =
-  "group flex min-h-[7.5rem] flex-col rounded-xl border border-[rgb(var(--border-soft))] bg-card/95 p-5 shadow-soft backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/35 hover:shadow-md sm:min-h-[8rem] sm:p-6";
+  "group flex min-h-[7.5rem] flex-col rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/35 hover:shadow-card sm:min-h-[8rem] sm:p-6";
 
 const pathways: { title: string; blurb: string; href: string }[] = [
   {
@@ -35,7 +35,7 @@ export default function InsightsPathways() {
       className="relative mx-auto mt-12 max-w-6xl sm:mt-14"
       aria-labelledby="insights-start-heading"
     >
-      <div className="rounded-2xl border border-[rgb(var(--border-soft))] bg-gradient-to-b from-[rgb(var(--gold))]/[0.09] via-card to-card px-5 py-7 shadow-soft ring-1 ring-[rgb(var(--gold))]/[0.12] sm:px-8 sm:py-9">
+      <div className="rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(245,240,235,0.88)_0%,rgba(255,255,255,0.98)_40%,rgba(255,255,255,1)_100%)] px-5 py-7 shadow-[0_18px_52px_rgba(0,0,0,0.08)] ring-1 ring-[rgb(var(--gold))]/[0.1] sm:px-8 sm:py-10">
         <div className="mx-auto max-w-2xl text-center sm:max-w-none">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[rgb(var(--gold))]">First step</p>
           <h2
@@ -45,7 +45,7 @@ export default function InsightsPathways() {
             Start here
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
-            Choose what matches you most. Then use search when you want to narrow down.
+            Choose the concern that feels closest to your experience, then narrow down with search when you want more detail.
           </p>
         </div>
         <ul className="mt-8 grid gap-4 sm:mt-9 sm:grid-cols-2 sm:gap-5">

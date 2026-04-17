@@ -26,6 +26,18 @@ export const metadata: Metadata = buildPageMetadata({
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
 
 // —— 1. HERO ——
+const HERO_REASSURANCE_POINTS = [
+  "Free initial analysis",
+  "No referral required",
+  "Bloods and photos can be added later",
+] as const;
+
+const HERO_TRUST_STRIP = [
+  { label: "Turnaround", value: "Usually within 48 hours" },
+  { label: "Approach", value: "Biology-first clinical review" },
+  { label: "Next step", value: "Paid support only if you need it" },
+] as const;
+
 const WHAT_HAPPENS_NEXT = [
   "Create your secure account",
   "Complete your free intake",
@@ -34,81 +46,172 @@ const WHAT_HAPPENS_NEXT = [
   "Upgrade only if you need added support",
 ] as const;
 
+const CONCERN_PATHWAYS = [
+  {
+    title: "Postpartum or sudden shedding",
+    description: "A softer starting point for heavy shedding after pregnancy, illness, stress, or a major hormonal shift.",
+    href: "/guides/postpartum-hair-loss",
+  },
+  {
+    title: "Diffuse thinning or widening part",
+    description: "Understand slower, harder-to-explain thinning patterns in women without losing the medical detail.",
+    href: "/insights/diffuse-thinning-in-women",
+  },
+  {
+    title: "Ferritin, thyroid, or hormones",
+    description: "Explore blood-marker and hormone questions in plain language before you decide what to do next.",
+    href: "/insights/what-blood-tests-matter-for-hair-loss",
+  },
+  {
+    title: "Unsure what is driving it",
+    description: "Browse the main causes of hair shedding and thinning, with clear links into deeper guides and insights.",
+    href: "/hair-loss-causes",
+  },
+] as const;
+
+const SURFACE_CARD =
+  "rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.94)_100%)] shadow-soft";
+
+const INTERACTIVE_SURFACE_CARD = `${SURFACE_CARD} motion-safe:transition-all motion-safe:duration-200 motion-reduce:transition-none`;
+
+const SECTION_HEADING_COPY =
+  'mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))] sm:text-lg';
+
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
     <section className="relative overflow-hidden bg-card">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,rgba(198,167,94,0.06),transparent_55%)]" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_70%_at_20%_0%,rgba(198,167,94,0.12),transparent_55%),radial-gradient(ellipse_70%_60%_at_85%_10%,rgba(91,122,116,0.1),transparent_55%)]"
+        aria-hidden
+      />
       <Container>
-        <div className="relative mx-auto max-w-3xl py-16 text-center sm:py-20 md:py-24">
-          <h1 className="text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl md:text-5xl" style={{ lineHeight: 1.2 }}>
-            Free, personalised hair analysis — no referral required
-          </h1>
-          <p className="mt-5 text-lg text-[rgb(var(--text-secondary))] sm:text-xl" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review — if you choose it.
-          </p>
-          <p className="mt-4 text-sm text-[rgb(var(--text-muted))] sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            Free initial analysis · No referral · Bloods and photos when you are ready · Paid pathways optional
-          </p>
+        <div className="relative py-14 sm:py-20 md:py-24">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.82fr)] lg:items-center">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold-dark))]">
+                Biology-first hair support
+              </p>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-5xl md:text-6xl">
+                Free, personalised hair analysis — no referral required
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg text-[rgb(var(--text-secondary))] sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review, if you choose it.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
+                {HERO_REASSURANCE_POINTS.map((item) => (
+                  <span
+                    key={item}
+                    className="inline-flex min-h-[44px] items-center rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-2 text-sm font-medium text-[rgb(var(--text-secondary))] shadow-soft"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-8 flex flex-col items-start gap-3 sm:mt-9">
+                <PrimaryButton href={href} className="w-full sm:w-auto">
+                  Start My Hair Analysis
+                </PrimaryButton>
+                <p className="flex flex-col gap-2 text-sm leading-relaxed text-[rgb(var(--text-muted))] sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
+                  Prefer to read first?{" "}
+                  <a
+                    href="#how-it-works"
+                    className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+                  >
+                    See how it works
+                  </a>
+                  <span className="mx-2 text-[rgb(var(--text-muted))]/70" aria-hidden>
+                    ·
+                  </span>
+                  <Link
+                    href="/guides"
+                    className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+                  >
+                    Browse guides
+                  </Link>
+                </p>
+              </div>
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {HERO_TRUST_STRIP.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-white/82 px-4 py-4 shadow-soft"
+                  >
+                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-          <div
-            className="mx-auto mt-10 max-w-md rounded-card border border-[rgb(var(--border-soft))] bg-subtle/60 px-5 py-5 text-left shadow-soft sm:px-6"
-            aria-labelledby="pricing-clarity-heading"
-          >
-            <h2 id="pricing-clarity-heading" className="text-center text-xs font-semibold uppercase tracking-[0.12em] text-[rgb(var(--text-muted))]">
-              How pricing works
-            </h2>
-            <ul className="mt-4 space-y-3 text-sm text-[rgb(var(--text-primary))]">
-              {HLI_PRICING_SUMMARY_LINES.map((line) => (
-                <li key={line} className="leading-snug">
-                  {line}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-5 text-center">
-              <Link
-                href="/pricing"
-                className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
-              >
-                Full pricing details
-              </Link>
-            </p>
+            <div className="rounded-[1.9rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(245,240,235,0.9)_100%)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.08)] sm:p-7">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold-dark))]">
+                A calmer place to start
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl">
+                What happens next
+              </h2>
+              <p className="mt-3 text-sm text-[rgb(var(--text-secondary))] sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
+              </p>
+              <ol className="mt-5 space-y-3 sm:mt-6">
+                {WHAT_HAPPENS_NEXT.map((step, index) => (
+                  <li key={step} className="flex gap-3 rounded-[1.15rem] border border-[rgb(var(--border-soft))]/80 bg-white/78 px-4 py-3.5 text-sm text-[rgb(var(--text-secondary))]">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/15 text-xs font-semibold text-[rgb(var(--gold-dark))]">
+                      {index + 1}
+                    </span>
+                    <span className="leading-relaxed">{step}</span>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-5 rounded-[1.15rem] border border-[rgb(var(--medical))]/12 bg-[rgb(var(--medical))]/[0.05] px-4 py-4">
+                <p className="text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                  You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
+                </p>
+              </div>
+            </div>
           </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-            <PrimaryButton href={href}>Start Free Hair Analysis</PrimaryButton>
-            <a
-              href="#how-it-works"
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/25 bg-card px-6 py-3 text-sm font-semibold text-medical shadow-soft transition hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]"
-            >
-              How It Works
-            </a>
-          </div>
-          <p className="mt-4 max-w-lg mx-auto">
-            <Link
-              href={href}
-              className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
-            >
-              Create Secure Account to Start Free Analysis
-            </Link>
-          </p>
-
-          <div className="mx-auto mt-10 max-w-lg rounded-card border border-[rgb(var(--border-soft))] bg-card px-5 py-6 text-left shadow-soft sm:px-6">
-            <h2 className="text-center text-sm font-semibold tracking-wide text-[rgb(var(--text-primary))]">
-              What happens next
-            </h2>
-            <ol className="mt-4 list-decimal space-y-2.5 pl-5 text-sm text-[rgb(var(--text-secondary))] marker:font-medium marker:text-[rgb(var(--gold))]">
-              {WHAT_HAPPENS_NEXT.map((step) => (
-                <li key={step} className="leading-relaxed pl-1">
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <p className="mt-8 text-sm text-[rgb(var(--text-muted))]">
-            Most people receive their personalised review within 48 hours of a complete submission.
+function ConcernPathwaysSection() {
+  return (
+    <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16" aria-labelledby="concern-pathways-heading">
+      <Container>
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-medium tracking-[0.14em] text-[rgb(var(--gold))]">Common starting points</p>
+          <h2 id="concern-pathways-heading" className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
+            Start from the concern that feels most familiar
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+            Many people arrive feeling overwhelmed by postpartum shedding, diffuse thinning, ferritin questions, thyroid shifts, or stress-linked hair changes. These guided pathways help you begin in a more human way without losing clinical depth.
           </p>
         </div>
+        <ul className="mt-10 grid gap-4 sm:gap-5 sm:grid-cols-2">
+          {CONCERN_PATHWAYS.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className={`${INTERACTIVE_SURFACE_CARD} group flex h-full flex-col rounded-[1.6rem] p-5 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-[rgb(var(--gold))]/25 motion-safe:hover:shadow-card focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] active:scale-[0.995] sm:p-6`}
+              >
+                <span className="inline-flex w-fit rounded-full bg-[rgb(var(--gold))]/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
+                  Guided reading path
+                </span>
+                <span className="mt-3 text-lg font-semibold text-[rgb(var(--text-primary))] group-hover:text-medical">
+                  {item.title}
+                </span>
+                <span className="mt-3 flex-1 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                  {item.description}
+                </span>
+                <span className="mt-5 text-sm font-semibold text-medical">Open path →</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </Container>
     </section>
   );
@@ -150,20 +253,26 @@ const HOW_IT_WORKS = [
 
 function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="how-it-works-heading">
+    <section id="how-it-works" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-card py-14 sm:py-16" aria-labelledby="how-it-works-heading">
       <Container>
         <h2 id="how-it-works-heading" className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
           How it works
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+        <p className={SECTION_HEADING_COPY} style={{ lineHeight: "var(--line-height-relaxed)" }}>
           Three simple steps to your personalised plan.
         </p>
-        <div className="mt-12 grid gap-10 sm:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:mt-12 sm:gap-6 sm:grid-cols-3">
           {HOW_IT_WORKS.map((item) => (
-            <div key={item.step} className="flex flex-col items-center text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-card bg-[rgb(var(--gold))]/10 text-[rgb(var(--gold))]">
+            <div
+              key={item.step}
+              className={`${SURFACE_CARD} flex flex-col items-center px-5 py-6 text-center sm:py-7`}
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[rgb(var(--gold))]/12 text-[rgb(var(--gold-dark))]">
                 {item.icon}
               </div>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                Step {item.step}
+              </p>
               <h3 className="mt-5 text-lg font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
               <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.description}</p>
             </div>
@@ -171,16 +280,19 @@ function HowItWorksSection() {
         </div>
         <div className="mt-8 flex flex-col items-center">
           <ExpandableDetailPanel variant="clinical" label="Clinical detail">
-            <p className="mb-3 text-neutral-700">Behind the three steps:</p>
+            <p className="mb-3 text-[rgb(var(--text-secondary))]">Behind the three steps:</p>
             <ul className="space-y-2 text-sm">
-              <li><strong className="text-neutral-800">Triage</strong> — Every case is prioritised and routed to a senior trichologist (30+ years experience).</li>
-              <li><strong className="text-neutral-800">Review</strong> — One specialist interprets intake, bloods, and photos using our biological framework.</li>
-              <li><strong className="text-neutral-800">Summary</strong> — Written diagnostic summary and next-step recommendations, typically within 48 hours of complete submission.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Triage</strong> — Every case is prioritised and routed to a senior trichologist (30+ years experience).</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Review</strong> — One specialist interprets intake, bloods, and photos using our biological framework.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Summary</strong> — Written diagnostic summary and next-step recommendations, typically within 48 hours of complete submission.</li>
             </ul>
           </ExpandableDetailPanel>
         </div>
         <p className="mt-8 text-center">
-          <Link href="/how-it-works" className="text-sm font-medium text-[rgb(var(--gold))] hover:underline">
+          <Link
+            href="/how-it-works"
+            className="inline-flex min-h-[44px] items-center text-sm font-medium text-[rgb(var(--gold))] underline-offset-2 transition hover:text-[rgb(var(--gold-dark))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+          >
             Full process and turnaround →
           </Link>
         </p>
@@ -204,29 +316,61 @@ function GlobalHairIntelligenceNetworkBlock() {
 
 // —— 4. WHAT WE ANALYSE ——
 const WHAT_WE_ANALYSE = [
-  { title: "Hormones", line: "Androgen sensitivity and hormone balance.", icon: "H" },
-  { title: "Nutrients", line: "Iron, vitamins and minerals that support hair.", icon: "N" },
-  { title: "Scalp health", line: "Inflammation and follicle environment.", icon: "S" },
-  { title: "Genetics", line: "Pattern and progression context.", icon: "G" },
+  {
+    title: "Hormones",
+    line: "Androgen sensitivity and hormone balance.",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 3v18m6-12c0 3.314-2.686 6-6 6s-6-2.686-6-6 2.686-6 6-6 6 2.686 6 6z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Nutrients",
+    line: "Iron, vitamins and minerals that support hair.",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10.5 6.75h3m-7.5 4.5h12m-9 4.5h6M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Scalp health",
+    line: "Inflammation and follicle environment.",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 4.5c3.866 0 7 2.91 7 6.5S15.866 17.5 12 17.5 5 14.59 5 11s3.134-6.5 7-6.5zm0 0v13.5m-3.5 0h7" />
+      </svg>
+    ),
+  },
+  {
+    title: "Genetics",
+    line: "Pattern and progression context.",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 4.5c0 1.657 1.343 3 3 3s3-1.343 3-3m-6 15c0-1.657 1.343-3 3-3s3 1.343 3 3M9 7.5c0 1.657 1.343 3 3 3s3 1.343 3 3-1.343 3-3 3-3 1.343-3 3" />
+      </svg>
+    ),
+  },
 ];
 
 function WhatWeAnalyseSection() {
   return (
-    <section id="what-we-analyse" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="analyse-heading">
+    <section id="what-we-analyse" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-card py-14 sm:py-16" aria-labelledby="analyse-heading">
       <Container>
         <h2 id="analyse-heading" className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
           What we analyse
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+        <p className={SECTION_HEADING_COPY} style={{ lineHeight: "var(--line-height-relaxed)" }}>
           Key factors that influence your hair — in plain language.
         </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-4 sm:mt-12 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {WHAT_WE_ANALYSE.map((item) => (
             <div
               key={item.title}
-              className="rounded-card border border-[rgb(var(--border-soft))] bg-subtle/50 p-6 shadow-soft transition hover:border-[rgb(var(--gold))]/20 hover:shadow-card"
+              className={`${INTERACTIVE_SURFACE_CARD} p-5 motion-safe:hover:border-[rgb(var(--gold))]/20 motion-safe:hover:shadow-card sm:p-6`}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[rgb(var(--gold))]/10 text-sm font-semibold text-[rgb(var(--gold))]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgb(var(--gold))]/12 text-[rgb(var(--gold-dark))]">
                 {item.icon}
               </div>
               <h3 className="mt-4 font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
@@ -237,15 +381,18 @@ function WhatWeAnalyseSection() {
         <div className="mt-10 flex flex-col items-center">
           <ExpandableDetailPanel variant="clinical">
             <ul className="space-y-2 text-sm">
-              <li><strong className="text-neutral-800">DHT pathways</strong> — 5-alpha reductase, androgen receptor sensitivity, and how they affect the follicle.</li>
-              <li><strong className="text-neutral-800">Thyroid markers</strong> — TSH, T3/T4, conversion; impact on growth cycle.</li>
-              <li><strong className="text-neutral-800">Iron / ferritin thresholds</strong> — serum ferritin and iron studies in relation to hair shedding.</li>
-              <li><strong className="text-neutral-800">Inflammatory markers</strong> — CRP, scalp environment, and chronic inflammation.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">DHT pathways</strong> — 5-alpha reductase, androgen receptor sensitivity, and how they affect the follicle.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Thyroid markers</strong> — TSH, T3/T4, conversion; impact on growth cycle.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Iron / ferritin thresholds</strong> — serum ferritin and iron studies in relation to hair shedding.</li>
+              <li><strong className="text-[rgb(var(--text-primary))]">Inflammatory markers</strong> — CRP, scalp environment, and chronic inflammation.</li>
             </ul>
           </ExpandableDetailPanel>
         </div>
         <p className="mt-8 text-center">
-          <Link href="/science" className="text-sm font-medium text-[rgb(var(--gold))] hover:underline">
+          <Link
+            href="/science"
+            className="inline-flex min-h-[44px] items-center text-sm font-medium text-[rgb(var(--gold))] underline-offset-2 transition hover:text-[rgb(var(--gold-dark))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+          >
             Explore our science →
           </Link>
         </p>
@@ -257,21 +404,58 @@ function WhatWeAnalyseSection() {
 // —— 5. RESULTS PREVIEW (show value before signup; mock data, easily replaceable with real) ——
 function ResultsPreviewSection() {
   return (
-    <section id="results" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-labelledby="results-heading">
+    <section id="results" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16" aria-labelledby="results-heading">
       <Container>
         <h2 id="results-heading" className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
           Your results, in one place
         </h2>
-        <p className="mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+        <p className={SECTION_HEADING_COPY} style={{ lineHeight: "var(--line-height-relaxed)" }}>
           A clear snapshot and a path forward — usually within 48 hours.
         </p>
-        <div className="mx-auto mt-12 max-w-xl">
+        <div className="mx-auto mt-10 max-w-xl sm:mt-12">
           <ResultsPreviewCard />
           <div className="mt-6 flex justify-center">
             <ExpandableDetailPanel variant="clinical" label="What the score means">
-              <p className="text-neutral-700">The Hair Risk Score and related indices (e.g. DHT Risk Index™, Follicle Stability Rating™) are derived from your biology and history. They are interpretive tools to guide strategy — not diagnostic labels. Your report includes written interpretation and next-step recommendations.</p>
+              <p className="text-[rgb(var(--text-secondary))]">The Hair Risk Score and related indices (e.g. DHT Risk Index™, Follicle Stability Rating™) are derived from your biology and history. They are interpretive tools to guide strategy — not diagnostic labels. Your report includes written interpretation and next-step recommendations.</p>
             </ExpandableDetailPanel>
           </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function PricingClaritySection() {
+  return (
+    <section className="border-t border-[rgb(var(--border-soft))] bg-card py-14 sm:py-16" aria-labelledby="pricing-clarity-heading">
+      <Container>
+        <div className="mx-auto max-w-3xl rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] p-5 shadow-[0_20px_54px_rgba(0,0,0,0.06)] sm:p-8">
+          <p className="text-sm font-medium tracking-[0.14em] text-[rgb(var(--gold))]">Pricing clarity</p>
+          <h2 id="pricing-clarity-heading" className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl">
+            How pricing works
+          </h2>
+          <p className="mt-4 text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+            Keep the first step simple. Your initial analysis is free, and any paid pathway is optional only after your first review.
+          </p>
+          <ul className="mt-6 space-y-3">
+            {HLI_PRICING_SUMMARY_LINES.map((line) => (
+              <li
+                key={line}
+                className="flex gap-3 rounded-[1.15rem] border border-[rgb(var(--border-soft))]/80 bg-white/80 px-4 py-3.5 text-sm leading-relaxed text-[rgb(var(--text-secondary))]"
+              >
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[rgb(var(--gold))]/60" aria-hidden />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6">
+            <Link
+              href="/pricing"
+              className="text-sm font-semibold text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+            >
+              Full pricing details
+            </Link>
+          </p>
         </div>
       </Container>
     </section>
@@ -287,14 +471,17 @@ const TRUST_ITEMS = [
 
 function TrustSection() {
   return (
-    <section className="border-t border-[rgb(var(--border-soft))] bg-card py-12 sm:py-16" aria-labelledby="trust-heading">
+    <section className="border-t border-[rgb(var(--border-soft))] bg-card py-14 sm:py-16" aria-labelledby="trust-heading">
       <Container>
         <h2 id="trust-heading" className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
           Built on 30+ years of clinical experience
         </h2>
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <p className="mx-auto mt-4 max-w-2xl text-center text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+          Calm presentation matters when hair changes feel personal. The experience is designed to feel guided and reassuring, while the interpretation stays medically serious and evidence-aware.
+        </p>
+        <div className="mt-10 grid gap-4 sm:mt-12 sm:gap-6 sm:grid-cols-3">
           {TRUST_ITEMS.map((item) => (
-            <div key={item.title} className="rounded-card border border-[rgb(var(--border-soft))] bg-subtle/50 p-6 text-center shadow-soft">
+            <div key={item.title} className={`${SURFACE_CARD} p-5 text-center sm:p-6`}>
               <h3 className="font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
               <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.detail}</p>
             </div>
@@ -302,11 +489,14 @@ function TrustSection() {
         </div>
         <div className="mt-8 flex justify-center">
           <ExpandableDetailPanel variant="clinical" label="Methodology & scope">
-            <p className="text-neutral-700">We use evidence-based biological reasoning and a structured framework (Follicle Intelligence™) for case interpretation. We do not prescribe; we interpret and recommend. Prescriptions require your local doctor or a partnered prescriber. For clinician training and surgical audit, see our ecosystem partners (IIOHR, HairAudit).</p>
+            <p className="text-[rgb(var(--text-secondary))]">We use evidence-based biological reasoning and a structured framework (Follicle Intelligence™) for case interpretation. We do not prescribe; we interpret and recommend. Prescriptions require your local doctor or a partnered prescriber. For clinician training and surgical audit, see our ecosystem partners (IIOHR, HairAudit).</p>
           </ExpandableDetailPanel>
         </div>
         <p className="mt-8 text-center text-sm text-[rgb(var(--text-muted))]">
-          <Link href="/for-professionals" className="font-medium text-medical hover:text-[rgb(var(--text-primary))]">
+          <Link
+            href="/for-professionals"
+            className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+          >
             For clinicians and referrers →
           </Link>
         </p>
@@ -318,7 +508,7 @@ function TrustSection() {
 // —— 7. FINAL CTA (single primary CTA) ——
 function FinalCTASection({ startHref: href }: { startHref: string }) {
   return (
-    <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-labelledby="final-cta-heading">
+    <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16" aria-labelledby="final-cta-heading">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 id="final-cta-heading" className="text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
@@ -328,12 +518,14 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
             Create a secure account, complete your intake, and receive your personalised review. No referral required. Optional paid support is there if you need it after your first review.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
-            <PrimaryButton href={href}>Start Free Hair Analysis</PrimaryButton>
+            <PrimaryButton href={href} className="w-full sm:w-auto">
+              Start My Hair Analysis
+            </PrimaryButton>
             <Link
               href={href}
-              className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] rounded-sm"
+              className="inline-flex min-h-[44px] items-center text-sm font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] rounded-sm"
             >
-              Create Secure Account to Start Free Analysis
+              Create Secure Account to Start Your Analysis
             </Link>
           </div>
         </div>
@@ -345,7 +537,7 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
 // —— CONVERSION FAQ ——
 function FAQSection() {
   return (
-    <section id="faq" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-labelledby="faq-heading">
+    <section id="faq" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16" aria-labelledby="faq-heading">
       <Container>
         <ConversionFaqList
           embedded
@@ -354,13 +546,19 @@ function FAQSection() {
           headingId="faq-heading"
         />
         <p className="mt-8 text-center text-sm text-[rgb(var(--text-muted))]">
-          <Link href="/how-it-works" className="font-medium text-medical hover:text-[rgb(var(--text-primary))]">
+          <Link
+            href="/how-it-works"
+            className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] rounded-sm"
+          >
             More on process and turnaround
           </Link>
           <span className="mx-2 text-[rgb(var(--text-muted))]/80" aria-hidden>
             ·
           </span>
-          <Link href="/pricing" className="font-medium text-medical hover:text-[rgb(var(--text-primary))]">
+          <Link
+            href="/pricing"
+            className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] rounded-sm"
+          >
             Pricing
           </Link>
         </p>
@@ -382,15 +580,17 @@ export default function Page() {
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={href}
-        ctaLabel="Start Free Hair Analysis"
+        ctaLabel="Start My Hair Analysis"
         theme="light"
       />
 
       <HeroSection startHref={href} />
+      <ConcernPathwaysSection />
       <HowItWorksSection />
       <GlobalHairIntelligenceNetworkBlock />
       <WhatWeAnalyseSection />
       <ResultsPreviewSection />
+      <PricingClaritySection />
       <TrustSection />
       <HliGuidesResourceSection />
       <FinalCTASection startHref={href} />

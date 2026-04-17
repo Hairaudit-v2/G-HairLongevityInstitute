@@ -36,17 +36,20 @@ export default function ArticleTeaserList({
       {articles.map((a) => (
         <li key={a.slug}>
           <article
-            className={`rounded-card border border-[rgb(var(--border-soft))] bg-card ${padding} shadow-soft transition hover:border-[rgb(var(--gold))]/20 ${scan ? "sm:flex sm:items-start sm:justify-between sm:gap-6" : ""}`}
+            className={`rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.94)_100%)] ${padding} shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/25 hover:shadow-card ${scan ? "sm:flex sm:items-start sm:justify-between sm:gap-6" : ""}`}
           >
             <div className={scan ? "min-w-0 flex-1" : ""}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
-                <Link href={HUB_PATH[a.hub]} className="hover:text-medical">
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+                <Link
+                  href={HUB_PATH[a.hub]}
+                  className="inline-flex rounded-full bg-[rgb(var(--gold))]/10 px-2.5 py-1 text-[rgb(var(--gold-dark))] transition hover:bg-[rgb(var(--gold))]/15"
+                >
                   {HUB_LABEL[a.hub]}
                 </Link>
-                {" · "}
+                <span aria-hidden>·</span>
                 <time dateTime={a.publishedAt}>{a.publishedAt}</time>
               </p>
-              <TitleTag className="mt-1.5 text-lg font-semibold leading-snug text-[rgb(var(--text-primary))]">
+              <TitleTag className="mt-3 text-lg font-semibold leading-snug text-[rgb(var(--text-primary))] sm:text-[1.35rem]">
                 <Link href={`/insights/${a.slug}`} className="hover:text-medical">
                   {a.title}
                 </Link>
@@ -64,8 +67,11 @@ export default function ArticleTeaserList({
                 {a.excerpt}
               </p>
             </div>
-            <p className={scan ? "mt-3 shrink-0 sm:mt-6" : "mt-3"}>
-              <Link href={`/insights/${a.slug}`} className="text-sm font-semibold text-medical hover:underline">
+            <p className={scan ? "mt-4 shrink-0 sm:mt-8" : "mt-4"}>
+              <Link
+                href={`/insights/${a.slug}`}
+                className="inline-flex rounded-full border border-[rgb(var(--medical))]/15 bg-white/85 px-3.5 py-2 text-sm font-semibold text-medical transition hover:border-[rgb(var(--medical))]/30 hover:bg-[rgb(var(--medical))]/5"
+              >
                 {scan ? "Read →" : "Read article →"}
               </Link>
             </p>

@@ -40,138 +40,147 @@ export default async function BookPage({
   const showPaidWelcome = welcome === "appointment";
 
   return (
-    <main className="min-h-screen bg-[rgb(var(--bg-dark))] text-white">
+    <main className="min-h-screen bg-page">
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}
         ctaLabel="Start My Hair Analysis"
-        theme="dark"
+        theme="light"
       />
 
       <section className="py-14 md:py-16">
         <Container>
           {showPaidWelcome ? (
             <div
-              className="mb-8 max-w-2xl rounded-2xl border border-emerald-400/25 bg-emerald-950/40 p-4 text-sm leading-relaxed text-emerald-50/95"
+              className="mb-8 max-w-2xl rounded-2xl border border-emerald-400/25 bg-emerald-50 p-4 text-sm leading-relaxed text-emerald-900"
               role="status"
             >
-              <p className="font-medium text-emerald-100/95">Booking fee paid</p>
-              <p className="mt-2 text-emerald-50/90">
+              <p className="font-medium text-emerald-900">Booking fee paid</p>
+              <p className="mt-2 text-emerald-800">
                 Your one-on-one appointment fee is on file. Email us to schedule your session — include your preferred
                 times if helpful.
               </p>
             </div>
           ) : null}
-          <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
-            OPTIONAL · PREMIUM CONSULTATION
-          </p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-white md:text-5xl">
-            One-on-one trichologist appointment
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
-            A dedicated video consultation when you want more time and depth. This is{" "}
-            <span className="text-white/90">not</span> required to begin care at HLI — most people start with the free
-            initial hair analysis and add a paid appointment only if it suits them.
-          </p>
-          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/65 md:text-base">
-            <span className="font-medium text-white/85">Membership note:</span> active members already receive two
-            30-minute one-on-one Zoom sessions per calendar year at no extra charge. This page is for the{" "}
-            <span className="text-white/90">separate</span> 1-hour extended appointment ($120 USD) when you want a full
-            hour beyond those included visits.
-          </p>
-
-          <div className="mt-8 max-w-2xl rounded-2xl border border-[rgb(var(--gold))]/25 bg-[rgb(var(--gold))]/[0.07] px-5 py-4 md:px-6 md:py-5">
-            <p className="text-sm font-medium leading-relaxed text-white md:text-base">
-              Not ready to book?{" "}
-              <span className="text-white/90">Start with the free initial hair analysis first.</span>
+          <div className="rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.97)_0%,rgba(245,240,235,0.94)_100%)] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.08)] md:p-9">
+            <p className="text-sm font-medium tracking-[0.18em] text-[rgb(var(--gold))]">
+              OPTIONAL · PREMIUM CONSULTATION
             </p>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
-              <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
-              <EntitlementAwareCheckoutButton offering={HLI_OFFERING.TRICHOLOGIST_APPOINTMENT} theme="light">
-                Pay $120 USD — One-on-One Appointment (1 hour)
-              </EntitlementAwareCheckoutButton>
+            <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-[rgb(var(--text-primary))] md:text-5xl">
+              One-on-one trichologist appointment
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[rgb(var(--text-secondary))] md:text-lg">
+              A dedicated video consultation when you want more time and depth. This is not required to begin care at
+              HLI — most people start with the free initial hair analysis and add a paid appointment only if it suits
+              them.
+            </p>
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+              <span className="font-medium text-[rgb(var(--text-primary))]">Membership note:</span> active members
+              already receive two 30-minute one-on-one Zoom sessions per calendar year at no extra charge. This page is
+              for the separate 1-hour extended appointment ($120 USD) when you want a full hour beyond those included
+              visits.
+            </p>
+
+            <div className="mt-10 grid gap-6 lg:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-[rgb(var(--medical))]/18 bg-white/88 p-6 shadow-soft">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--medical))]">
+                  Best first step
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))]">
+                  Start with the free analysis
+                </h2>
+                <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
+                  If you want clarity before committing to a call, begin with the guided intake and complimentary
+                  review. Most people can start there, then decide later whether extra one-to-one time would help.
+                </p>
+                <div className="mt-6">
+                  <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
+                </div>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-[rgb(var(--gold))]/22 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,244,239,0.96)_100%)] p-6 shadow-soft">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                  When you want more depth
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))]">
+                  Extended appointment
+                </h2>
+                <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
+                  One-on-One Trichologist Appointment — <span className="font-semibold text-[rgb(var(--gold-dark))]">$120 USD</span>{" "}
+                  <span className="text-[rgb(var(--text-muted))]">(1 hour)</span>
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                  {consult.body} Prescriptions remain with your GP or appropriate prescriber — we focus on
+                  interpretation, clarity, and a sensible path forward.
+                </p>
+                <div className="mt-6">
+                  <EntitlementAwareCheckoutButton offering={HLI_OFFERING.TRICHOLOGIST_APPOINTMENT} theme="light">
+                    Pay $120 USD — One-on-One Appointment (1 hour)
+                  </EntitlementAwareCheckoutButton>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-10 border-t border-white/10 pt-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">Consultation fee</p>
-            <p className="mt-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
-              One-on-One Trichologist Appointment — <span className="text-[rgb(var(--gold))]">$120 USD</span>{" "}
-              <span className="text-base font-normal text-white/60">(1 hour)</span>
-            </p>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
-              {consult.body} Prescriptions remain with your GP or appropriate prescriber — we focus on interpretation,
-              clarity, and a sensible path forward.
-            </p>
-          </div>
+          <div className="mt-12 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="space-y-8">
+              <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-white/90 p-7 shadow-soft md:p-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">Best suited for</p>
+                <ul className="mt-5 space-y-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                  {BEST_SUITED_FOR.map((line) => (
+                    <li key={line} className="flex gap-3">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          <div className="mt-10 max-w-2xl">
-            <h2 className="text-lg font-semibold text-white md:text-xl">Best suited for</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-white/80 md:text-base">
-              {BEST_SUITED_FOR.map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span className="mt-0.5 shrink-0 text-[rgb(var(--gold))]" aria-hidden>
-                    ·
-                  </span>
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mt-12 grid gap-8 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-7 md:p-8">
-              <h2 className="text-xl font-semibold text-white">What&apos;s included</h2>
-              <ul className="mt-5 space-y-3 text-sm leading-relaxed text-white/75">
-                <li className="flex gap-2">
-                  <span className="text-[rgb(var(--gold))]" aria-hidden>
-                    ·
-                  </span>
-                  <span>Private video session with a senior trichologist (1 hour)</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-[rgb(var(--gold))]" aria-hidden>
-                    ·
-                  </span>
-                  <span>Direct case interpretation in context — history, symptoms, and any labs or photos you share</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-[rgb(var(--gold))]" aria-hidden>
-                    ·
-                  </span>
-                  <span>Space for your questions and a clear, personalised discussion of next steps</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-[rgb(var(--gold))]" aria-hidden>
-                    ·
-                  </span>
-                  <span>GP-appropriate guidance where relevant — HLI does not replace your prescribing doctor</span>
-                </li>
-              </ul>
+              <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-white/90 p-7 shadow-soft md:p-8">
+                <h2 className="text-xl font-semibold text-[rgb(var(--text-primary))]">What&apos;s included</h2>
+                <ul className="mt-5 space-y-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />
+                    <span>Private video session with a senior trichologist (1 hour)</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />
+                    <span>Direct case interpretation in context — history, symptoms, and any labs or photos you share</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />
+                    <span>Space for your questions and a clear, personalised discussion of next steps</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--gold))]/70" aria-hidden />
+                    <span>GP-appropriate guidance where relevant — HLI does not replace your prescribing doctor</span>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-7 md:p-8">
-              <h2 className="text-xl font-semibold text-white">Request a time</h2>
-              <p className="mt-4 text-sm leading-relaxed text-white/75">
+            <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.96)_100%)] p-7 shadow-soft md:p-8">
+              <h2 className="text-xl font-semibold text-[rgb(var(--text-primary))]">Request a time</h2>
+              <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
                 Send a booking request by email. Our team will reply with available times and anything we need from you
                 ahead of the appointment (for example, recent blood results or photos if you have them).
               </p>
-              <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-6">
-                <p className="text-sm text-white/80">
+              <div className="mt-6 rounded-2xl border border-[rgb(var(--border-soft))] bg-white/90 p-6">
+                <p className="text-sm text-[rgb(var(--text-primary))]">
                   <a
                     href={BOOK_MAILTO}
-                    className="font-semibold text-[rgb(var(--gold))] underline-offset-2 hover:underline"
+                    className="font-semibold text-[rgb(var(--gold-dark))] underline-offset-2 hover:underline"
                   >
                     {BOOK_EMAIL}
                   </a>
                 </p>
-                <p className="mt-3 text-sm text-white/60">
+                <p className="mt-3 text-sm text-[rgb(var(--text-muted))]">
                   We aim to respond within one business day with next steps.
                 </p>
               </div>
-              <p className="mt-5 text-xs leading-relaxed text-white/50">
+              <p className="mt-5 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
                 Prefer to begin without a call?{" "}
-                <Link href={startHref} className="font-medium text-white/70 underline-offset-2 hover:text-white/90 hover:underline">
+                <Link href={startHref} className="font-medium text-medical underline-offset-2 hover:underline">
                   Start your free analysis first
                 </Link>
                 {" — "}
@@ -183,17 +192,17 @@ export default async function BookPage({
           <EcosystemCrossLinks
             currentSite="hli"
             showSurgeryLink={true}
-            theme="dark"
+            theme="light"
             heading="Considering hair transplant surgery?"
             className="mt-14"
           />
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <PrimaryButton href={startHref}>Start Free Hair Analysis</PrimaryButton>
+            <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
             <SecondaryButton href="/pricing">View pricing</SecondaryButton>
             <Link
               href="/"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/90 transition hover:bg-white/10"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-2xl border border-[rgb(var(--border-soft))] bg-white px-6 py-3 text-sm font-semibold text-[rgb(var(--text-primary))] transition hover:bg-subtle"
             >
               ← Back to home
             </Link>
@@ -201,7 +210,7 @@ export default async function BookPage({
         </Container>
       </section>
 
-      <PublicFooter />
+      <PublicFooter theme="light" />
     </main>
   );
 }
