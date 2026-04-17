@@ -445,10 +445,10 @@ function ResultsPreviewSection() {
           <div className={`${LIGHT_PANEL} p-6 sm:p-7`}>
             <div className="overflow-hidden rounded-[1.45rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-dark))] shadow-[0_16px_34px_rgba(8,16,28,0.18)]">
               <Image
-                src="/homepage/hli-results-report-visual.svg"
+                src="/homepage/results/results-visual.png"
                 alt="Illustrated preview of an HLI report and analysis dashboard."
-                width={1200}
-                height={900}
+                width={1376}
+                height={768}
                 className="h-auto w-full contrast-110 saturate-[1.03]"
                 sizes="(max-width: 1024px) 100vw, 480px"
               />
