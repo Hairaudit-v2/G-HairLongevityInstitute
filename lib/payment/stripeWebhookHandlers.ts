@@ -45,7 +45,7 @@ export async function applyCheckoutSessionCompleted(
     if (!subId) return;
     const stripe = getStripe();
     const sub = await stripe.subscriptions.retrieve(subId);
-    await syncSubscriptionToProfile(supabase, profileId, sub);
+    await syncSubscriptionToProfile(supabase, profileId, sub, { stripeEventId });
     await insertEntitlementLedger(supabase, {
       profile_id: profileId,
       source_kind: "stripe_checkout",
@@ -124,28 +124,60 @@ async function applyOneTimeOffering(
 export async function syncSubscriptionToProfile(
   supabase: SupabaseClient,
   profileId: string,
-  sub: Stripe.Subscription
+  sub: Stripe.Subscription,
+  options?: { stripeEventId?: string | null }
 ): Promise<void> {
   const entitled = subscriptionIsEntitled(sub.status);
+  const periodStartIso = new Date(sub.current_period_start * 1000).toISOString();
+
+  const { data: prevRow } = await supabase
+    .from("hli_longevity_profiles")
+    .select("membership_zoom_usage_period_start")
+    .eq("id", profileId)
+    .maybeSingle();
+  const prevPeriodStart =
+    prevRow && typeof prevRow === "object" && "membership_zoom_usage_period_start" in prevRow
+      ? (prevRow as { membership_zoom_usage_period_start: string | null }).membership_zoom_usage_period_start
+      : null;
+
   await supabase
     .from("hli_longevity_profiles")
     .update({
       membership_stripe_subscription_id: sub.id,
       membership_status: sub.status,
       membership_current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+      membership_zoom_usage_period_start: periodStartIso,
       ongoing_support_access: entitled,
       updated_at: new Date().toISOString(),
     })
     .eq("id", profileId);
+
+  if (entitled && prevPeriodStart && prevPeriodStart !== periodStartIso) {
+    await insertEntitlementLedger(supabase, {
+      profile_id: profileId,
+      source_kind: "stripe_subscription",
+      offering: HLI_OFFERING.MEMBERSHIP,
+      stripe_event_id: options?.stripeEventId ?? null,
+      stripe_subscription_id: sub.id,
+      summary:
+        "Membership billing period advanced; included one-on-one Zoom consultation allowance renewed (2 sessions × 30 minutes for this period).",
+      metadata: {
+        previous_period_start: prevPeriodStart,
+        new_period_start: periodStartIso,
+        kind: "membership_zoom_allowance_reset",
+      },
+    });
+  }
 }
 
 export async function handleSubscriptionEvent(
   supabase: SupabaseClient,
-  sub: Stripe.Subscription
+  sub: Stripe.Subscription,
+  stripeEventId?: string | null
 ): Promise<void> {
   const profileId = sub.metadata?.profile_id;
   if (profileId && typeof profileId === "string") {
-    await syncSubscriptionToProfile(supabase, profileId, sub);
+    await syncSubscriptionToProfile(supabase, profileId, sub, { stripeEventId });
     return;
   }
 
@@ -155,7 +187,7 @@ export async function handleSubscriptionEvent(
     .eq("membership_stripe_subscription_id", sub.id)
     .maybeSingle();
   if (row?.id) {
-    await syncSubscriptionToProfile(supabase, row.id as string, sub);
+    await syncSubscriptionToProfile(supabase, row.id as string, sub, { stripeEventId });
   }
 }
 
@@ -164,7 +196,7 @@ export async function handleSubscriptionDeleted(
   sub: Stripe.Subscription,
   stripeEventId: string
 ): Promise<void> {
-  await handleSubscriptionEvent(supabase, sub);
+  await handleSubscriptionEvent(supabase, sub, stripeEventId);
 
   let profileId: string | null =
     typeof sub.metadata?.profile_id === "string" ? sub.metadata.profile_id : null;

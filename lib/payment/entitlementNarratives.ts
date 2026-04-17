@@ -53,11 +53,22 @@ export function plainEnglishBloodReviewAccess(args: {
 export function plainEnglishTrichAccess(args: {
   paid: boolean;
   paidAt?: string | null;
+  membershipIncludedZoom?: {
+    used: number;
+    includedPerPeriod: number;
+    remaining: number;
+    sessionMinutes: number;
+    scopeLabel: string;
+  } | null;
 }): string {
   if (args.paid) {
-    return `Trichologist booking fee paid on ${formatLongDate(args.paidAt)}. Scheduling is arranged separately.`;
+    return `One-on-one trichologist appointment fee paid on ${formatLongDate(args.paidAt)}. Scheduling is arranged separately (1-hour session).`;
   }
-  return "No active entitlement (booking fee not paid).";
+  if (args.membershipIncludedZoom && args.membershipIncludedZoom.remaining > 0) {
+    const z = args.membershipIncludedZoom;
+    return `Your active membership includes ${z.includedPerPeriod} one-on-one Zoom sessions per ${z.scopeLabel} (${z.sessionMinutes} minutes each). You have ${z.remaining} remaining (${z.used} used this period). Schedule with the team — no separate booking fee until included sessions are used.`;
+  }
+  return "No paid one-on-one appointment on file. Members with no included sessions remaining may purchase a separate 1-hour appointment if offered on the booking page.";
 }
 
 /** Shorter staff-facing label (matches user examples). */

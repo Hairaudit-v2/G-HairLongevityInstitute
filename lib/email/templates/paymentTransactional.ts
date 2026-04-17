@@ -82,7 +82,7 @@ export function buildMembershipStartedEmail(params: {
     greeting,
     introParagraphs: [
       `Thank you — your membership is now active.${period}`,
-      "While your subscription is active, it includes blood request letters, follow-up blood analysis reviews, and ongoing support. You can cancel any time from the billing portal (linked below).",
+      "While your subscription is active, it includes blood request letters, follow-up blood analysis reviews, ongoing support, and two one-on-one Zoom sessions per billing period (30 minutes each). You can cancel any time from the billing portal (linked below).",
     ],
     sections: [
       {
@@ -140,8 +140,8 @@ export function buildTrichBookingFeeEmail(params: {
   const content: EmailBodyContent = {
     greeting,
     introParagraphs: [
-      "We have received your trichologist appointment booking fee.",
-      "This fee covers scheduling a one-on-one session; our team will contact you about times, or you can reach out using the booking page.",
+      "We have received your one-on-one trichologist appointment fee (1-hour session, USD 120).",
+      "This fee covers scheduling your session; our team will contact you about times, or you can reach out using the booking page.",
     ],
     cta: { text: "Booking information", url: bookUrl() },
     closingParagraphs: ["If you have questions before your appointment, reply to this email or use the contact details in the footer."],

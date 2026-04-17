@@ -15,7 +15,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/book",
   title: "Optional one-on-one trichologist appointment",
   metaDescription:
-    "Optional $199 video consultation for deeper discussion and case interpretation. Start with a free initial hair analysis first — booking is not required to begin.",
+    "Optional one-on-one trichologist appointment (1 hour, USD 120) for deeper discussion and case interpretation. Start with a free initial hair analysis first — booking is not required to begin.",
   appendBrand: true,
 });
 
@@ -82,7 +82,7 @@ export default async function BookPage({
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start">
               <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
               <EntitlementAwareCheckoutButton offering={HLI_OFFERING.TRICHOLOGIST_APPOINTMENT} theme="light">
-                Pay $199 booking fee — One-on-One Appointment
+                Pay $120 USD — One-on-One Appointment (1 hour)
               </EntitlementAwareCheckoutButton>
             </div>
           </div>
@@ -90,7 +90,8 @@ export default async function BookPage({
           <div className="mt-10 border-t border-white/10 pt-10">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">Consultation fee</p>
             <p className="mt-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
-              One-on-One Trichologist Appointment — <span className="text-[rgb(var(--gold))]">$199</span>
+              One-on-One Trichologist Appointment — <span className="text-[rgb(var(--gold))]">$120 USD</span>{" "}
+              <span className="text-base font-normal text-white/60">(1 hour)</span>
             </p>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
               {consult.body} Prescriptions remain with your GP or appropriate prescriber — we focus on interpretation,
@@ -120,7 +121,7 @@ export default async function BookPage({
                   <span className="text-[rgb(var(--gold))]" aria-hidden>
                     ·
                   </span>
-                  <span>Private video session with a senior trichologist (typically 45 minutes)</span>
+                  <span>Private video session with a senior trichologist (1 hour)</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-[rgb(var(--gold))]" aria-hidden>

@@ -14,7 +14,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/membership",
   title: "Membership — ongoing support",
   metaDescription:
-    "Optional Hair Longevity Institute membership at $10/month: blood request letters, blood analysis reviews, and continuity of care. Start with a free initial analysis.",
+    "Optional Hair Longevity Institute membership at $10/month: blood request letters, blood analysis reviews, ongoing support, and two 30-minute Zoom consultations per billing period. Start with a free initial analysis.",
   appendBrand: true,
 });
 

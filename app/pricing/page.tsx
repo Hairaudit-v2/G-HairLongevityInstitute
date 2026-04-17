@@ -11,7 +11,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/pricing",
   title: "Pricing — free first, optional paid support",
   metaDescription:
-    "Transparent Hair Longevity Institute pricing: free initial hair analysis; blood letter and review; one-on-one trichologist appointment; optional membership. No obligation to upgrade.",
+    "Transparent Hair Longevity Institute pricing: free initial hair analysis; blood letter and review; optional one-hour trichologist appointment (USD 120); optional membership with included Zoom sessions. No obligation to upgrade.",
   appendBrand: true,
 });
 

@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
-        await handleSubscriptionEvent(supabase, sub);
+        await handleSubscriptionEvent(supabase, sub, event.id);
         break;
       }
       case "customer.subscription.deleted": {

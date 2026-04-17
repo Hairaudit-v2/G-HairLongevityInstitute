@@ -4,7 +4,8 @@ export type EntitlementLedgerSourceKind =
   | "stripe_checkout"
   | "stripe_subscription"
   | "legacy_migration"
-  | "admin";
+  | "admin"
+  | "entitlement_usage";
 
 export type EntitlementLedgerRow = {
   id: string;

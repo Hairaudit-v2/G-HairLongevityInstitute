@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getPortalUser } from "@/lib/longevity/portalAuth";
 import { getProfilePaymentRow, getProfilePaymentRowByAuthUserId } from "@/lib/payment/profilePayment";
 import { computeHliEntitlements, computeHliEntitlementsDetailed } from "@/lib/payment/entitlements";
+import { getMembershipZoomBalance } from "@/lib/payment/membershipIncludedZoom";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
 
 export const dynamic = "force-dynamic";
@@ -30,14 +31,16 @@ export async function GET() {
           { status: 403 }
         );
       }
+      const membershipZoom = await getMembershipZoomBalance(supabase, row);
       return NextResponse.json({
         ok: true,
         profile_id: row.id,
-        entitlements: computeHliEntitlements(row),
-        detailed: computeHliEntitlementsDetailed(row),
+        entitlements: computeHliEntitlements(row, membershipZoom ?? undefined),
+        detailed: computeHliEntitlementsDetailed(row, membershipZoom ?? undefined),
         raw: {
           membership_status: row.membership_status,
           membership_current_period_end: row.membership_current_period_end,
+          membership_zoom_usage_period_start: row.membership_zoom_usage_period_start,
         },
       });
     }
@@ -46,14 +49,16 @@ export async function GET() {
   if (sessionProfileId) {
     const row = await getProfilePaymentRow(supabase, sessionProfileId);
     if (row) {
+      const membershipZoom = await getMembershipZoomBalance(supabase, row);
       return NextResponse.json({
         ok: true,
         profile_id: row.id,
-        entitlements: computeHliEntitlements(row),
-        detailed: computeHliEntitlementsDetailed(row),
+        entitlements: computeHliEntitlements(row, membershipZoom ?? undefined),
+        detailed: computeHliEntitlementsDetailed(row, membershipZoom ?? undefined),
         raw: {
           membership_status: row.membership_status,
           membership_current_period_end: row.membership_current_period_end,
+          membership_zoom_usage_period_start: row.membership_zoom_usage_period_start,
         },
       });
     }

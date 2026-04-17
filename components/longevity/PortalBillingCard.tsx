@@ -1,5 +1,6 @@
 import type { BillingSnapshot } from "@/lib/payment/billingSnapshot";
 import { PortalBillingPortalButton } from "@/components/longevity/PortalBillingPortalButton";
+import type { MembershipZoomBalance } from "@/lib/payment/membershipIncludedZoom";
 
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -34,10 +35,41 @@ function EntitlementBlock({
   );
 }
 
+function MembershipZoomBlock({ zoom }: { zoom: MembershipZoomBalance }) {
+  return (
+    <div className="rounded-xl border border-[rgb(var(--gold))]/25 bg-[rgb(var(--gold))]/[0.06] p-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[rgb(var(--gold))]/90">
+        Membership · included Zoom consultations
+      </p>
+      <p className="mt-2 text-sm text-white/88">
+        Each billing period includes{" "}
+        <span className="font-medium text-white">{zoom.includedPerPeriod}</span> one-on-one Zoom sessions (
+        {zoom.sessionDurationMinutes} minutes each).{" "}
+        <span className="text-white/70">{zoom.scopeLabel}</span>
+      </p>
+      <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
+        <div className="rounded-lg border border-white/10 bg-black/20 py-2">
+          <dt className="text-white/45">Included</dt>
+          <dd className="mt-0.5 font-semibold tabular-nums text-white">{zoom.includedPerPeriod}</dd>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-black/20 py-2">
+          <dt className="text-white/45">Used</dt>
+          <dd className="mt-0.5 font-semibold tabular-nums text-white">{zoom.used}</dd>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-black/20 py-2">
+          <dt className="text-white/45">Remaining</dt>
+          <dd className="mt-0.5 font-semibold tabular-nums text-[rgb(var(--gold))]">{zoom.remaining}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 export function PortalBillingCard({ snapshot }: { snapshot: BillingSnapshot }) {
   const { detailed, ledger, stripeBillingPortalAvailable } = snapshot;
   const m = detailed.membershipActive;
   const periodEnd = detailed.membershipCurrentPeriodEnd;
+  const zoom = detailed.membershipIncludedZoom;
 
   return (
     <section
@@ -66,10 +98,16 @@ export function PortalBillingCard({ snapshot }: { snapshot: BillingSnapshot }) {
         </div>
         <p className="text-xs leading-relaxed text-white/55">
           {m
-            ? "Includes blood request letters, follow-up blood analysis reviews, and ongoing support while your subscription is active. Cancel any time from the billing portal below."
-            : "Membership includes blood request letters, blood analysis reviews, and ongoing support while active. Cancel any time — no long lock-in."}
+            ? "Includes blood request letters, follow-up blood analysis reviews, ongoing support, and two one-on-one Zoom sessions per billing period (30 minutes each) while your subscription is active. Cancel any time from the billing portal below."
+            : "Membership includes blood request letters, blood analysis reviews, ongoing support, and two 30-minute Zoom consultations per billing period. Cancel any time — no long lock-in."}
         </p>
       </div>
+
+      {m && zoom ? (
+        <div className="mt-4">
+          <MembershipZoomBlock zoom={zoom} />
+        </div>
+      ) : null}
 
       <div className="mt-4 space-y-3">
         <EntitlementBlock

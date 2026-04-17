@@ -73,7 +73,7 @@ Run these in **SQL Editor** if the tables don't exist yet.
 
 ## 3. Longevity and Stripe billing migrations (order matters)
 
-The Stripe billing migrations (`20260417000001_hli_stripe_entitlements.sql`, `20260418000001_hli_payment_hardening.sql`) **alter** `hli_longevity_profiles`. That table is **created** in `supabase/migrations/20250315000001_hli_longevity.sql`. If you run only the Stripe SQL in the Supabase SQL Editor on a new project, you will see:
+The Stripe billing migrations (`20260417000001_hli_stripe_entitlements.sql`, `20260418000001_hli_payment_hardening.sql`, `20260418000002_hli_entitlement_ledger_entitlement_usage.sql`, `20260419000001_hli_membership_zoom_entitlements.sql`) **alter** `hli_longevity_profiles` and related billing tables (run in filename order; `20260418000001` creates `hli_entitlement_ledger` before `20260418000002` extends it). That table is **created** in `supabase/migrations/20250315000001_hli_longevity.sql`. If you run only the Stripe SQL in the Supabase SQL Editor on a new project, you will see:
 
 `ERROR: relation "hli_longevity_profiles" does not exist`.
 

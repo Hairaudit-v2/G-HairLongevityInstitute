@@ -1,4 +1,6 @@
 import type { ProfilePaymentRow } from "./profilePayment";
+import type { MembershipZoomBalance } from "./membershipIncludedZoom";
+import { membershipBillingPeriodActive } from "./membershipIncludedZoom";
 import {
   BLOOD_ANALYSIS_REVIEW_SEMANTICS,
   BLOOD_REQUEST_LETTER_SEMANTICS,
@@ -18,7 +20,8 @@ export type EntitlementAccessReason =
   | "membership"
   | "one_time_unlock"
   | "legacy_grandfather"
-  | "none";
+  | "none"
+  | "membership_included_zoom";
 
 export type FeatureEntitlementDetail = {
   access: boolean;
@@ -45,6 +48,8 @@ export type HliEntitlementsDetailed = {
   bloodRequestLetter: FeatureEntitlementDetail;
   bloodAnalysisReview: FeatureEntitlementDetail;
   trichologistAppointment: FeatureEntitlementDetail & { paidAt: string | null };
+  /** Null when not on membership; otherwise balance for included Zoom sessions this period */
+  membershipIncludedZoom: MembershipZoomBalance | null;
   membershipActive: boolean;
   ongoingSupport: boolean;
   membershipCurrentPeriodEnd: string | null;
@@ -184,29 +189,68 @@ function detailForReview(row: ProfilePaymentRow): FeatureEntitlementDetail {
   };
 }
 
-export function computeHliEntitlementsDetailed(row: ProfilePaymentRow): HliEntitlementsDetailed {
+function detailForTrichologistAppointment(
+  row: ProfilePaymentRow,
+  membershipZoom: MembershipZoomBalance | null | undefined
+): FeatureEntitlementDetail & { paidAt: string | null } {
+  const paid = Boolean(row.trichologist_appointment_purchased_at);
+  if (paid) {
+    return {
+      access: true,
+      reason: "one_time_unlock",
+      supportLabel: `Paid one-on-one trichologist appointment fee (${row.trichologist_appointment_purchased_at}).`,
+      staffSummaryLine: `Paid 1-hour appointment fee on ${formatLongDate(row.trichologist_appointment_purchased_at)} (see Stripe Price: trichologist appointment, USD 120).`,
+      plainEnglishAccess: plainEnglishTrichAccess({
+        paid: true,
+        paidAt: row.trichologist_appointment_purchased_at,
+        membershipIncludedZoom: null,
+      }),
+      paidAt: row.trichologist_appointment_purchased_at,
+    };
+  }
+  if (membershipBillingPeriodActive(row) && membershipZoom && membershipZoom.remaining > 0) {
+    return {
+      access: true,
+      reason: "membership_included_zoom",
+      supportLabel: `Membership includes one-on-one Zoom: ${membershipZoom.used}/${membershipZoom.includedPerPeriod} used this period (${membershipZoom.remaining} remaining, ${membershipZoom.sessionDurationMinutes} min each).`,
+      staffSummaryLine: `Included membership Zoom sessions: ${membershipZoom.used} of ${membershipZoom.includedPerPeriod} used; ${membershipZoom.remaining} remaining this billing period.`,
+      plainEnglishAccess: plainEnglishTrichAccess({
+        paid: false,
+        membershipIncludedZoom: {
+          used: membershipZoom.used,
+          includedPerPeriod: membershipZoom.includedPerPeriod,
+          remaining: membershipZoom.remaining,
+          sessionMinutes: membershipZoom.sessionDurationMinutes,
+          scopeLabel: membershipZoom.scopeLabel,
+        },
+      }),
+      paidAt: null,
+    };
+  }
+  return {
+    access: false,
+    reason: "none",
+    supportLabel: "No paid 1-hour appointment; no remaining included membership Zoom sessions this period.",
+    staffSummaryLine: "No one-on-one appointment entitlement (no paid unlock; included membership sessions exhausted or not applicable).",
+    plainEnglishAccess: plainEnglishTrichAccess({ paid: false, membershipIncludedZoom: null }),
+    paidAt: null,
+  };
+}
+
+export function computeHliEntitlementsDetailed(
+  row: ProfilePaymentRow,
+  membershipZoom?: MembershipZoomBalance | null
+): HliEntitlementsDetailed {
   const letter = detailForLetter(row);
   const review = detailForReview(row);
   const membershipActive = membershipStatusActive(row.membership_status);
-  const trichPaid = Boolean(row.trichologist_appointment_purchased_at);
+  const trich = detailForTrichologistAppointment(row, membershipZoom);
 
-  const trichReason = trichPaid ? ("one_time_unlock" as const) : ("none" as const);
-  const trichPlain = plainEnglishTrichAccess({ paid: trichPaid, paidAt: row.trichologist_appointment_purchased_at });
   return {
     bloodRequestLetter: letter,
     bloodAnalysisReview: review,
-    trichologistAppointment: {
-      access: trichPaid,
-      reason: trichReason,
-      supportLabel: trichPaid
-        ? `Trichologist booking fee paid (${row.trichologist_appointment_purchased_at}).`
-        : "Trichologist appointment fee not paid.",
-      staffSummaryLine: trichPaid
-        ? `Booking fee paid on ${formatLongDate(row.trichologist_appointment_purchased_at)}.`
-        : "No active entitlement.",
-      plainEnglishAccess: trichPlain,
-      paidAt: row.trichologist_appointment_purchased_at,
-    },
+    trichologistAppointment: trich,
+    membershipIncludedZoom: membershipActive ? membershipZoom ?? null : null,
     membershipActive,
     ongoingSupport: membershipActive,
     membershipCurrentPeriodEnd: row.membership_current_period_end,
@@ -221,8 +265,11 @@ export function computeHliEntitlementsDetailed(row: ProfilePaymentRow): HliEntit
 }
 
 /** Flat booleans for API consumers that only need gates. */
-export function computeHliEntitlements(row: ProfilePaymentRow): HliEffectiveEntitlements {
-  const d = computeHliEntitlementsDetailed(row);
+export function computeHliEntitlements(
+  row: ProfilePaymentRow,
+  membershipZoom?: MembershipZoomBalance | null
+): HliEffectiveEntitlements {
+  const d = computeHliEntitlementsDetailed(row, membershipZoom);
   return {
     bloodRequestLetter: d.bloodRequestLetter.access,
     bloodAnalysisReview: d.bloodAnalysisReview.access,

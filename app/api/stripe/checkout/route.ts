@@ -9,6 +9,10 @@ import {
 } from "@/lib/payment/hliOffers";
 import { getProfilePaymentRowByAuthUserId } from "@/lib/payment/profilePayment";
 import { getPurchaseEligibility } from "@/lib/payment/purchaseEligibility";
+import {
+  getMembershipIncludedZoomUsedForPeriod,
+  membershipBillingPeriodActive,
+} from "@/lib/payment/membershipIncludedZoom";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getPortalUser } from "@/lib/longevity/portalAuth";
 import { getLongevitySessionFromRequest } from "@/lib/longevityAuth";
@@ -71,7 +75,17 @@ export async function POST(req: Request) {
     );
   }
 
-  const eligibility = getPurchaseEligibility(offering, profile);
+  let eligibility = getPurchaseEligibility(offering, profile);
+  if (offering === HLI_OFFERING.TRICHOLOGIST_APPOINTMENT && membershipBillingPeriodActive(profile)) {
+    const used = await getMembershipIncludedZoomUsedForPeriod(
+      supabase,
+      profile.id,
+      profile.membership_zoom_usage_period_start
+    );
+    eligibility = getPurchaseEligibility(offering, profile, {
+      membershipIncludedZoomUsed: used,
+    });
+  }
   if (!eligibility.canPurchase) {
     return NextResponse.json(
       {

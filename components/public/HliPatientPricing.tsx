@@ -72,7 +72,7 @@ function tierPayCtaLabel(tierId: (typeof HLI_PATIENT_PRICING_TIERS)[number]["id"
     case "blood-followup":
       return "Pay $10 for Blood Analysis Review";
     case "trich-appointment":
-      return "Book One-on-One Appointment — $199";
+      return "Book One-on-One Appointment — $120 USD (1 hour)";
     case "membership":
       return "Join Membership — $10/month";
     default:

@@ -1,6 +1,6 @@
 /**
  * Central catalogue: HLI commercial offerings and Stripe Price IDs (env).
- * Amounts are defined in Stripe; marketing copy stays in lib/content/hliPatientPricing.ts.
+ * Amounts are defined in Stripe (e.g. trichologist appointment USD 120 for 1 hour); marketing copy in lib/content/hliPatientPricing.ts.
  */
 
 export const HLI_OFFERING = {

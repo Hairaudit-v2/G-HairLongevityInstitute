@@ -7,7 +7,7 @@ export type HliPatientPricingTier = {
   id: string;
   /** Display name including tier label (exact commercial wording where specified). */
   title: string;
-  /** Shown beside or under title, e.g. "Free", "$10", "$199". */
+  /** Shown beside or under title, e.g. "Free", "$10", "$120". */
   price: string;
   body: string;
   bestFor: string;
@@ -38,28 +38,28 @@ export const HLI_PATIENT_PRICING_TIERS: readonly HliPatientPricingTier[] = [
   {
     id: "trich-appointment",
     title: "One-on-One Trichologist Appointment",
-    price: "$199",
-    body: "One payment covers the appointment booking fee on this account; scheduling and session logistics are arranged separately after payment.",
+    price: "$120",
+    body: "One payment covers the 1-hour appointment on this account (USD); scheduling and session logistics are arranged separately after payment.",
     bestFor: "When you want dedicated time for depth, questions, and a tailored discussion.",
   },
   {
     id: "membership",
     title: "Membership",
     price: "$10/month",
-    body: "Monthly membership includes blood request letters, follow-up blood analysis reviews, and ongoing support while your subscription is active (recurring billing until you cancel).",
-    bestFor: "When you want continuity and included letter and review support over time.",
+    body: "Monthly membership includes blood request letters, follow-up blood analysis reviews, ongoing support while your subscription is active, and two one-on-one Zoom consultations per billing period (30 minutes each; recurring billing until you cancel).",
+    bestFor: "When you want continuity, included letters and reviews, live Zoom time with our team, and support over time.",
   },
 ] as const;
 
 /** Homepage / compact blocks: one line per row + membership footnote. */
 export const HLI_PRICING_MEMBERSHIP_INCLUDES_LINE =
-  "Membership includes blood request letters, blood analysis reviews, and ongoing support";
+  "Membership includes blood request letters, blood analysis reviews, ongoing support, and two 30-minute one-on-one Zoom consultations per billing period";
 
 export const HLI_PRICING_SUMMARY_LINES: readonly string[] = [
   "Free Initial Hair Analysis",
   "Blood Request Letter — $10",
   "Follow-up Blood Analysis Review — $10",
-  "One-on-One Trichologist Appointment — $199",
+  "One-on-One Trichologist Appointment (1 hour) — $120 USD",
   "Membership — $10/month",
   HLI_PRICING_MEMBERSHIP_INCLUDES_LINE,
 ];
@@ -69,13 +69,14 @@ export const HLI_PRICING_SECURE_START_LINES: readonly string[] = [
   "Initial Hair Analysis — Free",
   "Blood Request Letter — $10",
   "Follow-up Blood Analysis Review — $10",
-  "Trichologist Appointment — $199",
-  "Membership — $10/month including blood requests, blood analysis reviews, and ongoing support",
+  "Trichologist Appointment (1 hour) — $120 USD",
+  "Membership — $10/month including blood requests, blood analysis reviews, ongoing support, and two 30-minute Zoom consultations per billing period",
 ];
 
 export const HLI_PRICING_PATIENT_NOTES: readonly string[] = [
   "Blood request letter and blood analysis review are one-time account unlocks ($10 each) — not subscriptions.",
-  "Membership is $10/month and includes letters, reviews, and ongoing support while active; cancel any time.",
+  "Membership is $10/month and includes letters, reviews, ongoing support, and two 30-minute one-on-one Zoom sessions per billing period while active; cancel any time.",
+  "Included membership Zoom sessions refresh each billing period (Stripe subscription period); they are not a lifetime bank of sessions.",
   "You do not need blood tests to begin.",
   "You do not need to book a consultation to start.",
   "HLI does not replace your GP or prescribing doctor.",
@@ -83,7 +84,7 @@ export const HLI_PRICING_PATIENT_NOTES: readonly string[] = [
 
 /** Short line for membership surfaces (calm, premium). */
 export const HLI_MEMBERSHIP_INCLUDES_AND_CANCEL =
-  "Includes blood request letters, follow-up blood analysis reviews, and ongoing support while your subscription is active. Cancel any time from billing.";
+  "Includes blood request letters, follow-up blood analysis reviews, ongoing support, and two 30-minute one-on-one Zoom consultations per billing period while your subscription is active. Cancel any time from billing.";
 
 export function getHliPatientPricingTier(id: HliPatientPricingTier["id"]): HliPatientPricingTier {
   const t = HLI_PATIENT_PRICING_TIERS.find((x) => x.id === id);

@@ -63,7 +63,7 @@ select
   'legacy_migration',
   'blood_request_letter',
   'Grandfathered access: a blood request letter was already generated on this account before paid checkout enforcement.',
-  jsonb_build_object('reason', 'existing_letter_document');
+  jsonb_build_object('reason', 'existing_letter_document')
 from updated;
 
 -- Optional manual grandfather (blood analysis review): run in SQL Editor after verifying criteria, e.g. legacy patients
