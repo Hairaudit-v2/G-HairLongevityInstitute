@@ -26,11 +26,15 @@ export const HLI_CONVERSION_FAQ_ITEMS: readonly HliConversionFaqItem[] = [
   },
   {
     q: "When do I pay?",
-    a: "Only if you choose optional support services such as a blood request letter, a follow-up blood analysis review, a one-on-one trichologist appointment, or membership.",
+    a: "Only if you choose optional services: a blood request letter, a follow-up blood analysis review, membership, or the separate one-hour trichologist appointment. Your first clinical review pathway begins free.",
   },
   {
     q: "What does membership include?",
-    a: "Membership is $10 per month and includes blood request letters, blood analysis reviews, and ongoing support.",
+    a: "Membership is $10 per month and includes blood request letters, blood analysis reviews, ongoing support while your membership is active, and two 30-minute one-on-one Zoom consultations per calendar year — not per month, and not a lifetime allowance.",
+  },
+  {
+    q: "What is the difference between membership Zoom sessions and the paid appointment?",
+    a: "Membership includes two 30-minute one-on-one Zoom sessions per calendar year at no extra charge while you are subscribed. The optional trichologist appointment is different: a dedicated 1-hour session for $120 USD when you want extended time beyond those included visits.",
   },
   {
     q: "Do I need to book an appointment to get started?",

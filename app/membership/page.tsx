@@ -12,9 +12,9 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/membership",
-  title: "Membership — ongoing support",
+  title: "Membership — letters, reviews & included Zoom",
   metaDescription:
-    "Optional Hair Longevity Institute membership at $10/month: blood request letters, blood analysis reviews, ongoing support, and two 30-minute Zoom consultations per billing period. Start with a free initial analysis.",
+    "Hair Longevity Institute membership at $10/month: blood request letters, blood analysis reviews, ongoing support, and two 30-minute one-on-one Zoom sessions per calendar year. Start with a free initial analysis.",
   appendBrand: true,
 });
 
@@ -41,8 +41,8 @@ export default function MembershipPage() {
             Continuity of care, when you want it
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
-            Membership is optional. Many people begin with the free initial hair analysis and add paid support only if needed. If you want ongoing access to letters, blood reviews, and
-            follow-up support, membership is designed for that continuity — without replacing your GP or prescribing doctor.
+            Membership is optional. Many people begin with the free initial hair analysis and add paid support only if needed. If you want ongoing letters and blood reviews, continuity of
+            care, and two included 30-minute Zoom sessions each calendar year, membership is designed for that — without replacing your GP or prescribing doctor.
           </p>
 
           <div className="mt-12 rounded-3xl border border-white/10 bg-white/5 p-8 md:p-10">

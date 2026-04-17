@@ -50,7 +50,8 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Membership billing period is not synced yet. Wait for Stripe webhook sync or ask support.",
+        error:
+          "Membership billing data is not synced yet. Wait for the next sync or contact support. Included Zoom sessions are per calendar year while membership is active.",
       },
       { status: 409 }
     );
@@ -59,7 +60,10 @@ export async function POST(req: Request) {
   const used = await getMembershipIncludedZoomUsedForPeriod(supabase, profileId, periodStart);
   if (used >= MEMBERSHIP_INCLUDED_ONE_ON_ONE_ZOOM_SESSIONS_PER_PERIOD) {
     return NextResponse.json(
-      { ok: false, error: "No remaining included Zoom sessions for this membership period." },
+      {
+        ok: false,
+        error: "No remaining included Zoom sessions under the current allowance (two per calendar year while membership is active).",
+      },
       { status: 409 }
     );
   }
@@ -78,7 +82,7 @@ export async function POST(req: Request) {
     profile_id: profileId,
     source_kind: "entitlement_usage",
     offering: "membership_included_zoom_session",
-    summary: `Included membership one-on-one Zoom session consumed (${nextUsed} of ${MEMBERSHIP_INCLUDED_ONE_ON_ONE_ZOOM_SESSIONS_PER_PERIOD} this billing period).`,
+    summary: `Included membership one-on-one Zoom session consumed (${nextUsed} of ${MEMBERSHIP_INCLUDED_ONE_ON_ONE_ZOOM_SESSIONS_PER_PERIOD}; patient terms: per calendar year).`,
     metadata: {
       kind: "membership_included_zoom_consumption",
       trichologist_id: trich.id,

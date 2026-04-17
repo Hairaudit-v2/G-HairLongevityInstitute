@@ -42,9 +42,9 @@ function MembershipZoomBlock({ zoom }: { zoom: MembershipZoomBalance }) {
         Membership · included Zoom consultations
       </p>
       <p className="mt-2 text-sm text-white/88">
-        Each billing period includes{" "}
+        Each calendar year includes up to{" "}
         <span className="font-medium text-white">{zoom.includedPerPeriod}</span> one-on-one Zoom sessions (
-        {zoom.sessionDurationMinutes} minutes each).{" "}
+        {zoom.sessionDurationMinutes} minutes each) while your membership is active.{" "}
         <span className="text-white/70">{zoom.scopeLabel}</span>
       </p>
       <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
@@ -98,8 +98,8 @@ export function PortalBillingCard({ snapshot }: { snapshot: BillingSnapshot }) {
         </div>
         <p className="text-xs leading-relaxed text-white/55">
           {m
-            ? "Includes blood request letters, follow-up blood analysis reviews, ongoing support, and two one-on-one Zoom sessions per billing period (30 minutes each) while your subscription is active. Cancel any time from the billing portal below."
-            : "Membership includes blood request letters, blood analysis reviews, ongoing support, and two 30-minute Zoom consultations per billing period. Cancel any time — no long lock-in."}
+            ? "Includes blood request letters, follow-up blood analysis reviews, ongoing support, and two 30-minute one-on-one Zoom sessions per calendar year while your subscription is active. Cancel any time from the billing portal below."
+            : "Membership includes letters, blood analysis reviews, ongoing support, and two 30-minute Zoom sessions per calendar year. Cancel any time — no long lock-in."}
         </p>
       </div>
 
@@ -121,7 +121,7 @@ export function PortalBillingCard({ snapshot }: { snapshot: BillingSnapshot }) {
           plainEnglish={detailed.bloodAnalysisReview.plainEnglishAccess}
         />
         <EntitlementBlock
-          title="Trichologist appointment"
+          title="Consultations (included Zoom & optional 1-hour)"
           staffLine={detailed.trichologistAppointment.staffSummaryLine}
           plainEnglish={detailed.trichologistAppointment.plainEnglishAccess}
         />

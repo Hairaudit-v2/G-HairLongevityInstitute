@@ -66,9 +66,9 @@ export function plainEnglishTrichAccess(args: {
   }
   if (args.membershipIncludedZoom && args.membershipIncludedZoom.remaining > 0) {
     const z = args.membershipIncludedZoom;
-    return `Your active membership includes ${z.includedPerPeriod} one-on-one Zoom sessions per ${z.scopeLabel} (${z.sessionMinutes} minutes each). You have ${z.remaining} remaining (${z.used} used this period). Schedule with the team — no separate booking fee until included sessions are used.`;
+    return `Your membership includes ${z.includedPerPeriod} one-on-one Zoom sessions per calendar year (${z.sessionMinutes} minutes each) while your subscription is active. ${z.used} used; ${z.remaining} remaining. Schedule with the team — no extra fee for these included visits. The optional 1-hour trichologist appointment ($120 USD) is a separate extended session when you need more time.`;
   }
-  return "No paid one-on-one appointment on file. Members with no included sessions remaining may purchase a separate 1-hour appointment if offered on the booking page.";
+  return "No paid one-hour appointment on file. After your included membership Zoom sessions for the year are used, you may purchase the separate 1-hour appointment ($120 USD) on the booking page.";
 }
 
 /** Shorter staff-facing label (matches user examples). */

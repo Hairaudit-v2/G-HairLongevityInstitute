@@ -1,13 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ProfilePaymentRow } from "./profilePayment";
 
-/** Included with active membership per Stripe subscription billing period (not lifetime). */
+/** Included with active membership (commercially: two per calendar year; see portal copy). Tracked in data against the current Stripe-synced period anchor. */
 export const MEMBERSHIP_INCLUDED_ONE_ON_ONE_ZOOM_SESSIONS_PER_PERIOD = 2;
 
 export const MEMBERSHIP_INCLUDED_ZOOM_SESSION_MINUTES = 30;
 
 export type MembershipZoomBalance = {
-  /** Sessions included each membership billing period */
+  /** Sessions included per commercial terms (two per calendar year in patient copy) */
   includedPerPeriod: number;
   used: number;
   remaining: number;
@@ -55,7 +55,7 @@ export async function getMembershipZoomBalance(
     remaining: Math.max(0, included - used),
     sessionDurationMinutes: MEMBERSHIP_INCLUDED_ZOOM_SESSION_MINUTES,
     scopeLabel:
-      "Included sessions are per membership billing period (your Stripe subscription period), not lifetime — the count refreshes when the period renews.",
+      "Not monthly and not a lifetime allowance — unused sessions do not roll over indefinitely.",
     periodStart,
   };
 }

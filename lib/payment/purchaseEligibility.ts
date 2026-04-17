@@ -122,7 +122,7 @@ export function getPurchaseEligibility(
           canPurchase: false,
           code: "use_included_membership_zoom_first",
           patientMessage:
-            "Your membership includes two one-on-one Zoom sessions (30 minutes each) per billing period. Use those included sessions first — scheduling is arranged with our team without this payment.",
+            "Your membership includes two one-on-one Zoom sessions (30 minutes each) per calendar year. Use those included sessions first — scheduling is arranged with our team without this payment. The paid option on this page is a separate 1-hour appointment.",
         };
       }
     }

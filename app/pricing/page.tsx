@@ -11,7 +11,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/pricing",
   title: "Pricing — free first, optional paid support",
   metaDescription:
-    "Transparent Hair Longevity Institute pricing: free initial hair analysis; blood letter and review; optional one-hour trichologist appointment (USD 120); optional membership with included Zoom sessions. No obligation to upgrade.",
+    "Hair Longevity Institute pricing: free initial analysis; optional letter and review unlocks; optional 1-hour trichologist appointment (USD 120); membership with two 30-minute Zoom sessions per calendar year. No obligation to upgrade.",
   appendBrand: true,
 });
 
@@ -48,7 +48,7 @@ export default function PricingPage() {
             theme="light"
             id="pricing"
             headingId="pricing-details-heading"
-            intro="Each tier is designed to stand alone or combine over time. There is no pressure to upgrade."
+            intro="Each tier stands alone or combines over time. Membership includes two 30-minute Zoom sessions per calendar year; the optional trichologist appointment is a separate 1-hour session ($120 USD)."
             startHref={startHref}
           />
 

@@ -73,6 +73,12 @@ export default async function BookPage({
             <span className="text-white/90">not</span> required to begin care at HLI — most people start with the free
             initial hair analysis and add a paid appointment only if it suits them.
           </p>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/65 md:text-base">
+            <span className="font-medium text-white/85">Membership note:</span> active members already receive two
+            30-minute one-on-one Zoom sessions per calendar year at no extra charge. This page is for the{" "}
+            <span className="text-white/90">separate</span> 1-hour extended appointment ($120 USD) when you want a full
+            hour beyond those included visits.
+          </p>
 
           <div className="mt-8 max-w-2xl rounded-2xl border border-[rgb(var(--gold))]/25 bg-[rgb(var(--gold))]/[0.07] px-5 py-4 md:px-6 md:py-5">
             <p className="text-sm font-medium leading-relaxed text-white md:text-base">

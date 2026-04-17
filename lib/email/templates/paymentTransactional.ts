@@ -82,7 +82,7 @@ export function buildMembershipStartedEmail(params: {
     greeting,
     introParagraphs: [
       `Thank you — your membership is now active.${period}`,
-      "While your subscription is active, it includes blood request letters, follow-up blood analysis reviews, ongoing support, and two one-on-one Zoom sessions per billing period (30 minutes each). You can cancel any time from the billing portal (linked below).",
+      "While your subscription is active, it includes blood request letters, follow-up blood analysis reviews, ongoing support, and two one-on-one Zoom sessions per calendar year (30 minutes each). You can cancel any time from the billing portal (linked below).",
     ],
     sections: [
       {
@@ -115,7 +115,7 @@ export function buildMembershipCancelledEmail(params: {
   const content: EmailBodyContent = {
     greeting,
     introParagraphs: [
-      "Your HLI membership has ended or been cancelled. You no longer have membership-based access to included letters, blood analysis reviews, and ongoing support.",
+      "Your HLI membership has ended or been cancelled. You no longer have membership-based access to included letters, blood analysis reviews, ongoing support, or the two included 30-minute Zoom sessions per calendar year.",
       "Any one-time unlocks you purchased separately on your account remain as recorded in your portal.",
     ],
     cta: { text: "Open patient portal", url: portalUrl() },

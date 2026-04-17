@@ -48,7 +48,7 @@ export type HliEntitlementsDetailed = {
   bloodRequestLetter: FeatureEntitlementDetail;
   bloodAnalysisReview: FeatureEntitlementDetail;
   trichologistAppointment: FeatureEntitlementDetail & { paidAt: string | null };
-  /** Null when not on membership; otherwise balance for included Zoom sessions this period */
+  /** Null when not on membership; otherwise balance for included Zoom sessions (patient copy: per calendar year) */
   membershipIncludedZoom: MembershipZoomBalance | null;
   membershipActive: boolean;
   ongoingSupport: boolean;
@@ -212,8 +212,8 @@ function detailForTrichologistAppointment(
     return {
       access: true,
       reason: "membership_included_zoom",
-      supportLabel: `Membership includes one-on-one Zoom: ${membershipZoom.used}/${membershipZoom.includedPerPeriod} used this period (${membershipZoom.remaining} remaining, ${membershipZoom.sessionDurationMinutes} min each).`,
-      staffSummaryLine: `Included membership Zoom sessions: ${membershipZoom.used} of ${membershipZoom.includedPerPeriod} used; ${membershipZoom.remaining} remaining this billing period.`,
+      supportLabel: `Membership includes one-on-one Zoom: ${membershipZoom.used}/${membershipZoom.includedPerPeriod} used (${membershipZoom.remaining} remaining, ${membershipZoom.sessionDurationMinutes} min each; patient terms: per calendar year while active).`,
+      staffSummaryLine: `Included membership Zoom (30 min): ${membershipZoom.used} of ${membershipZoom.includedPerPeriod} used; ${membershipZoom.remaining} remaining (patient messaging: per calendar year while active).`,
       plainEnglishAccess: plainEnglishTrichAccess({
         paid: false,
         membershipIncludedZoom: {
@@ -230,7 +230,8 @@ function detailForTrichologistAppointment(
   return {
     access: false,
     reason: "none",
-    supportLabel: "No paid 1-hour appointment; no remaining included membership Zoom sessions this period.",
+    supportLabel:
+      "No paid 1-hour appointment on file; no remaining included membership Zoom sessions under current allowance (patient terms: per calendar year).",
     staffSummaryLine: "No one-on-one appointment entitlement (no paid unlock; included membership sessions exhausted or not applicable).",
     plainEnglishAccess: plainEnglishTrichAccess({ paid: false, membershipIncludedZoom: null }),
     paidAt: null,

@@ -160,7 +160,7 @@ export async function syncSubscriptionToProfile(
       stripe_event_id: options?.stripeEventId ?? null,
       stripe_subscription_id: sub.id,
       summary:
-        "Membership billing period advanced; included one-on-one Zoom consultation allowance renewed (2 sessions × 30 minutes for this period).",
+        "Membership subscription period updated; included Zoom session tracking refreshed in the portal (commercial terms: two 30-minute sessions per calendar year while active).",
       metadata: {
         previous_period_start: prevPeriodStart,
         new_period_start: periodStartIso,
