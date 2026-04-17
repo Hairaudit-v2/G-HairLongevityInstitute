@@ -37,9 +37,9 @@ export default function PublicHeader({
     { href: "/about", label: "About" },
     { href: "/guides", label: "Guides" },
     { href: "/insights", label: "Insights" },
-    { href: "#how-it-works", label: "How it works" },
-    { href: "#what-we-analyse", label: "What we analyse" },
-    { href: "#results", label: "Your results" },
+    { href: "/#how-it-works", label: "How it works" },
+    { href: "/#what-we-analyse", label: "What we analyse" },
+    { href: "/#results", label: "Your results" },
     { href: "/#faq", label: "FAQ" },
   ];
 
