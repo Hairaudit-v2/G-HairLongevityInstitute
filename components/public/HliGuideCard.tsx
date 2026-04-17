@@ -29,8 +29,8 @@ export function HliGuideCard({ guide, prominent, showThumbnail = false }: Props)
     <article
       className={
         prominent
-          ? "relative flex h-full flex-col overflow-hidden rounded-card border border-[rgb(var(--gold))]/25 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(247,243,238,0.96)_100%)] p-8 shadow-[0_16px_44px_rgba(0,0,0,0.08)] sm:p-10"
-          : "relative flex h-full flex-col overflow-hidden rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.94)_100%)] p-6 shadow-soft transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/25 hover:shadow-card sm:p-7"
+          ? "relative flex h-full flex-col overflow-hidden rounded-card border border-[rgb(var(--gold))]/28 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(247,243,238,0.98)_100%)] p-8 shadow-[0_22px_56px_rgba(0,0,0,0.085)] sm:p-10"
+          : "relative flex h-full flex-col overflow-hidden rounded-card border border-[rgba(214,206,198,0.9)] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.97)_100%)] p-6 shadow-[0_14px_34px_rgba(0,0,0,0.05)] transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/25 hover:shadow-[0_18px_40px_rgba(0,0,0,0.07)] sm:p-7"
       }
     >
       <div
@@ -38,16 +38,16 @@ export function HliGuideCard({ guide, prominent, showThumbnail = false }: Props)
         aria-hidden
       />
       {showThumbnail && guide.thumbnailSrc ? (
-        <div className={prominent ? "relative mb-6 overflow-hidden rounded-[1.35rem] border border-[rgba(12,18,28,0.18)] bg-[rgb(18,24,34)] shadow-[0_14px_30px_rgba(0,0,0,0.12)]" : "relative mb-5 overflow-hidden rounded-[1.15rem] border border-[rgba(12,18,28,0.16)] bg-[rgb(18,24,34)] shadow-[0_12px_24px_rgba(0,0,0,0.1)]"}>
+        <div className={prominent ? "relative mb-6 overflow-hidden rounded-[1.35rem] border border-[rgba(12,18,28,0.2)] bg-[rgb(18,24,34)] shadow-[0_18px_38px_rgba(0,0,0,0.14)]" : "relative mb-5 overflow-hidden rounded-[1.15rem] border border-[rgba(12,18,28,0.18)] bg-[rgb(18,24,34)] shadow-[0_14px_28px_rgba(0,0,0,0.11)]"}>
           <Image
             src={guide.thumbnailSrc}
             alt={guide.thumbnailAlt ?? ""}
             width={1200}
             height={780}
-            className={prominent ? "aspect-[16/10] h-auto w-full object-cover contrast-[1.16] saturate-[0.96] brightness-[0.88]" : "aspect-[16/10] h-auto w-full object-cover contrast-[1.15] saturate-[0.96] brightness-[0.9]"}
+            className={prominent ? "aspect-[16/10] h-auto w-full object-cover contrast-[1.18] saturate-[0.98] brightness-[0.9]" : "aspect-[16/10] h-auto w-full object-cover contrast-[1.16] saturate-[0.98] brightness-[0.92]"}
             sizes={prominent ? "(max-width: 768px) 100vw, 960px" : "(max-width: 768px) 100vw, 420px"}
           />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.08)_0%,rgba(8,12,18,0.2)_100%)]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.05)_0%,rgba(8,12,18,0.16)_100%)]" aria-hidden />
           <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" aria-hidden />
         </div>
       ) : null}

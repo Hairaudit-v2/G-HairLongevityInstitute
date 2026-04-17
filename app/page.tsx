@@ -77,12 +77,12 @@ const CONCERN_PATHWAYS = [
 ] as const;
 
 const SURFACE_CARD =
-  "rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.94)_100%)] shadow-soft";
+  "rounded-[1.5rem] border border-[rgba(214,206,198,0.9)] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.97)_100%)] shadow-[0_14px_36px_rgba(0,0,0,0.055)]";
 
 const INTERACTIVE_SURFACE_CARD = `${SURFACE_CARD} motion-safe:transition-all motion-safe:duration-200 motion-reduce:transition-none`;
 
 const SECTION_HEADING_COPY =
-  'mx-auto mt-4 max-w-xl text-center text-[rgb(var(--text-secondary))] sm:text-lg';
+  'mx-auto mt-4 max-w-2xl text-center text-[rgb(var(--text-secondary))] font-medium sm:text-lg';
 
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
@@ -99,15 +99,15 @@ function HeroSection({ startHref: href }: { startHref: string }) {
               className="object-cover object-right"
             />
             <div
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(6,10,16,0.84)_0%,rgba(6,10,16,0.74)_36%,rgba(6,10,16,0.56)_66%,rgba(6,10,16,0.34)_100%)]"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(6,10,16,0.86)_0%,rgba(6,10,16,0.74)_36%,rgba(6,10,16,0.52)_66%,rgba(6,10,16,0.24)_100%)]"
               aria-hidden
             />
             <div
               className="pointer-events-none absolute inset-y-0 left-0 w-full max-w-[54rem] bg-[linear-gradient(180deg,rgba(7,12,18,0.92)_0%,rgba(7,12,18,0.88)_100%)]"
               aria-hidden
             />
-            <div className="relative grid gap-6 p-6 sm:gap-8 sm:p-8 md:p-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(320px,0.86fr)] lg:items-center lg:p-12">
-              <div className="max-w-3xl rounded-[1.9rem] border border-white/12 bg-[rgba(8,12,18,0.9)] px-5 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] sm:px-7 sm:py-8 lg:pr-8">
+            <div className="relative grid gap-7 p-6 sm:gap-8 sm:p-8 md:p-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(320px,0.86fr)] lg:items-center lg:p-12">
+              <div className="max-w-3xl rounded-[1.9rem] border border-white/12 bg-[rgba(8,12,18,0.92)] px-5 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] sm:px-7 sm:py-8 lg:pr-8">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                   Biology-first hair support
                 </p>
@@ -168,19 +168,19 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                 </div>
               </div>
 
-              <div className="rounded-[1.9rem] border border-white/12 bg-[rgba(8,12,18,0.9)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.28)] sm:p-7">
+              <div className="rounded-[1.9rem] border border-white/10 bg-[rgba(8,12,18,0.96)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.26)] ring-1 ring-inset ring-white/6 sm:p-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                   A calmer place to start
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   What happens next
                 </h2>
-                <p className="mt-3 text-sm font-medium text-white sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                <p className="mt-3 text-sm font-medium text-white/95 sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
                   You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
                 </p>
                 <ol className="mt-5 space-y-3 sm:mt-6">
                   {WHAT_HAPPENS_NEXT.map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/10 bg-[rgb(15,22,32)] px-4 py-3.5 text-sm font-medium text-white">
+                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/10 bg-[rgb(13,19,28)] px-4 py-4 text-sm font-medium text-white shadow-[0_10px_22px_rgba(0,0,0,0.12)]">
                       <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/22 text-xs font-semibold text-[rgb(var(--gold))]">
                         {index + 1}
                       </span>
@@ -188,8 +188,8 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                     </li>
                   ))}
                 </ol>
-                <div className="mt-5 rounded-[1.15rem] border border-white/10 bg-[rgb(15,22,32)] px-4 py-4">
-                  <p className="text-sm font-medium leading-relaxed text-white/92">
+                <div className="mt-5 rounded-[1.15rem] border border-white/10 bg-[rgb(13,19,28)] px-4 py-4 shadow-[0_10px_22px_rgba(0,0,0,0.1)]">
+                  <p className="text-sm font-medium leading-relaxed text-white/94">
                     You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
                   </p>
                 </div>
@@ -228,7 +228,7 @@ function ConcernPathwaysSection() {
                 <span className="mt-3 text-lg font-semibold text-[rgb(var(--text-primary))] group-hover:text-medical">
                   {item.title}
                 </span>
-                <span className="mt-3 flex-1 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                <span className="mt-3 flex-1 text-sm font-medium leading-relaxed text-[rgb(var(--text-secondary))]">
                   {item.description}
                 </span>
                 <span className="mt-5 text-sm font-semibold text-medical">Open path →</span>
@@ -298,7 +298,7 @@ function HowItWorksSection() {
                 Step {item.step}
               </p>
               <h3 className="mt-5 text-lg font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
-              <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.description}</p>
+              <p className="mt-2 text-sm font-medium text-[rgb(var(--text-secondary))] leading-relaxed">{item.description}</p>
             </div>
           ))}
         </div>
@@ -399,7 +399,7 @@ function WhatWeAnalyseSection() {
               className={`${INTERACTIVE_SURFACE_CARD} relative overflow-hidden p-5 motion-safe:hover:border-[rgb(var(--gold))]/20 motion-safe:hover:shadow-card sm:p-6`}
             >
               <div
-                className="pointer-events-none absolute right-4 top-4 h-20 w-20 rounded-full border border-[rgb(var(--gold))]/10 bg-[radial-gradient(circle_at_center,rgba(198,167,94,0.14),rgba(198,167,94,0.02)_55%,transparent_72%)]"
+                className="pointer-events-none absolute right-4 top-4 h-20 w-20 rounded-full border border-[rgb(var(--gold))]/8 bg-[radial-gradient(circle_at_center,rgba(198,167,94,0.1),rgba(198,167,94,0.015)_55%,transparent_72%)]"
                 aria-hidden
               />
               <div
@@ -410,12 +410,12 @@ function WhatWeAnalyseSection() {
                 <div className="flex h-14 w-14 items-center justify-center rounded-[1.1rem] border border-[rgb(var(--gold))]/14 bg-[linear-gradient(180deg,rgba(198,167,94,0.16)_0%,rgba(198,167,94,0.06)_100%)] text-[rgb(var(--gold-dark))] shadow-[0_14px_28px_rgba(198,167,94,0.08)]">
                   {item.icon}
                 </div>
-                <span className="inline-flex rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+                <span className="inline-flex rounded-full border border-[rgb(var(--border-soft))] bg-white/95 px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-secondary))]">
                   {item.accent}
                 </span>
               </div>
               <h3 className="relative mt-5 font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
-              <p className="relative mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.line}</p>
+              <p className="relative mt-2 text-sm font-medium text-[rgb(var(--text-secondary))] leading-relaxed">{item.line}</p>
             </div>
           ))}
         </div>
@@ -469,12 +469,12 @@ function ResultsPreviewSection() {
               {RESULTS_VISUAL_POINTS.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))] bg-white/96 px-4 py-3.5"
+                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))] bg-white px-4 py-3.5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]"
                 >
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
                     {item.label}
                   </p>
-                  <p className="mt-1.5 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">{item.detail}</p>
+                  <p className="mt-1.5 text-sm font-medium leading-relaxed text-[rgb(var(--text-secondary))]">{item.detail}</p>
                 </div>
               ))}
             </div>
@@ -509,7 +509,7 @@ function PricingClaritySection() {
             {HLI_PRICING_SUMMARY_LINES.map((line) => (
               <li
                 key={line}
-                className="flex gap-3 rounded-[1.15rem] border border-[rgb(var(--border-soft))]/80 bg-white/80 px-4 py-3.5 text-sm leading-relaxed text-[rgb(var(--text-secondary))]"
+                className="flex gap-3 rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white px-4 py-3.5 text-sm font-medium leading-relaxed text-[rgb(var(--text-secondary))] shadow-[0_8px_20px_rgba(0,0,0,0.035)]"
               >
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[rgb(var(--gold))]/60" aria-hidden />
                 <span>{line}</span>
@@ -551,7 +551,7 @@ function TrustSection() {
           {TRUST_ITEMS.map((item) => (
             <div key={item.title} className={`${SURFACE_CARD} p-5 text-center sm:p-6`}>
               <h3 className="font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
-              <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.detail}</p>
+              <p className="mt-2 text-sm font-medium text-[rgb(var(--text-secondary))] leading-relaxed">{item.detail}</p>
             </div>
           ))}
         </div>
@@ -578,15 +578,15 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
   return (
     <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16" aria-labelledby="final-cta-heading">
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 id="final-cta-heading" className="text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.94)_100%)] px-6 py-8 text-center shadow-[0_20px_54px_rgba(0,0,0,0.06)] sm:px-8 sm:py-10">
+          <h2 id="final-cta-heading" className="text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl md:text-[2.85rem]">
             Begin with a free hair analysis
           </h2>
-          <p className="mt-5 text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+          <p className="mt-5 text-[rgb(var(--text-secondary))] font-medium" style={{ lineHeight: "var(--line-height-relaxed)" }}>
             Create a secure account, complete your intake, and receive your personalised review. Most cases are reviewed within 12–24 hours after complete submission. No referral required. Optional paid support is there if you need it after your first review.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
-            <PrimaryButton href={href} className="w-full sm:w-auto">
+            <PrimaryButton href={href} className="w-full border-[rgb(var(--gold))]/45 bg-[linear-gradient(180deg,rgba(204,174,100,1)_0%,rgba(176,147,82,1)_100%)] px-7 py-3.5 text-[0.95rem] shadow-[0_16px_40px_rgba(176,147,82,0.24)] hover:shadow-[0_18px_44px_rgba(176,147,82,0.28)] sm:w-auto">
               Start My Hair Analysis
             </PrimaryButton>
             <Link
