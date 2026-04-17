@@ -38,17 +38,17 @@ export function HliGuideCard({ guide, prominent, showThumbnail = false }: Props)
         aria-hidden
       />
       {showThumbnail && guide.thumbnailSrc ? (
-        <div className={prominent ? "relative mb-6 overflow-hidden rounded-[1.35rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-subtle))] shadow-[0_14px_30px_rgba(0,0,0,0.08)]" : "relative mb-5 overflow-hidden rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-subtle))] shadow-[0_12px_24px_rgba(0,0,0,0.06)]"}>
+        <div className={prominent ? "relative mb-6 overflow-hidden rounded-[1.35rem] border border-[rgba(12,18,28,0.18)] bg-[rgb(18,24,34)] shadow-[0_14px_30px_rgba(0,0,0,0.12)]" : "relative mb-5 overflow-hidden rounded-[1.15rem] border border-[rgba(12,18,28,0.16)] bg-[rgb(18,24,34)] shadow-[0_12px_24px_rgba(0,0,0,0.1)]"}>
           <Image
             src={guide.thumbnailSrc}
             alt={guide.thumbnailAlt ?? ""}
             width={1200}
             height={780}
-            className={prominent ? "aspect-[16/10] h-auto w-full object-cover contrast-[1.14] saturate-[0.94] brightness-[0.94]" : "aspect-[16/10] h-auto w-full object-cover contrast-[1.12] saturate-[0.94] brightness-[0.95]"}
+            className={prominent ? "aspect-[16/10] h-auto w-full object-cover contrast-[1.16] saturate-[0.96] brightness-[0.88]" : "aspect-[16/10] h-auto w-full object-cover contrast-[1.15] saturate-[0.96] brightness-[0.9]"}
             sizes={prominent ? "(max-width: 768px) 100vw, 960px" : "(max-width: 768px) 100vw, 420px"}
           />
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(16,24,34,0.03)_0%,rgba(16,24,34,0.12)_100%)]" aria-hidden />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-[linear-gradient(180deg,rgba(16,24,34,0)_0%,rgba(16,24,34,0.12)_100%)]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.08)_0%,rgba(8,12,18,0.2)_100%)]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" aria-hidden />
         </div>
       ) : null}
       <p

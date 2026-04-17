@@ -12,6 +12,7 @@ export {
 } from "./hliEmailLayout";
 
 export { buildAssessmentCompleteEmail, SUBJECT as SUBJECT_ASSESSMENT_COMPLETE } from "./templates/assessmentComplete";
+export { buildIntakeSubmissionEmail, SUBJECT as SUBJECT_INTAKE_SUBMISSION } from "./templates/intakeSubmission";
 export { buildGpLetterEmail, SUBJECT as SUBJECT_GP_LETTER } from "./templates/gpLetter";
 export { buildReminderEmail, SUBJECT_CONTINUE } from "./templates/reminder";
 export { buildFollowUpEmail, SUBJECT as SUBJECT_FOLLOW_UP } from "./templates/followUp";

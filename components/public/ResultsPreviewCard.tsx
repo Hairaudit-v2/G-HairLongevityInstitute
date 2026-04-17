@@ -123,10 +123,10 @@ export function ResultsPreviewCard({ data, className = "" }: ResultsPreviewCardP
 
   return (
     <article
-      className={`overflow-hidden rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.96)_100%)] shadow-[0_20px_48px_rgba(0,0,0,0.08)] ${className}`}
+      className={`overflow-hidden rounded-card border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.98)_100%)] shadow-[0_20px_48px_rgba(0,0,0,0.08)] ${className}`}
       aria-labelledby="results-preview-title"
     >
-      <div className="border-b border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(245,240,235,0.9)_0%,rgba(255,255,255,0.95)_100%)] px-5 py-4 sm:px-6 sm:py-5">
+      <div className="border-b border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(245,240,235,0.96)_0%,rgba(255,255,255,1)_100%)] px-5 py-4 sm:px-6 sm:py-5">
         <div className="flex items-center gap-3">
           <Image
             src="/brand/hli-mark.png"
@@ -149,9 +149,9 @@ export function ResultsPreviewCard({ data, className = "" }: ResultsPreviewCardP
 
       <div className="space-y-6 p-5 sm:p-6">
         {/* Hair Risk Score — prominent */}
-        <div className="grid gap-4 rounded-card border border-[rgb(var(--border-soft))]/80 bg-white/80 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="grid gap-4 rounded-card border border-[rgb(var(--border-soft))] bg-white p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
           <div>
-            <p className="text-xs font-medium text-[rgb(var(--text-muted))]">Hair Risk Score</p>
+            <p className="text-xs font-semibold text-[rgb(var(--text-secondary))]">Hair Risk Score</p>
             <p className="mt-1 text-3xl font-semibold tabular-nums text-[rgb(var(--text-primary))]">
               {resolved.hairRiskScore}
               <span className="ml-1 text-lg font-normal text-[rgb(var(--text-muted))]">/ 100</span>
@@ -167,14 +167,14 @@ export function ResultsPreviewCard({ data, className = "" }: ResultsPreviewCardP
           </div>
         </div>
 
-        <p className="text-xs text-[rgb(var(--text-muted))]">
+        <p className="text-xs font-medium text-[rgb(var(--text-secondary))]">
           Projected progression (interpretive; your report includes full context).
         </p>
 
         {/* Example treatment plan */}
         <div>
           <h3 className="text-sm font-semibold text-[rgb(var(--text-primary))]">Example treatment plan</h3>
-          <ul className="mt-3 space-y-2 rounded-card border border-[rgb(var(--border-soft))]/80 bg-white/75 p-4">
+          <ul className="mt-3 space-y-2 rounded-card border border-[rgb(var(--border-soft))] bg-white p-4">
             {resolved.treatmentPlanItems.map((item, i) => (
               <li
                 key={i}

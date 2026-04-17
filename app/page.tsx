@@ -99,36 +99,32 @@ function HeroSection({ startHref: href }: { startHref: string }) {
               className="object-cover object-right"
             />
             <div
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(10,18,29,0.995)_0%,rgba(10,18,29,0.985)_24%,rgba(10,18,29,0.95)_44%,rgba(10,18,29,0.82)_60%,rgba(10,18,29,0.52)_78%,rgba(10,18,29,0.22)_100%)]"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(6,10,16,0.84)_0%,rgba(6,10,16,0.74)_36%,rgba(6,10,16,0.56)_66%,rgba(6,10,16,0.34)_100%)]"
               aria-hidden
             />
             <div
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_82%_76%_at_18%_0%,rgba(198,167,94,0.14),transparent_48%),radial-gradient(ellipse_70%_60%_at_78%_20%,rgba(255,255,255,0.05),transparent_55%)]"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute inset-y-0 left-0 w-full max-w-[52rem] bg-[linear-gradient(180deg,rgba(7,13,22,0.18)_0%,rgba(7,13,22,0.04)_100%)]"
+              className="pointer-events-none absolute inset-y-0 left-0 w-full max-w-[54rem] bg-[linear-gradient(180deg,rgba(7,12,18,0.92)_0%,rgba(7,12,18,0.88)_100%)]"
               aria-hidden
             />
             <div className="relative grid gap-6 p-6 sm:gap-8 sm:p-8 md:p-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(320px,0.86fr)] lg:items-center lg:p-12">
-              <div className="max-w-3xl lg:pr-6">
+              <div className="max-w-3xl rounded-[1.9rem] border border-white/12 bg-[rgba(8,12,18,0.9)] px-5 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] sm:px-7 sm:py-8 lg:pr-8">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                   Biology-first hair support
                 </p>
                 <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
                   Free, personalised hair analysis — no referral required
                 </h1>
-                <p className="mt-4 max-w-2xl text-lg text-white/92 sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                <p className="mt-4 max-w-2xl text-lg font-medium text-white sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
                   Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review, if you choose it.
                 </p>
-                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base">
+                <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-white/90 sm:text-base">
                   Read first, start a guided analysis, bring blood results into context, and add an appointment only if it helps.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
                   {HERO_REASSURANCE_POINTS.map((item) => (
                     <span
                       key={item}
-                      className="inline-flex min-h-[44px] items-center rounded-full border border-white/16 bg-white/12 px-4 py-2 text-sm font-medium text-white/94 shadow-[0_12px_28px_rgba(0,0,0,0.12)]"
+                      className="inline-flex min-h-[44px] items-center rounded-full border border-white/18 bg-[rgba(17,24,35,0.96)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,0.18)]"
                     >
                       {item}
                     </span>
@@ -138,20 +134,20 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                   <PrimaryButton href={href} className="w-full sm:w-auto">
                     Start My Hair Analysis
                   </PrimaryButton>
-                  <p className="flex flex-col gap-2 text-sm leading-relaxed text-white/78 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
+                  <p className="flex flex-col gap-2 text-sm font-medium leading-relaxed text-white/90 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
                     Prefer to read first?{" "}
                     <a
                       href="#how-it-works"
-                      className="inline-flex min-h-[44px] items-center font-medium text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
+                      className="inline-flex min-h-[44px] items-center font-semibold text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
                     >
                       See how it works
                     </a>
-                    <span className="mx-2 text-white/36" aria-hidden>
+                    <span className="mx-2 text-white/55" aria-hidden>
                       ·
                     </span>
                     <Link
                       href="/guides"
-                      className="inline-flex min-h-[44px] items-center font-medium text-white/90 underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
+                      className="inline-flex min-h-[44px] items-center font-semibold text-white underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
                     >
                       Browse guides
                     </Link>
@@ -161,30 +157,30 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                   {HERO_TRUST_STRIP.map((item) => (
                     <div
                       key={item.label}
-                      className="rounded-[1.25rem] border border-white/14 bg-black/18 px-4 py-4 shadow-[0_18px_34px_rgba(0,0,0,0.14)]"
+                      className="rounded-[1.25rem] border border-white/12 bg-[rgba(15,22,32,0.96)] px-4 py-4 shadow-[0_18px_34px_rgba(0,0,0,0.18)]"
                     >
                       <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold))]">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-sm leading-relaxed text-white/92">{item.value}</p>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-white">{item.value}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-[1.9rem] border border-white/14 bg-[linear-gradient(180deg,rgba(17,27,40,0.94)_0%,rgba(17,27,40,0.88)_100%)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.22)] sm:p-7">
+              <div className="rounded-[1.9rem] border border-white/12 bg-[rgba(8,12,18,0.9)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.28)] sm:p-7">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                   A calmer place to start
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                   What happens next
                 </h2>
-                <p className="mt-3 text-sm text-white/88 sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                <p className="mt-3 text-sm font-medium text-white sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
                   You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
                 </p>
                 <ol className="mt-5 space-y-3 sm:mt-6">
                   {WHAT_HAPPENS_NEXT.map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/12 bg-black/18 px-4 py-3.5 text-sm text-white/92">
+                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/10 bg-[rgb(15,22,32)] px-4 py-3.5 text-sm font-medium text-white">
                       <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/22 text-xs font-semibold text-[rgb(var(--gold))]">
                         {index + 1}
                       </span>
@@ -192,8 +188,8 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                     </li>
                   ))}
                 </ol>
-                <div className="mt-5 rounded-[1.15rem] border border-white/12 bg-white/10 px-4 py-4">
-                  <p className="text-sm leading-relaxed text-white/84">
+                <div className="mt-5 rounded-[1.15rem] border border-white/10 bg-[rgb(15,22,32)] px-4 py-4">
+                  <p className="text-sm font-medium leading-relaxed text-white/92">
                     You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
                   </p>
                 </div>

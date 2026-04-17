@@ -9,6 +9,14 @@ export type EmailCTA = {
   url: string;
 };
 
+/** Optional branded header treatment for letter-style emails */
+export type EmailHeader = {
+  eyebrow?: string;
+  title?: string;
+  logoUrl?: string;
+  logoAlt?: string;
+};
+
 /** A section can have an optional heading, paragraphs, and/or bullets */
 export type EmailSection = {
   heading?: string;
@@ -18,6 +26,8 @@ export type EmailSection = {
 
 /** Structured content for the main body (between greeting and sign-off) */
 export type EmailBodyContent = {
+  /** Optional branded header override (logo / title / eyebrow) */
+  header?: EmailHeader;
   /** e.g. "Dear Jane" or "Hello" */
   greeting?: string;
   /** Short intro paragraph(s) — max 2–3 lines each */

@@ -14,6 +14,7 @@ const BODY_COLOR = HLI_COLORS.primary;
 const MUTED_COLOR = HLI_COLORS.muted;
 const ACCENT_COLOR = HLI_COLORS.accent;
 const BORDER_COLOR = HLI_COLORS.border;
+const SECTION_BACKGROUND = HLI_COLORS.backgroundSubtle;
 const FONT_FAMILY =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
@@ -26,16 +27,43 @@ function escapeHtml(s: string): string {
 }
 
 /** Render branded header HTML */
-function renderHeader(): string {
+function renderHeader(content?: EmailBodyContent): string {
+  const header = content?.header;
+  const title = header?.title?.trim() || HLI_BRAND.businessName;
+  const eyebrow = header?.eyebrow?.trim();
+  const logoUrl = header?.logoUrl?.trim();
+  const logoAlt = header?.logoAlt?.trim() || HLI_BRAND.businessName;
+  const logo = logoUrl
+    ? `
+        <tr>
+          <td style="padding-bottom:12px;">
+            <img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(logoAlt)}" width="180" style="display:block;max-width:180px;width:100%;height:auto;border:0;outline:none;text-decoration:none;">
+          </td>
+        </tr>`
+    : "";
+  const eyebrowRow = eyebrow
+    ? `
+        <tr>
+          <td style="font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:${ACCENT_COLOR};padding-bottom:6px;font-family:${FONT_FAMILY};">
+            ${escapeHtml(eyebrow)}
+          </td>
+        </tr>`
+    : "";
   const tagline = HLI_BRAND.tagline
-    ? `\n    <tr><td style="font-size:13px;color:${MUTED_COLOR};padding-top:4px;">${escapeHtml(HLI_BRAND.tagline)}</td></tr>`
+    ? `\n        <tr><td style="font-size:13px;color:${MUTED_COLOR};padding-top:4px;font-family:${FONT_FAMILY};">${escapeHtml(HLI_BRAND.tagline)}</td></tr>`
     : "";
   return `
   <tr>
-    <td style="padding:24px 24px 16px;border-bottom:1px solid ${BORDER_COLOR};">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td>
-        <span style="font-size:20px;font-weight:600;color:${ACCENT_COLOR};font-family:${FONT_FAMILY};">${escapeHtml(HLI_BRAND.businessName)}</span>${tagline}
-      </td></tr></table>
+    <td style="padding:28px 28px 18px;border-bottom:1px solid ${BORDER_COLOR};">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        ${logo}
+        ${eyebrowRow}
+        <tr>
+          <td>
+            <span style="font-size:26px;font-weight:600;color:${BODY_COLOR};font-family:${FONT_FAMILY};letter-spacing:0.2px;">${escapeHtml(title)}</span>
+          </td>
+        </tr>${tagline}
+      </table>
     </td>
   </tr>`;
 }
@@ -68,7 +96,7 @@ function renderSection(section: EmailSection): string {
   const parts: string[] = [];
   if (section.heading) {
     parts.push(
-      `<p style="margin:20px 0 8px;font-size:${BODY_FONT_SIZE};font-weight:600;color:${BODY_COLOR};font-family:${FONT_FAMILY};">${escapeHtml(section.heading)}</p>`
+      `<p style="margin:0 0 12px;font-size:12px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:${ACCENT_COLOR};font-family:${FONT_FAMILY};">${escapeHtml(section.heading)}</p>`
     );
   }
   if (section.paragraphs?.length) {
@@ -85,14 +113,22 @@ function renderSection(section: EmailSection): string {
     }
     parts.push("</ul>");
   }
-  return parts.join("");
+  if (parts.length === 0) return "";
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;border:1px solid ${BORDER_COLOR};border-radius:10px;background:${SECTION_BACKGROUND};">
+    <tr>
+      <td style="padding:18px 18px 6px;">
+        ${parts.join("")}
+      </td>
+    </tr>
+  </table>`;
 }
 
 function renderCta(cta: EmailCTA): string {
   return `
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
     <tr><td>
-      <a href="${escapeHtml(cta.url)}" style="display:inline-block;padding:12px 24px;font-size:15px;font-weight:500;color:${BODY_COLOR};background:transparent;border:1px solid ${BORDER_COLOR};text-decoration:none;font-family:${FONT_FAMILY};border-radius:4px;">${escapeHtml(cta.text)}</a>
+      <a href="${escapeHtml(cta.url)}" style="display:inline-block;padding:11px 20px;font-size:14px;font-weight:500;color:${BODY_COLOR};background:${SECTION_BACKGROUND};border:1px solid ${BORDER_COLOR};text-decoration:none;font-family:${FONT_FAMILY};border-radius:6px;">${escapeHtml(cta.text)}</a>
     </td></tr>
   </table>`;
 }
@@ -100,7 +136,7 @@ function renderCta(cta: EmailCTA): string {
 /** Build body HTML from structured content */
 function renderBodyContent(content: EmailBodyContent): string {
   const parts: string[] = [];
-  parts.push('<td style="padding:24px 24px 20px;">');
+  parts.push('<td style="padding:28px 28px 24px;">');
 
   if (content.greeting) {
     parts.push(
@@ -153,7 +189,7 @@ export function buildHliEmailHtml(content: EmailBodyContent): string {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f5f5;">
 <tr><td align="center" style="padding:24px 16px;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:${MAX_WIDTH}px;background:${HLI_COLORS.background};border-radius:8px;overflow:hidden;">
-${renderHeader()}
+${renderHeader(content)}
 ${bodyRow}
 ${renderFooter()}
 </table>

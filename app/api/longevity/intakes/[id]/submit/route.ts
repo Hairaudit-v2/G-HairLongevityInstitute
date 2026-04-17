@@ -14,6 +14,7 @@ import { buildLongevitySignals } from "@/lib/longevity/normalizedSignals";
 import type { LongevityQuestionnaireResponses } from "@/lib/longevity/schema";
 import { trackLongevityBetaEvent, BETA_EVENT } from "@/lib/longevity/analytics";
 import { buildLongevityAdaptivePayload } from "@/lib/longevity/intake";
+import { sendLongevityIntakeSubmittedEmail } from "@/lib/longevity/notifications/intakeSubmittedEmail";
 
 export const dynamic = "force-dynamic";
 
@@ -64,9 +65,11 @@ export async function POST(
       );
     }
 
+    const submittedAt = new Date().toISOString();
+
     const { error: updateErr } = await supabase
       .from("hli_longevity_intakes")
-      .update({ status: "submitted", updated_at: new Date().toISOString() })
+      .update({ status: "submitted", updated_at: submittedAt })
       .eq("id", id);
     if (updateErr) {
       return NextResponse.json({ ok: false, error: updateErr.message }, { status: 500 });
@@ -146,7 +149,6 @@ export async function POST(
     }
 
     try {
-      const intakeOccurredAt = new Date().toISOString();
       await stageLongevityIntegrationArtifacts(supabase, {
         profile_id: profileId,
         intake_id: id,
@@ -154,7 +156,7 @@ export async function POST(
         event: buildLongevityEventEnvelope({
           event_type: LONGEVITY_EVENT_TYPE.INTAKE_SUBMITTED,
           actor_type: "user",
-          occurred_at: intakeOccurredAt,
+          occurred_at: submittedAt,
           local_entity_type: "intake",
           local_entity_id: id,
           payload: {
@@ -172,7 +174,7 @@ export async function POST(
           bloodRequest: activeBloodRequest,
           hasBloodResultUploadDocument: false,
           hasStructuredMarkers: false,
-          generatedAt: intakeOccurredAt,
+          generatedAt: submittedAt,
           sourceEventType: LONGEVITY_EVENT_TYPE.INTAKE_SUBMITTED,
         }),
       });
@@ -225,6 +227,35 @@ export async function POST(
       });
     } catch {
       // Outcome attribution is additive; do not fail submit.
+    }
+
+    try {
+      const result = await sendLongevityIntakeSubmittedEmail({
+        supabase,
+        intakeId: id,
+        profileId,
+        submittedAt,
+      });
+      if (result.ok) {
+        console.info("[longevity-intake-submitted] acknowledgement sent", {
+          intake_id: id,
+          profile_id: profileId,
+          provider: result.provider,
+        });
+      } else {
+        console.warn("[longevity-intake-submitted] acknowledgement failed", {
+          intake_id: id,
+          profile_id: profileId,
+          provider: result.provider,
+          error: result.error,
+        });
+      }
+    } catch (e) {
+      console.warn("[longevity-intake-submitted] acknowledgement error", {
+        intake_id: id,
+        profile_id: profileId,
+        error: e instanceof Error ? e.message : String(e),
+      });
     }
 
     return NextResponse.json({ ok: true, status: "submitted" });
