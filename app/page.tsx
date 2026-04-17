@@ -73,7 +73,7 @@ const LIGHT_PANEL =
   "rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-white shadow-[0_18px_44px_rgba(0,0,0,0.055)]";
 
 const SECTION_HEADING_COPY =
-  'mx-auto mt-4 max-w-2xl text-center text-[rgb(var(--text-secondary))] font-medium sm:text-lg';
+  'mx-auto mt-4 max-w-2xl text-center text-[rgb(var(--text-primary))]/75 font-medium sm:text-lg';
 
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
@@ -85,56 +85,53 @@ function HeroSection({ startHref: href }: { startHref: string }) {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover object-center lg:object-[58%_center]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.68)_44%,rgba(0,0,0,0.48)_100%)] lg:bg-[linear-gradient(90deg,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.55)_40%,rgba(0,0,0,0.25)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.88)_0%,rgba(0,0,0,0.8)_28%,rgba(0,0,0,0.62)_58%,rgba(0,0,0,0.38)_100%)] lg:bg-[linear-gradient(90deg,rgba(0,0,0,0.9)_0%,rgba(0,0,0,0.82)_24%,rgba(0,0,0,0.68)_42%,rgba(0,0,0,0.44)_64%,rgba(0,0,0,0.2)_84%,rgba(0,0,0,0.04)_100%)]" />
       </div>
       <Container>
-        <div className="relative flex min-h-[34rem] items-center py-16 sm:min-h-[38rem] sm:py-20 md:min-h-[42rem] md:py-24 lg:min-h-[44rem]">
+        <div className="relative flex min-h-[35rem] items-center py-16 sm:min-h-[39rem] sm:py-20 md:min-h-[43rem] md:py-24 lg:min-h-[46rem]">
           <div className="max-w-[37.5rem] py-2 sm:py-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
-                Clinical hair analysis
-              </p>
-              <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-white sm:text-6xl md:text-7xl lg:text-[5.25rem]">
-                Free, personalised hair analysis — no referral required
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg text-white/92 sm:text-[1.35rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-                A senior trichologist reviews your intake, blood results, and scalp photos to build a calm, medically grounded starting point for hair loss and thinning.
-              </p>
-              <div className="mt-10">
-                <PrimaryButton href={href} className="w-full sm:w-auto">
-                  Start My Hair Analysis
-                </PrimaryButton>
-              </div>
-              <p className="mt-7 text-sm font-medium uppercase tracking-[0.12em] text-white/72">
-                No referral required
-                <span className="mx-3 text-white/35" aria-hidden>
-                  ·
-                </span>
-                12–24 hour turnaround
-                <span className="mx-3 text-white/35" aria-hidden>
-                  ·
-                </span>
-                Reviewed by a senior trichologist
-              </p>
-              <p className="mt-6 flex flex-col gap-2 text-sm font-medium leading-relaxed text-white/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
-                Prefer to read first?{" "}
-                <a
-                  href="#how-it-works"
-                  className="inline-flex min-h-[44px] items-center rounded-sm font-semibold text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))]"
-                >
-                  See how it works
-                </a>
-                <span className="mx-2 text-white/45" aria-hidden>
-                  ·
-                </span>
-                <Link
-                  href="/guides"
-                  className="inline-flex min-h-[44px] items-center rounded-sm font-semibold text-white underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))]"
-                >
-                  Browse guides
-                </Link>
-              </p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
+              Clinical hair analysis
+            </p>
+            <h1 className="mt-5 max-w-4xl text-[3.4rem] font-semibold tracking-tight leading-[1.01] text-white sm:text-[4.35rem] md:text-[5rem] lg:text-[5.9rem]">
+              Free, personalised hair analysis — no referral required
+            </h1>
+            <p className="mt-7 max-w-2xl text-lg text-white/94 sm:text-[1.4rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+              A senior trichologist reviews your intake, blood results, and scalp photos to build a calm, medically grounded starting point for hair loss and thinning.
+            </p>
+            <div className="mt-11">
+              <PrimaryButton
+                href={href}
+                className="w-full border-[rgb(var(--gold))]/55 px-8 py-4 text-[0.95rem] shadow-[0_20px_44px_rgba(176,147,82,0.26)] hover:shadow-[0_24px_52px_rgba(176,147,82,0.32)] focus:ring-offset-[rgb(var(--bg-dark))] sm:w-auto"
+              >
+                Start My Hair Analysis
+              </PrimaryButton>
+            </div>
+            <ul className="mt-6 space-y-2 text-sm font-medium text-white/84 sm:text-[0.95rem]">
+              <li>No referral required</li>
+              <li>Results in 12–24 hours</li>
+              <li>Reviewed by a senior trichologist</li>
+            </ul>
+            <p className="mt-7 flex flex-col gap-2 text-sm font-medium leading-relaxed text-white/82 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
+              Prefer to read first?{" "}
+              <a
+                href="#how-it-works"
+                className="inline-flex min-h-[44px] items-center rounded-sm font-semibold text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))]"
+              >
+                See how it works
+              </a>
+              <span className="mx-2 text-white/45" aria-hidden>
+                ·
+              </span>
+              <Link
+                href="/guides"
+                className="inline-flex min-h-[44px] items-center rounded-sm font-semibold text-white underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))]"
+              >
+                Browse guides
+              </Link>
+            </p>
           </div>
         </div>
       </Container>
@@ -144,9 +141,9 @@ function HeroSection({ startHref: href }: { startHref: string }) {
 
 function GettingStartedSection() {
   return (
-    <section className="border-t border-[rgb(var(--border-soft))] bg-card py-12 sm:py-14" aria-labelledby="getting-started-heading">
+    <section className="border-t border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(245,240,235,0.62)_0%,rgba(255,255,255,1)_100%)] py-12 sm:py-14" aria-labelledby="getting-started-heading">
       <Container>
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-start">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-start">
           <div className="max-w-xl">
             <p className="text-sm font-medium tracking-[0.14em] text-[rgb(var(--gold))]">
               A calmer place to start
@@ -154,20 +151,23 @@ function GettingStartedSection() {
             <h2 id="getting-started-heading" className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
               What happens next
             </h2>
-            <p className="mt-4 text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+            <p className="mt-4 text-[rgb(var(--text-primary))]/76 sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
               You do not need to organise everything before you begin. Start with the basics, then add more detail only when it helps clarify the picture.
             </p>
           </div>
-          <ol className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {WHAT_HAPPENS_NEXT.map((step, index) => (
               <li
                 key={step}
-                className={`${SURFACE_CARD} flex gap-3 px-4 py-4`}
+                className={`${SURFACE_CARD} flex min-h-[10.5rem] flex-col justify-start px-4 py-4`}
               >
-                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/18 text-xs font-semibold text-[rgb(var(--gold-dark))]">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[rgb(var(--gold))]/18 text-xs font-semibold text-[rgb(var(--gold-dark))]">
                   {index + 1}
                 </span>
-                <span className="text-sm font-medium leading-relaxed text-[rgb(var(--text-primary))]">
+                <span className="mt-4 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
+                  Step {index + 1}
+                </span>
+                <span className="mt-3 text-sm font-medium leading-relaxed text-[rgb(var(--text-primary))]">
                   {step}
                 </span>
               </li>
@@ -188,7 +188,7 @@ function ConcernPathwaysSection() {
           <h2 id="concern-pathways-heading" className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
             Start from the concern that feels most familiar
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+          <p className="mx-auto mt-4 max-w-2xl text-[rgb(var(--text-primary))]/76 sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
             Many people arrive feeling overwhelmed by postpartum shedding, diffuse thinning, ferritin questions, thyroid shifts, or stress-linked hair changes. These guided pathways help you begin in a more human way without losing clinical depth.
           </p>
         </div>
