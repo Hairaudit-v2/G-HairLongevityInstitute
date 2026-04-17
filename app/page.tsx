@@ -77,11 +77,21 @@ const SECTION_HEADING_COPY =
 
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
-    <section className="overflow-hidden bg-[rgb(var(--bg-dark))] text-white">
+    <section className="relative isolate overflow-hidden bg-[rgb(var(--bg-dark))] text-white">
+      <div className="absolute inset-0" aria-hidden>
+        <Image
+          src="/homepage/hero/hero-main.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.68)_44%,rgba(0,0,0,0.48)_100%)] lg:bg-[linear-gradient(90deg,rgba(0,0,0,0.75)_0%,rgba(0,0,0,0.55)_40%,rgba(0,0,0,0.25)_100%)]" />
+      </div>
       <Container>
-        <div className="py-12 sm:py-16 md:py-20">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] lg:items-center lg:gap-20">
-            <div className="max-w-3xl py-2 sm:py-4">
+        <div className="relative flex min-h-[34rem] items-center py-16 sm:min-h-[38rem] sm:py-20 md:min-h-[42rem] md:py-24 lg:min-h-[44rem]">
+          <div className="max-w-[37.5rem] py-2 sm:py-4">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
                 Clinical hair analysis
               </p>
@@ -125,22 +135,6 @@ function HeroSection({ startHref: href }: { startHref: string }) {
                   Browse guides
                 </Link>
               </p>
-            </div>
-            <div className="relative min-h-[24rem] overflow-hidden rounded-[1.5rem] lg:min-h-[38rem]">
-              <Image
-                src="/homepage/hero/hero-main.jpg"
-                alt="Premium clinical consultation setting representing personalised hair analysis."
-                width={1920}
-                height={1088}
-                priority
-                sizes="(max-width: 1024px) 100vw, 42vw"
-                className="h-full w-full object-cover object-center"
-              />
-              <div
-                className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.18)_0%,rgba(8,12,18,0.28)_100%)] lg:bg-[linear-gradient(90deg,rgba(8,12,18,0.28)_0%,rgba(8,12,18,0.12)_36%,rgba(8,12,18,0.46)_100%)]"
-                aria-hidden
-              />
-            </div>
           </div>
         </div>
       </Container>
