@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { SecondaryButton, UtilityLink } from "@/components/public/PublicCTA";
 import type { HliFeaturedGuide } from "@/lib/guides/hliDownloadableGuides";
 
@@ -5,6 +6,8 @@ type Props = {
   guide: HliFeaturedGuide;
   /** Larger typography and framing for the “start here” guide */
   prominent?: boolean;
+  /** Homepage-only thumbnail treatment */
+  showThumbnail?: boolean;
 };
 
 /** Primary action: landing/PDF href, else editorial read-online href. */
@@ -17,7 +20,7 @@ function guideDownloadFilename(guide: HliFeaturedGuide): string | boolean | unde
   return guide.downloadAs;
 }
 
-export function HliGuideCard({ guide, prominent }: Props) {
+export function HliGuideCard({ guide, prominent, showThumbnail = false }: Props) {
   const actionHref = guideActionHref(guide);
   const download = guideDownloadFilename(guide);
   const showSecondaryLink = Boolean(guide.href && guide.readOnlineHref && guide.readOnlineLabel);
@@ -34,6 +37,18 @@ export function HliGuideCard({ guide, prominent }: Props) {
         className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,rgba(198,167,94,0.12),transparent_70%)]"
         aria-hidden
       />
+      {showThumbnail && guide.thumbnailSrc ? (
+        <div className={prominent ? "relative mb-6 overflow-hidden rounded-[1.35rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-subtle))]" : "relative mb-5 overflow-hidden rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-subtle))]"}>
+          <Image
+            src={guide.thumbnailSrc}
+            alt={guide.thumbnailAlt ?? ""}
+            width={1200}
+            height={780}
+            className={prominent ? "aspect-[16/10] h-auto w-full object-cover" : "aspect-[16/10] h-auto w-full object-cover"}
+            sizes={prominent ? "(max-width: 768px) 100vw, 960px" : "(max-width: 768px) 100vw, 420px"}
+          />
+        </div>
+      ) : null}
       <p
         className={
           prominent

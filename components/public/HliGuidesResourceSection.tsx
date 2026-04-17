@@ -47,14 +47,14 @@ export function HliGuidesResourceSection() {
             <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
               Start here
             </p>
-            <HliGuideCard guide={foundational} prominent />
+            <HliGuideCard guide={foundational} prominent showThumbnail />
           </div>
         ) : null}
 
         <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
           {followOn.map((guide) => (
             <li key={guide.id}>
-              <HliGuideCard guide={guide} />
+              <HliGuideCard guide={guide} showThumbnail />
             </li>
           ))}
         </ul>

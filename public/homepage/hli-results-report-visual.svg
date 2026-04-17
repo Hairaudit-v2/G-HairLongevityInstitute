@@ -1,0 +1,51 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="124" y1="110" x2="1031" y2="787" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#152538"/>
+      <stop offset="1" stop-color="#0D1824"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="325" y1="138" x2="826" y2="718" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDFC"/>
+      <stop offset="1" stop-color="#F4EEE8"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="431" y1="266" x2="770" y2="683" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D8BD7B"/>
+      <stop offset="1" stop-color="#B59042"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" rx="44" fill="url(#bg)"/>
+  <rect x="77" y="88" width="1046" height="724" rx="38" fill="#132131" stroke="#D7C08B" stroke-opacity="0.14"/>
+  <circle cx="941" cy="182" r="72" fill="#D8BD7B" fill-opacity="0.09"/>
+  <circle cx="1017" cy="253" r="22" fill="#D8BD7B" fill-opacity="0.18"/>
+  <rect x="362" y="180" width="468" height="558" rx="28" fill="url(#paper)" stroke="#D5C6B5"/>
+  <rect x="321" y="225" width="468" height="558" rx="28" fill="#EFE6DA" fill-opacity="0.26" stroke="#D5C6B5" stroke-opacity="0.35"/>
+  <rect x="411" y="242" width="204" height="62" rx="22" fill="#F6F0E8"/>
+  <text x="513" y="279" text-anchor="middle" fill="#A98E58" font-size="22" font-family="Arial, sans-serif" font-weight="700">Example Output</text>
+  <circle cx="695" cy="275" r="34" fill="#152538"/>
+  <path d="M695 255L706 272H700L708 287L695 278L682 287L690 272H684L695 255Z" fill="#D8BD7B"/>
+  <rect x="413" y="339" width="364" height="168" rx="26" fill="#FCFAF7" stroke="#E2D4C4"/>
+  <text x="450" y="379" fill="#74716B" font-size="18" font-family="Arial, sans-serif">Hair Risk Score</text>
+  <text x="449" y="453" fill="#1C1C1B" font-size="84" font-family="Arial, sans-serif" font-weight="700">68</text>
+  <text x="585" y="453" fill="#8C8882" font-size="34" font-family="Arial, sans-serif">/100</text>
+  <text x="452" y="487" fill="#525250" font-size="24" font-family="Arial, sans-serif">Stable range</text>
+  <path d="M609 446C631 406 663 385 701 385C728 385 752 395 773 416" stroke="url(#gold)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M609 469C639 489 676 493 710 482C737 473 759 455 776 430" stroke="#D9C59A" stroke-width="8" stroke-linecap="round"/>
+  <rect x="413" y="535" width="364" height="152" rx="26" fill="#FCFAF7" stroke="#E2D4C4"/>
+  <text x="449" y="575" fill="#1C1C1B" font-size="26" font-family="Arial, sans-serif" font-weight="700">Plan highlights</text>
+  <circle cx="449" cy="619" r="7" fill="#C8A75E"/>
+  <circle cx="449" cy="651" r="7" fill="#C8A75E"/>
+  <circle cx="449" cy="683" r="7" fill="#C8A75E"/>
+  <text x="470" y="625" fill="#525250" font-size="19" font-family="Arial, sans-serif">Optimise ferritin and review thyroid context</text>
+  <text x="470" y="657" fill="#525250" font-size="19" font-family="Arial, sans-serif">Consider profile-led topical support</text>
+  <text x="470" y="689" fill="#525250" font-size="19" font-family="Arial, sans-serif">Reassess with follow-up bloods and photos</text>
+  <rect x="851" y="256" width="176" height="96" rx="24" fill="#F7F1E9" fill-opacity="0.08" stroke="#D9C59A" stroke-opacity="0.25"/>
+  <text x="882" y="294" fill="#DCC892" font-size="18" font-family="Arial, sans-serif" font-weight="700">Turnaround</text>
+  <text x="882" y="333" fill="white" font-size="34" font-family="Arial, sans-serif" font-weight="700">48h</text>
+  <rect x="852" y="383" width="192" height="136" rx="28" fill="#F7F1E9" fill-opacity="0.06" stroke="#D9C59A" stroke-opacity="0.18"/>
+  <path d="M884 456H1010" stroke="#E7D7AE" stroke-opacity="0.42" stroke-width="4" stroke-linecap="round"/>
+  <path d="M884 486H987" stroke="#E7D7AE" stroke-opacity="0.3" stroke-width="4" stroke-linecap="round"/>
+  <path d="M884 426H959" stroke="#DCC892" stroke-opacity="0.6" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="868" cy="426" r="6" fill="#DCC892"/>
+  <circle cx="868" cy="456" r="6" fill="#6E8E89"/>
+  <circle cx="868" cy="486" r="6" fill="#DCC892"/>
+</svg>

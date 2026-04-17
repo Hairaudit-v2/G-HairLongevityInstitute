@@ -1,0 +1,66 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="216" y1="92" x2="1386" y2="1116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#152538"/>
+      <stop offset="0.55" stop-color="#101C2B"/>
+      <stop offset="1" stop-color="#0A131E"/>
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1160 180) rotate(90) scale(250 320)">
+      <stop stop-color="#D8BD7B" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#D8BD7B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="softGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1185 455) rotate(90) scale(420 320)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hair" x1="987" y1="196" x2="1460" y2="1037" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#402F2B"/>
+      <stop offset="0.45" stop-color="#241A1A"/>
+      <stop offset="1" stop-color="#151110"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="1080" y1="331" x2="1292" y2="758" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DAB7A5"/>
+      <stop offset="0.48" stop-color="#C8937C"/>
+      <stop offset="1" stop-color="#A56C59"/>
+    </linearGradient>
+    <linearGradient id="coat" x1="999" y1="690" x2="1344" y2="1042" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EEE8DF"/>
+      <stop offset="1" stop-color="#D5CCC2"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#bg)"/>
+  <rect width="1600" height="1200" fill="url(#goldGlow)"/>
+  <rect width="1600" height="1200" fill="url(#softGlow)"/>
+  <circle cx="1183" cy="214" r="7" fill="#E3D3AA" fill-opacity="0.45"/>
+  <circle cx="1250" cy="262" r="3.5" fill="#E3D3AA" fill-opacity="0.6"/>
+  <circle cx="1326" cy="318" r="5" fill="#E3D3AA" fill-opacity="0.35"/>
+  <path d="M950 1070C1028 993 1075 951 1131 926C1206 891 1311 894 1390 933C1451 964 1496 1007 1579 1089V1200H950V1070Z" fill="url(#coat)"/>
+  <path d="M1094 721C1128 690 1176 676 1219 684C1271 693 1312 728 1340 781L1366 1011H1047L1074 791C1079 763 1080 735 1094 721Z" fill="#F5EEE4" fill-opacity="0.88"/>
+  <path d="M1095 226C1178 178 1277 182 1346 231C1418 282 1450 388 1437 489C1425 582 1375 665 1299 709C1227 751 1135 753 1070 709C995 658 950 560 948 464C946 361 1008 272 1095 226Z" fill="url(#hair)"/>
+  <path d="M1109 323C1166 278 1248 282 1298 330C1346 376 1355 454 1332 524C1307 602 1245 664 1171 675C1112 684 1059 654 1031 602C999 542 995 462 1017 402C1033 360 1067 337 1109 323Z" fill="url(#skin)"/>
+  <path d="M1120 432C1129 425 1141 420 1152 420C1165 420 1175 424 1185 432" stroke="#8A5F4E" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1043 503C1065 473 1085 459 1111 454" stroke="#6F473A" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+  <path d="M1230 440C1252 453 1267 474 1275 498" stroke="#6F473A" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+  <path d="M1154 503C1179 517 1208 518 1235 504" stroke="#7A5244" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1173 551C1190 559 1209 559 1227 551" stroke="#8A5F4E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M1188 445C1190 476 1190 507 1180 534" stroke="#986A58" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <path d="M1002 431C1020 365 1068 309 1138 275" stroke="#5E433F" stroke-width="36" stroke-linecap="round" opacity="0.95"/>
+  <path d="M1280 271C1354 302 1406 385 1410 475" stroke="#362625" stroke-width="44" stroke-linecap="round" opacity="0.96"/>
+  <path d="M1378 505C1380 632 1316 748 1194 804" stroke="#2B1E1D" stroke-width="56" stroke-linecap="round" opacity="0.94"/>
+  <path d="M1097 761C1146 797 1230 803 1290 771" stroke="#D5C5B4" stroke-width="14" stroke-linecap="round"/>
+  <g opacity="0.9">
+    <rect x="1118" y="834" width="260" height="134" rx="26" fill="#111C2A" fill-opacity="0.86" stroke="#D3B679" stroke-opacity="0.24"/>
+    <rect x="1144" y="860" width="94" height="46" rx="18" fill="#1F2F43"/>
+    <text x="1191" y="889" text-anchor="middle" fill="#E6D3A1" font-size="14" font-family="Arial, sans-serif">Risk Score</text>
+    <text x="1191" y="937" text-anchor="middle" fill="#FFFFFF" font-size="40" font-family="Arial, sans-serif" font-weight="700">68</text>
+    <path d="M1269 909C1284 892 1305 879 1328 879C1346 879 1362 886 1375 898" stroke="#D3B679" stroke-width="4" stroke-linecap="round"/>
+    <path d="M1268 928C1288 936 1310 934 1327 924C1338 918 1347 909 1354 898" stroke="#F3E8CB" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g opacity="0.75">
+    <rect x="1268" y="788" width="175" height="78" rx="22" fill="#F8F2EA" fill-opacity="0.1" stroke="#F5E7C4" stroke-opacity="0.2"/>
+    <path d="M1303 827H1408" stroke="#F5E7C4" stroke-opacity="0.55" stroke-width="3" stroke-linecap="round"/>
+    <path d="M1303 848H1384" stroke="#F5E7C4" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="1289" cy="827" r="5" fill="#D7BB7A"/>
+    <circle cx="1289" cy="848" r="5" fill="#6F8F89"/>
+  </g>
+</svg>

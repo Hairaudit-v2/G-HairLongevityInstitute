@@ -1,6 +1,7 @@
 // app/page.tsx — Patient-first, light homepage (audited: redundant content relocated to /science, /how-it-works, /for-professionals)
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { isLongevityEnabled } from "@/lib/features";
 import PublicHeader from "@/components/public/PublicHeader";
 import PublicFooter from "@/components/public/PublicFooter";
@@ -46,6 +47,12 @@ const WHAT_HAPPENS_NEXT = [
   "Upgrade only if you need added support",
 ] as const;
 
+const RESULTS_VISUAL_POINTS = [
+  { label: "Hair Risk Score", detail: "A cleaner snapshot of stability, risk context, and next-step priorities." },
+  { label: "Written interpretation", detail: "Not just numbers: your report explains what matters and why." },
+  { label: "Actionable plan", detail: "A grounded path forward to discuss with your GP or prescriber when needed." },
+] as const;
+
 const CONCERN_PATHWAYS = [
   {
     title: "Postpartum or sudden shedding",
@@ -80,95 +87,112 @@ const SECTION_HEADING_COPY =
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
     <section className="relative overflow-hidden bg-card">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_70%_at_20%_0%,rgba(198,167,94,0.12),transparent_55%),radial-gradient(ellipse_70%_60%_at_85%_10%,rgba(91,122,116,0.1),transparent_55%)]"
-        aria-hidden
-      />
       <Container>
-        <div className="relative py-14 sm:py-20 md:py-24">
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.82fr)] lg:items-center">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold-dark))]">
-                Biology-first hair support
-              </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-5xl md:text-6xl">
-                Free, personalised hair analysis — no referral required
-              </h1>
-              <p className="mt-4 max-w-2xl text-lg text-[rgb(var(--text-secondary))] sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-                Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review, if you choose it.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
-                {HERO_REASSURANCE_POINTS.map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex min-h-[44px] items-center rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-2 text-sm font-medium text-[rgb(var(--text-secondary))] shadow-soft"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-8 flex flex-col items-start gap-3 sm:mt-9">
-                <PrimaryButton href={href} className="w-full sm:w-auto">
-                  Start My Hair Analysis
-                </PrimaryButton>
-                <p className="flex flex-col gap-2 text-sm leading-relaxed text-[rgb(var(--text-muted))] sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
-                  Prefer to read first?{" "}
-                  <a
-                    href="#how-it-works"
-                    className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
-                  >
-                    See how it works
-                  </a>
-                  <span className="mx-2 text-[rgb(var(--text-muted))]/70" aria-hidden>
-                    ·
-                  </span>
-                  <Link
-                    href="/guides"
-                    className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
-                  >
-                    Browse guides
-                  </Link>
+        <div className="relative py-8 sm:py-12 md:py-14">
+          <div className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[rgb(var(--bg-dark))] shadow-[0_28px_80px_rgba(12,18,28,0.22)]">
+            <Image
+              src="/homepage/hli-hero-editorial-portrait.svg"
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 1200px"
+              className="object-cover object-right"
+            />
+            <div
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(12,20,34,0.97)_0%,rgba(12,20,34,0.94)_34%,rgba(12,20,34,0.82)_56%,rgba(12,20,34,0.42)_78%,rgba(12,20,34,0.12)_100%)]"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_80%_at_18%_0%,rgba(198,167,94,0.18),transparent_55%),radial-gradient(ellipse_70%_60%_at_78%_20%,rgba(255,255,255,0.08),transparent_55%)]"
+              aria-hidden
+            />
+            <div className="relative grid gap-6 p-6 sm:gap-8 sm:p-8 md:p-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(320px,0.86fr)] lg:items-center lg:p-12">
+              <div className="max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
+                  Biology-first hair support
                 </p>
-              </div>
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {HERO_TRUST_STRIP.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-white/82 px-4 py-4 shadow-soft"
-                  >
-                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
-                      {item.label}
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">{item.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[1.9rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(245,240,235,0.9)_100%)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.08)] sm:p-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold-dark))]">
-                A calmer place to start
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl">
-                What happens next
-              </h2>
-              <p className="mt-3 text-sm text-[rgb(var(--text-secondary))] sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-                You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
-              </p>
-              <ol className="mt-5 space-y-3 sm:mt-6">
-                {WHAT_HAPPENS_NEXT.map((step, index) => (
-                  <li key={step} className="flex gap-3 rounded-[1.15rem] border border-[rgb(var(--border-soft))]/80 bg-white/78 px-4 py-3.5 text-sm text-[rgb(var(--text-secondary))]">
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/15 text-xs font-semibold text-[rgb(var(--gold-dark))]">
-                      {index + 1}
+                <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
+                  Free, personalised hair analysis — no referral required
+                </h1>
+                <p className="mt-4 max-w-2xl text-lg text-white/82 sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                  Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review, if you choose it.
+                </p>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/68 sm:text-base">
+                  Read first, start a guided analysis, bring blood results into context, and add an appointment only if it helps.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
+                  {HERO_REASSURANCE_POINTS.map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex min-h-[44px] items-center rounded-full border border-white/12 bg-white/10 px-4 py-2 text-sm font-medium text-white/88 shadow-[0_12px_28px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+                    >
+                      {item}
                     </span>
-                    <span className="leading-relaxed">{step}</span>
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-5 rounded-[1.15rem] border border-[rgb(var(--medical))]/12 bg-[rgb(var(--medical))]/[0.05] px-4 py-4">
-                <p className="text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
-                  You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
+                  ))}
+                </div>
+                <div className="mt-8 flex flex-col items-start gap-3 sm:mt-9">
+                  <PrimaryButton href={href} className="w-full sm:w-auto">
+                    Start My Hair Analysis
+                  </PrimaryButton>
+                  <p className="flex flex-col gap-2 text-sm leading-relaxed text-white/66 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
+                    Prefer to read first?{" "}
+                    <a
+                      href="#how-it-works"
+                      className="inline-flex min-h-[44px] items-center font-medium text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
+                    >
+                      See how it works
+                    </a>
+                    <span className="mx-2 text-white/28" aria-hidden>
+                      ·
+                    </span>
+                    <Link
+                      href="/guides"
+                      className="inline-flex min-h-[44px] items-center font-medium text-white/82 underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
+                    >
+                      Browse guides
+                    </Link>
+                  </p>
+                </div>
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  {HERO_TRUST_STRIP.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-4 shadow-[0_18px_34px_rgba(0,0,0,0.12)] backdrop-blur-sm"
+                    >
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold))]">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-white/84">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[1.9rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.08)_100%)] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.18)] backdrop-blur-md sm:p-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
+                  A calmer place to start
                 </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  What happens next
+                </h2>
+                <p className="mt-3 text-sm text-white/78 sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                  You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
+                </p>
+                <ol className="mt-5 space-y-3 sm:mt-6">
+                  {WHAT_HAPPENS_NEXT.map((step, index) => (
+                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/10 bg-black/10 px-4 py-3.5 text-sm text-white/82">
+                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/20 text-xs font-semibold text-[rgb(var(--gold))]">
+                        {index + 1}
+                      </span>
+                      <span className="leading-relaxed">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+                <div className="mt-5 rounded-[1.15rem] border border-white/10 bg-white/8 px-4 py-4">
+                  <p className="text-sm leading-relaxed text-white/74">
+                    You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -319,6 +343,7 @@ const WHAT_WE_ANALYSE = [
   {
     title: "Hormones",
     line: "Androgen sensitivity and hormone balance.",
+    accent: "Hormone mapping",
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 3v18m6-12c0 3.314-2.686 6-6 6s-6-2.686-6-6 2.686-6 6-6 6 2.686 6 6z" />
@@ -328,6 +353,7 @@ const WHAT_WE_ANALYSE = [
   {
     title: "Nutrients",
     line: "Iron, vitamins and minerals that support hair.",
+    accent: "Blood context",
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M10.5 6.75h3m-7.5 4.5h12m-9 4.5h6M7.5 3.75h9A2.25 2.25 0 0118.75 6v12A2.25 2.25 0 0116.5 20.25h-9A2.25 2.25 0 015.25 18V6A2.25 2.25 0 017.5 3.75z" />
@@ -337,6 +363,7 @@ const WHAT_WE_ANALYSE = [
   {
     title: "Scalp health",
     line: "Inflammation and follicle environment.",
+    accent: "Scalp environment",
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 4.5c3.866 0 7 2.91 7 6.5S15.866 17.5 12 17.5 5 14.59 5 11s3.134-6.5 7-6.5zm0 0v13.5m-3.5 0h7" />
@@ -346,6 +373,7 @@ const WHAT_WE_ANALYSE = [
   {
     title: "Genetics",
     line: "Pattern and progression context.",
+    accent: "Risk profile",
     icon: (
       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 4.5c0 1.657 1.343 3 3 3s3-1.343 3-3m-6 15c0-1.657 1.343-3 3-3s3 1.343 3 3M9 7.5c0 1.657 1.343 3 3 3s3 1.343 3 3-1.343 3-3 3-3 1.343-3 3" />
@@ -368,13 +396,26 @@ function WhatWeAnalyseSection() {
           {WHAT_WE_ANALYSE.map((item) => (
             <div
               key={item.title}
-              className={`${INTERACTIVE_SURFACE_CARD} p-5 motion-safe:hover:border-[rgb(var(--gold))]/20 motion-safe:hover:shadow-card sm:p-6`}
+              className={`${INTERACTIVE_SURFACE_CARD} relative overflow-hidden p-5 motion-safe:hover:border-[rgb(var(--gold))]/20 motion-safe:hover:shadow-card sm:p-6`}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgb(var(--gold))]/12 text-[rgb(var(--gold-dark))]">
-                {item.icon}
+              <div
+                className="pointer-events-none absolute right-4 top-4 h-20 w-20 rounded-full border border-[rgb(var(--gold))]/10 bg-[radial-gradient(circle_at_center,rgba(198,167,94,0.14),rgba(198,167,94,0.02)_55%,transparent_72%)]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute right-8 top-8 h-10 w-10 rounded-full border border-[rgb(var(--gold))]/12"
+                aria-hidden
+              />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-[1.1rem] border border-[rgb(var(--gold))]/14 bg-[linear-gradient(180deg,rgba(198,167,94,0.16)_0%,rgba(198,167,94,0.06)_100%)] text-[rgb(var(--gold-dark))] shadow-[0_14px_28px_rgba(198,167,94,0.08)]">
+                  {item.icon}
+                </div>
+                <span className="inline-flex rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-1 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+                  {item.accent}
+                </span>
               </div>
-              <h3 className="mt-4 font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
-              <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.line}</p>
+              <h3 className="relative mt-5 font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
+              <p className="relative mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{item.line}</p>
             </div>
           ))}
         </div>
@@ -412,12 +453,39 @@ function ResultsPreviewSection() {
         <p className={SECTION_HEADING_COPY} style={{ lineHeight: "var(--line-height-relaxed)" }}>
           A clear snapshot and a path forward — usually within 48 hours.
         </p>
-        <div className="mx-auto mt-10 max-w-xl sm:mt-12">
-          <ResultsPreviewCard />
-          <div className="mt-6 flex justify-center">
-            <ExpandableDetailPanel variant="clinical" label="What the score means">
-              <p className="text-[rgb(var(--text-secondary))]">The Hair Risk Score and related indices (e.g. DHT Risk Index™, Follicle Stability Rating™) are derived from your biology and history. They are interpretive tools to guide strategy — not diagnostic labels. Your report includes written interpretation and next-step recommendations.</p>
-            </ExpandableDetailPanel>
+        <div className="mx-auto mt-10 grid max-w-6xl gap-8 sm:mt-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
+          <div className="rounded-[1.85rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.9)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:p-7">
+            <div className="overflow-hidden rounded-[1.45rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-dark))]">
+              <Image
+                src="/homepage/hli-results-report-visual.svg"
+                alt="Illustrated preview of an HLI report and analysis dashboard."
+                width={1200}
+                height={900}
+                className="h-auto w-full"
+                sizes="(max-width: 1024px) 100vw, 480px"
+              />
+            </div>
+            <div className="mt-6 space-y-3">
+              {RESULTS_VISUAL_POINTS.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))]/90 bg-white/88 px-4 py-3.5"
+                >
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
+                    {item.label}
+                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mx-auto w-full max-w-xl">
+            <ResultsPreviewCard />
+            <div className="mt-6 flex justify-center">
+              <ExpandableDetailPanel variant="clinical" label="What the score means">
+                <p className="text-[rgb(var(--text-secondary))]">The Hair Risk Score and related indices (e.g. DHT Risk Index™, Follicle Stability Rating™) are derived from your biology and history. They are interpretive tools to guide strategy — not diagnostic labels. Your report includes written interpretation and next-step recommendations.</p>
+              </ExpandableDetailPanel>
+            </div>
           </div>
         </div>
       </Container>
