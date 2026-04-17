@@ -16,6 +16,7 @@ const STATIC_PUBLIC_PATHS: Array<{
   { path: "/science", changeFrequency: "monthly", priority: 0.9 },
   { path: "/for-professionals", changeFrequency: "monthly", priority: 0.9 },
   { path: "/book", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/pricing", changeFrequency: "monthly", priority: 0.92 },
   { path: "/membership", changeFrequency: "monthly", priority: 0.85 },
   { path: "/start", changeFrequency: "monthly", priority: 0.95 },
   { path: "/insights", changeFrequency: "weekly", priority: 0.95 },

@@ -10,19 +10,30 @@ import { GlobalHairIntelligenceSection } from "@/components/ecosystem/GlobalHair
 import { ExpandableDetailPanel } from "@/components/ExpandableDetail";
 import { ResultsPreviewCard } from "@/components/public/ResultsPreviewCard";
 import HomeFaqJsonLd from "@/components/editorial/HomeFaqJsonLd";
+import { ConversionFaqList } from "@/components/public/ConversionFaqList";
+import { HLI_CONVERSION_FAQ_ITEMS } from "@/lib/content/hliConversionFaq";
+import { HLI_PRICING_SUMMARY_LINES } from "@/lib/content/hliPatientPricing";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/",
-  title: "Hair loss analysis & biology-first planning",
+  title: "Free hair analysis & biology-first planning",
   metaDescription:
-    "Personalised hair loss analysis backed by biology, not guesswork. Understand pattern, hormones, blood markers, and options — typically 48 hours to your plan.",
+    "Free initial hair analysis — no referral required. Personalised review backed by biology; add bloods or photos when you are ready. Optional paid support after your first review — typically 48 hours to your plan.",
   appendBrand: true,
 });
 
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
 
 // —— 1. HERO ——
+const WHAT_HAPPENS_NEXT = [
+  "Create your secure account",
+  "Complete your free intake",
+  "Upload bloods or photos if available",
+  "Receive your personalised review",
+  "Upgrade only if you need added support",
+] as const;
+
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
     <section className="relative overflow-hidden bg-card">
@@ -30,13 +41,41 @@ function HeroSection({ startHref: href }: { startHref: string }) {
       <Container>
         <div className="relative mx-auto max-w-3xl py-16 text-center sm:py-20 md:py-24">
           <h1 className="text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl md:text-5xl" style={{ lineHeight: 1.2 }}>
-            Understand Your Hair Loss. Take Control Early.
+            Free, personalised hair analysis — no referral required
           </h1>
           <p className="mt-5 text-lg text-[rgb(var(--text-secondary))] sm:text-xl" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            Personalised analysis backed by biology, not guesswork.
+            Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review — if you choose it.
           </p>
+          <p className="mt-4 text-sm text-[rgb(var(--text-muted))] sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+            Free initial analysis · No referral · Bloods and photos when you are ready · Paid pathways optional
+          </p>
+
+          <div
+            className="mx-auto mt-10 max-w-md rounded-card border border-[rgb(var(--border-soft))] bg-subtle/60 px-5 py-5 text-left shadow-soft sm:px-6"
+            aria-labelledby="pricing-clarity-heading"
+          >
+            <h2 id="pricing-clarity-heading" className="text-center text-xs font-semibold uppercase tracking-[0.12em] text-[rgb(var(--text-muted))]">
+              How pricing works
+            </h2>
+            <ul className="mt-4 space-y-3 text-sm text-[rgb(var(--text-primary))]">
+              {HLI_PRICING_SUMMARY_LINES.map((line) => (
+                <li key={line} className="leading-snug">
+                  {line}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-center">
+              <Link
+                href="/pricing"
+                className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+              >
+                Full pricing details
+              </Link>
+            </p>
+          </div>
+
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-            <PrimaryButton href={href}>Start My Hair Analysis</PrimaryButton>
+            <PrimaryButton href={href}>Start Free Hair Analysis</PrimaryButton>
             <a
               href="#how-it-works"
               className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/25 bg-card px-6 py-3 text-sm font-semibold text-medical shadow-soft transition hover:bg-subtle focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]"
@@ -44,8 +83,30 @@ function HeroSection({ startHref: href }: { startHref: string }) {
               How It Works
             </a>
           </div>
-          <p className="mt-6 text-sm text-[rgb(var(--text-muted))]">
-            No referral required · Typically 48 hours to your personalised plan
+          <p className="mt-4 max-w-lg mx-auto">
+            <Link
+              href={href}
+              className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))] rounded-sm"
+            >
+              Create Secure Account to Start Free Analysis
+            </Link>
+          </p>
+
+          <div className="mx-auto mt-10 max-w-lg rounded-card border border-[rgb(var(--border-soft))] bg-card px-5 py-6 text-left shadow-soft sm:px-6">
+            <h2 className="text-center text-sm font-semibold tracking-wide text-[rgb(var(--text-primary))]">
+              What happens next
+            </h2>
+            <ol className="mt-4 list-decimal space-y-2.5 pl-5 text-sm text-[rgb(var(--text-secondary))] marker:font-medium marker:text-[rgb(var(--gold))]">
+              {WHAT_HAPPENS_NEXT.map((step) => (
+                <li key={step} className="leading-relaxed pl-1">
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <p className="mt-8 text-sm text-[rgb(var(--text-muted))]">
+            Most people receive their personalised review within 48 hours of a complete submission.
           </p>
         </div>
       </Container>
@@ -261,13 +322,19 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 id="final-cta-heading" className="text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
-            Start your personalised hair analysis today
+            Begin with a free hair analysis
           </h2>
           <p className="mt-5 text-[rgb(var(--text-secondary))]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-            No referral required. Clear results, usually within 48 hours.
+            Create a secure account, complete your intake, and receive your personalised review. No referral required. Optional paid support is there if you need it after your first review.
           </p>
-          <div className="mt-8">
-            <PrimaryButton href={href}>Start My Hair Analysis</PrimaryButton>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <PrimaryButton href={href}>Start Free Hair Analysis</PrimaryButton>
+            <Link
+              href={href}
+              className="text-sm font-medium text-medical underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] rounded-sm"
+            >
+              Create Secure Account to Start Free Analysis
+            </Link>
           </div>
         </div>
       </Container>
@@ -275,38 +342,26 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
   );
 }
 
-// —— MINIMAL FAQ (full process on /how-it-works) ——
-const FAQ_ITEMS = [
-  { q: "What do I need to start?", a: "A few minutes for the questionnaire. You can add blood tests and hair photos if you have them — or upload later." },
-  { q: "How long until I get my results?", a: "Most people get their personalised summary within 48 hours after we have your completed intake and any uploads." },
-  { q: "Is this for men and women?", a: "Yes. We look at hormone balance, nutrients, scalp health, and pattern for all hair types and causes of loss." },
-];
-
+// —— CONVERSION FAQ ——
 function FAQSection() {
   return (
     <section id="faq" className="scroll-mt-20 border-t border-[rgb(var(--border-soft))] bg-subtle py-12 sm:py-16" aria-labelledby="faq-heading">
       <Container>
-        <h2 id="faq-heading" className="text-center text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
-          Common questions
-        </h2>
-        <div className="mx-auto mt-12 max-w-2xl space-y-3">
-          {FAQ_ITEMS.map((faq) => (
-            <details key={faq.q} className="group rounded-card border border-[rgb(var(--border-soft))] bg-card shadow-soft">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-[rgb(var(--text-primary))] [&::-webkit-details-marker]:hidden">
-                {faq.q}
-                <svg className="h-5 w-5 shrink-0 text-[rgb(var(--text-muted))] transition group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="border-t border-[rgb(var(--border-soft))] px-5 pb-4 pt-2">
-                <p className="text-sm text-[rgb(var(--text-secondary))] leading-relaxed">{faq.a}</p>
-              </div>
-            </details>
-          ))}
-        </div>
+        <ConversionFaqList
+          embedded
+          variant="light"
+          heading="Questions before you start"
+          headingId="faq-heading"
+        />
         <p className="mt-8 text-center text-sm text-[rgb(var(--text-muted))]">
           <Link href="/how-it-works" className="font-medium text-medical hover:text-[rgb(var(--text-primary))]">
-            More on process and turnaround →
+            More on process and turnaround
+          </Link>
+          <span className="mx-2 text-[rgb(var(--text-muted))]/80" aria-hidden>
+            ·
+          </span>
+          <Link href="/pricing" className="font-medium text-medical hover:text-[rgb(var(--text-primary))]">
+            Pricing
           </Link>
         </p>
       </Container>
@@ -321,11 +376,13 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-page">
-      <HomeFaqJsonLd items={FAQ_ITEMS.map(({ q, a }) => ({ question: q, answer: a }))} />
+      <HomeFaqJsonLd
+        items={HLI_CONVERSION_FAQ_ITEMS.map(({ q, a }) => ({ question: q, answer: a }))}
+      />
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={href}
-        ctaLabel="Start My Hair Analysis"
+        ctaLabel="Start Free Hair Analysis"
         theme="light"
       />
 

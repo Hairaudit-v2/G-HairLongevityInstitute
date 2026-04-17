@@ -48,6 +48,7 @@ export default function PublicFooter({ theme = "dark" }: { theme?: "light" | "da
               <Link href="/how-it-works" className={linkClass}>How it works</Link>
               <Link href="/science" className={linkClass}>Science</Link>
               <Link href="/for-professionals" className={linkClass}>For professionals</Link>
+              <Link href="/pricing" className={linkClass}>Pricing</Link>
               <Link href="/membership" className={linkClass}>Membership</Link>
               <Link href="/book" className={linkClass}>Book consultation</Link>
               <Link href={startHref} className={linkClass}>Start My Hair Analysis</Link>

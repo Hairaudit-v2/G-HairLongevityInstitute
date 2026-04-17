@@ -8,15 +8,24 @@ import { getPortalUser, ensurePortalProfile } from "@/lib/longevity/portalAuth";
 import { buildPortalLoginRedirectPath } from "@/lib/longevity/redirects";
 import { getTrichologistFromRequest } from "@/lib/longevity/trichologistAuth";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { ConversionFaqList } from "@/components/public/ConversionFaqList";
+import { HLI_PRICING_SECURE_START_LINES } from "@/lib/content/hliPatientPricing";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const metadata: Metadata = buildPageMetadata({
   path: "/longevity/start",
-  title: "Start Hair Longevity assessment intake",
+  title: "Start your free hair analysis",
   metaDescription:
-    "Hair Longevity guided intake: structured questions, optional scalp photos and blood uploads, specialist review, and your personalised summary — typically within 48 hours.",
+    "Free initial hair analysis. Create a secure account to save your intake and protect your information. Optional bloods and photos; paid support only if you need it later.",
   appendBrand: true,
 });
+
+const START_WITH_OPTIONS = [
+  "Just your symptoms and history",
+  "Blood test results if you already have them",
+  "Scalp or hair photos if available",
+  "Questions about next steps",
+] as const;
 
 function buildCurrentPath(searchParams: {
   resume?: string;
@@ -70,37 +79,76 @@ export default async function LongevityStartPage({
               Hair Longevity Institute™ — Secure start
             </div>
             <h1 className="mt-3 text-3xl font-semibold text-white">
-              {resumingAssessment
-                ? "Create your account or sign in to resume"
-                : "Create your account or sign in to begin"}
+              {resumingAssessment ? "Sign in to continue your free analysis" : "Start your free hair analysis securely"}
             </h1>
-            <p className="mt-3 text-base leading-relaxed text-white/75">
-              {resumingAssessment
-                ? "Your saved assessment is held inside your secure portal account. Sign in to reopen it safely, continue where you left off, and keep your uploads and review linked to the correct patient record."
-                : "Your Hair Longevity assessment now starts inside your secure portal account. This lets us save your progress properly, protect your uploads, and keep your review tied to the right patient record from the start."}
-            </p>
-            <div className="mt-6 rounded-2xl border border-white/10 bg-black/10 p-5 text-sm text-white/75">
-              <p className="font-medium text-white/90">Before you begin, you will need to:</p>
-              <ul className="mt-3 list-disc space-y-2 pl-5">
-                <li>{resumingAssessment ? "Sign in to your patient account" : "Create your patient account or sign in"}</li>
-                <li>Return here automatically after authentication</li>
-                <li>{resumingAssessment ? "Resume your saved intake inside your secure portal session" : "Start a real intake draft inside your secure portal session"}</li>
+            <div className="mt-5 space-y-3 text-base leading-relaxed text-white/75">
+              <p>
+                <span className="text-white/90">Your initial hair analysis is free.</span>{" "}
+                {resumingAssessment
+                  ? "Your intake is saved in your secure portal — sign in to continue where you left off."
+                  : "We ask you to create a secure account so we can save your progress, protect your health information, and deliver your review to the right place."}
+              </p>
+              <p>
+                You can begin even if you do not yet have blood tests or photos — add them when you are ready.{" "}
+                <span className="text-white/90">
+                  Paid support is optional and only comes later, if you choose it.
+                </span>
+              </p>
+            </div>
+
+            <div
+              className="mt-6 rounded-2xl border border-white/10 bg-black/10 p-5 text-sm text-white/80"
+              aria-labelledby="secure-start-pricing-heading"
+            >
+              <h2 id="secure-start-pricing-heading" className="text-xs font-semibold uppercase tracking-[0.14em] text-white/55">
+                Pricing summary
+              </h2>
+              <ul className="mt-3 space-y-2 leading-snug">
+                {HLI_PRICING_SECURE_START_LINES.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
               </ul>
             </div>
-            <div className="mt-8 flex flex-wrap gap-3">
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-black/10 p-5 text-sm text-white/80">
+              <h2 className="text-sm font-semibold text-white/90">You can start with any of the following</h2>
+              <ul className="mt-3 list-disc space-y-2 pl-5">
+                {START_WITH_OPTIONS.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="mt-6 text-sm leading-relaxed text-white/65">
+              No referral is required. There is no obligation to upgrade — begin with your free analysis and add paid options only if you need them.
+            </p>
+
+            <div className="mt-8">
+              <ConversionFaqList
+                embedded
+                variant="dark"
+                heading="Questions before you start"
+                headingId="secure-start-faq-heading"
+              />
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 href={loginHref}
-                className="inline-flex rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--bg))]"
+                className="inline-flex min-h-[48px] items-center justify-center rounded-2xl bg-[rgb(var(--gold))] px-6 py-3 text-center text-sm font-semibold leading-snug text-[rgb(var(--bg))] sm:max-w-md"
               >
-                {resumingAssessment ? "Sign in to resume" : "Create account or sign in"}
+                {resumingAssessment ? "Sign in to continue your free analysis" : "Create Secure Account to Start Free Analysis"}
               </Link>
               <Link
                 href="/longevity"
-                className="inline-flex rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/85 hover:bg-white/10"
+                className="inline-flex min-h-[48px] items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white/85 hover:bg-white/10"
               >
                 Back
               </Link>
             </div>
+            <p className="mt-4 text-xs text-white/50">
+              After you authenticate, you will return here automatically to {resumingAssessment ? "resume your intake" : "begin your intake"} in your secure portal session.
+            </p>
           </div>
         </div>
       </main>
