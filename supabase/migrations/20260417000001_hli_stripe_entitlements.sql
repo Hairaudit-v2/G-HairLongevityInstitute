@@ -1,5 +1,11 @@
 -- HLI Stripe billing: entitlement columns on longevity profiles + webhook idempotency.
 -- Additive only.
+--
+-- PREREQUISITE: `hli_longevity_profiles` must already exist. It is created in
+--   20250315000001_hli_longevity.sql
+-- Do not run this file alone on an empty database. Apply all migrations in order, e.g.:
+--   supabase db push
+-- or run prior longevity migrations before this one.
 
 alter table hli_longevity_profiles
   add column if not exists stripe_customer_id text;

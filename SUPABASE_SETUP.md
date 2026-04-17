@@ -71,7 +71,27 @@ Run these in **SQL Editor** if the tables don't exist yet.
 
 ---
 
-## 3. AI Pipeline Tables (new)
+## 3. Longevity and Stripe billing migrations (order matters)
+
+The Stripe billing migrations (`20260417000001_hli_stripe_entitlements.sql`, `20260418000001_hli_payment_hardening.sql`) **alter** `hli_longevity_profiles`. That table is **created** in `supabase/migrations/20250315000001_hli_longevity.sql`. If you run only the Stripe SQL in the Supabase SQL Editor on a new project, you will see:
+
+`ERROR: relation "hli_longevity_profiles" does not exist`.
+
+**Recommended:** apply the full migration history in timestamp order:
+
+```bash
+# From the repo root, with the project linked to your Supabase project
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+That runs every file under `supabase/migrations/` in order. The payment-hardening migration’s grandfather step also expects `hli_longevity_blood_requests.letter_document_id` (added in `20250316000006_hli_longevity_blood_request_eligibility.sql`).
+
+If you cannot use the CLI, run the SQL files **in filename order** from `20250315000001` onward, at minimum through the migrations your app uses, **before** the `20260417` / `20260418` files.
+
+---
+
+## 4. AI Pipeline Tables (new)
 
 Run the migration file to add the AI pipeline tables:
 
@@ -87,7 +107,7 @@ This creates: `hli_ai_jobs`, `hli_ai_extractions`, `hli_ai_scores`, `hli_reports
 
 ---
 
-## 4. Running the AI Pipeline Locally
+## 5. Running the AI Pipeline Locally
 
 1. **Run migrations** (see above).
 2. **Install dependencies**: `npm install`

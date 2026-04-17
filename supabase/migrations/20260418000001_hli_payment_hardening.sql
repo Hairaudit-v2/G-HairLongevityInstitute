@@ -1,5 +1,9 @@
 -- HLI payment hardening: explicit grandfathering, entitlement audit ledger, support diagnostics.
 -- Additive only.
+--
+-- PREREQUISITE: Same as 20260417000001 — run 20250315000001_hli_longevity.sql first (and migrations
+-- that add `hli_longevity_blood_requests.letter_document_id`, e.g. 20250316000006, for the
+-- grandfather CTE below). Prefer: `supabase db push` to apply the full chain in order.
 
 -- Pre-Stripe users: set once during migration so access matches prior product behavior (auditable timestamp).
 alter table hli_longevity_profiles
