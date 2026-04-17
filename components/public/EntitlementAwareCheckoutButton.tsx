@@ -20,7 +20,7 @@ export function EntitlementAwareCheckoutButton({
   children,
 }: {
   offering: HliPaymentOffering;
-  theme?: "gold" | "light";
+  theme?: "gold" | "light" | "soft";
   children: React.ReactNode;
 }) {
   const [eligibility, setEligibility] = useState<PurchaseEligibility | null>(null);
@@ -47,12 +47,20 @@ export function EntitlementAwareCheckoutButton({
   }, [offering]);
 
   if (loaded && eligibility && !eligibility.canPurchase) {
+    const bodyClass =
+      theme === "light"
+        ? "text-sm leading-relaxed text-white/75"
+        : "text-sm leading-relaxed text-[rgb(var(--text-secondary))]";
+    const linkClass =
+      theme === "light"
+        ? "inline-block text-sm font-medium text-[rgb(var(--gold))] underline-offset-2 hover:underline"
+        : "inline-block text-sm font-medium text-medical underline-offset-2 hover:underline";
     return (
       <div className="max-w-md space-y-2">
-        <p className="text-sm leading-relaxed text-white/75">{eligibility.patientMessage}</p>
+        <p className={bodyClass}>{eligibility.patientMessage}</p>
         <Link
           href="/portal/dashboard"
-          className="inline-block text-sm font-medium text-[rgb(var(--gold))] underline-offset-2 hover:underline"
+          className={linkClass}
         >
           View account &amp; billing in portal
         </Link>
