@@ -173,7 +173,7 @@ export default function EditorialArticlePage({ params }: Props) {
           </aside>
           <div className="min-w-0 rounded-[2rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-[0_18px_48px_rgba(0,0,0,0.06)] sm:p-8 md:p-10">
             <MedicalDisclaimer />
-            <div className="editorial-prose mt-8 max-w-none">
+            <div className="editorial-prose mt-8 max-w-[72ch]">
               <Body />
             </div>
             {article.glossarySlugs?.length ? (

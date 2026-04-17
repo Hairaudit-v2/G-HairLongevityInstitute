@@ -141,16 +141,16 @@ function InsightsContent({ searchParams }: SearchProps) {
           then search — we cover medicines, office procedures, and long-term hair support in plain language. This is
           education, not a substitute for an exam with your doctor.
         </p>
-        <div className="mx-auto mt-6 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
-          <div className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/85 px-4 py-3 shadow-soft">
+        <div className="mx-auto mt-6 grid max-w-3xl gap-2.5 text-left sm:grid-cols-3 sm:gap-3">
+          <div className="rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-2.5 shadow-soft sm:rounded-[1.15rem] sm:px-4 sm:py-3">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Patient-first</p>
             <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">Guided reading for hair shedding, thinning, blood markers, and treatment questions.</p>
           </div>
-          <div className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/85 px-4 py-3 shadow-soft">
+          <div className="rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-2.5 shadow-soft sm:rounded-[1.15rem] sm:px-4 sm:py-3">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Evidence-aware</p>
             <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">Educational content that stays medically serious without becoming cold or overwhelming.</p>
           </div>
-          <div className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/85 px-4 py-3 shadow-soft">
+          <div className="rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-2.5 shadow-soft sm:rounded-[1.15rem] sm:px-4 sm:py-3">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Easy to navigate</p>
             <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">Browse curated starting points, then narrow down by topic, hub, audience, or format.</p>
           </div>
@@ -196,7 +196,7 @@ function InsightsContent({ searchParams }: SearchProps) {
               <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div>
               <h2 className="text-lg font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-xl">
-                All guides
+                All insights
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
                 Full library, newest first — or use filters in search above.
