@@ -18,374 +18,482 @@ export const metadata: Metadata = buildPageMetadata({
   appendBrand: true,
 });
 
+const HERO_REASSURANCE = [
+  { label: "30+ years", value: "Clinical hair restoration experience across trichology, surgery, and regenerative strategy." },
+  { label: "Biology-first", value: "Blood markers, hormones, history, symptoms, and progression are interpreted together." },
+  { label: "Independent", value: "HLI exists to clarify your case, not to push a single medication or procedure." },
+] as const;
+
+const CREDIBILITY_POINTS = [
+  "International clinical practice",
+  "Surgical and non-surgical hair restoration",
+  "Advanced FUE techniques",
+  "Donor regeneration strategy",
+  "PRP and exosome integration",
+  "Hormone and DHT risk mapping",
+  "Post-transplant outcome auditing",
+  "Global training and medical standardisation",
+] as const;
+
+const WHY_HLI_EXISTS = [
+  "DHT sensitivity and androgen receptor behaviour",
+  "Age-triggered hormonal shifts",
+  "Thyroid conversion and thyroid-related shedding",
+  "Iron sufficiency and nutrient status",
+  "Inflammatory markers and scalp environment",
+  "Cortisol load, stress physiology, and medication interactions",
+  "Genetic predisposition and progression risk",
+] as const;
+
+const DIFFERENTIATORS = [
+  {
+    title: "Biology before intervention",
+    body: "We look at blood markers, symptoms, history, and progression before talking about treatment pathways. That helps reduce guesswork and makes recommendations more coherent.",
+  },
+  {
+    title: "Hormone and DHT literacy",
+    body: "Androgen sensitivity, TRT acceleration risk, hormone balance, and follicle behaviour are central to long-term planning rather than side notes.",
+  },
+  {
+    title: "Real surgical understanding",
+    body: "Because HLI is informed by extensive transplant experience, we can speak clearly about when to delay surgery, when to stabilise first, and when donor protection matters most.",
+  },
+  {
+    title: "Regenerative therapies in context",
+    body: "PRP, exosomes, and related therapies are treated as tools, not magic. Timing, case selection, and biological context matter.",
+  },
+] as const;
+
+const LOOKS_AT = [
+  {
+    title: "Hormones and DHT pathways",
+    body: "We interpret androgen exposure, receptor sensitivity, and hormone patterns in the context of your history, symptoms, and hair changes.",
+  },
+  {
+    title: "Blood markers and nutrient sufficiency",
+    body: "Iron, thyroid-related markers, inflammatory markers, vitamins, and other labs can help explain shedding, diffuse thinning, or poor recovery.",
+  },
+  {
+    title: "Scalp, symptoms, and pattern",
+    body: "Your hairline, density changes, scalp environment, and symptom pattern often tell a more useful story when combined with biology.",
+  },
+  {
+    title: "Progression, timing, and risk",
+    body: "The goal is not short-term noise. It is understanding whether your follicles are likely to stabilise, deteriorate, or need a different next step.",
+  },
+] as const;
+
+const HOW_PEOPLE_USE_HLI = [
+  {
+    title: "Education first",
+    body: "Some people begin by reading our patient guides and insights to understand shedding, thinning, blood markers, and treatment questions in plain language.",
+    href: "/insights",
+    cta: "Browse insights",
+  },
+  {
+    title: "Structured analysis",
+    body: "Most people start with the guided hair analysis so HLI can interpret their history, symptoms, blood work, and photos in a more organised way.",
+    href: "/how-it-works",
+    cta: "See how it works",
+  },
+  {
+    title: "Blood interpretation support",
+    body: "When people already have blood results, HLI helps place those results in hair context and identify what may still need to be discussed with a GP or prescriber.",
+    href: "/science",
+    cta: "Explore the science",
+  },
+  {
+    title: "Optional appointments",
+    body: "If deeper discussion is helpful, a one-on-one trichologist appointment can be added later. It is optional, not a gatekeeper for getting started.",
+    href: "/book",
+    cta: "Book consultation",
+  },
+] as const;
+
+const TRUST_STANDARDS = [
+  "Evidence-aware biological reasoning",
+  "Clear limitations and transparent scope",
+  "No guarantee language or false certainty",
+  "Designed for long-term follicle stability",
+] as const;
+
+const WHAT_WE_PROVIDE = [
+  "Structured biological interpretation",
+  "Risk mapping and pattern clarification",
+  "Personalised strategy recommendations",
+  "Clear next-step guidance to take forward",
+] as const;
+
+const WHAT_WE_DO_NOT = [
+  "Guarantee regrowth",
+  "Replace your GP",
+  "Replace endocrinology advice",
+  "Replace dermatology diagnosis",
+] as const;
+
+function BulletList({ items, tone = "default" }: { items: readonly string[]; tone?: "default" | "soft" }) {
+  const dotClass = tone === "soft" ? "bg-[rgb(var(--gold))]/45" : "bg-[rgb(var(--gold))]/70";
+  return (
+    <ul className="space-y-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+      {items.map((item) => (
+        <li key={item} className="flex gap-3">
+          <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function AboutPage() {
   const useLongevity = isLongevityEnabled();
   const startHref = useLongevity ? "/longevity/start" : "/start";
 
   return (
-    <main className="min-h-screen bg-[rgb(var(--bg-dark))] text-white">
-      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" theme="dark" />
+    <main className="min-h-screen bg-page">
+      <PublicHeader showLongevityLinks={useLongevity} ctaHref={startHref} ctaLabel="Start My Hair Analysis" theme="light" />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden py-14 md:py-24">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(198,167,94,0.12),transparent_60%)]" />
+      <section className="py-14 md:py-16">
         <Container>
-          <div className="relative">
-            <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
-              HAIR LONGEVITY INSTITUTE™
-            </p>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white md:text-5xl">
-              International Hair Longevity Specialist
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-              Three decades of clinical experience.
-              <br />
-              Biology-first strategy.
-              <br />
-              No shortcuts. No gimmicks.
-            </p>
-          </div>
-        </Container>
-      </section>
+          <div className="relative overflow-hidden rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(245,240,235,0.94)_100%)] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.08)] md:p-9">
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top,rgba(198,167,94,0.12),transparent_72%)]"
+              aria-hidden
+            />
+            <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)] lg:items-start">
+              <div className="max-w-3xl">
+                <p className="text-sm font-medium tracking-[0.18em] text-[rgb(var(--gold))]">ABOUT HLI</p>
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[rgb(var(--text-primary))] md:text-5xl">
+                  A calmer, biology-first way to understand hair loss.
+                </h1>
+                <p className="mt-5 max-w-2xl text-base leading-relaxed text-[rgb(var(--text-secondary))] md:text-lg">
+                  Hair Longevity Institute™ is a medically serious, trichology-led platform built to give people clearer
+                  biological guidance when they feel anxious, confused, or overwhelmed by thinning, shedding, hormones,
+                  blood tests, and treatment decisions.
+                </p>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                  For more than 30 years, I have worked across trichology, surgical hair restoration, regenerative
+                  medicine, and hormone-related hair loss. HLI is the digital extension of that experience: a place for
+                  structured interpretation, patient guidance, and more thoughtful next steps.
+                </p>
 
-      {/* Who I Am */}
-      <section className="border-t border-white/10 bg-black/10 py-16">
-        <Container>
-          <SectionTitle
-            eyebrow="Who I Am"
-            title="Three decades at the intersection of trichology, surgery, and regenerative medicine."
-            subtitle="For more than 30 years, I have worked at the intersection of trichology, surgical hair restoration, regenerative medicine, and hormone-related hair loss."
-          />
-          <div className="mt-8">
-            <div className="text-sm font-medium text-white/90">My career has included:</div>
-            <ul className="mt-4 space-y-2 text-white/80">
-              <li>• International clinical practice</li>
-              <li>• Surgical and non-surgical hair restoration</li>
-              <li>• Advanced FUE techniques</li>
-              <li>• Donor regeneration strategy</li>
-              <li>• PRP and exosome integration</li>
-              <li>• Hormone and DHT risk mapping</li>
-              <li>• Post-transplant outcome auditing</li>
-              <li>• Global training and medical standardisation</li>
-            </ul>
-            <p className="mt-8 text-base leading-relaxed text-white/80">
-              I have worked with thousands of patients across multiple countries and have trained doctors
-              internationally in advanced hair restoration protocols.
-            </p>
-            <p className="mt-4 text-base leading-relaxed text-white/80">
-              Hair Longevity Institute™ is the digital extension of that experience — designed to give
-              structured biological clarity to patients anywhere in the world.
-            </p>
-          </div>
-        </Container>
-      </section>
-
-      {/* Why This Platform Exists */}
-      <section className="py-16">
-        <Container>
-          <SectionTitle
-            eyebrow="Why This Platform Exists"
-            title="Most people are sold a product."
-            subtitle="Few people are given a structured interpretation of their biology."
-          />
-          <p className="mt-6 text-base leading-relaxed text-white/80">
-            Hair loss is influenced by:
-          </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {[
-              "DHT sensitivity",
-              "Age-triggered androgen receptor activation",
-              "Thyroid conversion",
-              "Iron sufficiency",
-              "Cortisol load",
-              "Inflammatory markers",
-              "Nutrient optimisation",
-              "Medication interactions",
-              "Genetic predisposition",
-            ].map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm text-white/85"
-              >
-                {item}
+                <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap">
+                  <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
+                  <SecondaryButton href="/how-it-works">See how it works</SecondaryButton>
+                  <Link
+                    href="/insights"
+                    className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 transition hover:text-[rgb(var(--text-primary))] hover:underline"
+                  >
+                    Read patient insights
+                  </Link>
+                </div>
               </div>
-            ))}
+
+              <div className="rounded-[1.75rem] border border-[rgb(var(--gold))]/24 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.96)_100%)] p-6 shadow-[0_20px_52px_rgba(0,0,0,0.08)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                  Why patients trust HLI
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))]">
+                  Clarity before pressure
+                </h2>
+                <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] sm:text-base">
+                  HLI exists because too many people are left confused, over-marketed to, or pushed toward treatment
+                  without a clear understanding of what may actually be driving their hair changes.
+                </p>
+                <div className="mt-6 space-y-3">
+                  {HERO_REASSURANCE.map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-4 shadow-soft"
+                    >
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="mt-8 text-base leading-relaxed text-white/80">
-            Without mapping these variables, treatment becomes guesswork.
-          </p>
-          <p className="mt-2 text-lg font-medium text-white">
-            This platform removes guesswork.
-          </p>
-        </Container>
-      </section>
 
-      {/* The System Map */}
-      <section className="border-t border-white/10 py-[var(--section-py)] md:py-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
-            THE SYSTEM
-          </p>
-
-          <h2 className="mt-3 text-3xl font-semibold text-white">
-            The Hair Longevity System Map™
-          </h2>
-
-          <p className="mt-4 text-white/70 max-w-3xl">
-            Hair loss is rarely caused by one variable.
-            Follicle Intelligence™ maps five biological domains that determine long-term follicle survival.
-            It is the biological and analytical engine we use for structured case interpretation and patient roadmaps, and is also used within the HairAudit platform to evaluate transplant procedures.
-          </p>
-
-          <div className="mt-16">
-            <AnimatedFollicleSystemMap />
-          </div>
-        </div>
-      </section>
-
-      {/* Surgical Readiness Matrix */}
-      <section className="border-t border-white/10 py-[var(--section-py)] md:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="text-sm font-medium tracking-[0.2em] text-[rgb(var(--gold))]">
-            SURGICAL DECISIONING
-          </p>
-
-          <h2 className="mt-3 text-3xl font-semibold text-white">
-            Surgical Readiness Matrix™
-          </h2>
-
-          <p className="mt-4 max-w-3xl text-white/70">
-            A visual framework used to determine whether surgery is appropriate now, later, or not at all —
-            based on biological stability and progression rate.
-          </p>
-
-          <div className="mt-12">
-            <SurgicalReadinessMatrixInteractive />
-          </div>
-        </div>
-      </section>
-
-      {/* What Makes This Different */}
-      <section className="border-t border-white/10 bg-black/10 py-16">
-        <Container>
-          <SectionTitle
-            eyebrow="What Makes This Different"
-            title="Biology first. Hormone literacy. Surgical understanding."
-          />
-
-          <div className="mt-10 space-y-8">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm tracking-widest text-[rgb(var(--gold))]">1</div>
-              <h3 className="mt-2 text-xl font-semibold text-white">Biology First</h3>
-              <p className="mt-3 text-white/80">
-                We analyse blood markers before recommending interventions.
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-4 shadow-soft">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Who HLI is for</p>
+              <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                People who want medically grounded interpretation before guessing, self-prescribing, or rushing into a procedure.
               </p>
             </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm tracking-widest text-[rgb(var(--gold))]">2</div>
-              <h3 className="mt-2 text-xl font-semibold text-white">Hormone & DHT Literacy</h3>
-              <p className="mt-3 text-white/80">
-                Few practitioners truly understand androgen receptor behaviour, TRT acceleration risk, and
-                follicle sensitivity thresholds. This is a core focus.
+            <div className="rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-4 shadow-soft">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">What makes it different</p>
+              <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                Trichology, blood interpretation support, hormone literacy, and surgical understanding are brought together in one calm pathway.
               </p>
             </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm tracking-widest text-[rgb(var(--gold))]">3</div>
-              <h3 className="mt-2 text-xl font-semibold text-white">Surgical Understanding</h3>
-              <p className="mt-3 text-white/80">
-                Because I have extensive surgical experience, I understand:
-              </p>
-              <ul className="mt-3 space-y-2 text-white/80">
-                <li>• When to delay surgery</li>
-                <li>• When to stabilise first</li>
-                <li>• When density correction is appropriate</li>
-                <li>• When donor protection is critical</li>
-              </ul>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm tracking-widest text-[rgb(var(--gold))]">4</div>
-              <h3 className="mt-2 text-xl font-semibold text-white">Regenerative Strategy</h3>
-              <p className="mt-3 text-white/80">
-                PRP, exosomes, and regenerative therapies are not magic. They are tools — used correctly,
-                at the correct time, for the correct biological environment.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm tracking-widest text-[rgb(var(--gold))]">5</div>
-              <h3 className="mt-2 text-xl font-semibold text-white">Independence</h3>
-              <p className="mt-3 text-white/80">
-                This platform does not exist to sell you medication. It exists to interpret your data.
+            <div className="rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-white/90 px-4 py-4 shadow-soft">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">What you can expect</p>
+              <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                Straight answers, transparent limits, and next-step guidance designed around long-term follicle stability, not hype.
               </p>
             </div>
           </div>
         </Container>
       </section>
 
-      {/* Clinical Philosophy */}
-      <section className="py-16">
+      <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16">
         <Container>
-          <SectionTitle
-            eyebrow="My Clinical Philosophy"
-            title="Hair loss is rarely caused by a single factor."
-            subtitle="It is a biological equation."
-          />
-          <p className="mt-6 text-base leading-relaxed text-white/80">
-            If you stabilise:
-          </p>
-          <ul className="mt-4 space-y-2 text-white/80">
-            <li>• Androgen exposure</li>
-            <li>• Inflammatory load</li>
-            <li>• Nutrient sufficiency</li>
-            <li>• Thyroid balance</li>
-            <li>• Stress physiology</li>
-          </ul>
-          <p className="mt-6 text-lg font-medium text-white">
-            You dramatically improve follicle survival and long-term outcomes.
-          </p>
-          <p className="mt-4 text-base leading-relaxed text-white/80">
-            Hair longevity is about stability, not short-term regrowth.
-          </p>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
+            <div>
+              <SectionTitle
+                eyebrow="Why HLI exists"
+                title="Most people are sold a product before their biology is properly understood."
+                subtitle="Hair loss is rarely one-variable. The point of HLI is to replace guesswork with a more structured interpretation of what may be influencing follicle survival, shedding, or progression."
+              />
+              <p className="mt-6 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                Without a framework, people often move between supplements, prescriptions, procedures, and online opinions
+                without ever being told how their case fits together. HLI was built to offer that missing structure.
+              </p>
+            </div>
+            <div className="rounded-[1.6rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+                Common biological variables
+              </p>
+              <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                {WHY_HLI_EXISTS.map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-[1rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.94)_100%)] px-4 py-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-5 text-sm font-medium text-[rgb(var(--text-primary))]">
+                When these variables are not mapped, treatment decisions can become expensive guesswork.
+              </p>
+            </div>
+          </div>
         </Container>
       </section>
 
-      {/* Credentials */}
-      <section className="border-t border-white/10 bg-black/10 py-16">
+      <section className="py-14 sm:py-16">
         <Container>
           <SectionTitle
-            eyebrow="Credentials & Experience"
-            title="30+ years in clinical hair restoration."
+            eyebrow="What makes the approach different"
+            title="Premium guidance, but clinically grounded."
+            subtitle="The aim is not to sound dramatic or sell certainty. It is to help patients understand their case with more intelligence, more transparency, and less noise."
           />
-          <div className="mt-8 flex flex-wrap gap-3">
-            {[
-              "International Trichologist",
-              "Surgical Hair Transplant Experience",
-              "Advanced FUE & Donor Preservation",
-              "Regenerative Integration (PRP / Exosomes)",
-              "Hormone Mapping & DHT Risk Profiling",
-              "Global Medical Training & Standardisation",
-              "Post-Transplant Audit Specialist",
-            ].map((cred) => (
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            {DIFFERENTIATORS.map((item, index) => (
               <div
-                key={cred}
-                className="rounded-full border border-[rgba(198,167,94,0.25)] bg-[rgba(198,167,94,0.08)] px-4 py-2 text-sm text-white/90"
+                key={item.title}
+                className="rounded-[1.6rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft"
               >
-                {cred}
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                  0{index + 1}
+                </p>
+                <h3 className="mt-3 text-xl font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">{item.body}</p>
               </div>
             ))}
           </div>
         </Container>
       </section>
 
-      {/* Transparency & Ethics */}
-      <section className="py-16">
+      <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16">
         <Container>
-          <SectionTitle
-            eyebrow="Transparency & Ethics"
-            title="What we provide — and what we don&apos;t."
-          />
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm font-medium text-[rgb(var(--gold))]">We provide:</div>
-              <ul className="mt-3 space-y-2 text-white/80">
-                <li>• Structured biological interpretation</li>
-                <li>• Risk mapping</li>
-                <li>• Personalised strategy recommendations</li>
-                <li>• Clear next-step guidance</li>
-              </ul>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
+            <div>
+              <SectionTitle
+                eyebrow="Who HLI is"
+                title="Three decades at the intersection of trichology, surgery, and regenerative medicine."
+                subtitle="My work has included thousands of patients across multiple countries, alongside training doctors internationally in advanced hair restoration protocols."
+              />
+              <div className="mt-8 rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft">
+                <p className="text-sm font-medium text-[rgb(var(--text-primary))]">Career experience has included:</p>
+                <div className="mt-5">
+                  <BulletList items={CREDIBILITY_POINTS} />
+                </div>
+              </div>
+              <p className="mt-6 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                Hair Longevity Institute™ is the patient-facing extension of that experience: an intelligent, medically
+                serious environment designed to help people make sense of biology, blood work, symptoms, and treatment
+                decisions before they move further.
+              </p>
             </div>
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <div className="text-sm font-medium text-white/90">We do not:</div>
-              <ul className="mt-3 space-y-2 text-white/80">
-                <li>• Guarantee regrowth</li>
-                <li>• Replace your GP</li>
-                <li>• Replace endocrinology advice</li>
-                <li>• Replace dermatology diagnosis</li>
-              </ul>
+
+            <div className="rounded-[1.6rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(249,246,242,0.96)_100%)] p-6 shadow-soft">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
+                Clinical philosophy
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))]">
+                Hair loss is a biological equation.
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                If you stabilise androgen exposure, inflammatory load, nutrient sufficiency, thyroid balance, and stress
+                physiology, you improve the conditions that support long-term follicle survival.
+              </p>
+              <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                Hair longevity is about stability, not short-term regrowth claims. That is why HLI prioritises pattern,
+                timing, context, and realistic next steps.
+              </p>
             </div>
           </div>
-          <p className="mt-8 text-base leading-relaxed text-white/80">
-            Where prescriptions are required, you must consult a licensed local medical practitioner.
-          </p>
-          <p className="mt-2 text-sm font-medium text-white/90">
-            This is clinical strategy — not telemedicine prescribing.
-          </p>
         </Container>
       </section>
 
-      {/* Why You Can Trust */}
-      <section className="border-t border-white/10 bg-black/10 py-16">
+      <section className="py-14 sm:py-16">
         <Container>
           <SectionTitle
-            eyebrow="Why You Can Trust This Platform"
-            title="30+ years clinical experience. No dependence on selling medication."
+            eyebrow="What HLI looks at"
+            title="A case is interpreted across multiple domains, not reduced to one headline answer."
+            subtitle="Follicle Intelligence™ is the biological and analytical engine we use for structured case interpretation and patient roadmaps. It also supports HairAudit when transplant procedures need independent evaluation."
           />
-          <div className="mt-6 flex flex-wrap gap-3">
-            {[
-              "Evidence-based biological reasoning",
-              "Clear limitations & transparent scope",
-              "Designed for long-term stability",
-            ].map((item) => (
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            {LOOKS_AT.map((item) => (
               <div
-                key={item}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/85"
+                key={item.title}
+                className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft"
               >
-                {item}
+                <h3 className="text-xl font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">{item.body}</p>
               </div>
             ))}
           </div>
-          <p className="mt-8 text-base leading-relaxed text-white/80">
-            Trust is built through:
-          </p>
-          <ul className="mt-3 space-y-2 text-white/80">
-            <li>• Experience</li>
-            <li>• Clarity</li>
-            <li>• Transparency</li>
-            <li>• Structured thinking</li>
-          </ul>
-          <p className="mt-8 text-base leading-relaxed text-white/80">
-            Hair Longevity Institute™ exists because too many patients are confused, over-medicated, or
-            under-informed.
-          </p>
+
+          <div className="mt-10 rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.86)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.06)] md:p-8">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">The system</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl">
+                The Hair Longevity System Map™
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                Hair loss is rarely caused by one variable. This map shows the five biological domains that influence
+                long-term follicle survival and gives patients a more coherent way to understand what may need attention.
+              </p>
+            </div>
+            <div className="mt-10">
+              <AnimatedFollicleSystemMap />
+            </div>
+          </div>
         </Container>
       </section>
 
-      {/* Closing */}
-      <section className="py-16">
+      <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16">
         <Container>
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
-              Biology First. Hair for Life.
+          <SectionTitle
+            eyebrow="How people use HLI"
+            title="Education, analysis, blood interpretation support, then optional appointments if needed."
+            subtitle="The experience is designed to be flexible. You can read first, start with the guided analysis, bring existing blood results into context, or add a specialist conversation later."
+          />
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            {HOW_PEOPLE_USE_HLI.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-[1.6rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft"
+              >
+                <h3 className="text-xl font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">{item.body}</p>
+                <div className="mt-5">
+                  <Link href={item.href} className="font-medium text-medical underline-offset-2 hover:underline">
+                    {item.cta}
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 rounded-[1.5rem] border border-[rgb(var(--medical))]/12 bg-[rgb(var(--medical))]/[0.05] px-5 py-5">
+            <p className="text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+              HLI can help interpret blood results you already have, suggest what to discuss with your GP, and explain
+              where a specialist appointment may or may not add value. It is designed to guide, not overwhelm.
+            </p>
+          </div>
+        </Container>
+      </section>
+
+      <section className="py-14 sm:py-16">
+        <Container>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.95fr)] lg:items-start">
+            <div>
+              <SectionTitle
+                eyebrow="Trust, standards, and expert oversight"
+                title="Transparent scope matters as much as expertise."
+                subtitle="Trust is built through experience, clarity, and honest limits. HLI is designed for clinical strategy and biological interpretation, not telemedicine prescribing."
+              />
+              <div className="mt-8 flex flex-wrap gap-3">
+                {TRUST_STANDARDS.map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-full border border-[rgb(var(--border-soft))] bg-white/92 px-4 py-2 text-sm text-[rgb(var(--text-secondary))] shadow-soft"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 grid gap-6 md:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft">
+                  <p className="text-sm font-medium text-[rgb(var(--gold-dark))]">We provide</p>
+                  <div className="mt-4">
+                    <BulletList items={WHAT_WE_PROVIDE} tone="soft" />
+                  </div>
+                </div>
+                <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-white/92 p-6 shadow-soft">
+                  <p className="text-sm font-medium text-[rgb(var(--text-primary))]">We do not</p>
+                  <div className="mt-4">
+                    <BulletList items={WHAT_WE_DO_NOT} tone="soft" />
+                  </div>
+                </div>
+              </div>
+
+              <p className="mt-6 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                Where prescriptions are required, you must consult a licensed local medical practitioner. This is
+                clinical strategy and patient guidance, not a replacement for your GP, endocrinologist, dermatologist, or prescriber.
+              </p>
+            </div>
+
+            <div className="rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.06)] md:p-7">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">
+                Surgical decisioning
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))]">
+                Surgical Readiness Matrix™
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-[rgb(var(--text-secondary))] md:text-base">
+                This framework helps determine whether surgery is appropriate now, later, or not at all based on
+                biological stability, progression rate, and the need to protect long-term donor and scalp outcomes.
+              </p>
+              <div className="mt-8">
+                <SurgicalReadinessMatrixInteractive />
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16">
+        <Container>
+          <div className="rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] p-8 text-center shadow-[0_18px_52px_rgba(0,0,0,0.06)] md:p-10">
+            <p className="text-sm font-semibold tracking-[0.18em] text-[rgb(var(--gold))]">WHERE TO START</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] md:text-4xl">
+              Biology first. Clarity first. Then the right next step.
             </h2>
-            <p className="mt-4 text-lg text-white/80">
-              If you want clarity — not marketing — you are in the right place.
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-[rgb(var(--text-secondary))] md:text-lg">
+              If you want a clearer understanding of what may be driving your hair concerns, HLI is designed to help you
+              start in a more grounded way.
             </p>
-          </div>
-        </Container>
-      </section>
-
-      {/* CTA */}
-      <section className="border-t border-white/10 bg-black/10 py-[var(--section-py)]">
-        <Container>
-          <div className="text-center">
-            <p className="text-sm font-semibold tracking-[0.2em] text-[rgb(var(--gold))]">
-              READY TO UNDERSTAND YOUR BIOLOGY?
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
-              Take the next step
-            </h2>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
               <PrimaryButton href={startHref}>Start My Hair Analysis</PrimaryButton>
               <SecondaryButton href="/book">Book specialist consultation</SecondaryButton>
+              <Link href="/guides" className="inline-flex min-h-[44px] items-center font-medium text-medical underline-offset-2 hover:underline">
+                Browse guides first
+              </Link>
             </div>
           </div>
         </Container>
       </section>
 
-      <PublicFooter />
+      <PublicFooter theme="light" />
     </main>
   );
 }
