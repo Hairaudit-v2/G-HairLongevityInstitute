@@ -6,7 +6,7 @@ export default function ArticlePillarStartLink({ pillar }: { pillar: EditorialPi
   const { href, guideTitle, blurb } = pillarTopBlurb(pillar);
 
   return (
-    <div className="rounded-card border border-[rgb(var(--border-soft))] bg-subtle/60 p-4 shadow-soft sm:p-5">
+    <div className="rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-white/88 p-4 shadow-soft sm:p-5">
       <p className="text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
         <Link
           href={href}

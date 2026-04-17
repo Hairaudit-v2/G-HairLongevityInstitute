@@ -7,6 +7,9 @@ export default function ReferencesSection({ references }: { references: Editoria
       <h2 id="refs-heading" className="text-lg font-semibold text-[rgb(var(--text-primary))]">
         References & further reading
       </h2>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+        Sources are provided where they help you check claims, explore context, or go deeper on a topic.
+      </p>
       <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-[rgb(var(--text-secondary))]">
         {references.map((ref, i) => (
           <li key={i} className="leading-relaxed">

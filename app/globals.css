@@ -98,3 +98,56 @@ h3 {
 .prose-relaxed {
   line-height: var(--line-height-relaxed);
 }
+
+.editorial-prose {
+  color: rgb(var(--text-secondary));
+}
+
+.editorial-prose > * + * {
+  margin-top: 1.25rem;
+}
+
+.editorial-prose h2,
+.editorial-prose h3 {
+  color: rgb(var(--text-primary));
+  scroll-margin-top: 6rem;
+}
+
+.editorial-prose h2 {
+  margin-top: 2.75rem;
+  font-size: clamp(1.6rem, 2vw, 2rem);
+}
+
+.editorial-prose h3 {
+  margin-top: 2rem;
+  font-size: clamp(1.15rem, 1.5vw, 1.35rem);
+}
+
+.editorial-prose p,
+.editorial-prose li {
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.editorial-prose ul,
+.editorial-prose ol {
+  padding-left: 1.25rem;
+}
+
+.editorial-prose a {
+  color: rgb(var(--medical));
+  text-underline-offset: 2px;
+}
+
+.editorial-prose a:hover {
+  text-decoration: underline;
+}
+
+.editorial-prose blockquote {
+  margin: 2rem 0;
+  border-left: 3px solid rgb(var(--gold));
+  padding: 0.75rem 0 0.75rem 1rem;
+  color: rgb(var(--text-primary));
+  background: rgba(245, 240, 235, 0.55);
+  border-radius: 0.75rem;
+}

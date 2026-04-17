@@ -4,7 +4,7 @@ import Link from "next/link";
 function PersonCard({ person, variant }: { person: EditorialPerson; variant: "author" | "reviewer" }) {
   const label = variant === "author" ? "Author" : "Reviewer";
   return (
-    <div className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft">
+    <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft">
       <p className="text-xs font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">{label}</p>
       <p className="mt-2 font-semibold text-[rgb(var(--text-primary))]">{person.name}</p>
       <p className="mt-1 text-sm text-[rgb(var(--text-secondary))]">{person.role}</p>

@@ -5,7 +5,7 @@ function chip(href: string, label: string) {
   return (
     <Link
       href={href}
-      className="inline-flex rounded-full border border-[rgb(var(--border-soft))] bg-subtle/50 px-3 py-1 text-xs font-medium text-[rgb(var(--text-primary))] hover:border-[rgb(var(--gold))]/30"
+      className="inline-flex rounded-full border border-[rgb(var(--border-soft))] bg-white/90 px-3 py-1.5 text-xs font-medium text-[rgb(var(--text-primary))] transition hover:border-[rgb(var(--gold))]/30 hover:bg-[rgb(var(--gold))]/[0.06]"
     >
       {label}
     </Link>
@@ -71,8 +71,8 @@ export default function RelatedTopicsModule({ taxonomy }: { taxonomy: EditorialT
   if (!blocks.length) return null;
 
   return (
-    <section className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft" aria-labelledby="related-topics-heading">
-      <h2 id="related-topics-heading" className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
+    <section className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft" aria-labelledby="related-topics-heading">
+      <h2 id="related-topics-heading" className="text-sm font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
         Related topics
       </h2>
       <div className="mt-4 space-y-4">

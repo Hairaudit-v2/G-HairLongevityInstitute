@@ -7,9 +7,12 @@ export default function EditorialFaqSection({ items }: { items: EditorialFaqItem
       <h2 id="article-faq-heading" className="text-lg font-semibold text-[rgb(var(--text-primary))]">
         Frequently asked questions
       </h2>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+        Short answers to common patient questions, without replacing a proper clinical assessment.
+      </p>
       <div className="mt-6 space-y-3">
         {items.map((faq) => (
-          <details key={faq.question} className="group rounded-card border border-[rgb(var(--border-soft))] bg-card shadow-soft">
+          <details key={faq.question} className="group rounded-[1.25rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] shadow-soft">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-[rgb(var(--text-primary))] [&::-webkit-details-marker]:hidden">
               {faq.question}
               <svg

@@ -15,7 +15,13 @@ export default function EditorialPageShell({
   const isLight = theme === "light";
 
   return (
-    <main className={`min-h-screen ${isLight ? "bg-page" : "bg-[rgb(var(--bg-dark))] text-white"}`}>
+    <main
+      className={`min-h-screen ${
+        isLight
+          ? "bg-[linear-gradient(180deg,rgba(249,246,242,1)_0%,rgba(255,255,255,0.92)_12%,rgba(249,246,242,1)_100%)]"
+          : "bg-[rgb(var(--bg-dark))] text-white"
+      }`}
+    >
       <PublicHeader
         showLongevityLinks={useLongevity}
         ctaHref={startHref}

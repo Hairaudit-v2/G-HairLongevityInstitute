@@ -19,8 +19,11 @@ export default function NextStepBlocks({ assessmentHref, bookHref = "/book" }: P
       <h2 id="next-steps-heading" className="text-lg font-semibold text-[rgb(var(--text-primary))]">
         Next steps
       </h2>
+      <p className="max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+        Choose the next step that fits your situation: keep reading, begin your analysis, or book deeper support when you need more interpretation.
+      </p>
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft">
+        <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft">
           <h3 className="font-semibold text-[rgb(var(--text-primary))]">Read more on HLI</h3>
           <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">
             Explore hubs on causes, blood markers, and treatment planning — written for patients and clinicians who want
@@ -44,7 +47,7 @@ export default function NextStepBlocks({ assessmentHref, bookHref = "/book" }: P
             </li>
           </ul>
         </div>
-        <div className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft">
+        <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft">
           <h3 className="font-semibold text-[rgb(var(--text-primary))]">When to consider blood tests</h3>
           <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">
             If shedding is new, severe, or accompanied by systemic symptoms, structured blood review may be appropriate.
@@ -62,7 +65,7 @@ export default function NextStepBlocks({ assessmentHref, bookHref = "/book" }: P
             </Link>
           </p>
         </div>
-        <div className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft">
+        <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft">
           <h3 className="font-semibold text-[rgb(var(--text-primary))]">When to book a specialist consult</h3>
           <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">
             Rapid progression, scarring signs, pain, or uncertainty after initial tests are reasons many people choose a
@@ -78,7 +81,7 @@ export default function NextStepBlocks({ assessmentHref, bookHref = "/book" }: P
             </Link>
           </p>
         </div>
-        <div className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft">
+        <div className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft">
           <h3 className="font-semibold text-[rgb(var(--text-primary))]">When HairAudit is the better destination</h3>
           <p className="mt-2 text-sm text-[rgb(var(--text-secondary))] leading-relaxed">
             If your primary question is surgical transparency, audit, or procedural due diligence, HairAudit focuses on

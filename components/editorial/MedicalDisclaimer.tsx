@@ -1,7 +1,7 @@
 export default function MedicalDisclaimer({ compact }: { compact?: boolean }) {
   return (
     <aside
-      className={`rounded-card border border-[rgb(var(--border-soft))] bg-subtle/60 ${compact ? "p-4" : "p-6"}`}
+      className={`rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(245,240,235,0.9)_0%,rgba(255,255,255,0.96)_100%)] shadow-soft ${compact ? "p-4" : "p-6"}`}
       role="note"
     >
       <p className={`font-semibold text-[rgb(var(--text-primary))] ${compact ? "text-sm" : ""}`}>

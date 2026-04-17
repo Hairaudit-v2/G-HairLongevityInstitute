@@ -121,10 +121,15 @@ function InsightsContent({ searchParams }: SearchProps) {
     : { featured: [] as EditorialArticle[], rest: articles };
   /** True on plain /insights: curated picks plus the rest of the library (both lists non-empty). Hidden when any filter/search/topic is active — single Results list then. */
   const showFeaturedBand = isDefaultView && featured.length > 0 && rest.length > 0;
+  const resultCount = articles.length;
 
   return (
     <div className="pb-16 pt-8 sm:pb-20 sm:pt-10">
-      <header className="mx-auto max-w-4xl rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] px-6 py-8 text-center shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:px-10 sm:py-10">
+      <header className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] px-6 py-8 text-center shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:px-10 sm:py-10">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(198,167,94,0.12),transparent_70%)]"
+          aria-hidden
+        />
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[rgb(var(--gold))] sm:text-sm sm:tracking-[0.2em]">
           Insights
         </p>
@@ -136,6 +141,20 @@ function InsightsContent({ searchParams }: SearchProps) {
           then search — we cover medicines, office procedures, and long-term hair support in plain language. This is
           education, not a substitute for an exam with your doctor.
         </p>
+        <div className="mx-auto mt-6 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
+          <div className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/85 px-4 py-3 shadow-soft">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Patient-first</p>
+            <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">Guided reading for hair shedding, thinning, blood markers, and treatment questions.</p>
+          </div>
+          <div className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/85 px-4 py-3 shadow-soft">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Evidence-aware</p>
+            <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">Educational content that stays medically serious without becoming cold or overwhelming.</p>
+          </div>
+          <div className="rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/85 px-4 py-3 shadow-soft">
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold-dark))]">Easy to navigate</p>
+            <p className="mt-2 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">Browse curated starting points, then narrow down by topic, hub, audience, or format.</p>
+          </div>
+        </div>
       </header>
 
       <InsightsPathways />
@@ -150,41 +169,60 @@ function InsightsContent({ searchParams }: SearchProps) {
         <div className={showFeaturedBand ? "pt-2" : ""}>
           {showFeaturedBand ? (
             <>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
-                Suggested first reads
-              </p>
-              <h2 className="mt-2 text-lg font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-xl">
-                Common starting points
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
-                Curated starting articles — including recent deep-dives — plus evergreen entry points for labs and sudden
-                shedding.
-              </p>
-              <div className="mt-6">
-                <ArticleTeaserList
-                  articles={featured}
-                  density="scan"
-                  headingLevel="h3"
-                />
+              <div className="rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.78)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.06)] sm:p-7">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
+                  Suggested first reads
+                </p>
+                <h2 className="mt-2 text-lg font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-xl">
+                  Common starting points
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                  Curated starting articles — including recent deep-dives — plus evergreen entry points for labs and sudden
+                  shedding.
+                </p>
+                <div className="mt-6">
+                  <ArticleTeaserList
+                    articles={featured}
+                    density="scan"
+                    headingLevel="h3"
+                  />
+                </div>
               </div>
               <div
                 className="my-12 border-t-2 border-[rgb(var(--border-soft))] pt-12"
                 role="separator"
                 aria-hidden
               />
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
               <h2 className="text-lg font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-xl">
                 All guides
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
                 Full library, newest first — or use filters in search above.
               </p>
+                </div>
+                <p className="text-sm font-medium text-[rgb(var(--text-muted))]">
+                  {rest.length} articles
+                </p>
+              </div>
               <div className="mt-6">
                 <ArticleTeaserList articles={rest} density="scan" headingLevel="h3" />
               </div>
             </>
           ) : (
             <>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">Results</h2>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">Results</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                    Refined results based on your current search and filters.
+                  </p>
+                </div>
+                <p className="text-sm font-medium text-[rgb(var(--text-muted))]">
+                  {resultCount} article{resultCount === 1 ? "" : "s"}
+                </p>
+              </div>
               <div className="mt-4">
                 <ArticleTeaserList articles={articles} density="scan" headingLevel="h3" />
               </div>

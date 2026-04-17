@@ -7,10 +7,10 @@ import { EDITORIAL_EVENT } from "@/lib/analytics/editorialEvents";
 import type { EditorialCtaType } from "@/lib/content/types";
 
 const primaryClass =
-  "inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-btn bg-[rgb(var(--gold))] px-6 py-3 text-sm font-semibold text-[rgb(var(--text-primary))] shadow-soft transition hover:opacity-92 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]";
+  "inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-btn border border-[rgb(var(--gold))]/30 bg-[linear-gradient(180deg,rgba(198,167,94,0.95)_0%,rgba(176,147,82,0.98)_100%)] px-6 py-3 text-sm font-semibold text-[rgb(var(--text-primary))] shadow-[0_10px_30px_rgba(176,147,82,0.16)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(176,147,82,0.2)] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]";
 
 const secondaryClass =
-  "inline-flex min-h-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/30 px-6 py-3 text-sm font-semibold text-medical hover:bg-medical/5";
+  "inline-flex min-h-[44px] items-center justify-center rounded-btn border border-[rgb(var(--medical))]/20 bg-white/90 px-6 py-3 text-sm font-semibold text-medical shadow-[0_6px_18px_rgba(0,0,0,0.05)] transition duration-200 hover:-translate-y-0.5 hover:bg-[rgb(var(--medical))]/5 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--medical))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]";
 
 function secondaryForCtaType(
   ctaType: EditorialCtaType,

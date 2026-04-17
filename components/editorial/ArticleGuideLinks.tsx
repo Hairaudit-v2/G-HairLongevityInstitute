@@ -5,8 +5,8 @@ export default function ArticleGuideLinks({ guides }: { guides: EditorialGuideLi
   if (!guides.length) return null;
 
   return (
-    <section className="rounded-card border border-[rgb(var(--border-soft))] bg-card p-5 shadow-soft" aria-labelledby="article-guide-links-heading">
-      <h2 id="article-guide-links-heading" className="text-sm font-semibold uppercase tracking-wider text-[rgb(var(--text-muted))]">
+    <section className="rounded-[1.5rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(248,244,239,0.94)_100%)] p-5 shadow-soft" aria-labelledby="article-guide-links-heading">
+      <h2 id="article-guide-links-heading" className="text-sm font-semibold uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
         Related guides
       </h2>
       <p className="mt-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
@@ -17,7 +17,7 @@ export default function ArticleGuideLinks({ guides }: { guides: EditorialGuideLi
           <li key={guide.href}>
             <Link
               href={guide.href}
-              className="flex h-full flex-col rounded-card border border-[rgb(var(--border-soft))] bg-subtle/50 p-4 transition hover:border-[rgb(var(--gold))]/25 hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]"
+              className="flex h-full flex-col rounded-[1.15rem] border border-[rgb(var(--border-soft))] bg-white/88 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-[rgb(var(--gold))]/25 hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))] focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-page))]"
             >
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[rgb(var(--gold))]">
                 {guide.label}
