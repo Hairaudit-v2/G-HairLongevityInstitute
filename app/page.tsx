@@ -27,18 +27,6 @@ export const metadata: Metadata = buildPageMetadata({
 const startHref = () => (isLongevityEnabled() ? "/longevity/start" : "/start");
 
 // —— 1. HERO ——
-const HERO_REASSURANCE_POINTS = [
-  "Free initial analysis",
-  "No referral required",
-  "Bloods and photos can be added later",
-] as const;
-
-const HERO_TRUST_STRIP = [
-  { label: "Turnaround", value: "Usually within 12–24 hours" },
-  { label: "Approach", value: "Biology-first clinical review" },
-  { label: "Next step", value: "Paid support only if you need it" },
-] as const;
-
 const WHAT_HAPPENS_NEXT = [
   "Create your secure account",
   "Complete your free intake",
@@ -81,121 +69,116 @@ const SURFACE_CARD =
 
 const INTERACTIVE_SURFACE_CARD = `${SURFACE_CARD} motion-safe:transition-all motion-safe:duration-200 motion-reduce:transition-none`;
 
+const LIGHT_PANEL =
+  "rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-white shadow-[0_18px_44px_rgba(0,0,0,0.055)]";
+
 const SECTION_HEADING_COPY =
   'mx-auto mt-4 max-w-2xl text-center text-[rgb(var(--text-secondary))] font-medium sm:text-lg';
 
 function HeroSection({ startHref: href }: { startHref: string }) {
   return (
-    <section className="relative overflow-hidden bg-card">
+    <section className="overflow-hidden bg-[rgb(var(--bg-dark))] text-white">
       <Container>
-        <div className="relative py-8 sm:py-12 md:py-14">
-          <div className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[rgb(var(--bg-dark))] shadow-[0_28px_80px_rgba(12,18,28,0.22)]">
-            <Image
-              src="/homepage/hli-hero-editorial-portrait.svg"
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 1200px"
-              className="object-cover object-right"
-            />
-            <div
-              className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(6,10,16,0.86)_0%,rgba(6,10,16,0.74)_36%,rgba(6,10,16,0.52)_66%,rgba(6,10,16,0.24)_100%)]"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute inset-y-0 left-0 w-full max-w-[54rem] bg-[linear-gradient(180deg,rgba(7,12,18,0.92)_0%,rgba(7,12,18,0.88)_100%)]"
-              aria-hidden
-            />
-            <div className="relative grid gap-7 p-6 sm:gap-8 sm:p-8 md:p-10 lg:grid-cols-[minmax(0,1.06fr)_minmax(320px,0.86fr)] lg:items-center lg:p-12">
-              <div className="max-w-3xl rounded-[1.9rem] border border-white/12 bg-[rgba(8,12,18,0.92)] px-5 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.28)] sm:px-7 sm:py-8 lg:pr-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
-                  Biology-first hair support
-                </p>
-                <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
-                  Free, personalised hair analysis — no referral required
-                </h1>
-                <p className="mt-4 max-w-2xl text-lg font-medium text-white sm:mt-5 sm:text-[1.3rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-                  Start with a complimentary clinical review after your intake. Blood tests and scalp photos can be added later. Optional paid support is available only after your initial review, if you choose it.
-                </p>
-                <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-white/90 sm:text-base">
-                  Read first, start a guided analysis, bring blood results into context, and add an appointment only if it helps.
-                </p>
-                <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
-                  {HERO_REASSURANCE_POINTS.map((item) => (
-                    <span
-                      key={item}
-                      className="inline-flex min-h-[44px] items-center rounded-full border border-white/18 bg-[rgba(17,24,35,0.96)] px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,0.18)]"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-8 flex flex-col items-start gap-3 sm:mt-9">
-                  <PrimaryButton href={href} className="w-full sm:w-auto">
-                    Start My Hair Analysis
-                  </PrimaryButton>
-                  <p className="flex flex-col gap-2 text-sm font-medium leading-relaxed text-white/90 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
-                    Prefer to read first?{" "}
-                    <a
-                      href="#how-it-works"
-                      className="inline-flex min-h-[44px] items-center font-semibold text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
-                    >
-                      See how it works
-                    </a>
-                    <span className="mx-2 text-white/55" aria-hidden>
-                      ·
-                    </span>
-                    <Link
-                      href="/guides"
-                      className="inline-flex min-h-[44px] items-center font-semibold text-white underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))] rounded-sm"
-                    >
-                      Browse guides
-                    </Link>
-                  </p>
-                </div>
-                <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  {HERO_TRUST_STRIP.map((item) => (
-                    <div
-                      key={item.label}
-                      className="rounded-[1.25rem] border border-white/12 bg-[rgba(15,22,32,0.96)] px-4 py-4 shadow-[0_18px_34px_rgba(0,0,0,0.18)]"
-                    >
-                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[rgb(var(--gold))]">
-                        {item.label}
-                      </p>
-                      <p className="mt-2 text-sm font-medium leading-relaxed text-white">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
+        <div className="py-12 sm:py-16 md:py-20">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] lg:items-center lg:gap-20">
+            <div className="max-w-3xl py-2 sm:py-4">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
+                Clinical hair analysis
+              </p>
+              <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-white sm:text-6xl md:text-7xl lg:text-[5.25rem]">
+                Free, personalised hair analysis — no referral required
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg text-white/92 sm:text-[1.35rem]" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+                A senior trichologist reviews your intake, blood results, and scalp photos to build a calm, medically grounded starting point for hair loss and thinning.
+              </p>
+              <div className="mt-10">
+                <PrimaryButton href={href} className="w-full sm:w-auto">
+                  Start My Hair Analysis
+                </PrimaryButton>
               </div>
-
-              <div className="rounded-[1.9rem] border border-white/10 bg-[rgba(8,12,18,0.96)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.26)] ring-1 ring-inset ring-white/6 sm:p-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgb(var(--gold))]">
-                  A calmer place to start
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  What happens next
-                </h2>
-                <p className="mt-3 text-sm font-medium text-white/95 sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
-                  You do not need to organise everything before you begin. Start with the basics and add more detail only when it helps.
-                </p>
-                <ol className="mt-5 space-y-3 sm:mt-6">
-                  {WHAT_HAPPENS_NEXT.map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-[1.15rem] border border-white/10 bg-[rgb(13,19,28)] px-4 py-4 text-sm font-medium text-white shadow-[0_10px_22px_rgba(0,0,0,0.12)]">
-                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/22 text-xs font-semibold text-[rgb(var(--gold))]">
-                        {index + 1}
-                      </span>
-                      <span className="leading-relaxed">{step}</span>
-                    </li>
-                  ))}
-                </ol>
-                <div className="mt-5 rounded-[1.15rem] border border-white/10 bg-[rgb(13,19,28)] px-4 py-4 shadow-[0_10px_22px_rgba(0,0,0,0.1)]">
-                  <p className="text-sm font-medium leading-relaxed text-white/94">
-                    You can begin with only the basics, then add blood results or photos later if they help clarify the picture.
-                  </p>
-                </div>
-              </div>
+              <p className="mt-7 text-sm font-medium uppercase tracking-[0.12em] text-white/72">
+                No referral required
+                <span className="mx-3 text-white/35" aria-hidden>
+                  ·
+                </span>
+                12–24 hour turnaround
+                <span className="mx-3 text-white/35" aria-hidden>
+                  ·
+                </span>
+                Reviewed by a senior trichologist
+              </p>
+              <p className="mt-6 flex flex-col gap-2 text-sm font-medium leading-relaxed text-white/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-0">
+                Prefer to read first?{" "}
+                <a
+                  href="#how-it-works"
+                  className="inline-flex min-h-[44px] items-center rounded-sm font-semibold text-[rgb(var(--gold))] underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))]"
+                >
+                  See how it works
+                </a>
+                <span className="mx-2 text-white/45" aria-hidden>
+                  ·
+                </span>
+                <Link
+                  href="/guides"
+                  className="inline-flex min-h-[44px] items-center rounded-sm font-semibold text-white underline-offset-2 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-dark))]"
+                >
+                  Browse guides
+                </Link>
+              </p>
+            </div>
+            <div className="relative min-h-[24rem] overflow-hidden rounded-[1.5rem] lg:min-h-[38rem]">
+              <Image
+                src="/homepage/hero/hero-main.jpg"
+                alt="Premium clinical consultation setting representing personalised hair analysis."
+                width={1920}
+                height={1088}
+                priority
+                sizes="(max-width: 1024px) 100vw, 42vw"
+                className="h-full w-full object-cover object-center"
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,12,18,0.18)_0%,rgba(8,12,18,0.28)_100%)] lg:bg-[linear-gradient(90deg,rgba(8,12,18,0.28)_0%,rgba(8,12,18,0.12)_36%,rgba(8,12,18,0.46)_100%)]"
+                aria-hidden
+              />
             </div>
           </div>
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function GettingStartedSection() {
+  return (
+    <section className="border-t border-[rgb(var(--border-soft))] bg-card py-12 sm:py-14" aria-labelledby="getting-started-heading">
+      <Container>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-start">
+          <div className="max-w-xl">
+            <p className="text-sm font-medium tracking-[0.14em] text-[rgb(var(--gold))]">
+              A calmer place to start
+            </p>
+            <h2 id="getting-started-heading" className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl md:text-4xl">
+              What happens next
+            </h2>
+            <p className="mt-4 text-[rgb(var(--text-secondary))] sm:text-lg" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+              You do not need to organise everything before you begin. Start with the basics, then add more detail only when it helps clarify the picture.
+            </p>
+          </div>
+          <ol className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {WHAT_HAPPENS_NEXT.map((step, index) => (
+              <li
+                key={step}
+                className={`${SURFACE_CARD} flex gap-3 px-4 py-4`}
+              >
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--gold))]/18 text-xs font-semibold text-[rgb(var(--gold-dark))]">
+                  {index + 1}
+                </span>
+                <span className="text-sm font-medium leading-relaxed text-[rgb(var(--text-primary))]">
+                  {step}
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
       </Container>
     </section>
@@ -222,7 +205,7 @@ function ConcernPathwaysSection() {
                 href={item.href}
                 className={`${INTERACTIVE_SURFACE_CARD} group flex h-full flex-col rounded-[1.6rem] p-5 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-[rgb(var(--gold))]/25 motion-safe:hover:shadow-card focus:outline-none focus:ring-2 focus:ring-[rgb(var(--gold))]/35 focus:ring-offset-2 focus:ring-offset-[rgb(var(--bg-subtle))] active:scale-[0.995] sm:p-6`}
               >
-                <span className="inline-flex w-fit rounded-full bg-[rgb(var(--gold))]/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
+                <span className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
                   Guided reading path
                 </span>
                 <span className="mt-3 text-lg font-semibold text-[rgb(var(--text-primary))] group-hover:text-medical">
@@ -231,7 +214,9 @@ function ConcernPathwaysSection() {
                 <span className="mt-3 flex-1 text-sm font-medium leading-relaxed text-[rgb(var(--text-secondary))]">
                   {item.description}
                 </span>
-                <span className="mt-5 text-sm font-semibold text-medical">Open path →</span>
+                <span className="mt-5 inline-flex w-fit rounded-full border border-[rgb(var(--border-soft))] px-3 py-1.5 text-sm font-semibold text-medical">
+                  Open path
+                </span>
               </Link>
             </li>
           ))}
@@ -245,8 +230,8 @@ function ConcernPathwaysSection() {
 const HOW_IT_WORKS = [
   {
     step: 1,
-    title: "Answer a few questions",
-    description: "Short guided intake about your history and goals.",
+    title: "Create your secure account",
+    description: "Begin with a short guided intake about your hair loss history, health context, and goals.",
     icon: (
       <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -255,8 +240,8 @@ const HOW_IT_WORKS = [
   },
   {
     step: 2,
-    title: "Upload photos (optional)",
-    description: "Add hair photos and blood tests if you have them.",
+    title: "Add photos or blood tests if available",
+    description: "You can start with the basics and upload scalp photos or blood work later if it helps clarify the picture.",
     icon: (
       <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -265,8 +250,8 @@ const HOW_IT_WORKS = [
   },
   {
     step: 3,
-    title: "Receive your personalised plan",
-    description: "Clear interpretation and next steps. Most cases are reviewed within 12–24 hours after complete submission.",
+    title: "Receive your personalised review",
+    description: "A senior trichologist interprets your case and outlines next steps, usually within 12–24 hours after complete submission.",
     icon: (
       <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -289,7 +274,7 @@ function HowItWorksSection() {
           {HOW_IT_WORKS.map((item) => (
             <div
               key={item.step}
-              className={`${SURFACE_CARD} flex flex-col items-center px-5 py-6 text-center sm:py-7`}
+              className={`${SURFACE_CARD} flex flex-col items-start px-5 py-6 text-left sm:py-7`}
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[rgb(var(--gold))]/12 text-[rgb(var(--gold-dark))]">
                 {item.icon}
@@ -298,10 +283,13 @@ function HowItWorksSection() {
                 Step {item.step}
               </p>
               <h3 className="mt-5 text-lg font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
-              <p className="mt-2 text-sm font-medium text-[rgb(var(--text-secondary))] leading-relaxed">{item.description}</p>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-[rgb(var(--text-secondary))]">{item.description}</p>
             </div>
           ))}
         </div>
+        <p className="mx-auto mt-8 max-w-3xl text-center text-sm font-medium text-[rgb(var(--text-secondary))] sm:text-base" style={{ lineHeight: "var(--line-height-relaxed)" }}>
+          No referral is required. Begin with the essentials, then add more detail only when it helps. Any paid support comes later, after your initial review, if you decide you need it.
+        </p>
         <div className="mt-8 flex flex-col items-center">
           <ExpandableDetailPanel variant="clinical" label="Clinical detail">
             <p className="mb-3 text-[rgb(var(--text-secondary))]">Behind the three steps:</p>
@@ -453,8 +441,8 @@ function ResultsPreviewSection() {
         <p className={SECTION_HEADING_COPY} style={{ lineHeight: "var(--line-height-relaxed)" }}>
           A clear snapshot and a path forward. Most cases are reviewed within 12–24 hours after complete submission.
         </p>
-        <div className="mx-auto mt-10 grid max-w-6xl gap-8 sm:mt-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center">
-          <div className="rounded-[1.85rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.99)_0%,rgba(242,236,229,0.94)_100%)] p-6 shadow-[0_18px_52px_rgba(0,0,0,0.07)] sm:p-7">
+        <div className="mx-auto mt-10 grid max-w-6xl gap-8 sm:mt-12 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
+          <div className={`${LIGHT_PANEL} p-6 sm:p-7`}>
             <div className="overflow-hidden rounded-[1.45rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-dark))] shadow-[0_16px_34px_rgba(8,16,28,0.18)]">
               <Image
                 src="/homepage/hli-results-report-visual.svg"
@@ -465,11 +453,11 @@ function ResultsPreviewSection() {
                 sizes="(max-width: 1024px) 100vw, 480px"
               />
             </div>
-            <div className="mt-6 space-y-3">
+            <div className="mt-6 grid gap-3">
               {RESULTS_VISUAL_POINTS.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))] bg-white px-4 py-3.5 shadow-[0_8px_20px_rgba(0,0,0,0.04)]"
+                  className="rounded-[1.1rem] border border-[rgb(var(--border-soft))] bg-[rgb(var(--bg-subtle))]/55 px-4 py-3.5"
                 >
                   <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--gold-dark))]">
                     {item.label}
@@ -497,7 +485,7 @@ function PricingClaritySection() {
   return (
     <section className="border-t border-[rgb(var(--border-soft))] bg-card py-14 sm:py-16" aria-labelledby="pricing-clarity-heading">
       <Container>
-        <div className="mx-auto max-w-3xl rounded-[1.75rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.92)_100%)] p-5 shadow-[0_20px_54px_rgba(0,0,0,0.06)] sm:p-8">
+        <div className={`${LIGHT_PANEL} mx-auto max-w-3xl p-5 sm:p-8`}>
           <p className="text-sm font-medium tracking-[0.14em] text-[rgb(var(--gold))]">Pricing clarity</p>
           <h2 id="pricing-clarity-heading" className="mt-3 text-2xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-3xl">
             How pricing works
@@ -549,7 +537,7 @@ function TrustSection() {
         </p>
         <div className="mt-10 grid gap-4 sm:mt-12 sm:gap-6 sm:grid-cols-3">
           {TRUST_ITEMS.map((item) => (
-            <div key={item.title} className={`${SURFACE_CARD} p-5 text-center sm:p-6`}>
+            <div key={item.title} className={`${SURFACE_CARD} p-5 text-left sm:p-6`}>
               <h3 className="font-semibold text-[rgb(var(--text-primary))]">{item.title}</h3>
               <p className="mt-2 text-sm font-medium text-[rgb(var(--text-secondary))] leading-relaxed">{item.detail}</p>
             </div>
@@ -578,7 +566,7 @@ function FinalCTASection({ startHref: href }: { startHref: string }) {
   return (
     <section className="border-t border-[rgb(var(--border-soft))] bg-subtle py-14 sm:py-16" aria-labelledby="final-cta-heading">
       <Container>
-        <div className="mx-auto max-w-3xl rounded-[2rem] border border-[rgb(var(--border-soft))] bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(245,240,235,0.94)_100%)] px-6 py-8 text-center shadow-[0_20px_54px_rgba(0,0,0,0.06)] sm:px-8 sm:py-10">
+        <div className={`${LIGHT_PANEL} mx-auto max-w-3xl px-6 py-8 text-center sm:px-8 sm:py-10`}>
           <h2 id="final-cta-heading" className="text-3xl font-semibold tracking-tight text-[rgb(var(--text-primary))] sm:text-4xl md:text-[2.85rem]">
             Begin with a free hair analysis
           </h2>
@@ -653,9 +641,10 @@ export default function Page() {
       />
 
       <HeroSection startHref={href} />
+      <GettingStartedSection />
+      <GlobalHairIntelligenceNetworkBlock />
       <ConcernPathwaysSection />
       <HowItWorksSection />
-      <GlobalHairIntelligenceNetworkBlock />
       <WhatWeAnalyseSection />
       <ResultsPreviewSection />
       <PricingClaritySection />

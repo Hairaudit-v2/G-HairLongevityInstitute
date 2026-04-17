@@ -49,7 +49,7 @@ export const FEATURED_HLI_GUIDES: HliFeaturedGuide[] = [
     shortTitle: "Hair Loss Medications",
     description:
       "A pillar guide to what is available now, what is used off-label, what is natural, what is still in trials, and how to compare options without hype.",
-    thumbnailSrc: "/homepage/guides/guide-medications.svg",
+    thumbnailSrc: "/homepage/guides/guide-medications%20.svg",
     thumbnailAlt: "Editorial illustration for the Hair Loss Medications guide.",
     audience: "patients",
     updatedAt: "April 2026",
